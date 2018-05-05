@@ -1,0 +1,29 @@
+{
+  "name": "yeep",
+  "version": "1.0.0",
+  "description": "User management made easy",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/yeepio/yeep.git"
+  },
+  "keywords": [
+    "user",
+    "session",
+    "login",
+    "role",
+    "priviledge",
+    "rbac"
+  ],
+  "author": {
+    "name" : "Dimitrios C. Michalakos"
+  },
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/yeepio/yeep/issues"
+  },
+  "homepage": "https://github.com/yeepio/yeep#readme"
+}
