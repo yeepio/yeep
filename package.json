@@ -4,6 +4,14 @@
   "description": "User management made easy",
   "main": "dist/index.js",
   "scripts": {
+    "start": "node --require dotenv/config dist/index.js",
+    "dev": "node --require dotenv/config --require @babel/register server/index.js",
+    "lint": "eslint .",
+    "precommit": "lint-staged",
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean",
+    "build": "babel server --out-dir dist --copy-files --ignore __tests__/**,*.spec.js,*.test.js,*.snapshot.json",
+    "postinstall": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -19,11 +27,39 @@
     "rbac"
   ],
   "author": {
-    "name" : "Dimitrios C. Michalakos"
+    "name": "Dimitrios C. Michalakos"
   },
   "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/yeepio/yeep/issues"
   },
-  "homepage": "https://github.com/yeepio/yeep#readme"
+  "homepage": "https://github.com/yeepio/yeep#readme",
+  "devDependencies": {
+    "eslint": "^4.19.1",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-plugin-import": "^2.11.0",
+    "eslint-plugin-prettier": "^2.6.0",
+    "husky": "^0.14.3",
+    "lint-staged": "^7.0.5",
+    "prettier": "^1.12.1",
+    "prettier-eslint": "^8.8.1"
+  },
+  "dependencies": {
+    "@babel/cli": "^7.0.0-beta.46",
+    "@babel/core": "^7.0.0-beta.46",
+    "@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.46",
+    "@babel/preset-env": "^7.0.0-beta.46",
+    "@babel/register": "^7.0.0-beta.46",
+    "boom": "^7.2.0",
+    "dotenv": "^5.0.1",
+    "koa": "^2.5.1",
+    "koa-compose": "^4.0.0",
+    "koa-router": "^7.4.0",
+    "rimraf": "^2.6.2"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint ."
+    ]
+  }
 }
