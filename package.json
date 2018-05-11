@@ -69,6 +69,7 @@
     "koa-router": "^7.4.0",
     "koa-sslify": "^2.1.2",
     "mongoose": "^5.0.17",
+    "mongoose-migrate-2": "^0.2.4",
     "rimraf": "^2.6.2"
   },
   "lint-staged": {
