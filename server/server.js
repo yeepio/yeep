@@ -8,6 +8,9 @@ import bodyParser from 'koa-bodyparser';
 import compression from 'compression';
 import koaConnect from 'koa-connect';
 import Boom from 'boom';
+import mongoose from 'mongoose';
+import * as models from './models';
+
 import errorHandler from './middleware/errorHandler';
 import api from './api';
 
@@ -81,6 +84,13 @@ server.start = async () => {
     throw new Error('Server already listening');
   }
 
+  // connect to mongodb + register models
+  const db = await mongoose.createConnection();
+  Object.entries(models).forEach(([key, schema]) => {
+    db.model(key, schema);
+  });
+  app.context.db = db;
+
   // start the server
   await new Promise((resolve, reject) => {
     server.listen(PORT, (err) => {
@@ -122,6 +132,10 @@ server.stop = async () => {
       }
     });
   });
+
+  // disconnect from mongodb
+  const { db } = app.context;
+  await db.close();
 };
 
 export default server;

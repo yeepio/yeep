@@ -13,7 +13,8 @@
     "prebuild": "npm run clean",
     "build": "babel server --out-dir dist --copy-files --ignore __tests__/**,*.spec.js,*.test.js,*.snapshot.json",
     "postinstall": "npm run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "PORT=5002 jest --config=config/jest.json --runInBand",
+    "coverage": "jest --coverage --config=config/jest.json"
   },
   "repository": {
     "type": "git",
@@ -36,6 +37,7 @@
   },
   "homepage": "https://github.com/yeepio/yeep#readme",
   "devDependencies": {
+    "babel-core": "^7.0.0-bridge.0",
     "babel-jest": "^22.4.3",
     "eslint": "^4.19.1",
     "eslint-config-prettier": "^2.9.0",

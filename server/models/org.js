@@ -1,4 +1,4 @@
-import { Schema, model as createModel } from 'mongoose';
+import { Schema } from 'mongoose';
 
 const orgSchema = new Schema(
   {
@@ -40,4 +40,4 @@ orgSchema.index(
   }
 );
 
-export default createModel('Org', orgSchema);
+export default orgSchema;
