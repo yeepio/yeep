@@ -11,7 +11,7 @@
     "precommit": "lint-staged",
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
-    "build": "babel server --out-dir dist --copy-files --ignore __tests__/**,*.spec.js,*.test.js,*.snapshot.json",
+    "build": "babel server --out-dir dist --source-maps --ignore '**/*.test.js,**/*.spec.js,**/*.snapshop.json' --verbose",
     "postinstall": "npm run migrate && npm run build",
     "test": "PORT=5002 jest --config=config/jest.json --runInBand",
     "coverage": "jest --coverage --config=config/jest.json",
