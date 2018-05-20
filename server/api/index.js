@@ -1,5 +1,6 @@
 import Router from 'koa-router';
 import health from './health';
+import org from './org';
 
 const router = Router();
 
@@ -13,5 +14,6 @@ router.use(async (ctx, next) => {
 });
 
 router.use('/api', health.routes(), health.allowedMethods());
+router.use('/api', org.routes(), org.allowedMethods());
 
 export default router;
