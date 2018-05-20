@@ -1,6 +1,6 @@
 /* eslint-env jest */
 import request from 'supertest';
-import server from '../../server';
+import server from '../../../server';
 
 describe('api/v1/ping', () => {
   test('responds as expected', async () => {
