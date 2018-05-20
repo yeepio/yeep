@@ -35,6 +35,11 @@ if (process.env.NODE_ENV === 'production') {
   app.use(koaConnect(compression()));
 }
 
+// check if in development mode
+if (process.env.NODE_ENV === 'development') {
+  mongoose.set('debug', true);
+}
+
 // handle errors
 app.use(errorHandler);
 
