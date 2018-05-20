@@ -1,0 +1,15 @@
+{
+  "rootDir": "..",
+  "testEnvironment": "node",
+  "collectCoverageFrom": [
+    "server/**/*.{js}"
+  ],
+  "testPathIgnorePatterns": [
+    "/node_modules",
+    "/dist"
+  ],
+  "setupFiles": [
+    "<rootDir>/config/polyfills.js"
+  ],
+  "verbose": true
+}
