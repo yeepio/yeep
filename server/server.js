@@ -90,7 +90,10 @@ server.start = async () => {
   }
 
   // connect to mongodb + register models
-  const db = await mongoose.createConnection();
+  const db = await mongoose.createConnection(process.env.MONGODB_URI, {
+    autoIndex: false,
+    bufferCommands: false,
+  });
   Object.entries(models).forEach(([key, schema]) => {
     db.model(key, schema);
   });
