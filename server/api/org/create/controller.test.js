@@ -2,18 +2,14 @@
 import request from 'supertest';
 import server from '../../../server';
 
-describe('api/v1/ping', () => {
-  test('responds as expected', async () => {
-    const res = await request(server).get('/api/v1/ping');
-    expect(res.status).toEqual(200);
-    expect(res.type).toMatch(/json/);
-    expect(res.body).toEqual({ ping: 'pong' });
+describe('api/v1/org.create', () => {
+  beforeAll(async () => {
+    await server.setup();
   });
 
-  // afterAll(async () => {
-  //   // delete org
-  //   await deleteOrg(knex, { slug: 'acme' });
-  // });
+  afterAll(async () => {
+    await server.teardown();
+  });
 
   test('throws 400 "Bad Request" when `slug` contains invalid characters', async () => {
     const res = await request(server)

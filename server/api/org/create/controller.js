@@ -21,7 +21,6 @@ const validation = createValidationMiddleware({
 });
 
 async function handler({ request, response, db }) {
-  console.log(request, response, db);
   const OrgModel = db.model('Org');
 
   // make sure org does not already exist
