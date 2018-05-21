@@ -3,11 +3,10 @@
 import server from './server';
 
 describe('server', () => {
-  test('starts/stops without crashing', async () => {
-    const info = await server.start();
-    expect(info).toMatchObject({
-      url: expect.any(String),
-    });
-    await server.stop();
+  test('performs setup/teardown without crashing', async () => {
+    await server.setup();
+    server.listen();
+    server.close();
+    await server.teardown();
   });
 });
