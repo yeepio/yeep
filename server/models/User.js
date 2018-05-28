@@ -18,7 +18,7 @@ const emailSchema = new Schema(
       required: true,
       default: false,
     },
-    isDefault: {
+    isPrimary: {
       type: Boolean,
       required: true,
       default: false,
