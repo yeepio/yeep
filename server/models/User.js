@@ -5,24 +5,29 @@ import { Schema } from 'mongoose';
 const randomBytes = Promise.promisify(crypto.randomBytes);
 const pbkdf2 = Promise.promisify(crypto.pbkdf2);
 
-const emailSchema = new Schema({
-  address: {
-    type: String,
-    required: true,
-    trim: true,
-    maxlength: 100,
+const emailSchema = new Schema(
+  {
+    address: {
+      type: String,
+      required: true,
+      trim: true,
+      maxlength: 100,
+    },
+    isVerified: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
+    isDefault: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
   },
-  isVerified: {
-    type: Boolean,
-    required: true,
-    default: false,
-  },
-  isDefault: {
-    type: Boolean,
-    required: true,
-    default: false,
-  },
-});
+  {
+    _id: false, // disable _id PK
+  }
+);
 
 const userSchema = new Schema(
   {
