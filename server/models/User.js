@@ -73,6 +73,14 @@ const userSchema = new Schema(
 );
 
 userSchema.index(
+  { username: 1 },
+  {
+    unique: true,
+    name: 'username_uidx',
+  }
+);
+
+userSchema.index(
   { 'emails.address': 1 },
   {
     unique: true,
