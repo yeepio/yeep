@@ -1,4 +1,9 @@
+import crypto from 'crypto';
+import Promise from 'bluebird';
 import { Schema } from 'mongoose';
+
+const randomBytes = Promise.promisify(crypto.randomBytes);
+const pbkdf2 = Promise.promisify(crypto.pbkdf2);
 
 const emailSchema = new Schema({
   address: {
@@ -87,5 +92,32 @@ userSchema.index(
     name: 'email_address_uidx',
   }
 );
+
+/**
+ * Generates and returns a cryptographically secure pseudorandom buffer of 30 bytes.
+ * @return {Promise<Buffer>} a Bluebird promise resolving to a Buffer.
+ */
+userSchema.statics.generatePassword = function() {
+  return randomBytes(30);
+};
+
+/**
+ * Generates and returns a cryptographically secure pseudorandom buffer of 128 bytes.
+ * @return {Promise<Buffer>} a Bluebird promise resolving to a Buffer.
+ */
+userSchema.statics.generateSalt = function() {
+  return randomBytes(128);
+};
+
+/**
+ * Returns a secure hash of the designated password using the supplied salt and iterations count.
+ * @param {string} password
+ * @param {Buffer} salt
+ * @param {number} iterations
+ * @return {Promise<Buffer>}
+ */
+userSchema.statics.digestPassword = function(password, salt, iterations) {
+  return pbkdf2(password, salt, iterations, 128, 'sha512');
+};
 
 export default userSchema;
