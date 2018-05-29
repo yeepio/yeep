@@ -90,7 +90,7 @@ describe('api/v1/user.create', () => {
   });
 
   test('creates new user and returns 201 "Created"', async () => {
-    const res = await request(server)
+    let res = await request(server)
       .post('/api/v1/user.create')
       .send({
         username: 'Wile',
@@ -104,7 +104,6 @@ describe('api/v1/user.create', () => {
           },
         ],
       });
-
     expect(res.status).toBe(201);
     expect(res.type).toMatch(/json/);
     expect(res.body).toMatchObject({
@@ -127,11 +126,100 @@ describe('api/v1/user.create', () => {
       }),
     });
 
-    // res = await request(server)
-    //   .post('/api/v1/user.delete')
-    //   .send({
-    //     slug: 'acme',
-    //   });
-    // expect(res.status).toBe(204);
+    res = await request(server)
+      .post('/api/v1/user.delete')
+      .send({
+        id: res.body.user.id,
+      });
+    expect(res.status).toBe(204);
+  });
+
+  test('throws 409 "Conflict" on duplicate username', async () => {
+    let res = await request(server)
+      .post('/api/v1/user.create')
+      .send({
+        username: 'Wile',
+        password: 'catch-the-b1rd$',
+        fullName: 'Wile E. Coyote',
+        emails: [
+          {
+            address: 'coyote@acme.com',
+            isVerified: true,
+            isPrimary: true,
+          },
+        ],
+      });
+    expect(res.status).toBe(201);
+
+    const { id } = res.body.user;
+
+    res = await request(server)
+      .post('/api/v1/user.create')
+      .send({
+        username: 'wile',
+        password: 'play-wolf',
+        fullName: 'Road Runner',
+        emails: [
+          {
+            address: 'beep-beep@acme.com',
+            isVerified: true,
+            isPrimary: true,
+          },
+        ],
+      });
+    expect(res.status).toBe(409);
+    expect(res.body.message).toMatch(/username/i);
+
+    res = await request(server)
+      .post('/api/v1/user.delete')
+      .send({ id });
+    expect(res.status).toBe(204);
+  });
+
+  test('throws 409 "Conflict" on duplicate email address', async () => {
+    let res = await request(server)
+      .post('/api/v1/user.create')
+      .send({
+        username: 'Wile',
+        password: 'catch-the-b1rd$',
+        fullName: 'Wile E. Coyote',
+        emails: [
+          {
+            address: 'coyote@acme.com',
+            isVerified: true,
+            isPrimary: true,
+          },
+          {
+            address: 'carnivorous@acme.com',
+            isVerified: false,
+            isPrimary: false,
+          },
+        ],
+      });
+    expect(res.status).toBe(201);
+
+    const { id } = res.body.user;
+
+    res = await request(server)
+      .post('/api/v1/user.create')
+      .send({
+        username: 'roadrunner',
+        password: 'play-wolf',
+        fullName: 'Road Runner',
+        emails: [
+          {
+            address: 'Carnivorous@acme.com',
+            isVerified: true,
+            isPrimary: true,
+          },
+        ],
+      });
+    expect(res.status).toBe(409);
+    expect(res.body.message).toMatch(/email address/i);
+
+    res = await request(server)
+      .post('/api/v1/user.delete')
+      .send({ id });
+    expect(res.status).toBe(204);
   });
 });

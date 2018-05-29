@@ -82,32 +82,48 @@ async function handler({ request, response, db }) {
   );
 
   // create user in db
-  const user = await UserModel.create({
-    username: request.body.username.toLowerCase(),
-    password: digestedPassword,
-    salt,
-    iterationCount,
-    fullName: request.body.fullName,
-    picture,
-    emails: request.body.emails,
-    orgs: [],
-    roles: [],
-  });
+  try {
+    const user = await UserModel.create({
+      username: request.body.username.toLowerCase(),
+      password: digestedPassword,
+      salt,
+      iterationCount,
+      fullName: request.body.fullName,
+      picture,
+      emails: request.body.emails,
+      orgs: [],
+      roles: [],
+    });
 
-  response.status = 201; // Created
-  response.body = {
-    user: {
-      id: user._id,
-      username: user.username,
-      fullName: user.fullName,
-      picture: user.picture,
-      emails: user.emails,
-      orgs: user.orgs,
-      roles: user.roles,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    },
-  };
+    response.status = 201; // Created
+    response.body = {
+      user: {
+        id: user._id,
+        username: user.username,
+        fullName: user.fullName,
+        picture: user.picture,
+        emails: user.emails,
+        orgs: user.orgs,
+        roles: user.roles,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      },
+    };
+  } catch (err) {
+    if (err.code === 11000) {
+      if (err.message.includes('email_address_uidx')) {
+        throw Boom.conflict('Email address already in use');
+      }
+
+      if (err.message.includes('username_uidx')) {
+        throw Boom.conflict(
+          `Username "${request.body.username}" already in use`
+        );
+      }
+    }
+
+    throw err;
+  }
 }
 
 export default compose([validation, handler]);
