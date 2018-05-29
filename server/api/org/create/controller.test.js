@@ -107,7 +107,7 @@ describe('api/v1/org.create', () => {
     res = await request(server)
       .post('/api/v1/org.delete')
       .send({
-        slug: 'acme',
+        id: res.body.org.id,
       });
     expect(res.status).toBe(204);
   });
@@ -121,6 +121,8 @@ describe('api/v1/org.create', () => {
       });
     expect(res.status).toBe(201);
 
+    const id = res.body.org.id;
+
     res = await request(server)
       .post('/api/v1/org.create')
       .send({
@@ -131,9 +133,7 @@ describe('api/v1/org.create', () => {
 
     res = await request(server)
       .post('/api/v1/org.delete')
-      .send({
-        slug: 'acme',
-      });
+      .send({ id });
     expect(res.status).toBe(204);
   });
 });

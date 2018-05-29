@@ -5,20 +5,17 @@ import { createValidationMiddleware } from '../../../middleware/validation';
 
 const validation = createValidationMiddleware({
   body: {
-    slug: Joi.string()
-      .lowercase()
-      .trim()
-      .min(3)
-      .max(30)
-      .required()
-      .regex(/^[A-Za-z0-9\-_]*$/, { name: 'slug' }),
+    id: Joi.string()
+      .length(24)
+      .hex()
+      .required(),
   },
 });
 
 async function handler({ request, response, db }) {
   const OrgModel = db.model('Org');
 
-  const result = await OrgModel.deleteOne({ slug: request.body.slug });
+  const result = await OrgModel.deleteOne({ _id: request.body.id });
 
   if (!result.ok) throw Boom.internal();
 

@@ -10,45 +10,45 @@ describe('api/v1/org.delete', () => {
     await server.teardown();
   });
 
-  test('throws 400 "Bad Request" when `slug` contains invalid characters', async () => {
+  test('throws 400 "Bad Request" when `id` contains invalid characters', async () => {
     const res = await request(server)
       .post('/api/v1/org.delete')
       .send({
-        slug: '@cme',
+        id: '507f1f77bcf86cd79943901@',
       });
     expect(res.status).toBe(400);
-    expect(res.body.details[0].path).toEqual(['slug']);
-    expect(res.body.details[0].type).toBe('string.regex.name');
+    expect(res.body.details[0].path).toEqual(['id']);
+    expect(res.body.details[0].type).toBe('string.hex');
   });
 
-  test('throws 400 "Bad Request" when `slug` contains more than 30 characters', async () => {
+  test('throws 400 "Bad Request" when `id` contains more than 24 characters', async () => {
     const res = await request(server)
       .post('/api/v1/org.delete')
       .send({
-        slug: '0123456789012345678901234567890',
+        id: '507f1f77bcf86cd7994390112',
       });
     expect(res.status).toBe(400);
-    expect(res.body.details[0].path).toEqual(['slug']);
-    expect(res.body.details[0].type).toBe('string.max');
+    expect(res.body.details[0].path).toEqual(['id']);
+    expect(res.body.details[0].type).toBe('string.length');
   });
 
-  test('throws 400 "Bad Request" when `slug` contains less than 2 characters', async () => {
+  test('throws 400 "Bad Request" when `id` contains less than 24 characters', async () => {
     const res = await request(server)
       .post('/api/v1/org.delete')
       .send({
-        slug: 'a',
+        id: '507f1f77bcf86cd79943901',
       });
     expect(res.status).toBe(400);
-    expect(res.body.details[0].path).toEqual(['slug']);
-    expect(res.body.details[0].type).toBe('string.min');
+    expect(res.body.details[0].path).toEqual(['id']);
+    expect(res.body.details[0].type).toBe('string.length');
   });
 
-  test('throws 400 "Bad Request" when `slug` is unspecified', async () => {
+  test('throws 400 "Bad Request" when `id` is unspecified', async () => {
     const res = await request(server)
       .post('/api/v1/org.delete')
       .send({});
     expect(res.status).toBe(400);
-    expect(res.body.details[0].path).toEqual(['slug']);
+    expect(res.body.details[0].path).toEqual(['id']);
     expect(res.body.details[0].type).toBe('any.required');
   });
 
@@ -56,7 +56,7 @@ describe('api/v1/org.delete', () => {
     const res = await request(server)
       .post('/api/v1/org.delete')
       .send({
-        slug: 'acme',
+        id: '507f1f77bcf86cd799439011',
         foo: 'bar',
       });
     expect(res.status).toBe(400);
@@ -76,7 +76,7 @@ describe('api/v1/org.delete', () => {
     res = await request(server)
       .post('/api/v1/org.delete')
       .send({
-        slug: 'acme',
+        id: res.body.org.id,
       });
     expect(res.status).toBe(204);
   });
