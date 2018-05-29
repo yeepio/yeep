@@ -7,6 +7,7 @@ exports.up = async function(next) {
     {
       unique: true,
       name: 'username_uidx',
+      collation: { locale: 'en', strength: 2 },
     },
     next
   );

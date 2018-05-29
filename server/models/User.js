@@ -87,6 +87,7 @@ userSchema.index(
   {
     unique: true,
     name: 'username_uidx',
+    collation: { locale: 'en', strength: 2 },
   }
 );
 
@@ -95,6 +96,7 @@ userSchema.index(
   {
     unique: true,
     name: 'email_address_uidx',
+    collation: { locale: 'en', strength: 2 },
   }
 );
 
