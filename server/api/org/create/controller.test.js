@@ -111,4 +111,29 @@ describe('api/v1/org.create', () => {
       });
     expect(res.status).toBe(204);
   });
+
+  test('throws 409 "Conflict" on duplicate org slug', async () => {
+    let res = await request(server)
+      .post('/api/v1/org.create')
+      .send({
+        name: 'ACME Inc.',
+        slug: 'acme',
+      });
+    expect(res.status).toBe(201);
+
+    res = await request(server)
+      .post('/api/v1/org.create')
+      .send({
+        name: 'ACME S.A.',
+        slug: 'acme',
+      });
+    expect(res.status).toBe(409);
+
+    res = await request(server)
+      .post('/api/v1/org.delete')
+      .send({
+        slug: 'acme',
+      });
+    expect(res.status).toBe(204);
+  });
 });

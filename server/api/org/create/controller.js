@@ -23,24 +23,25 @@ const validation = createValidationMiddleware({
 async function handler({ request, response, db }) {
   const OrgModel = db.model('Org');
 
-  // make sure org does not already exist
-  const count = await OrgModel.count({ slug: request.body.slug });
-
-  if (count !== 0) {
-    throw Boom.conflict(`Org "${request.body.slug}" already exists`);
-  }
-
   // create org in db
-  const org = await OrgModel.create(request.body);
+  try {
+    const org = await OrgModel.create(request.body);
 
-  response.status = 201; // Created
-  response.body = {
-    id: org._id,
-    name: org.name,
-    slug: org.slug,
-    createdAt: org.createdAt,
-    updatedAt: org.updatedAt,
-  };
+    response.status = 201; // Created
+    response.body = {
+      id: org._id,
+      name: org.name,
+      slug: org.slug,
+      createdAt: org.createdAt,
+      updatedAt: org.updatedAt,
+    };
+  } catch (err) {
+    if (err.code === 11000) {
+      throw Boom.conflict(`Org "${request.body.slug}" already in use`);
+    }
+
+    throw err;
+  }
 }
 
 export default compose([validation, handler]);
