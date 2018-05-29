@@ -29,11 +29,13 @@ async function handler({ request, response, db }) {
 
     response.status = 201; // Created
     response.body = {
-      id: org._id,
-      name: org.name,
-      slug: org.slug,
-      createdAt: org.createdAt,
-      updatedAt: org.updatedAt,
+      org: {
+        id: org._id,
+        name: org.name,
+        slug: org.slug,
+        createdAt: org.createdAt,
+        updatedAt: org.updatedAt,
+      },
     };
   } catch (err) {
     if (err.code === 11000) {

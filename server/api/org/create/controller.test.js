@@ -94,15 +94,15 @@ describe('api/v1/org.create', () => {
 
     expect(res.status).toBe(201);
     expect(res.type).toMatch(/json/);
-    expect(res.body).toEqual(
-      expect.objectContaining({
+    expect(res.body).toMatchObject({
+      org: expect.objectContaining({
         id: expect.any(String),
         name: expect.any(String),
         slug: expect.any(String),
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
-      })
-    );
+      }),
+    });
 
     res = await request(server)
       .post('/api/v1/org.delete')
