@@ -23,6 +23,10 @@ const tokenSchema = new Schema(
       type: Schema.Types.ObjectId,
       required: false,
     },
+    expiresAt: {
+      type: Date,
+      required: true,
+    },
   },
   {
     collection: 'tokens',
@@ -40,6 +44,9 @@ const tokenSchema = new Schema(
 
 tokenSchema.index({ secret: 'hashed' }, { name: 'secret_idx' });
 tokenSchema.index({ userId: 1 }, { name: 'userId_idx' });
+
+// set auto-expiration index based on `expiresAt`
+tokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
 /**
  * Generates and returns secret with the designated properties.
