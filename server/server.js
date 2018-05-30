@@ -9,12 +9,18 @@ import koaConnect from 'koa-connect';
 import Boom from 'boom';
 import mongoose from 'mongoose';
 import * as models from './models';
+import JsonWebToken from './utils/JsonWebToken';
 
 import errorHandler from './middleware/errorHandler';
 import api from './api';
 
 const app = new Koa();
 const server = http.createServer(app.callback());
+
+const jwt = new JsonWebToken({
+  secretKey: process.env.JWT_SECRET,
+  issuer: 'Yeep',
+});
 
 // check if in production mode
 if (process.env.NODE_ENV === 'production') {
@@ -89,10 +95,14 @@ server.setup = async () => {
     autoIndex: false,
     bufferCommands: false,
   });
+
   Object.entries(models).forEach(([key, schema]) => {
     db.model(key, schema);
   });
+
+  // populate app context
   app.context.db = db;
+  app.context.jwt = jwt;
 };
 
 export default server;
