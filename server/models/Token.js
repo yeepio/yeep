@@ -46,7 +46,10 @@ tokenSchema.index({ secret: 'hashed' }, { name: 'secret_idx' });
 tokenSchema.index({ userId: 1 }, { name: 'userId_idx' });
 
 // set auto-expiration index based on `expiresAt`
-tokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+tokenSchema.index(
+  { expiresAt: 1 },
+  { name: 'expiresAt_idx', expireAfterSeconds: 0 }
+);
 
 /**
  * Generates and returns secret with the designated properties.
