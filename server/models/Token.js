@@ -1,4 +1,5 @@
 import { Schema } from 'mongoose';
+import randomstring from 'randomstring';
 
 const tokenSchema = new Schema(
   {
@@ -39,5 +40,25 @@ const tokenSchema = new Schema(
 
 tokenSchema.index({ secret: 'hashed' }, { name: 'secret_idx' });
 tokenSchema.index({ userId: 1 }, { name: 'userId_idx' });
+
+/**
+ * Generates and returns secret with the designated properties.
+ * @param {Object} [props]
+ * @property {number} [props.length=32]
+ * @property {boolean} [props.readable=true]
+ * @property {string} [props.charset=alphanumeric]
+ * @returns {string}
+ * @see {@link https://github.com/klughammer/node-randomstring#api} for further info on this method properties.
+ */
+tokenSchema.statics.generateSecret = function(props = {}) {
+  const { length = 32, readable = true, charset = 'alphanumeric' } = props;
+
+  return randomstring.generate({
+    length,
+    readable,
+    charset,
+    ...props,
+  });
+};
 
 export default tokenSchema;
