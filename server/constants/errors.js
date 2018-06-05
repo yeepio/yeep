@@ -11,3 +11,10 @@ export class InvalidCredentialsError extends Error {
     this.code = 10002;
   }
 }
+
+export class DuplicateOrgError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10003;
+  }
+}

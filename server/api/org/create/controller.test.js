@@ -11,7 +11,7 @@ describe('api/v1/org.create', () => {
     await server.teardown();
   });
 
-  test('throws 400 "Bad Request" when `slug` contains invalid characters', async () => {
+  test('returns error when `slug` contains invalid characters', async () => {
     const res = await request(server)
       .post('/api/v1/org.create')
       .send({
@@ -19,12 +19,20 @@ describe('api/v1/org.create', () => {
         slug: '@cme',
       });
 
-    expect(res.status).toBe(400);
-    expect(res.body.details[0].path).toEqual(['slug']);
-    expect(res.body.details[0].type).toBe('string.regex.name');
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 400,
+        message: 'Invalid request body',
+        details: expect.any(Array),
+      },
+    });
+    expect(res.body.error.details[0].path).toEqual(['slug']);
+    expect(res.body.error.details[0].type).toBe('string.regex.name');
   });
 
-  test('throws 400 "Bad Request" when `slug` contains more than 30 characters', async () => {
+  test('returns error when `slug` contains more than 30 characters', async () => {
     const res = await request(server)
       .post('/api/v1/org.create')
       .send({
@@ -32,12 +40,20 @@ describe('api/v1/org.create', () => {
         slug: '0123456789012345678901234567890',
       });
 
-    expect(res.status).toBe(400);
-    expect(res.body.details[0].path).toEqual(['slug']);
-    expect(res.body.details[0].type).toBe('string.max');
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 400,
+        message: 'Invalid request body',
+        details: expect.any(Array),
+      },
+    });
+    expect(res.body.error.details[0].path).toEqual(['slug']);
+    expect(res.body.error.details[0].type).toBe('string.max');
   });
 
-  test('throws 400 "Bad Request" when `slug` contains less than 2 characters', async () => {
+  test('returns error when `slug` contains less than 2 characters', async () => {
     const res = await request(server)
       .post('/api/v1/org.create')
       .send({
@@ -45,32 +61,56 @@ describe('api/v1/org.create', () => {
         slug: 'a',
       });
 
-    expect(res.status).toBe(400);
-    expect(res.body.details[0].path).toEqual(['slug']);
-    expect(res.body.details[0].type).toBe('string.min');
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 400,
+        message: 'Invalid request body',
+        details: expect.any(Array),
+      },
+    });
+    expect(res.body.error.details[0].path).toEqual(['slug']);
+    expect(res.body.error.details[0].type).toBe('string.min');
   });
 
-  test('throws 400 "Bad Request" when `name` is unspecified', async () => {
+  test('returns error when `name` is unspecified', async () => {
     const res = await request(server)
       .post('/api/v1/org.create')
       .send({});
 
-    expect(res.status).toBe(400);
-    expect(res.body.details[0].path).toEqual(['name']);
-    expect(res.body.details[0].type).toBe('any.required');
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 400,
+        message: 'Invalid request body',
+        details: expect.any(Array),
+      },
+    });
+    expect(res.body.error.details[0].path).toEqual(['name']);
+    expect(res.body.error.details[0].type).toBe('any.required');
   });
 
-  test('throws 400 "Bad Request" when `slug` is unspecified', async () => {
+  test('returns error when `slug` is unspecified', async () => {
     const res = await request(server)
       .post('/api/v1/org.create')
       .send({ name: 'ACME Inc.' });
 
-    expect(res.status).toBe(400);
-    expect(res.body.details[0].path).toEqual(['slug']);
-    expect(res.body.details[0].type).toBe('any.required');
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 400,
+        message: 'Invalid request body',
+        details: expect.any(Array),
+      },
+    });
+    expect(res.body.error.details[0].path).toEqual(['slug']);
+    expect(res.body.error.details[0].type).toBe('any.required');
   });
 
-  test('throws 400 "Bad Request" when payload contains unknown properties', async () => {
+  test('returns error when payload contains unknown properties', async () => {
     const res = await request(server)
       .post('/api/v1/org.create')
       .send({
@@ -79,12 +119,20 @@ describe('api/v1/org.create', () => {
         foo: 'bar',
       });
 
-    expect(res.status).toBe(400);
-    expect(res.body.details[0].path).toEqual(['foo']);
-    expect(res.body.details[0].type).toBe('object.allowUnknown');
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 400,
+        message: 'Invalid request body',
+        details: expect.any(Array),
+      },
+    });
+    expect(res.body.error.details[0].path).toEqual(['foo']);
+    expect(res.body.error.details[0].type).toBe('object.allowUnknown');
   });
 
-  test('creates new org and returns 201 "Created"', async () => {
+  test('creates new org and returns expected response', async () => {
     let res = await request(server)
       .post('/api/v1/org.create')
       .send({
@@ -92,9 +140,10 @@ describe('api/v1/org.create', () => {
         slug: 'acme',
       });
 
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(200);
     expect(res.type).toMatch(/json/);
     expect(res.body).toMatchObject({
+      ok: true,
       org: expect.objectContaining({
         id: expect.any(String),
         name: expect.any(String),
@@ -112,14 +161,14 @@ describe('api/v1/org.create', () => {
     expect(res.status).toBe(204);
   });
 
-  test('throws 409 "Conflict" on duplicate org slug', async () => {
+  test('returns error on duplicate org slug', async () => {
     let res = await request(server)
       .post('/api/v1/org.create')
       .send({
         name: 'ACME Inc.',
         slug: 'acme',
       });
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(200);
 
     const id = res.body.org.id;
 
@@ -129,7 +178,13 @@ describe('api/v1/org.create', () => {
         name: 'ACME S.A.',
         slug: 'acme',
       });
-    expect(res.status).toBe(409);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 10003,
+        message: expect.any(String),
+      },
+    });
 
     res = await request(server)
       .post('/api/v1/org.delete')
