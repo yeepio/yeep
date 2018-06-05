@@ -7,6 +7,7 @@ import {
   UserNotFoundError,
   InvalidCredentialsError,
 } from '../../../constants/errors';
+import packJSONRPC from '../../../middleware/packJSONRPC';
 
 const validation = createValidationMiddleware({
   body: {
@@ -75,11 +76,11 @@ async function handler({ request, response, db, jwt }) {
     }
   );
 
-  response.status = 201; // Created
+  response.status = 200; // OK
   response.body = {
     token: jwtToken,
     expiresIn: expiresIn * 1000, // convert to milliseconds
   };
 }
 
-export default compose([validation, handler]);
+export default compose([packJSONRPC, validation, handler]);

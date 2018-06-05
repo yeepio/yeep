@@ -11,56 +11,82 @@ describe('api/v1/session.create', () => {
     await server.teardown();
   });
 
-  // test('throws 400 "Bad Request" when `emails` contains duplicate addresses', async () => {
-  //   const res = await request(server)
-  //     .post('/api/v1/session.create')
-  //     .send({
-  //       username: 'wile',
-  //       password: 'catch-the-b1rd$',
-  //       fullName: 'Wile E. Coyote',
-  //       emails: [
-  //         {
-  //           address: 'coyote@acme.com',
-  //           isVerified: false,
-  //           isPrimary: false,
-  //         },
-  //         {
-  //           address: 'coyote@acme.com',
-  //           isVerified: false,
-  //           isPrimary: false,
-  //         },
-  //       ],
-  //     });
+  test('throws 400 "Bad Request" when username is invalid', async () => {
+    const res = await request(server)
+      .post('/api/v1/session.create')
+      .send({
+        username: 'a',
+        password: 'password',
+      });
 
-  //   expect(res.status).toBe(400);
-  //   expect(res.body.details[0].path).toEqual(['emails', 1]);
-  //   expect(res.body.details[0].type).toBe('array.unique');
-  // });
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 400,
+        message: 'Invalid request body',
+        details: expect.any(Array),
+      },
+    });
+  });
 
-  // test('throws 422 "Bad Request" when primary email is not specified', async () => {
-  //   const res = await request(server)
-  //     .post('/api/v1/session.create')
-  //     .send({
-  //       username: 'wile',
-  //       password: 'catch-the-b1rd$',
-  //       fullName: 'Wile E. Coyote',
-  //       emails: [
-  //         {
-  //           address: 'coyote@acme.com',
-  //           isVerified: false,
-  //           isPrimary: false,
-  //         },
-  //         {
-  //           address: 'wile@acme.com',
-  //           isVerified: false,
-  //           isPrimary: false,
-  //         },
-  //       ],
-  //     });
+  test('throws "UserNotFoundError" error when user does not exist', async () => {
+    const res = await request(server)
+      .post('/api/v1/session.create')
+      .send({
+        username: 'notuser',
+        password: 'password',
+      });
 
-  //   expect(res.status).toBe(422);
-  //   expect(res.body.message).toBe('You must specify at least 1 primary email');
-  // });
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 10001,
+        message: expect.any(String),
+      },
+    });
+  });
+
+  test('throws "InvalidCredentialsError" error when password is invalid', async () => {
+    let res = await request(server)
+      .post('/api/v1/user.create')
+      .send({
+        username: 'Wile',
+        password: 'catch-the-b1rd$',
+        fullName: 'Wile E. Coyote',
+        emails: [
+          {
+            address: 'coyote@acme.com',
+            isVerified: true,
+            isPrimary: true,
+          },
+        ],
+      });
+    expect(res.status).toBe(201);
+    const { id: userId } = res.body.user;
+
+    res = await request(server)
+      .post('/api/v1/session.create')
+      .send({
+        username: 'wile',
+        password: 'invalid-password',
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 10002,
+        message: expect.any(String),
+      },
+    });
+
+    res = await request(server)
+      .post('/api/v1/user.delete')
+      .send({ id: userId });
+    expect(res.status).toBe(204);
+  });
 
   // test('throws 422 "Bad Request" when multiple primary emails are specified', async () => {
   //   const res = await request(server)
@@ -113,9 +139,10 @@ describe('api/v1/session.create', () => {
         username: 'Wile',
         password: 'catch-the-b1rd$',
       });
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(200);
     expect(res.body).toEqual(
       expect.objectContaining({
+        ok: true,
         token: expect.any(String),
         expiresIn: expect.any(Number),
       })

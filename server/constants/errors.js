@@ -1,2 +1,13 @@
-export class UserNotFoundError extends Error {}
-export class InvalidCredentialsError extends Error {}
+export class UserNotFoundError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10001;
+  }
+}
+
+export class InvalidCredentialsError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10002;
+  }
+}
