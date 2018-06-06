@@ -11,7 +11,7 @@ describe('api/v1/user.create', () => {
     await server.teardown();
   });
 
-  test('throws 400 "Bad Request" when `emails` contains duplicate addresses', async () => {
+  test('returns error when `emails` contains duplicate addresses', async () => {
     const res = await request(server)
       .post('/api/v1/user.create')
       .send({
@@ -32,12 +32,20 @@ describe('api/v1/user.create', () => {
         ],
       });
 
-    expect(res.status).toBe(400);
-    expect(res.body.details[0].path).toEqual(['emails', 1]);
-    expect(res.body.details[0].type).toBe('array.unique');
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 400,
+        message: 'Invalid request body',
+        details: expect.any(Array),
+      },
+    });
+    expect(res.body.error.details[0].path).toEqual(['emails', 1]);
+    expect(res.body.error.details[0].type).toBe('array.unique');
   });
 
-  test('throws 422 "Bad Request" when primary email is not specified', async () => {
+  test('returns error when primary email is not specified', async () => {
     const res = await request(server)
       .post('/api/v1/user.create')
       .send({
@@ -58,11 +66,17 @@ describe('api/v1/user.create', () => {
         ],
       });
 
-    expect(res.status).toBe(422);
-    expect(res.body.message).toBe('You must specify at least 1 primary email');
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 10004,
+        message: 'You must specify at least 1 primary email',
+      },
+    });
   });
 
-  test('throws 422 "Bad Request" when multiple primary emails are specified', async () => {
+  test('throws error when multiple primary emails are specified', async () => {
     const res = await request(server)
       .post('/api/v1/user.create')
       .send({
@@ -83,13 +97,17 @@ describe('api/v1/user.create', () => {
         ],
       });
 
-    expect(res.status).toBe(422);
-    expect(res.body.message).toBe(
-      'User cannot have more than 1 primary emails'
-    );
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 10004,
+        message: expect.any(String),
+      },
+    });
   });
 
-  test('creates new user and returns 201 "Created"', async () => {
+  test('creates new user and returns expected response', async () => {
     let res = await request(server)
       .post('/api/v1/user.create')
       .send({
@@ -104,9 +122,9 @@ describe('api/v1/user.create', () => {
           },
         ],
       });
-    expect(res.status).toBe(201);
-    expect(res.type).toMatch(/json/);
-    expect(res.body).toMatchObject({
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      ok: true,
       user: expect.objectContaining({
         id: expect.any(String),
         username: 'wile',
@@ -134,7 +152,7 @@ describe('api/v1/user.create', () => {
     expect(res.status).toBe(204);
   });
 
-  test('throws 409 "Conflict" on duplicate username', async () => {
+  test('returns error on duplicate username', async () => {
     let res = await request(server)
       .post('/api/v1/user.create')
       .send({
@@ -149,7 +167,10 @@ describe('api/v1/user.create', () => {
           },
         ],
       });
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: true,
+    });
 
     const { id } = res.body.user;
 
@@ -167,8 +188,14 @@ describe('api/v1/user.create', () => {
           },
         ],
       });
-    expect(res.status).toBe(409);
-    expect(res.body.message).toMatch(/username/i);
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 10006,
+        message: expect.any(String),
+      },
+    });
 
     res = await request(server)
       .post('/api/v1/user.delete')
@@ -176,7 +203,7 @@ describe('api/v1/user.create', () => {
     expect(res.status).toBe(204);
   });
 
-  test('throws 409 "Conflict" on duplicate email address', async () => {
+  test('returns error on duplicate email address', async () => {
     let res = await request(server)
       .post('/api/v1/user.create')
       .send({
@@ -196,7 +223,10 @@ describe('api/v1/user.create', () => {
           },
         ],
       });
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: true,
+    });
 
     const { id } = res.body.user;
 
@@ -214,8 +244,14 @@ describe('api/v1/user.create', () => {
           },
         ],
       });
-    expect(res.status).toBe(409);
-    expect(res.body.message).toMatch(/email address/i);
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 10005,
+        message: expect.any(String),
+      },
+    });
 
     res = await request(server)
       .post('/api/v1/user.delete')

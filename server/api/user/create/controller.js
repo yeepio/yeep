@@ -1,8 +1,13 @@
 import Joi from 'joi';
-import Boom from 'boom';
 import compose from 'koa-compose';
+import packJSONRPC from '../../../middleware/packJSONRPC';
 import { createValidationMiddleware } from '../../../middleware/validation';
 import { getGravatarUrl } from '../../../utils/gravatar';
+import {
+  InvalidPrimaryEmailError,
+  DuplicateEmailAddressError,
+  DuplicateUsernameError,
+} from '../../../constants/errors';
 
 const validation = createValidationMiddleware({
   body: {
@@ -60,10 +65,14 @@ async function handler({ request, response, db }) {
   // ensure there is exactly 1 primary email
   const primaryEmails = request.body.emails.filter((email) => email.isPrimary);
   if (primaryEmails.length < 1) {
-    throw Boom.badData('You must specify at least 1 primary email');
+    throw new InvalidPrimaryEmailError(
+      'You must specify at least 1 primary email'
+    );
   }
   if (primaryEmails.length > 1) {
-    throw Boom.badData('User cannot have more than 1 primary emails');
+    throw new InvalidPrimaryEmailError(
+      'User cannot have more than 1 primary emails'
+    );
   }
 
   // attempt to populate missing picture from gravatar
@@ -95,7 +104,7 @@ async function handler({ request, response, db }) {
       roles: [],
     });
 
-    response.status = 201; // Created
+    response.status = 200; // OK
     response.body = {
       user: {
         id: user._id,
@@ -112,11 +121,11 @@ async function handler({ request, response, db }) {
   } catch (err) {
     if (err.code === 11000) {
       if (err.message.includes('email_address_uidx')) {
-        throw Boom.conflict('Email address already in use');
+        throw new DuplicateEmailAddressError('Email address already in use');
       }
 
       if (err.message.includes('username_uidx')) {
-        throw Boom.conflict(
+        throw new DuplicateUsernameError(
           `Username "${request.body.username}" already in use`
         );
       }
@@ -126,4 +135,4 @@ async function handler({ request, response, db }) {
   }
 }
 
-export default compose([validation, handler]);
+export default compose([packJSONRPC, validation, handler]);

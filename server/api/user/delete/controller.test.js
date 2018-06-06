@@ -79,13 +79,17 @@ describe('api/v1/user.delete', () => {
           },
         ],
       });
-    expect(res.status).toBe(201);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: true,
+    });
+
+    const { id: userId } = res.body.user;
 
     res = await request(server)
       .post('/api/v1/user.delete')
-      .send({
-        id: res.body.user.id,
-      });
+      .send({ id: userId });
     expect(res.status).toBe(204);
   });
 });

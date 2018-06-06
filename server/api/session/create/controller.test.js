@@ -63,7 +63,12 @@ describe('api/v1/session.create', () => {
           },
         ],
       });
-    expect(res.status).toBe(201);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: true,
+    });
+
     const { id: userId } = res.body.user;
 
     res = await request(server)
@@ -103,7 +108,12 @@ describe('api/v1/session.create', () => {
           },
         ],
       });
-    expect(res.status).toBe(201);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: true,
+    });
+
     const { id: userId } = res.body.user;
 
     res = await request(server)
