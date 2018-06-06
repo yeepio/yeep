@@ -158,7 +158,10 @@ describe('api/v1/org.create', () => {
       .send({
         id: res.body.org.id,
       });
-    expect(res.status).toBe(204);
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: true,
+    });
   });
 
   test('returns error on duplicate org slug', async () => {
@@ -189,6 +192,9 @@ describe('api/v1/org.create', () => {
     res = await request(server)
       .post('/api/v1/org.delete')
       .send({ id });
-    expect(res.status).toBe(204);
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: true,
+    });
   });
 });

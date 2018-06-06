@@ -1,6 +1,7 @@
 import Joi from 'joi';
 import Boom from 'boom';
 import compose from 'koa-compose';
+import packJSONRPC from '../../../middleware/packJSONRPC';
 import { createValidationMiddleware } from '../../../middleware/validation';
 
 const validation = createValidationMiddleware({
@@ -19,7 +20,7 @@ async function handler({ request, response, db }) {
 
   if (!result.ok) throw Boom.internal();
 
-  response.status = 204; // No Content
+  response.status = 200; // OK
 }
 
-export default compose([validation, handler]);
+export default compose([packJSONRPC, validation, handler]);
