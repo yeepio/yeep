@@ -90,7 +90,10 @@ describe('api/v1/session.create', () => {
     res = await request(server)
       .post('/api/v1/user.delete')
       .send({ id: userId });
-    expect(res.status).toBe(204);
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: true,
+    });
   });
 
   test('creates new session', async () => {
@@ -134,6 +137,9 @@ describe('api/v1/session.create', () => {
     res = await request(server)
       .post('/api/v1/user.delete')
       .send({ id: userId });
-    expect(res.status).toBe(204);
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: true,
+    });
   });
 });

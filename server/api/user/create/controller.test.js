@@ -149,7 +149,10 @@ describe('api/v1/user.create', () => {
       .send({
         id: res.body.user.id,
       });
-    expect(res.status).toBe(204);
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: true,
+    });
   });
 
   test('returns error on duplicate username', async () => {
@@ -200,7 +203,10 @@ describe('api/v1/user.create', () => {
     res = await request(server)
       .post('/api/v1/user.delete')
       .send({ id });
-    expect(res.status).toBe(204);
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: true,
+    });
   });
 
   test('returns error on duplicate email address', async () => {
@@ -256,6 +262,9 @@ describe('api/v1/user.create', () => {
     res = await request(server)
       .post('/api/v1/user.delete')
       .send({ id });
-    expect(res.status).toBe(204);
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: true,
+    });
   });
 });
