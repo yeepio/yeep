@@ -1,7 +1,8 @@
 import Joi from 'joi';
-import Boom from 'boom';
 import compose from 'koa-compose';
+import packJSONRPC from '../../../middleware/packJSONRPC';
 import { createValidationMiddleware } from '../../../middleware/validation';
+import { DuplicateOrgError } from '../../../constants/errors';
 
 const validation = createValidationMiddleware({
   body: {
@@ -23,24 +24,27 @@ const validation = createValidationMiddleware({
 async function handler({ request, response, db }) {
   const OrgModel = db.model('Org');
 
-  // make sure org does not already exist
-  const count = await OrgModel.count({ slug: request.body.slug });
-
-  if (count !== 0) {
-    throw Boom.conflict(`Org "${request.body.slug}" already exists`);
-  }
-
   // create org in db
-  const org = await OrgModel.create(request.body);
+  try {
+    const org = await OrgModel.create(request.body);
 
-  response.status = 201; // Created
-  response.body = {
-    id: org._id,
-    name: org.name,
-    slug: org.slug,
-    createdAt: org.createdAt,
-    updatedAt: org.updatedAt,
-  };
+    response.status = 200; // OK
+    response.body = {
+      org: {
+        id: org._id,
+        name: org.name,
+        slug: org.slug,
+        createdAt: org.createdAt,
+        updatedAt: org.updatedAt,
+      },
+    };
+  } catch (err) {
+    if (err.code === 11000) {
+      throw new DuplicateOrgError(`Org "${request.body.slug}" already exists`);
+    }
+
+    throw err;
+  }
 }
 
-export default compose([validation, handler]);
+export default compose([packJSONRPC, validation, handler]);

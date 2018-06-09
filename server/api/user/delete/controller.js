@@ -3,6 +3,7 @@ import Boom from 'boom';
 import compose from 'koa-compose';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { createValidationMiddleware } from '../../../middleware/validation';
+import deleteUser from './service';
 
 const validation = createValidationMiddleware({
   body: {
@@ -14,11 +15,11 @@ const validation = createValidationMiddleware({
 });
 
 async function handler({ request, response, db }) {
-  const OrgModel = db.model('Org');
+  const isUserDeleted = await deleteUser(db, request.body);
 
-  const result = await OrgModel.deleteOne({ _id: request.body.id });
-
-  if (!result.ok) throw Boom.internal();
+  if (!isUserDeleted) {
+    throw Boom.internal();
+  }
 
   response.status = 200; // OK
 }

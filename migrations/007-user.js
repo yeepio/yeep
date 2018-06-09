@@ -2,11 +2,11 @@ const mongoose = require('mongoose');
 
 exports.up = async function(next) {
   await mongoose.connect(process.env.MONGODB_URI);
-  await mongoose.connection.db.collection('orgs').createIndex(
-    { slug: 1 },
+  await mongoose.connection.db.collection('users').createIndex(
+    { 'emails.address': 1 },
     {
       unique: true,
-      name: 'slug_uidx',
+      name: 'email_address_uidx',
       collation: { locale: 'en', strength: 2 },
     },
     next
@@ -15,5 +15,7 @@ exports.up = async function(next) {
 
 exports.down = async function(next) {
   await mongoose.connect(process.env.MONGODB_URI);
-  await mongoose.connection.db.collection('orgs').dropIndex('slug_uidx', next);
+  await mongoose.connection.db
+    .collection('users')
+    .dropIndex('email_address_uidx', next);
 };

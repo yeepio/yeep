@@ -9,7 +9,7 @@ function createValidationMiddleware(schema, opts = {}) {
       const { error, value } = Joi.validate(request.headers, schema.headers);
 
       if (error) {
-        const boom = Boom.badRequest(error.name);
+        const boom = Boom.badRequest('Invalid request header(s)');
         boom.output.payload.details = error.details;
 
         throw boom;
@@ -25,7 +25,7 @@ function createValidationMiddleware(schema, opts = {}) {
       });
 
       if (error) {
-        const boom = Boom.badRequest(error.name);
+        const boom = Boom.badRequest('Invalid request URL param(s)');
         boom.output.payload.details = error.details;
 
         throw boom;
@@ -42,7 +42,7 @@ function createValidationMiddleware(schema, opts = {}) {
       });
 
       if (error) {
-        const boom = Boom.badRequest(error.name);
+        const boom = Boom.badRequest('Invalid request query param(s)');
         boom.output.payload.details = error.details;
 
         throw boom;
@@ -60,7 +60,7 @@ function createValidationMiddleware(schema, opts = {}) {
       });
 
       if (error) {
-        const boom = Boom.badRequest(error.name);
+        const boom = Boom.badRequest('Invalid request body');
         boom.output.payload.details = error.details;
 
         throw boom;

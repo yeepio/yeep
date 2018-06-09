@@ -37,6 +37,7 @@ orgSchema.index(
   {
     unique: true,
     name: 'org_slug_uidx',
+    collation: { locale: 'en', strength: 2 },
   }
 );
 
