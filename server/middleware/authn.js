@@ -87,9 +87,12 @@ function createAuthnMiddleware({ ignore = false } = {}) {
 
     // augment request object with session data
     request.session = {
+      token: {
+        id: records[0]._id,
+        issuedAt,
+        expiresAt,
+      },
       user: records[0].user,
-      issuedAt,
-      expiresAt,
     };
 
     await next();
