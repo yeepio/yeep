@@ -6,6 +6,7 @@ exports.up = async function(next) {
   await mongoose.connection.db.collection('roles').insertOne(
     {
       name: 'admin',
+      isSystemRole: true,
       permissions: ['yeep.user.write', 'yeep.user.read'],
       createdAt: now,
       updatedAt: now,
