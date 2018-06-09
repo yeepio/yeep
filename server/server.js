@@ -105,4 +105,8 @@ server.setup = async () => {
   app.context.jwt = jwt;
 };
 
+server.getAppContext = () => {
+  return app.context;
+};
+
 export default server;
