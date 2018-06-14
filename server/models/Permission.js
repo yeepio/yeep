@@ -15,6 +15,11 @@ const permissionSchema = new Schema(
       trim: true,
       maxlength: 140,
     },
+    isSystemPermission: {
+      type: Boolean,
+      required: true,
+      default: false,
+    },
   },
   {
     collection: 'permissions',
