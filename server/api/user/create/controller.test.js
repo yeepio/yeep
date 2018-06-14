@@ -138,7 +138,6 @@ describe('api/v1/user.create', () => {
           },
         ],
         orgs: [],
-        roles: [],
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
       }),

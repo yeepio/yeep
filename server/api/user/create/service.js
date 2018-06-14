@@ -49,7 +49,6 @@ async function createUser(
       picture,
       emails: emails,
       orgs: [],
-      roles: [],
     });
 
     return {
@@ -59,7 +58,6 @@ async function createUser(
       picture: user.picture,
       emails: user.emails,
       orgs: user.orgs,
-      roles: user.roles,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
