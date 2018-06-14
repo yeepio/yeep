@@ -14,7 +14,10 @@ const roleSchema = new Schema(
       required: true,
       default: false,
     },
-    permissions: [String],
+    permissions: {
+      type: [String],
+      required: true,
+    },
   },
   {
     collection: 'roles',
