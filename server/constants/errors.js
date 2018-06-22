@@ -39,3 +39,10 @@ export class DuplicateUsernameError extends Error {
     this.code = 10006;
   }
 }
+
+export class DuplicatePermissionError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10007;
+  }
+}
