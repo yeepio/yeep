@@ -6,14 +6,16 @@ exports.up = async function(next) {
   await mongoose.connection.db.collection('permissions').insertMany(
     [
       {
-        _id: 'yeep.user.write',
+        name: 'yeep.user.write',
         description: 'Permission to write (i.e. create, update, delete) users',
+        isSystemPermission: true,
         createdAt: now,
         updatedAt: now,
       },
       {
-        _id: 'yeep.user.read',
+        name: 'yeep.user.read',
         description: 'Permission to read users',
+        isSystemPermission: true,
         createdAt: now,
         updatedAt: now,
       },

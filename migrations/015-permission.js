@@ -2,18 +2,12 @@ const mongoose = require('mongoose');
 
 exports.up = async function(next) {
   await mongoose.connect(process.env.MONGODB_URI);
-  const now = new Date();
-  await mongoose.connection.db.collection('permissions').updateMany(
+  await mongoose.connection.db.collection('permissions').createIndex(
+    { scope: 1, name: 1 },
     {
-      _id: {
-        $in: ['yeep.user.write', 'yeep.user.read'],
-      },
-    },
-    {
-      $set: {
-        isSystemPermission: true,
-        updatedAt: now,
-      },
+      unique: true,
+      name: 'permission_uidx',
+      collation: { locale: 'en', strength: 2 },
     },
     next
   );
@@ -21,17 +15,7 @@ exports.up = async function(next) {
 
 exports.down = async function(next) {
   await mongoose.connect(process.env.MONGODB_URI);
-  await mongoose.connection.db.collection('permissions').updateMany(
-    {
-      _id: {
-        $in: ['yeep.user.write', 'yeep.user.read'],
-      },
-    },
-    {
-      $unset: {
-        isSystemPermission: '',
-      },
-    },
-    next
-  );
+  await mongoose.connection.db
+    .collection('permissions')
+    .dropIndex('permission_uidx', next);
 };

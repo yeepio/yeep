@@ -11,9 +11,8 @@ const permissionAssignmentSchema = new Schema(
       required: false, // org missing implies global assigment
     },
     permission: {
-      type: String,
+      type: Schema.Types.ObjectId,
       required: true,
-      trim: true,
     },
     resource: {
       type: Schema.Types.Mixed,
