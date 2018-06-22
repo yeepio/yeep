@@ -46,3 +46,17 @@ export class DuplicatePermissionError extends Error {
     this.code = 10007;
   }
 }
+
+export class PermissionNotFoundError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10008;
+  }
+}
+
+export class ImmutablePermissionError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10009;
+  }
+}
