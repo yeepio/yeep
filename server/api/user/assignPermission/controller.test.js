@@ -7,6 +7,7 @@ import createPermission from '../../permission/create/service';
 import deletePermission from '../../permission/delete/service';
 import createOrg from '../../org/create/service';
 import deleteOrg from '../../org/delete/service';
+import deletePermissionAssignment from '../revokePermission/service';
 
 describe('api/v1/user.assignPermission', () => {
   let ctx;
@@ -369,5 +370,60 @@ describe('api/v1/user.assignPermission', () => {
 
     const isOtherOrgDeleted = await deleteOrg(ctx.db, otherOrg);
     expect(isOtherOrgDeleted).toBe(true);
+  });
+
+  test('creates permission assignment and returns expected response', async () => {
+    const user = await createUser(ctx.db, {
+      username: 'wile',
+      password: 'catch-the-b1rd$',
+      fullName: 'Wile E. Coyote',
+      picture: 'https://www.acme.com/pictures/coyote.png',
+      emails: [
+        {
+          address: 'coyote@acme.com',
+          isVerified: true,
+          isPrimary: true,
+        },
+      ],
+    });
+
+    const org = await createOrg(ctx.db, {
+      name: 'Acme Inc',
+      slug: 'acme',
+    });
+
+    const permission = await createPermission(ctx.db, {
+      name: 'yeep.permission.test',
+      description: 'Test permission',
+      scope: [org.id],
+    });
+
+    const res = await request(server)
+      .post('/api/v1/user.assignPermission')
+      .send({
+        userId: user.id,
+        permissionId: permission.id,
+        orgId: org.id,
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: true,
+    });
+
+    const isPermissionAssignmentDeleted = await deletePermissionAssignment(
+      ctx.db,
+      res.body.permissionAssignment
+    );
+    expect(isPermissionAssignmentDeleted).toBe(true);
+
+    const isUserDeleted = await deleteUser(ctx.db, user);
+    expect(isUserDeleted).toBe(true);
+
+    const isPermissionDeleted = await deletePermission(ctx.db, permission);
+    expect(isPermissionDeleted).toBe(true);
+
+    const isOrgDeleted = await deleteOrg(ctx.db, org);
+    expect(isOrgDeleted).toBe(true);
   });
 });
