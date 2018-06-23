@@ -45,7 +45,7 @@ async function createPermissionAssignment(
   }
 
   // ensure permission scope includes org
-  if (permission.scope && !permission.scope.includes(orgId)) {
+  if (permission.scope && permission.scope.every((e) => !e.equals(orgId))) {
     throw new InvalidPermissionAssignmentError(
       'Permission cannot be assigned to the designated org'
     );
@@ -61,7 +61,7 @@ async function createPermissionAssignment(
     });
 
     return {
-      id: permissionAssignment._id,
+      id: permissionAssignment.id,
       userId: permissionAssignment.user,
       orgId: permissionAssignment.org,
       permissionId: permissionAssignment.permission,
