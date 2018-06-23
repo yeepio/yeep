@@ -2,7 +2,7 @@ import Joi from 'joi';
 import compose from 'koa-compose';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { createValidationMiddleware } from '../../../middleware/validation';
-import { DuplicateOrgError } from '../../../constants/errors';
+import createOrg from './service';
 
 const validation = createValidationMiddleware({
   body: {
@@ -22,29 +22,12 @@ const validation = createValidationMiddleware({
 });
 
 async function handler({ request, response, db }) {
-  const OrgModel = db.model('Org');
+  const org = await createOrg(db, request.body);
 
-  // create org in db
-  try {
-    const org = await OrgModel.create(request.body);
-
-    response.status = 200; // OK
-    response.body = {
-      org: {
-        id: org._id,
-        name: org.name,
-        slug: org.slug,
-        createdAt: org.createdAt,
-        updatedAt: org.updatedAt,
-      },
-    };
-  } catch (err) {
-    if (err.code === 11000) {
-      throw new DuplicateOrgError(`Org "${request.body.slug}" already exists`);
-    }
-
-    throw err;
-  }
+  response.status = 200; // OK
+  response.body = {
+    org,
+  };
 }
 
 export default compose([packJSONRPC, validation, handler]);

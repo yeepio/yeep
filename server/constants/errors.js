@@ -60,3 +60,24 @@ export class ImmutablePermissionError extends Error {
     this.code = 10009;
   }
 }
+
+export class DuplicatePermissionAssignmentError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10010;
+  }
+}
+
+export class OrgNotFoundError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10011;
+  }
+}
+
+export class InvalidPermissionAssignmentError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10011;
+  }
+}
