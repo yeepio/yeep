@@ -33,9 +33,7 @@ describe('api/v1/permission.delete', () => {
   });
 
   test('returns error when permission is system-defined', async () => {
-    const permission = await ctx.db
-      .model('Permission')
-      .findOne({ isSystemPermission: true });
+    const permission = await ctx.db.model('Permission').findOne({ isSystemPermission: true });
 
     const res = await request(server)
       .post('/api/v1/permission.delete')
@@ -48,9 +46,7 @@ describe('api/v1/permission.delete', () => {
       ok: false,
       error: {
         code: 10009,
-        message: `Permission ${
-          permission.id
-        } is a system permission and thus cannot be deleted`,
+        message: `Permission ${permission.id} is a system permission and thus cannot be deleted`,
       },
     });
   });

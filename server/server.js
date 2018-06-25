@@ -51,10 +51,7 @@ app.use(
   cors({
     origin: (ctx) => {
       const origin = ctx.get('Origin');
-      if (
-        origin.endsWith('.yeep.io') ||
-        process.env.NODE_ENV !== 'production'
-      ) {
+      if (origin.endsWith('.yeep.io') || process.env.NODE_ENV !== 'production') {
         return origin;
       }
 

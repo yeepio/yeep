@@ -29,10 +29,7 @@ const validation = createValidationMiddleware({
 });
 
 async function handler({ request, response, db }) {
-  const permissionAssignment = await createPermissionAssignment(
-    db,
-    request.body
-  );
+  const permissionAssignment = await createPermissionAssignment(db, request.body);
 
   response.status = 200; // OK
   response.body = {

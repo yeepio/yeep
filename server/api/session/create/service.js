@@ -1,8 +1,5 @@
 import addSeconds from 'date-fns/add_seconds';
-import {
-  UserNotFoundError,
-  InvalidCredentialsError,
-} from '../../../constants/errors';
+import { UserNotFoundError, InvalidCredentialsError } from '../../../constants/errors';
 
 async function createSession(db, jwt, { username, password }) {
   const UserModel = db.model('User');
@@ -18,16 +15,10 @@ async function createSession(db, jwt, { username, password }) {
   }
 
   // verify password
-  const digestedPassword = await UserModel.digestPassword(
-    password,
-    user.salt,
-    user.iterationCount
-  );
+  const digestedPassword = await UserModel.digestPassword(password, user.salt, user.iterationCount);
 
   if (user.password.compare(digestedPassword) !== 0) {
-    throw new InvalidCredentialsError(
-      'Invalid username or password credentials'
-    );
+    throw new InvalidCredentialsError('Invalid username or password credentials');
   }
 
   // set expiration time

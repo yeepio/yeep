@@ -15,10 +15,7 @@ const validation = createValidationMiddleware({
 });
 
 async function handler({ request, response, db }) {
-  const isPermissionAssignmentDeleted = await deletePermissionAssignment(
-    db,
-    request.body
-  );
+  const isPermissionAssignmentDeleted = await deletePermissionAssignment(db, request.body);
 
   if (!isPermissionAssignmentDeleted) {
     throw Boom.internal();

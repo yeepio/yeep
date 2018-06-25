@@ -34,8 +34,7 @@ describe('api/v1/permission.create', () => {
       ok: false,
       error: {
         code: 10007,
-        message:
-          'Permission "yeep.permission.test.a" with global scope already exists',
+        message: 'Permission "yeep.permission.test.a" with global scope already exists',
       },
     });
 
@@ -63,8 +62,7 @@ describe('api/v1/permission.create', () => {
       ok: false,
       error: {
         code: 10007,
-        message:
-          'Permission "yeep.permission.test.b" with specified scope already exists',
+        message: 'Permission "yeep.permission.test.b" with specified scope already exists',
       },
     });
 

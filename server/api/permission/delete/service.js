@@ -1,7 +1,4 @@
-import {
-  PermissionNotFoundError,
-  ImmutablePermissionError,
-} from '../../../constants/errors';
+import { PermissionNotFoundError, ImmutablePermissionError } from '../../../constants/errors';
 
 async function deletePermission(db, { id }) {
   const PermissionModel = db.model('Permission');

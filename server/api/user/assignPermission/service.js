@@ -6,10 +6,7 @@ import {
   InvalidPermissionAssignmentError,
 } from '../../../constants/errors';
 
-async function createPermissionAssignment(
-  db,
-  { userId, orgId, permissionId, resourceId }
-) {
+async function createPermissionAssignment(db, { userId, orgId, permissionId, resourceId }) {
   const UserModel = db.model('User');
   const OrgModel = db.model('Org');
   const PermissionModel = db.model('Permission');
