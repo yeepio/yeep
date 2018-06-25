@@ -1,7 +1,7 @@
 import addSeconds from 'date-fns/add_seconds';
 import { UserNotFoundError, InvalidCredentialsError } from '../../../constants/errors';
 
-async function createSession(db, jwt, { username, password }) {
+async function createSessionToken(db, jwt, { username, password }) {
   const UserModel = db.model('User');
 
   // retrieve user from db
@@ -46,9 +46,10 @@ async function createSession(db, jwt, { username, password }) {
   );
 
   return {
+    id: token._id,
     token: jwtToken,
     expiresIn: expiresIn * 1000, // convert to milliseconds
   };
 }
 
-export default createSession;
+export default createSessionToken;

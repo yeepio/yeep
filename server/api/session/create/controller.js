@@ -3,7 +3,7 @@ import Joi from 'joi';
 import compose from 'koa-compose';
 import { createValidationMiddleware } from '../../../middleware/validation';
 import packJSONRPC from '../../../middleware/packJSONRPC';
-import createSession from './service';
+import createSessionToken from './service';
 
 const validation = createValidationMiddleware({
   body: {
@@ -23,7 +23,7 @@ const validation = createValidationMiddleware({
 });
 
 async function handler({ request, response, db, jwt }) {
-  const { token, expiresIn } = await createSession(db, jwt, request.body);
+  const { token, expiresIn } = await createSessionToken(db, jwt, request.body);
 
   response.status = 200; // OK
   response.body = {
