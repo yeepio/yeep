@@ -2,7 +2,15 @@ import Joi from 'joi';
 import compose from 'koa-compose';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { createValidationMiddleware } from '../../../middleware/validation';
+import createAuthnMiddleware from '../../../middleware/authn';
+import createAuthzMiddleware from '../../../middleware/authz';
 import createPermission from './service';
+
+const authn = createAuthnMiddleware();
+const authz = createAuthzMiddleware({
+  permissions: ['yeep.permission.write'],
+  org: (request) => request.body.scope,
+});
 
 const validation = createValidationMiddleware({
   body: {
@@ -17,15 +25,9 @@ const validation = createValidationMiddleware({
       .trim()
       .max(140)
       .optional(),
-    scope: Joi.array()
-      .items(
-        Joi.string()
-          .length(24)
-          .hex()
-      )
-      .min(1)
-      .max(10)
-      .unique()
+    scope: Joi.string()
+      .length(24)
+      .hex()
       .optional(),
   },
 });
@@ -39,4 +41,4 @@ async function handler({ request, response, db }) {
   };
 }
 
-export default compose([packJSONRPC, validation, handler]);
+export default compose([packJSONRPC, authn, validation, authz, handler]);

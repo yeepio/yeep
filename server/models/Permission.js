@@ -20,7 +20,7 @@ const permissionSchema = new Schema(
       required: true,
       default: false,
     },
-    scope: [Schema.Types.ObjectId],
+    scope: Schema.Types.ObjectId,
   },
   {
     collection: 'permissions',

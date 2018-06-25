@@ -81,3 +81,10 @@ export class InvalidPermissionAssignmentError extends Error {
     this.code = 10011;
   }
 }
+
+export class AuthorizationError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10012;
+  }
+}
