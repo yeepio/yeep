@@ -1,3 +1,4 @@
+import omitBy from 'lodash/fp/omitBy';
 import {
   DuplicatePermissionAssignmentError,
   UserNotFoundError,
@@ -5,6 +6,8 @@ import {
   PermissionNotFoundError,
   InvalidPermissionAssignmentError,
 } from '../../../constants/errors';
+
+const omitUndefinedOptionalValues = omitBy((v) => v === undefined);
 
 async function createPermissionAssignment(db, { userId, orgId, permissionId, resourceId }) {
   const UserModel = db.model('User');
@@ -50,12 +53,14 @@ async function createPermissionAssignment(db, { userId, orgId, permissionId, res
 
   // create permission assignment in db
   try {
-    const permissionAssignment = await PermissionAssignmentModel.create({
-      user: userId,
-      org: orgId,
-      permission: permissionId,
-      resource: resourceId,
-    });
+    const permissionAssignment = await PermissionAssignmentModel.create(
+      omitUndefinedOptionalValues({
+        user: userId,
+        org: orgId,
+        permission: permissionId,
+        resource: resourceId,
+      })
+    );
 
     return {
       id: permissionAssignment.id,
