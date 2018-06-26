@@ -83,15 +83,9 @@ function createAuthzMiddleware({ org: getOrg, permissions = [] }) {
       },
     ]).exec();
 
-    // check if permission requirements are met
-    if (records.length < permissions.length) {
-      throw new AuthorizationError(
-        `User "${
-          request.session.user.username
-        }" does not have sufficient permissions to access this resource`
-      );
-    }
+    // console.log(JSON.stringify(records, null, 2));
 
+    // check if permission requirements are met
     const set = new Set(records.map((record) => record.name));
     permissions.forEach((permission) => {
       if (!set.has(permission)) {
