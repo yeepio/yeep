@@ -57,7 +57,7 @@ describe('api/v1/permission.delete', () => {
       description: 'This is a test',
     });
 
-    let res = await request(server)
+    const res = await request(server)
       .post('/api/v1/permission.delete')
       .send({
         id: permission.id,

@@ -44,10 +44,10 @@ async function createPermissionAssignment(db, { userId, orgId, permissionId, res
     throw new PermissionNotFoundError('Permission does not exist');
   }
 
-  // ensure permission scope includes org
-  if (permission.scope && permission.scope.every((e) => !e.equals(orgId))) {
+  // ensure permission scope matches org
+  if (permission.scope && !permission.scope.equals(orgId)) {
     throw new InvalidPermissionAssignmentError(
-      'Permission cannot be assigned to the designated org'
+      `Permission ${permission.id} cannot be assigned to the designated org`
     );
   }
 
@@ -72,7 +72,7 @@ async function createPermissionAssignment(db, { userId, orgId, permissionId, res
   } catch (err) {
     if (err.code === 11000) {
       throw new DuplicatePermissionAssignmentError(
-        'Permission already assigned to the designated user'
+        `Permission ${permission.id} already assigned to the designated user`
       );
     }
 

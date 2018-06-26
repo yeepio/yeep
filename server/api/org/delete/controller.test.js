@@ -1,11 +1,16 @@
 /* eslint-env jest */
 import request from 'supertest';
 import server from '../../../server';
+import createOrg from '../create/service';
 
 describe('api/v1/org.delete', () => {
+  let ctx;
+
   beforeAll(async () => {
     await server.setup();
+    ctx = server.getAppContext();
   });
+
   afterAll(async () => {
     await server.teardown();
   });
@@ -105,23 +110,15 @@ describe('api/v1/org.delete', () => {
   });
 
   test('deletes org and returns expected response', async () => {
-    let res = await request(server)
-      .post('/api/v1/org.create')
-      .send({
-        name: 'ACME Inc.',
-        slug: 'acme',
-      });
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual(
-      expect.objectContaining({
-        ok: true,
-      })
-    );
+    const org = await createOrg(ctx.db, {
+      name: 'ACME Inc.',
+      slug: 'acme',
+    });
 
-    res = await request(server)
+    const res = await request(server)
       .post('/api/v1/org.delete')
       .send({
-        id: res.body.org.id,
+        id: org.id,
       });
     expect(res.status).toBe(200);
     expect(res.body).toEqual(

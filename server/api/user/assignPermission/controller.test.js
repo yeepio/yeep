@@ -15,9 +15,61 @@ describe('api/v1/user.assignPermission', () => {
   beforeAll(async () => {
     await server.setup();
     ctx = server.getAppContext();
+
+    ctx.org = await createOrg(ctx.db, {
+      name: 'Acme Inc',
+      slug: 'acme',
+    });
+
+    ctx.user = await createUser(ctx.db, {
+      username: 'wile',
+      password: 'catch-the-b1rd$',
+      fullName: 'Wile E. Coyote',
+      picture: 'https://www.acme.com/pictures/coyote.png',
+      emails: [
+        {
+          address: 'coyote@acme.com',
+          isVerified: true,
+          isPrimary: true,
+        },
+      ],
+    });
+
+    ctx.permission = await createPermission(ctx.db, {
+      name: 'yeep.permission.test',
+      description: 'Test permission',
+      scope: ctx.org.id,
+    });
+
+    ctx.otherOrg = await createOrg(ctx.db, {
+      name: 'Speak Riddles Old Man Ltd',
+      slug: 'speakriddles',
+    });
+
+    // const PermissionModel = ctx.db.model('Permission');
+    // const permission = await PermissionModel.findOne({
+    //   name: 'yeep.permission.write',
+    //   scope: { $exists: false },
+    // });
+    // ctx.permissionAssignment = await createPermissionAssignment(ctx.db, {
+    //   userId: ctx.user.id,
+    //   // orgId: ctx.org.id,
+    //   permissionId: permission.id,
+    // });
+
+    // ctx.session = await createSessionToken(ctx.db, ctx.jwt, {
+    //   username: 'wile',
+    //   password: 'catch-the-b1rd$',
+    // });
   });
 
   afterAll(async () => {
+    // await destroySessionToken(ctx.db, ctx.session);
+    // await deletePermissionAssignment(ctx.db, ctx.permissionAssignment);
+    await deleteOrg(ctx.db, ctx.org);
+    await deleteOrg(ctx.db, ctx.otherOrg);
+    await deleteUser(ctx.db, ctx.user);
+    await deletePermission(ctx.db, ctx.permission);
     await server.teardown();
   });
 
@@ -262,8 +314,8 @@ describe('api/v1/user.assignPermission', () => {
     const res = await request(server)
       .post('/api/v1/user.assignPermission')
       .send({
-        userId: '507f1f77bcf86cd799439011',
-        permissionId: '507f1f77bcf86cd799439013',
+        userId: '507f1f77bcf86cd799439011', // some random objectid
+        permissionId: ctx.permission.id,
       });
 
     expect(res.status).toBe(200);
@@ -277,25 +329,11 @@ describe('api/v1/user.assignPermission', () => {
   });
 
   test('returns error when permission does not exist', async () => {
-    const user = await createUser(ctx.db, {
-      username: 'wile',
-      password: 'catch-the-b1rd$',
-      fullName: 'Wile E. Coyote',
-      picture: 'https://www.acme.com/pictures/coyote.png',
-      emails: [
-        {
-          address: 'coyote@acme.com',
-          isVerified: true,
-          isPrimary: true,
-        },
-      ],
-    });
-
     const res = await request(server)
       .post('/api/v1/user.assignPermission')
       .send({
-        userId: user.id,
-        permissionId: '507f1f77bcf86cd799439013',
+        userId: ctx.user.id,
+        permissionId: '507f1f77bcf86cd799439013', // some random objectid
       });
 
     expect(res.status).toBe(200);
@@ -306,48 +344,15 @@ describe('api/v1/user.assignPermission', () => {
         message: 'Permission does not exist',
       },
     });
-
-    const isUserDeleted = await deleteUser(ctx.db, user);
-    expect(isUserDeleted).toBe(true);
   });
 
-  test('returns error when permission scope does not include the designated org', async () => {
-    const user = await createUser(ctx.db, {
-      username: 'wile',
-      password: 'catch-the-b1rd$',
-      fullName: 'Wile E. Coyote',
-      picture: 'https://www.acme.com/pictures/coyote.png',
-      emails: [
-        {
-          address: 'coyote@acme.com',
-          isVerified: true,
-          isPrimary: true,
-        },
-      ],
-    });
-
-    const org = await createOrg(ctx.db, {
-      name: 'Acme Inc',
-      slug: 'acme',
-    });
-
-    const otherOrg = await createOrg(ctx.db, {
-      name: 'Speak Riddles Old Man Ltd',
-      slug: 'speakriddles',
-    });
-
-    const permission = await createPermission(ctx.db, {
-      name: 'yeep.permission.test',
-      description: 'Test permission',
-      scope: [org.id],
-    });
-
+  test('returns error when permission scope does not match the designated org', async () => {
     const res = await request(server)
       .post('/api/v1/user.assignPermission')
       .send({
-        userId: user.id,
-        permissionId: permission.id,
-        orgId: otherOrg.id,
+        userId: ctx.user.id,
+        permissionId: ctx.permission.id,
+        orgId: ctx.otherOrg.id,
       });
 
     expect(res.status).toBe(200);
@@ -355,55 +360,18 @@ describe('api/v1/user.assignPermission', () => {
       ok: false,
       error: {
         code: 10011,
-        message: 'Permission cannot be assigned to the designated org',
+        message: `Permission ${ctx.permission.id} cannot be assigned to the designated org`,
       },
     });
-
-    const isUserDeleted = await deleteUser(ctx.db, user);
-    expect(isUserDeleted).toBe(true);
-
-    const isPermissionDeleted = await deletePermission(ctx.db, permission);
-    expect(isPermissionDeleted).toBe(true);
-
-    const isOrgDeleted = await deleteOrg(ctx.db, org);
-    expect(isOrgDeleted).toBe(true);
-
-    const isOtherOrgDeleted = await deleteOrg(ctx.db, otherOrg);
-    expect(isOtherOrgDeleted).toBe(true);
   });
 
   test('creates permission assignment and returns expected response', async () => {
-    const user = await createUser(ctx.db, {
-      username: 'wile',
-      password: 'catch-the-b1rd$',
-      fullName: 'Wile E. Coyote',
-      picture: 'https://www.acme.com/pictures/coyote.png',
-      emails: [
-        {
-          address: 'coyote@acme.com',
-          isVerified: true,
-          isPrimary: true,
-        },
-      ],
-    });
-
-    const org = await createOrg(ctx.db, {
-      name: 'Acme Inc',
-      slug: 'acme',
-    });
-
-    const permission = await createPermission(ctx.db, {
-      name: 'yeep.permission.test',
-      description: 'Test permission',
-      scope: [org.id],
-    });
-
     const res = await request(server)
       .post('/api/v1/user.assignPermission')
       .send({
-        userId: user.id,
-        permissionId: permission.id,
-        orgId: org.id,
+        userId: ctx.user.id,
+        permissionId: ctx.permission.id,
+        orgId: ctx.org.id,
       });
 
     expect(res.status).toBe(200);
@@ -416,14 +384,5 @@ describe('api/v1/user.assignPermission', () => {
       res.body.permissionAssignment
     );
     expect(isPermissionAssignmentDeleted).toBe(true);
-
-    const isUserDeleted = await deleteUser(ctx.db, user);
-    expect(isUserDeleted).toBe(true);
-
-    const isPermissionDeleted = await deletePermission(ctx.db, permission);
-    expect(isPermissionDeleted).toBe(true);
-
-    const isOrgDeleted = await deleteOrg(ctx.db, org);
-    expect(isOrgDeleted).toBe(true);
   });
 });

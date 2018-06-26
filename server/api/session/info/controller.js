@@ -5,7 +5,6 @@ import packJSONRPC from '../../../middleware/packJSONRPC';
 const authn = createAuthnMiddleware();
 
 async function handler({ request, response }) {
-  console.log(request.session);
   response.status = 200; // OK
   response.body = request.session;
 }

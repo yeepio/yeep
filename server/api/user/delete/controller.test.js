@@ -1,11 +1,16 @@
 /* eslint-env jest */
 import request from 'supertest';
 import server from '../../../server';
+import createUser from '../create/service';
 
 describe('api/v1/user.delete', () => {
+  let ctx;
+
   beforeAll(async () => {
     await server.setup();
+    ctx = server.getAppContext();
   });
+
   afterAll(async () => {
     await server.teardown();
   });
@@ -105,31 +110,24 @@ describe('api/v1/user.delete', () => {
   });
 
   test('deletes user and returns expected response', async () => {
-    let res = await request(server)
-      .post('/api/v1/user.create')
-      .send({
-        username: 'Wile',
-        password: 'catch-the-b1rd$',
-        fullName: 'Wile E. Coyote',
-        emails: [
-          {
-            address: 'coyote@acme.com',
-            isVerified: true,
-            isPrimary: true,
-          },
-        ],
-      });
-
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: true,
+    const user = await createUser(ctx.db, {
+      username: 'wile',
+      password: 'catch-the-b1rd$',
+      fullName: 'Wile E. Coyote',
+      picture: 'https://www.acme.com/pictures/coyote.png',
+      emails: [
+        {
+          address: 'coyote@acme.com',
+          isVerified: true,
+          isPrimary: true,
+        },
+      ],
     });
 
-    const { id: userId } = res.body.user;
-
-    res = await request(server)
+    const res = await request(server)
       .post('/api/v1/user.delete')
-      .send({ id: userId });
+      .send({ id: user.id });
+
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
       ok: true,

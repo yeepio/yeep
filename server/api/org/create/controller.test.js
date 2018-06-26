@@ -1,10 +1,15 @@
 /* eslint-env jest */
 import request from 'supertest';
 import server from '../../../server';
+import deleteOrg from '../delete/service';
+import createOrg from './service';
 
 describe('api/v1/org.create', () => {
+  let ctx;
+
   beforeAll(async () => {
     await server.setup();
+    ctx = server.getAppContext();
   });
 
   afterAll(async () => {
@@ -133,7 +138,7 @@ describe('api/v1/org.create', () => {
   });
 
   test('creates new org and returns expected response', async () => {
-    let res = await request(server)
+    const res = await request(server)
       .post('/api/v1/org.create')
       .send({
         name: 'ACME Inc.',
@@ -153,29 +158,17 @@ describe('api/v1/org.create', () => {
       }),
     });
 
-    res = await request(server)
-      .post('/api/v1/org.delete')
-      .send({
-        id: res.body.org.id,
-      });
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: true,
-    });
+    const isOrgDeleted = await deleteOrg(ctx.db, res.body.org);
+    expect(isOrgDeleted).toBe(true);
   });
 
   test('returns error on duplicate org slug', async () => {
-    let res = await request(server)
-      .post('/api/v1/org.create')
-      .send({
-        name: 'ACME Inc.',
-        slug: 'acme',
-      });
-    expect(res.status).toBe(200);
+    const org = await createOrg(ctx.db, {
+      name: 'ACME Inc.',
+      slug: 'acme',
+    });
 
-    const id = res.body.org.id;
-
-    res = await request(server)
+    const res = await request(server)
       .post('/api/v1/org.create')
       .send({
         name: 'ACME S.A.',
@@ -189,12 +182,7 @@ describe('api/v1/org.create', () => {
       },
     });
 
-    res = await request(server)
-      .post('/api/v1/org.delete')
-      .send({ id });
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: true,
-    });
+    const isOrgDeleted = await deleteOrg(ctx.db, org);
+    expect(isOrgDeleted).toBe(true);
   });
 });

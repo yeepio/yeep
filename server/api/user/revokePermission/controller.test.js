@@ -15,9 +15,37 @@ describe('api/v1/user.revokePermission', () => {
   beforeAll(async () => {
     await server.setup();
     ctx = server.getAppContext();
+
+    ctx.org = await createOrg(ctx.db, {
+      name: 'Acme Inc',
+      slug: 'acme',
+    });
+
+    ctx.user = await createUser(ctx.db, {
+      username: 'wile',
+      password: 'catch-the-b1rd$',
+      fullName: 'Wile E. Coyote',
+      picture: 'https://www.acme.com/pictures/coyote.png',
+      emails: [
+        {
+          address: 'coyote@acme.com',
+          isVerified: true,
+          isPrimary: true,
+        },
+      ],
+    });
+
+    ctx.permission = await createPermission(ctx.db, {
+      name: 'yeep.permission.test',
+      description: 'Test permission',
+      scope: ctx.org.id,
+    });
   });
 
   afterAll(async () => {
+    await deleteOrg(ctx.db, ctx.org);
+    await deleteUser(ctx.db, ctx.user);
+    await deletePermission(ctx.db, ctx.permission);
     await server.teardown();
   });
 
@@ -116,52 +144,19 @@ describe('api/v1/user.revokePermission', () => {
   });
 
   test('deletes permission assignment and returns expected response', async () => {
-    const user = await createUser(ctx.db, {
-      username: 'wile',
-      password: 'catch-the-b1rd$',
-      fullName: 'Wile E. Coyote',
-      picture: 'https://www.acme.com/pictures/coyote.png',
-      emails: [
-        {
-          address: 'coyote@acme.com',
-          isVerified: true,
-          isPrimary: true,
-        },
-      ],
-    });
-
-    const org = await createOrg(ctx.db, {
-      name: 'Acme Inc',
-      slug: 'acme',
-    });
-
-    const permission = await createPermission(ctx.db, {
-      name: 'yeep.permission.test',
-      description: 'Test permission',
-      scope: [org.id],
-    });
-
     const permissionAssignment = await createPermissionAssignment(ctx.db, {
-      userId: user.id,
-      orgId: org.id,
-      permissionId: permission.id,
+      userId: ctx.user.id,
+      orgId: ctx.org.id,
+      permissionId: ctx.permission.id,
     });
 
     const res = await request(server)
       .post('/api/v1/user.revokePermission')
       .send({ id: permissionAssignment.id });
+
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
       ok: true,
     });
-
-    const isUserDeleted = await deleteUser(ctx.db, user);
-    expect(isUserDeleted).toBe(true);
-
-    const isPermissionDeleted = await deletePermission(ctx.db, permission);
-    expect(isPermissionDeleted).toBe(true);
-
-    const isOrgDeleted = await deleteOrg(ctx.db, org);
-    expect(isOrgDeleted).toBe(true);
   });
 });

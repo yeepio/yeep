@@ -1,10 +1,15 @@
 /* eslint-env jest */
 import request from 'supertest';
 import server from '../../../server';
+import deleteUser from '../delete/service';
+import createUser from './service';
 
 describe('api/v1/user.create', () => {
+  let ctx;
+
   beforeAll(async () => {
     await server.setup();
+    ctx = server.getAppContext();
   });
 
   afterAll(async () => {
@@ -108,7 +113,7 @@ describe('api/v1/user.create', () => {
   });
 
   test('creates new user and returns expected response', async () => {
-    let res = await request(server)
+    const res = await request(server)
       .post('/api/v1/user.create')
       .send({
         username: 'Wile',
@@ -143,40 +148,26 @@ describe('api/v1/user.create', () => {
       }),
     });
 
-    res = await request(server)
-      .post('/api/v1/user.delete')
-      .send({
-        id: res.body.user.id,
-      });
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: true,
-    });
+    const isUserDeleted = await deleteUser(ctx.db, res.body.user);
+    expect(isUserDeleted).toBe(true);
   });
 
   test('returns error on duplicate username', async () => {
-    let res = await request(server)
-      .post('/api/v1/user.create')
-      .send({
-        username: 'Wile',
-        password: 'catch-the-b1rd$',
-        fullName: 'Wile E. Coyote',
-        emails: [
-          {
-            address: 'coyote@acme.com',
-            isVerified: true,
-            isPrimary: true,
-          },
-        ],
-      });
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: true,
+    const user = await createUser(ctx.db, {
+      username: 'wile',
+      password: 'catch-the-b1rd$',
+      fullName: 'Wile E. Coyote',
+      picture: 'https://www.acme.com/pictures/coyote.png',
+      emails: [
+        {
+          address: 'coyote@acme.com',
+          isVerified: true,
+          isPrimary: true,
+        },
+      ],
     });
 
-    const { id } = res.body.user;
-
-    res = await request(server)
+    const res = await request(server)
       .post('/api/v1/user.create')
       .send({
         username: 'wile',
@@ -199,43 +190,31 @@ describe('api/v1/user.create', () => {
       },
     });
 
-    res = await request(server)
-      .post('/api/v1/user.delete')
-      .send({ id });
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: true,
-    });
+    const isUserDeleted = await deleteUser(ctx.db, user);
+    expect(isUserDeleted).toBe(true);
   });
 
   test('returns error on duplicate email address', async () => {
-    let res = await request(server)
-      .post('/api/v1/user.create')
-      .send({
-        username: 'Wile',
-        password: 'catch-the-b1rd$',
-        fullName: 'Wile E. Coyote',
-        emails: [
-          {
-            address: 'coyote@acme.com',
-            isVerified: true,
-            isPrimary: true,
-          },
-          {
-            address: 'carnivorous@acme.com',
-            isVerified: false,
-            isPrimary: false,
-          },
-        ],
-      });
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: true,
+    const user = await createUser(ctx.db, {
+      username: 'wile',
+      password: 'catch-the-b1rd$',
+      fullName: 'Wile E. Coyote',
+      picture: 'https://www.acme.com/pictures/coyote.png',
+      emails: [
+        {
+          address: 'coyote@acme.com',
+          isVerified: true,
+          isPrimary: true,
+        },
+        {
+          address: 'carnivorous@acme.com',
+          isVerified: false,
+          isPrimary: false,
+        },
+      ],
     });
 
-    const { id } = res.body.user;
-
-    res = await request(server)
+    const res = await request(server)
       .post('/api/v1/user.create')
       .send({
         username: 'roadrunner',
@@ -243,7 +222,7 @@ describe('api/v1/user.create', () => {
         fullName: 'Road Runner',
         emails: [
           {
-            address: 'Carnivorous@acme.com',
+            address: 'Carnivorous@acme.com', // case-insensitive
             isVerified: true,
             isPrimary: true,
           },
@@ -258,12 +237,7 @@ describe('api/v1/user.create', () => {
       },
     });
 
-    res = await request(server)
-      .post('/api/v1/user.delete')
-      .send({ id });
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: true,
-    });
+    const isUserDeleted = await deleteUser(ctx.db, user);
+    expect(isUserDeleted).toBe(true);
   });
 });
