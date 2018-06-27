@@ -189,7 +189,7 @@ describe('authz middleware', () => {
     });
   });
 
-  describe('user has valid permission(s)', () => {
+  describe('user has valid scoped permission(s)', () => {
     beforeAll(async () => {
       ctx.org = await createOrg(ctx.db, {
         name: 'Acme Inc',
@@ -204,6 +204,51 @@ describe('authz middleware', () => {
       ctx.permissionAssignment = await createPermissionAssignment(ctx.db, {
         userId: ctx.user.id,
         orgId: ctx.org.id,
+        permissionId: permission.id,
+      });
+    });
+
+    afterAll(async () => {
+      await deletePermissionAssignment(ctx.db, ctx.permissionAssignment);
+      await deleteOrg(ctx.db, ctx.org);
+    });
+
+    test('calls next as expected', async () => {
+      const authz = createAuthzMiddleware({
+        permissions: ['yeep.permission.write'],
+        org: (request) => request.body.org,
+      });
+
+      const next = jest.fn(() => Promise.resolve());
+      const request = {
+        session: {
+          user: ctx.user,
+        },
+        body: {
+          org: ctx.org.id,
+        },
+      };
+
+      await expect(authz({ request, db: ctx.db }, next)).resolves.toBe();
+      expect(next.mock.calls.length).toBe(1);
+    });
+  });
+
+  describe('user has valid global permission(s)', () => {
+    beforeAll(async () => {
+      ctx.org = await createOrg(ctx.db, {
+        name: 'Acme Inc',
+        slug: 'acme',
+      });
+
+      const PermissionModel = ctx.db.model('Permission');
+      const permission = await PermissionModel.findOne({
+        name: 'yeep.permission.write',
+        scope: { $exists: false },
+      });
+      ctx.permissionAssignment = await createPermissionAssignment(ctx.db, {
+        // note the absence of orgId to mark this as global permission assignment
+        userId: ctx.user.id,
         permissionId: permission.id,
       });
     });
