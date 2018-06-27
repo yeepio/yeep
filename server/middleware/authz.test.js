@@ -232,6 +232,27 @@ describe('authz middleware', () => {
       await expect(authz({ request, db: ctx.db }, next)).resolves.toBe();
       expect(next.mock.calls.length).toBe(1);
     });
+
+    test('throws authorization error when org is undefined in request', async () => {
+      const authz = createAuthzMiddleware({
+        permissions: ['yeep.permission.write'],
+        org: (request) => request.body.org,
+      });
+
+      const next = jest.fn(() => Promise.resolve());
+      const request = {
+        session: {
+          user: ctx.user,
+        },
+        body: {},
+      };
+
+      await expect(authz({ request, db: ctx.db }, next)).rejects.toMatchObject({
+        code: 10012,
+        message:
+          'User "wile" does not have permission "yeep.permission.write" to access this resource',
+      });
+    });
   });
 
   describe('user has valid global permission(s)', () => {
