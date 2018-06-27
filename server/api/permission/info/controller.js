@@ -2,7 +2,15 @@ import Joi from 'joi';
 import compose from 'koa-compose';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { createValidationMiddleware } from '../../../middleware/validation';
+import createAuthnMiddleware from '../../../middleware/authn';
+import createAuthzMiddleware from '../../../middleware/authz';
 import getPermissionInfo from './service';
+
+const authn = createAuthnMiddleware();
+const authz = createAuthzMiddleware({
+  permissions: ['yeep.permission.read'],
+  org: (request) => request.session.permission.scope,
+});
 
 const validation = createValidationMiddleware({
   body: {
@@ -13,13 +21,23 @@ const validation = createValidationMiddleware({
   },
 });
 
-async function handler({ request, response, db }) {
+const customMiddleware = async ({ request, db }, next) => {
   const permission = await getPermissionInfo(db, request.body);
 
+  // augment request object with session data
+  request.session = {
+    ...request.session,
+    permission,
+  };
+
+  await next();
+};
+
+async function handler({ request, response }) {
   response.status = 200; // OK
   response.body = {
-    permission,
+    permission: request.session.permission,
   };
 }
 
-export default compose([packJSONRPC, validation, handler]);
+export default compose([packJSONRPC, authn, validation, customMiddleware, authz, handler]);
