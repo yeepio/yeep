@@ -3,6 +3,10 @@ import request from 'supertest';
 import server from '../../../server';
 import deleteUser from '../delete/service';
 import createUser from './service';
+import deletePermissionAssignment from '../revokePermission/service';
+import destroySessionToken from '../../session/destroy/service';
+import createSessionToken from '../../session/create/service';
+import createPermissionAssignment from '../assignPermission/service';
 
 describe('api/v1/user.create', () => {
   let ctx;
@@ -10,27 +14,60 @@ describe('api/v1/user.create', () => {
   beforeAll(async () => {
     await server.setup();
     ctx = server.getAppContext();
+
+    ctx.user = await createUser(ctx.db, {
+      username: 'wile',
+      password: 'catch-the-b1rd$',
+      fullName: 'Wile E. Coyote',
+      picture: 'https://www.acme.com/pictures/coyote.png',
+      emails: [
+        {
+          address: 'coyote@acme.com',
+          isVerified: true,
+          isPrimary: true,
+        },
+      ],
+    });
+
+    const PermissionModel = ctx.db.model('Permission');
+    const permission = await PermissionModel.findOne({
+      name: 'yeep.user.write',
+      scope: { $exists: false },
+    });
+    ctx.permissionAssignment = await createPermissionAssignment(ctx.db, {
+      userId: ctx.user.id,
+      permissionId: permission.id,
+    });
+
+    ctx.session = await createSessionToken(ctx.db, ctx.jwt, {
+      username: 'wile',
+      password: 'catch-the-b1rd$',
+    });
   });
 
   afterAll(async () => {
+    await destroySessionToken(ctx.db, ctx.session);
+    await deletePermissionAssignment(ctx.db, ctx.permissionAssignment);
+    await deleteUser(ctx.db, ctx.user);
     await server.teardown();
   });
 
   test('returns error when `emails` contains duplicate addresses', async () => {
     const res = await request(server)
       .post('/api/v1/user.create')
+      .set('Authorization', `Bearer ${ctx.session.token}`)
       .send({
-        username: 'wile',
-        password: 'catch-the-b1rd$',
-        fullName: 'Wile E. Coyote',
+        username: 'runner',
+        password: 'fast+furry-ous',
+        fullName: 'Road Runner',
         emails: [
           {
-            address: 'coyote@acme.com',
+            address: 'beep-beep@acme.com',
             isVerified: false,
             isPrimary: false,
           },
           {
-            address: 'coyote@acme.com',
+            address: 'beep-beep@acme.com',
             isVerified: false,
             isPrimary: false,
           },
@@ -53,18 +90,19 @@ describe('api/v1/user.create', () => {
   test('returns error when primary email is not specified', async () => {
     const res = await request(server)
       .post('/api/v1/user.create')
+      .set('Authorization', `Bearer ${ctx.session.token}`)
       .send({
-        username: 'wile',
-        password: 'catch-the-b1rd$',
-        fullName: 'Wile E. Coyote',
+        username: 'runner',
+        password: 'fast+furry-ous',
+        fullName: 'Road Runner',
         emails: [
           {
-            address: 'coyote@acme.com',
+            address: 'beep-beep@acme.com',
             isVerified: false,
             isPrimary: false,
           },
           {
-            address: 'wile@acme.com',
+            address: 'roadrunner@acme.com',
             isVerified: false,
             isPrimary: false,
           },
@@ -84,18 +122,19 @@ describe('api/v1/user.create', () => {
   test('throws error when multiple primary emails are specified', async () => {
     const res = await request(server)
       .post('/api/v1/user.create')
+      .set('Authorization', `Bearer ${ctx.session.token}`)
       .send({
-        username: 'wile',
-        password: 'catch-the-b1rd$',
-        fullName: 'Wile E. Coyote',
+        username: 'runner',
+        password: 'fast+furry-ous',
+        fullName: 'Road Runner',
         emails: [
           {
-            address: 'coyote@acme.com',
+            address: 'beep-beep@acme.com',
             isVerified: false,
             isPrimary: true,
           },
           {
-            address: 'wile@acme.com',
+            address: 'roadrunner@acme.com',
             isVerified: false,
             isPrimary: true,
           },
@@ -115,13 +154,14 @@ describe('api/v1/user.create', () => {
   test('creates new user and returns expected response', async () => {
     const res = await request(server)
       .post('/api/v1/user.create')
+      .set('Authorization', `Bearer ${ctx.session.token}`)
       .send({
-        username: 'Wile',
-        password: 'catch-the-b1rd$',
-        fullName: 'Wile E. Coyote',
+        username: 'runner',
+        password: 'fast+furry-ous',
+        fullName: 'Road Runner',
         emails: [
           {
-            address: 'coyote@acme.com',
+            address: 'beep-beep@acme.com',
             isVerified: true,
             isPrimary: true,
           },
@@ -132,12 +172,12 @@ describe('api/v1/user.create', () => {
       ok: true,
       user: expect.objectContaining({
         id: expect.any(String),
-        username: 'wile',
-        fullName: 'Wile E. Coyote',
+        username: 'runner',
+        fullName: 'Road Runner',
         picture: null,
         emails: [
           {
-            address: 'coyote@acme.com',
+            address: 'beep-beep@acme.com',
             isVerified: true,
             isPrimary: true,
           },
@@ -154,13 +194,13 @@ describe('api/v1/user.create', () => {
 
   test('returns error on duplicate username', async () => {
     const user = await createUser(ctx.db, {
-      username: 'wile',
-      password: 'catch-the-b1rd$',
-      fullName: 'Wile E. Coyote',
-      picture: 'https://www.acme.com/pictures/coyote.png',
+      username: 'runner',
+      password: 'fast+furry-ous',
+      fullName: 'Road Runner',
+      picture: 'https://www.acme.com/pictures/roadrunner.png',
       emails: [
         {
-          address: 'coyote@acme.com',
+          address: 'beep-beep@acme.com',
           isVerified: true,
           isPrimary: true,
         },
@@ -169,13 +209,14 @@ describe('api/v1/user.create', () => {
 
     const res = await request(server)
       .post('/api/v1/user.create')
+      .set('Authorization', `Bearer ${ctx.session.token}`)
       .send({
-        username: 'wile',
-        password: 'play-wolf',
-        fullName: 'Road Runner',
+        username: 'runner',
+        password: 'fast+furry-ous!!',
+        fullName: 'Road Runner Jr.',
         emails: [
           {
-            address: 'beep-beep@acme.com',
+            address: 'roadrunnerjr@acme.com',
             isVerified: true,
             isPrimary: true,
           },
@@ -196,18 +237,18 @@ describe('api/v1/user.create', () => {
 
   test('returns error on duplicate email address', async () => {
     const user = await createUser(ctx.db, {
-      username: 'wile',
-      password: 'catch-the-b1rd$',
-      fullName: 'Wile E. Coyote',
-      picture: 'https://www.acme.com/pictures/coyote.png',
+      username: 'runner',
+      password: 'fast+furry-ous',
+      fullName: 'Road Runner',
+      picture: 'https://www.acme.com/pictures/roadrunner.png',
       emails: [
         {
-          address: 'coyote@acme.com',
+          address: 'beep-beep@acme.com',
           isVerified: true,
           isPrimary: true,
         },
         {
-          address: 'carnivorous@acme.com',
+          address: 'roadrunner@acme.com',
           isVerified: false,
           isPrimary: false,
         },
@@ -216,13 +257,14 @@ describe('api/v1/user.create', () => {
 
     const res = await request(server)
       .post('/api/v1/user.create')
+      .set('Authorization', `Bearer ${ctx.session.token}`)
       .send({
         username: 'roadrunner',
-        password: 'play-wolf',
+        password: 'fast+furry-ous',
         fullName: 'Road Runner',
         emails: [
           {
-            address: 'Carnivorous@acme.com', // case-insensitive
+            address: 'RoadRunner@acme.com', // case-insensitive
             isVerified: true,
             isPrimary: true,
           },
