@@ -13,7 +13,7 @@ async function createPermission(db, { name, description, scope }) {
     });
 
     return {
-      id: permission._id,
+      id: permission.id,
       name: permission.name,
       description: permission.description,
       scope: permission.scope,
