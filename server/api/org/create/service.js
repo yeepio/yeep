@@ -7,7 +7,7 @@ async function createOrg(db, { name, slug }) {
     const org = await OrgModel.create({ name, slug });
 
     return {
-      id: org._id,
+      id: org.id, // as hex string
       name: org.name,
       slug: org.slug,
       createdAt: org.createdAt,

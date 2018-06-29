@@ -9,6 +9,10 @@ import createUser from './service';
 const authn = createAuthnMiddleware();
 const authz = createAuthzMiddleware({
   permissions: ['yeep.user.write'],
+  org: (request) => {
+    const { orgs } = request.body;
+    return orgs.length === 1 ? orgs[0] : null;
+  },
 });
 
 const validation = createValidationMiddleware({
@@ -47,10 +51,10 @@ const validation = createValidationMiddleware({
               .required(),
             isVerified: Joi.boolean()
               .default(false)
-              .required(),
+              .optional(),
             isPrimary: Joi.boolean()
               .default(false)
-              .required(),
+              .optional(),
           })
           .required()
       )
@@ -58,6 +62,18 @@ const validation = createValidationMiddleware({
       .max(10)
       .unique((a, b) => a.address === b.address)
       .required(),
+    orgs: Joi.array()
+      .items(
+        Joi.string()
+          .length(24)
+          .hex()
+      )
+      .min(1)
+      .max(10)
+      .single()
+      .unique()
+      .default([])
+      .optional(),
   },
 });
 

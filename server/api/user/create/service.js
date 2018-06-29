@@ -5,7 +5,7 @@ import {
   DuplicateUsernameError,
 } from '../../../constants/errors';
 
-async function createUser(db, { username, password, fullName, picture, emails }) {
+async function createUser(db, { username, password, fullName, picture, emails, orgs = [] }) {
   const UserModel = db.model('User');
 
   // ensure there is exactly 1 primary email
@@ -34,14 +34,14 @@ async function createUser(db, { username, password, fullName, picture, emails })
       password: digestedPassword,
       salt,
       iterationCount,
-      fullName: fullName,
+      fullName,
       picture,
-      emails: emails,
-      orgs: [],
+      emails,
+      orgs,
     });
 
     return {
-      id: user._id,
+      id: user.id, // as hex string
       username: user.username,
       fullName: user.fullName,
       picture: user.picture,

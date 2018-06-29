@@ -7,6 +7,8 @@ import deletePermissionAssignment from '../revokePermission/service';
 import destroySessionToken from '../../session/destroy/service';
 import createSessionToken from '../../session/create/service';
 import createPermissionAssignment from '../assignPermission/service';
+import createOrg from '../../org/create/service';
+import deleteOrg from '../../org/delete/service';
 
 describe('api/v1/user.create', () => {
   let ctx;
@@ -14,6 +16,11 @@ describe('api/v1/user.create', () => {
   beforeAll(async () => {
     await server.setup();
     ctx = server.getAppContext();
+
+    ctx.org = await createOrg(ctx.db, {
+      name: 'Acme Inc',
+      slug: 'acme',
+    });
 
     ctx.user = await createUser(ctx.db, {
       username: 'wile',
@@ -36,6 +43,7 @@ describe('api/v1/user.create', () => {
     });
     ctx.permissionAssignment = await createPermissionAssignment(ctx.db, {
       userId: ctx.user.id,
+      orgId: ctx.org.id,
       permissionId: permission.id,
     });
 
@@ -49,6 +57,7 @@ describe('api/v1/user.create', () => {
     await destroySessionToken(ctx.db, ctx.session);
     await deletePermissionAssignment(ctx.db, ctx.permissionAssignment);
     await deleteUser(ctx.db, ctx.user);
+    await deleteOrg(ctx.db, ctx.org);
     await server.teardown();
   });
 
@@ -72,6 +81,7 @@ describe('api/v1/user.create', () => {
             isPrimary: false,
           },
         ],
+        orgs: [ctx.org.id],
       });
 
     expect(res.status).toBe(200);
@@ -107,6 +117,7 @@ describe('api/v1/user.create', () => {
             isPrimary: false,
           },
         ],
+        orgs: [ctx.org.id],
       });
 
     expect(res.status).toBe(200);
@@ -139,6 +150,7 @@ describe('api/v1/user.create', () => {
             isPrimary: true,
           },
         ],
+        orgs: [ctx.org.id],
       });
 
     expect(res.status).toBe(200);
@@ -166,6 +178,7 @@ describe('api/v1/user.create', () => {
             isPrimary: true,
           },
         ],
+        orgs: [ctx.org.id],
       });
     expect(res.status).toBe(200);
     expect(res.body).toEqual({
@@ -182,7 +195,7 @@ describe('api/v1/user.create', () => {
             isPrimary: true,
           },
         ],
-        orgs: [],
+        orgs: expect.arrayContaining([ctx.org.id]),
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
       }),
@@ -221,6 +234,7 @@ describe('api/v1/user.create', () => {
             isPrimary: true,
           },
         ],
+        orgs: [ctx.org.id],
       });
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
@@ -269,6 +283,7 @@ describe('api/v1/user.create', () => {
             isPrimary: true,
           },
         ],
+        orgs: [ctx.org.id],
       });
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
@@ -281,5 +296,32 @@ describe('api/v1/user.create', () => {
 
     const isUserDeleted = await deleteUser(ctx.db, user);
     expect(isUserDeleted).toBe(true);
+  });
+
+  test('returns error when creating global user without necessary permission', async () => {
+    const res = await request(server)
+      .post('/api/v1/user.create')
+      .set('Authorization', `Bearer ${ctx.session.token}`)
+      .send({
+        // absense of orgs denotes global user
+        username: 'roadrunner',
+        password: 'fast+furry-ous',
+        fullName: 'Road Runner',
+        emails: [
+          {
+            address: 'RoadRunner@acme.com', // case-insensitive
+            isVerified: true,
+            isPrimary: true,
+          },
+        ],
+      });
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 10012,
+        message: expect.any(String),
+      },
+    });
   });
 });

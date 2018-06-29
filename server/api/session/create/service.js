@@ -46,7 +46,7 @@ async function createSessionToken(db, jwt, { username, password }) {
   );
 
   return {
-    id: token._id,
+    id: token.id, // as hex string
     token: jwtToken,
     expiresIn: expiresIn * 1000, // convert to milliseconds
   };

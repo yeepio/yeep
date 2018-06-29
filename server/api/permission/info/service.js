@@ -14,7 +14,7 @@ async function getPermissionInfo(db, { id }) {
   }
 
   return {
-    id: permission.id,
+    id: permission.id, // as hex string
     name: permission.name,
     description: permission.description,
     scope: permission.scope || null,
