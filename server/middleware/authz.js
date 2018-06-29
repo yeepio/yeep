@@ -3,6 +3,7 @@
 // import isString from 'lodash/isString';
 import has from 'lodash/has';
 import typeOf from 'typeof';
+import { ObjectId } from 'mongodb';
 import { AuthorizationError } from '../constants/errors';
 
 /**
@@ -41,9 +42,9 @@ function createAuthzMiddleware({ org: getOrg, permissions = [] }) {
       {
         $match: {
           $and: [
-            { user: userId },
+            { user: ObjectId(userId) },
             orgId
-              ? { $or: [{ org: orgId }, { org: { $exists: false } }] }
+              ? { $or: [{ org: ObjectId(orgId) }, { org: { $exists: false } }] }
               : { org: { $exists: false } },
           ],
         },
