@@ -6,6 +6,18 @@ import typeOf from 'typeof';
 import { ObjectId } from 'mongodb';
 import { AuthorizationError } from '../constants/errors';
 
+function constructOrgQueryClause(orgId) {
+  if (orgId == null) {
+    return { org: { $exists: false } };
+  }
+
+  if (Array.isArray(orgId)) {
+    return { $or: [{ org: { $in: orgId.map((e) => ObjectId(e)) } }, { org: { $exists: false } }] };
+  }
+
+  return { $or: [{ org: ObjectId(orgId) }, { org: { $exists: false } }] };
+}
+
 /**
  * Creates and returns authorization middleware with the specified options.
  * @param {Object} options
@@ -41,12 +53,7 @@ function createAuthzMiddleware({ org: getOrg, permissions = [] }) {
     const records = await PermissionAssignmentModel.aggregate([
       {
         $match: {
-          $and: [
-            { user: ObjectId(userId) },
-            orgId
-              ? { $or: [{ org: ObjectId(orgId) }, { org: { $exists: false } }] }
-              : { org: { $exists: false } },
-          ],
+          $and: [{ user: ObjectId(userId) }, constructOrgQueryClause(orgId)],
         },
       },
       {
