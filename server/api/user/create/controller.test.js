@@ -12,17 +12,21 @@ import deleteOrg from '../../org/delete/service';
 
 describe('api/v1/user.create', () => {
   let ctx;
+  let org;
+  let requestor;
+  let permissionAssignment;
+  let session;
 
   beforeAll(async () => {
     await server.setup();
     ctx = server.getAppContext();
 
-    ctx.org = await createOrg(ctx.db, {
+    org = await createOrg(ctx.db, {
       name: 'Acme Inc',
       slug: 'acme',
     });
 
-    ctx.user = await createUser(ctx.db, {
+    requestor = await createUser(ctx.db, {
       username: 'wile',
       password: 'catch-the-b1rd$',
       fullName: 'Wile E. Coyote',
@@ -41,30 +45,30 @@ describe('api/v1/user.create', () => {
       name: 'yeep.user.write',
       scope: { $exists: false },
     });
-    ctx.permissionAssignment = await createPermissionAssignment(ctx.db, {
-      userId: ctx.user.id,
-      orgId: ctx.org.id,
+    permissionAssignment = await createPermissionAssignment(ctx.db, {
+      userId: requestor.id,
+      orgId: org.id,
       permissionId: permission.id,
     });
 
-    ctx.session = await createSessionToken(ctx.db, ctx.jwt, {
+    session = await createSessionToken(ctx.db, ctx.jwt, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
   });
 
   afterAll(async () => {
-    await destroySessionToken(ctx.db, ctx.session);
-    await deletePermissionAssignment(ctx.db, ctx.permissionAssignment);
-    await deleteUser(ctx.db, ctx.user);
-    await deleteOrg(ctx.db, ctx.org);
+    await destroySessionToken(ctx.db, session);
+    await deletePermissionAssignment(ctx.db, permissionAssignment);
+    await deleteUser(ctx.db, requestor);
+    await deleteOrg(ctx.db, org);
     await server.teardown();
   });
 
   test('returns error when `emails` contains duplicate addresses', async () => {
     const res = await request(server)
       .post('/api/v1/user.create')
-      .set('Authorization', `Bearer ${ctx.session.token}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         username: 'runner',
         password: 'fast+furry-ous',
@@ -81,7 +85,7 @@ describe('api/v1/user.create', () => {
             isPrimary: false,
           },
         ],
-        orgs: [ctx.org.id],
+        orgs: [org.id],
       });
 
     expect(res.status).toBe(200);
@@ -100,7 +104,7 @@ describe('api/v1/user.create', () => {
   test('returns error when primary email is not specified', async () => {
     const res = await request(server)
       .post('/api/v1/user.create')
-      .set('Authorization', `Bearer ${ctx.session.token}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         username: 'runner',
         password: 'fast+furry-ous',
@@ -117,7 +121,7 @@ describe('api/v1/user.create', () => {
             isPrimary: false,
           },
         ],
-        orgs: [ctx.org.id],
+        orgs: [org.id],
       });
 
     expect(res.status).toBe(200);
@@ -133,7 +137,7 @@ describe('api/v1/user.create', () => {
   test('throws error when multiple primary emails are specified', async () => {
     const res = await request(server)
       .post('/api/v1/user.create')
-      .set('Authorization', `Bearer ${ctx.session.token}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         username: 'runner',
         password: 'fast+furry-ous',
@@ -150,7 +154,7 @@ describe('api/v1/user.create', () => {
             isPrimary: true,
           },
         ],
-        orgs: [ctx.org.id],
+        orgs: [org.id],
       });
 
     expect(res.status).toBe(200);
@@ -166,7 +170,7 @@ describe('api/v1/user.create', () => {
   test('creates new user and returns expected response', async () => {
     const res = await request(server)
       .post('/api/v1/user.create')
-      .set('Authorization', `Bearer ${ctx.session.token}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         username: 'runner',
         password: 'fast+furry-ous',
@@ -178,7 +182,7 @@ describe('api/v1/user.create', () => {
             isPrimary: true,
           },
         ],
-        orgs: [ctx.org.id],
+        orgs: [org.id],
       });
     expect(res.status).toBe(200);
     expect(res.body).toEqual({
@@ -195,7 +199,7 @@ describe('api/v1/user.create', () => {
             isPrimary: true,
           },
         ],
-        orgs: expect.arrayContaining([ctx.org.id]),
+        orgs: expect.arrayContaining([org.id]),
         createdAt: expect.any(String),
         updatedAt: expect.any(String),
       }),
@@ -222,7 +226,7 @@ describe('api/v1/user.create', () => {
 
     const res = await request(server)
       .post('/api/v1/user.create')
-      .set('Authorization', `Bearer ${ctx.session.token}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         username: 'runner',
         password: 'fast+furry-ous!!',
@@ -234,7 +238,7 @@ describe('api/v1/user.create', () => {
             isPrimary: true,
           },
         ],
-        orgs: [ctx.org.id],
+        orgs: [org.id],
       });
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
@@ -271,7 +275,7 @@ describe('api/v1/user.create', () => {
 
     const res = await request(server)
       .post('/api/v1/user.create')
-      .set('Authorization', `Bearer ${ctx.session.token}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         username: 'roadrunner',
         password: 'fast+furry-ous',
@@ -283,7 +287,7 @@ describe('api/v1/user.create', () => {
             isPrimary: true,
           },
         ],
-        orgs: [ctx.org.id],
+        orgs: [org.id],
       });
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
@@ -301,7 +305,7 @@ describe('api/v1/user.create', () => {
   test('returns error when creating global user without necessary permission', async () => {
     const res = await request(server)
       .post('/api/v1/user.create')
-      .set('Authorization', `Bearer ${ctx.session.token}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         // absense of orgs denotes global user
         username: 'roadrunner',
