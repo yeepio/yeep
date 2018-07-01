@@ -24,14 +24,23 @@ async function createPermissionAssignment(db, { userId, orgId, permissionId, res
     throw new UserNotFoundError('User does not exist');
   }
 
-  // ensure org exists (if specified)
   if (orgId) {
+    // ensure org exists (if specified)
     const org = await OrgModel.findOne({
       _id: orgId,
     });
 
     if (!org) {
       throw new OrgNotFoundError('Org does not exist');
+    }
+
+    // ensure user is member of org
+    const isMemberOf = user.orgs.some((oid) => oid.equals(org._id));
+
+    if (!isMemberOf) {
+      throw new InvalidPermissionAssignmentError(
+        `User ${user.id} is not a member of the designated org`
+      );
     }
   }
 
