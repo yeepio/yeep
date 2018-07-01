@@ -3,11 +3,25 @@ const mongoose = require('mongoose');
 exports.up = async function(next) {
   await mongoose.connect(process.env.MONGODB_URI);
   const now = new Date();
+  const permissions = await mongoose.connection.db
+    .collection('permissions')
+    .find(
+      {
+        scope: { $exists: false },
+        name: { $regex: /^yeep\./ },
+      },
+      {
+        projection: {
+          _id: 1,
+        },
+      }
+    )
+    .toArray();
   await mongoose.connection.db.collection('roles').insertOne(
     {
       name: 'admin',
       isSystemRole: true,
-      permissions: ['yeep.user.write', 'yeep.user.read'],
+      permissions: permissions.map((e) => e._id),
       createdAt: now,
       updatedAt: now,
     },
