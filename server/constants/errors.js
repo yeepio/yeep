@@ -88,3 +88,10 @@ export class AuthorizationError extends Error {
     this.code = 10012;
   }
 }
+
+export class PermissionAssignmentNotFoundError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10013;
+  }
+}
