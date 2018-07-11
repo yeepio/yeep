@@ -38,6 +38,7 @@ describe('api/v1/user.create', () => {
           isPrimary: true,
         },
       ],
+      orgs: [org.id],
     });
 
     const PermissionModel = ctx.db.model('Permission');

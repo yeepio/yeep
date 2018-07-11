@@ -36,6 +36,7 @@ describe('api/v1/permission.info', () => {
           isPrimary: true,
         },
       ],
+      orgs: [ctx.org.id],
     });
 
     const PermissionModel = ctx.db.model('Permission');

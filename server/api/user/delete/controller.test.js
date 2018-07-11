@@ -46,6 +46,7 @@ describe('api/v1/user.delete', () => {
             isPrimary: true,
           },
         ],
+        orgs: [org.id],
       });
 
       const PermissionModel = ctx.db.model('Permission');
@@ -226,6 +227,7 @@ describe('api/v1/user.delete', () => {
             isPrimary: true,
           },
         ],
+        orgs: [org.id],
       });
 
       const PermissionModel = ctx.db.model('Permission');

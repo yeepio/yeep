@@ -16,30 +16,9 @@ describe('authz middleware', () => {
   beforeAll(async () => {
     await server.setup();
     ctx = server.getAppContext();
-
-    ctx.user = await createUser(ctx.db, {
-      username: 'wile',
-      password: 'catch-the-b1rd$',
-      fullName: 'Wile E. Coyote',
-      picture: 'https://www.acme.com/pictures/coyote.png',
-      emails: [
-        {
-          address: 'coyote@acme.com',
-          isVerified: true,
-          isPrimary: true,
-        },
-      ],
-    });
-
-    ctx.session = await createSessionToken(ctx.db, ctx.jwt, {
-      username: 'wile',
-      password: 'catch-the-b1rd$',
-    });
   });
 
   afterAll(async () => {
-    await destroySessionToken(ctx.db, ctx.session);
-    await deleteUser(ctx.db, ctx.user);
     await server.teardown();
   });
 
@@ -57,30 +36,6 @@ describe('authz middleware', () => {
     test('throws authorization error', async () => {
       const authz = createAuthzMiddleware({
         permissions: ['yeep.permission.write'],
-        org: (request) => request.body.org,
-      });
-
-      const next = jest.fn(() => Promise.resolve());
-      const request = {
-        session: {
-          user: ctx.user,
-        },
-        body: {},
-      };
-
-      await expect(authz({ request, db: ctx.db }, next)).rejects.toMatchObject({
-        code: 10012,
-        message:
-          'User "wile" does not have permission "yeep.permission.write" to access this resource',
-      });
-    });
-  });
-
-  describe('user does not have required permission(s)', () => {
-    test('throws authorization error', async () => {
-      const authz = createAuthzMiddleware({
-        permissions: ['yeep.permission.write'],
-        org: (request) => request.body.org,
       });
 
       const next = jest.fn(() => Promise.resolve());
@@ -96,21 +51,106 @@ describe('authz middleware', () => {
     });
   });
 
-  describe('user has other permission(s), i.e. not the permission(s) required', () => {
+  describe('user does not have required permission(s)', () => {
+    let org;
+    let user;
+    let session;
+
     beforeAll(async () => {
+      org = await createOrg(ctx.db, {
+        name: 'Acme Inc',
+        slug: 'acme',
+      });
+
+      user = await createUser(ctx.db, {
+        username: 'wile',
+        password: 'catch-the-b1rd$',
+        fullName: 'Wile E. Coyote',
+        picture: 'https://www.acme.com/pictures/coyote.png',
+        emails: [
+          {
+            address: 'coyote@acme.com',
+            isVerified: true,
+            isPrimary: true,
+          },
+        ],
+        orgs: [org.id],
+      });
+
+      session = await createSessionToken(ctx.db, ctx.jwt, {
+        username: 'wile',
+        password: 'catch-the-b1rd$',
+      });
+    });
+
+    afterAll(async () => {
+      await destroySessionToken(ctx.db, session);
+      await deleteUser(ctx.db, user);
+      await deleteOrg(ctx.db, org);
+    });
+
+    test('throws authorization error', async () => {
+      const authz = createAuthzMiddleware({
+        permissions: ['yeep.permission.write'],
+        org: (request) => request.body.org,
+      });
+
+      const next = jest.fn(() => Promise.resolve());
+      const request = {
+        session: {
+          user,
+        },
+        body: {},
+      };
+
+      await expect(authz({ request, db: ctx.db }, next)).rejects.toMatchObject({
+        code: 10012,
+        message:
+          'User "wile" does not have permission "yeep.permission.write" to access this resource',
+      });
+    });
+  });
+
+  describe('user has other permission(s), i.e. not the permission(s) required', () => {
+    let user;
+    let permissionAssignment;
+    let session;
+
+    beforeAll(async () => {
+      user = await createUser(ctx.db, {
+        username: 'wile',
+        password: 'catch-the-b1rd$',
+        fullName: 'Wile E. Coyote',
+        picture: 'https://www.acme.com/pictures/coyote.png',
+        emails: [
+          {
+            address: 'coyote@acme.com',
+            isVerified: true,
+            isPrimary: true,
+          },
+        ],
+      });
+
       const PermissionModel = ctx.db.model('Permission');
       const permission = await PermissionModel.findOne({
         name: 'yeep.permission.read',
         scope: { $exists: false },
       });
-      ctx.permissionAssignment = await createPermissionAssignment(ctx.db, {
-        userId: ctx.user.id,
+      permissionAssignment = await createPermissionAssignment(ctx.db, {
+        userId: user.id,
         permissionId: permission.id,
+      });
+
+      session = await createSessionToken(ctx.db, ctx.jwt, {
+        username: 'wile',
+        password: 'catch-the-b1rd$',
       });
     });
 
     afterAll(async () => {
-      await deletePermissionAssignment(ctx.db, ctx.permissionAssignment);
+      await destroySessionToken(ctx.db, session);
+      await deletePermissionAssignment(ctx.db, permissionAssignment);
+      await deleteUser(ctx.db, user);
     });
 
     test('throws authorization error', async () => {
@@ -122,7 +162,7 @@ describe('authz middleware', () => {
       const next = jest.fn(() => Promise.resolve());
       const request = {
         session: {
-          user: ctx.user,
+          user,
         },
         body: {},
       };
@@ -136,15 +176,36 @@ describe('authz middleware', () => {
   });
 
   describe('user has permission(s) to other org, i.e. not the org required', () => {
+    let org;
+    let otherOrg;
+    let user;
+    let permissionAssignment;
+    let session;
+
     beforeAll(async () => {
-      ctx.org = await createOrg(ctx.db, {
+      org = await createOrg(ctx.db, {
         name: 'Acme Inc',
         slug: 'acme',
       });
 
-      ctx.otherOrg = await createOrg(ctx.db, {
+      otherOrg = await createOrg(ctx.db, {
         name: 'Speak Riddles Old Man Ltd',
         slug: 'speakriddles',
+      });
+
+      user = await createUser(ctx.db, {
+        username: 'wile',
+        password: 'catch-the-b1rd$',
+        fullName: 'Wile E. Coyote',
+        picture: 'https://www.acme.com/pictures/coyote.png',
+        emails: [
+          {
+            address: 'coyote@acme.com',
+            isVerified: true,
+            isPrimary: true,
+          },
+        ],
+        orgs: [org.id, otherOrg.id],
       });
 
       const PermissionModel = ctx.db.model('Permission');
@@ -152,32 +213,39 @@ describe('authz middleware', () => {
         name: 'yeep.permission.write',
         scope: { $exists: false },
       });
-      ctx.permissionAssignment = await createPermissionAssignment(ctx.db, {
-        userId: ctx.user.id,
-        orgId: ctx.otherOrg.id,
+      permissionAssignment = await createPermissionAssignment(ctx.db, {
+        userId: user.id,
         permissionId: permission.id,
+        orgId: otherOrg.id,
+      });
+
+      session = await createSessionToken(ctx.db, ctx.jwt, {
+        username: 'wile',
+        password: 'catch-the-b1rd$',
       });
     });
 
     afterAll(async () => {
-      await deletePermissionAssignment(ctx.db, ctx.permissionAssignment);
-      await deleteOrg(ctx.db, ctx.org);
-      await deleteOrg(ctx.db, ctx.otherOrg);
+      await destroySessionToken(ctx.db, session);
+      await deletePermissionAssignment(ctx.db, permissionAssignment);
+      await deleteOrg(ctx.db, org);
+      await deleteOrg(ctx.db, otherOrg);
+      await deleteUser(ctx.db, user);
     });
 
     test('throws authorization error', async () => {
       const authz = createAuthzMiddleware({
         permissions: ['yeep.permission.write'],
-        org: (request) => request.body.org,
+        org: (request) => request.body.org.id,
       });
 
       const next = jest.fn(() => Promise.resolve());
       const request = {
         session: {
-          user: ctx.user,
+          user,
         },
         body: {
-          org: ctx.org.id,
+          org,
         },
       };
 
@@ -190,10 +258,30 @@ describe('authz middleware', () => {
   });
 
   describe('user has valid scoped permission(s)', () => {
+    let org;
+    let user;
+    let permissionAssignment;
+    let session;
+
     beforeAll(async () => {
-      ctx.org = await createOrg(ctx.db, {
+      org = await createOrg(ctx.db, {
         name: 'Acme Inc',
         slug: 'acme',
+      });
+
+      user = await createUser(ctx.db, {
+        username: 'wile',
+        password: 'catch-the-b1rd$',
+        fullName: 'Wile E. Coyote',
+        picture: 'https://www.acme.com/pictures/coyote.png',
+        emails: [
+          {
+            address: 'coyote@acme.com',
+            isVerified: true,
+            isPrimary: true,
+          },
+        ],
+        orgs: [org.id],
       });
 
       const PermissionModel = ctx.db.model('Permission');
@@ -201,31 +289,38 @@ describe('authz middleware', () => {
         name: 'yeep.permission.write',
         scope: { $exists: false },
       });
-      ctx.permissionAssignment = await createPermissionAssignment(ctx.db, {
-        userId: ctx.user.id,
-        orgId: ctx.org.id,
+      permissionAssignment = await createPermissionAssignment(ctx.db, {
+        userId: user.id,
         permissionId: permission.id,
+        orgId: org.id,
+      });
+
+      session = await createSessionToken(ctx.db, ctx.jwt, {
+        username: 'wile',
+        password: 'catch-the-b1rd$',
       });
     });
 
     afterAll(async () => {
-      await deletePermissionAssignment(ctx.db, ctx.permissionAssignment);
-      await deleteOrg(ctx.db, ctx.org);
+      await destroySessionToken(ctx.db, session);
+      await deletePermissionAssignment(ctx.db, permissionAssignment);
+      await deleteOrg(ctx.db, org);
+      await deleteUser(ctx.db, user);
     });
 
     test('calls next as expected', async () => {
       const authz = createAuthzMiddleware({
         permissions: ['yeep.permission.write'],
-        org: (request) => request.body.org,
+        org: (request) => request.body.org.id,
       });
 
       const next = jest.fn(() => Promise.resolve());
       const request = {
         session: {
-          user: ctx.user,
+          user,
         },
         body: {
-          org: ctx.org.id,
+          org,
         },
       };
 
@@ -242,7 +337,7 @@ describe('authz middleware', () => {
       const next = jest.fn(() => Promise.resolve());
       const request = {
         session: {
-          user: ctx.user,
+          user,
         },
         body: {},
       };
@@ -256,10 +351,30 @@ describe('authz middleware', () => {
   });
 
   describe('user has valid global permission(s)', () => {
+    let org;
+    let user;
+    let permissionAssignment;
+    let session;
+
     beforeAll(async () => {
-      ctx.org = await createOrg(ctx.db, {
+      org = await createOrg(ctx.db, {
         name: 'Acme Inc',
         slug: 'acme',
+      });
+
+      user = await createUser(ctx.db, {
+        username: 'wile',
+        password: 'catch-the-b1rd$',
+        fullName: 'Wile E. Coyote',
+        picture: 'https://www.acme.com/pictures/coyote.png',
+        emails: [
+          {
+            address: 'coyote@acme.com',
+            isVerified: true,
+            isPrimary: true,
+          },
+        ],
+        orgs: [org.id],
       });
 
       const PermissionModel = ctx.db.model('Permission');
@@ -267,31 +382,38 @@ describe('authz middleware', () => {
         name: 'yeep.permission.write',
         scope: { $exists: false },
       });
-      ctx.permissionAssignment = await createPermissionAssignment(ctx.db, {
+      permissionAssignment = await createPermissionAssignment(ctx.db, {
         // note the absence of orgId to mark this as global permission assignment
-        userId: ctx.user.id,
+        userId: user.id,
         permissionId: permission.id,
+      });
+
+      session = await createSessionToken(ctx.db, ctx.jwt, {
+        username: 'wile',
+        password: 'catch-the-b1rd$',
       });
     });
 
     afterAll(async () => {
-      await deletePermissionAssignment(ctx.db, ctx.permissionAssignment);
-      await deleteOrg(ctx.db, ctx.org);
+      await destroySessionToken(ctx.db, session);
+      await deletePermissionAssignment(ctx.db, permissionAssignment);
+      await deleteOrg(ctx.db, org);
+      await deleteUser(ctx.db, user);
     });
 
     test('calls next as expected', async () => {
       const authz = createAuthzMiddleware({
         permissions: ['yeep.permission.write'],
-        org: (request) => request.body.org,
+        org: (request) => request.body.org.id,
       });
 
       const next = jest.fn(() => Promise.resolve());
       const request = {
         session: {
-          user: ctx.user,
+          user,
         },
         body: {
-          org: ctx.org.id,
+          org,
         },
       };
 

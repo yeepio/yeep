@@ -36,6 +36,7 @@ describe('api/v1/permission.delete', () => {
           isPrimary: true,
         },
       ],
+      orgs: [ctx.org.id],
     });
 
     const PermissionModel = ctx.db.model('Permission');
