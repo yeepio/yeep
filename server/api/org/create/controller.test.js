@@ -3,6 +3,10 @@ import request from 'supertest';
 import server from '../../../server';
 import deleteOrg from '../delete/service';
 import createOrg from './service';
+import createUser from '../../user/create/service';
+import createSessionToken from '../../session/create/service';
+import destroySessionToken from '../../session/destroy/service';
+import deleteUser from '../../user/delete/service';
 
 describe('api/v1/org.create', () => {
   let ctx;
@@ -16,173 +20,230 @@ describe('api/v1/org.create', () => {
     await server.teardown();
   });
 
-  test('returns error when `slug` contains invalid characters', async () => {
-    const res = await request(server)
-      .post('/api/v1/org.create')
-      .send({
-        name: 'ACME Inc.',
-        slug: '@cme',
+  describe('unauthorized user', () => {
+    test('returns error pretending resource does not exist', async () => {
+      const res = await request(server)
+        .post('/api/v1/org.create')
+        .send({
+          id: '507f191e810c19729de860ea', // some random object id
+        });
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 404,
+          message: 'Resource does not exist',
+        },
+      });
+    });
+  });
+
+  describe('authorized user', () => {
+    let user;
+    let session;
+
+    beforeAll(async () => {
+      user = await createUser(ctx.db, {
+        username: 'wile',
+        password: 'catch-the-b1rd$',
+        fullName: 'Wile E. Coyote',
+        picture: 'https://www.acme.com/pictures/coyote.png',
+        emails: [
+          {
+            address: 'coyote@acme.com',
+            isVerified: true,
+            isPrimary: true,
+          },
+        ],
       });
 
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: false,
-      error: {
-        code: 400,
-        message: 'Invalid request body',
-        details: expect.any(Array),
-      },
+      session = await createSessionToken(ctx.db, ctx.jwt, {
+        username: 'wile',
+        password: 'catch-the-b1rd$',
+      });
     });
-    expect(res.body.error.details[0].path).toEqual(['slug']);
-    expect(res.body.error.details[0].type).toBe('string.regex.name');
-  });
 
-  test('returns error when `slug` contains more than 30 characters', async () => {
-    const res = await request(server)
-      .post('/api/v1/org.create')
-      .send({
-        name: 'ACME Inc.',
-        slug: '0123456789012345678901234567890',
+    afterAll(async () => {
+      await destroySessionToken(ctx.db, session);
+      await deleteUser(ctx.db, user);
+    });
+
+    test('returns error when `slug` contains invalid characters', async () => {
+      const res = await request(server)
+        .post('/api/v1/org.create')
+        .set('Authorization', `Bearer ${session.token}`)
+        .send({
+          name: 'ACME Inc.',
+          slug: '@cme',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 400,
+          message: 'Invalid request body',
+          details: expect.any(Array),
+        },
+      });
+      expect(res.body.error.details[0].path).toEqual(['slug']);
+      expect(res.body.error.details[0].type).toBe('string.regex.name');
+    });
+
+    test('returns error when `slug` contains more than 30 characters', async () => {
+      const res = await request(server)
+        .post('/api/v1/org.create')
+        .set('Authorization', `Bearer ${session.token}`)
+        .send({
+          name: 'ACME Inc.',
+          slug: '0123456789012345678901234567890',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 400,
+          message: 'Invalid request body',
+          details: expect.any(Array),
+        },
+      });
+      expect(res.body.error.details[0].path).toEqual(['slug']);
+      expect(res.body.error.details[0].type).toBe('string.max');
+    });
+
+    test('returns error when `slug` contains less than 2 characters', async () => {
+      const res = await request(server)
+        .post('/api/v1/org.create')
+        .set('Authorization', `Bearer ${session.token}`)
+        .send({
+          name: 'ACME Inc.',
+          slug: 'a',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 400,
+          message: 'Invalid request body',
+          details: expect.any(Array),
+        },
+      });
+      expect(res.body.error.details[0].path).toEqual(['slug']);
+      expect(res.body.error.details[0].type).toBe('string.min');
+    });
+
+    test('returns error when `name` is unspecified', async () => {
+      const res = await request(server)
+        .post('/api/v1/org.create')
+        .set('Authorization', `Bearer ${session.token}`)
+        .send({});
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 400,
+          message: 'Invalid request body',
+          details: expect.any(Array),
+        },
+      });
+      expect(res.body.error.details[0].path).toEqual(['name']);
+      expect(res.body.error.details[0].type).toBe('any.required');
+    });
+
+    test('returns error when `slug` is unspecified', async () => {
+      const res = await request(server)
+        .post('/api/v1/org.create')
+        .set('Authorization', `Bearer ${session.token}`)
+        .send({ name: 'ACME Inc.' });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 400,
+          message: 'Invalid request body',
+          details: expect.any(Array),
+        },
+      });
+      expect(res.body.error.details[0].path).toEqual(['slug']);
+      expect(res.body.error.details[0].type).toBe('any.required');
+    });
+
+    test('returns error when payload contains unknown properties', async () => {
+      const res = await request(server)
+        .post('/api/v1/org.create')
+        .set('Authorization', `Bearer ${session.token}`)
+        .send({
+          name: 'ACME Inc.',
+          slug: 'acme',
+          foo: 'bar',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 400,
+          message: 'Invalid request body',
+          details: expect.any(Array),
+        },
+      });
+      expect(res.body.error.details[0].path).toEqual(['foo']);
+      expect(res.body.error.details[0].type).toBe('object.allowUnknown');
+    });
+
+    test('creates new org and returns expected response', async () => {
+      const res = await request(server)
+        .post('/api/v1/org.create')
+        .set('Authorization', `Bearer ${session.token}`)
+        .send({
+          name: 'ACME Inc.',
+          slug: 'acme',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.type).toMatch(/json/);
+      expect(res.body).toMatchObject({
+        ok: true,
+        org: expect.objectContaining({
+          id: expect.any(String),
+          name: expect.any(String),
+          slug: expect.any(String),
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
       });
 
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: false,
-      error: {
-        code: 400,
-        message: 'Invalid request body',
-        details: expect.any(Array),
-      },
+      const isOrgDeleted = await deleteOrg(ctx.db, res.body.org);
+      expect(isOrgDeleted).toBe(true);
     });
-    expect(res.body.error.details[0].path).toEqual(['slug']);
-    expect(res.body.error.details[0].type).toBe('string.max');
-  });
 
-  test('returns error when `slug` contains less than 2 characters', async () => {
-    const res = await request(server)
-      .post('/api/v1/org.create')
-      .send({
-        name: 'ACME Inc.',
-        slug: 'a',
-      });
-
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: false,
-      error: {
-        code: 400,
-        message: 'Invalid request body',
-        details: expect.any(Array),
-      },
-    });
-    expect(res.body.error.details[0].path).toEqual(['slug']);
-    expect(res.body.error.details[0].type).toBe('string.min');
-  });
-
-  test('returns error when `name` is unspecified', async () => {
-    const res = await request(server)
-      .post('/api/v1/org.create')
-      .send({});
-
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: false,
-      error: {
-        code: 400,
-        message: 'Invalid request body',
-        details: expect.any(Array),
-      },
-    });
-    expect(res.body.error.details[0].path).toEqual(['name']);
-    expect(res.body.error.details[0].type).toBe('any.required');
-  });
-
-  test('returns error when `slug` is unspecified', async () => {
-    const res = await request(server)
-      .post('/api/v1/org.create')
-      .send({ name: 'ACME Inc.' });
-
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: false,
-      error: {
-        code: 400,
-        message: 'Invalid request body',
-        details: expect.any(Array),
-      },
-    });
-    expect(res.body.error.details[0].path).toEqual(['slug']);
-    expect(res.body.error.details[0].type).toBe('any.required');
-  });
-
-  test('returns error when payload contains unknown properties', async () => {
-    const res = await request(server)
-      .post('/api/v1/org.create')
-      .send({
+    test('returns error on duplicate org slug', async () => {
+      const org = await createOrg(ctx.db, {
         name: 'ACME Inc.',
         slug: 'acme',
-        foo: 'bar',
       });
 
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: false,
-      error: {
-        code: 400,
-        message: 'Invalid request body',
-        details: expect.any(Array),
-      },
-    });
-    expect(res.body.error.details[0].path).toEqual(['foo']);
-    expect(res.body.error.details[0].type).toBe('object.allowUnknown');
-  });
-
-  test('creates new org and returns expected response', async () => {
-    const res = await request(server)
-      .post('/api/v1/org.create')
-      .send({
-        name: 'ACME Inc.',
-        slug: 'acme',
+      const res = await request(server)
+        .post('/api/v1/org.create')
+        .set('Authorization', `Bearer ${session.token}`)
+        .send({
+          name: 'ACME S.A.',
+          slug: 'acme',
+        });
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 10003,
+          message: expect.any(String),
+        },
       });
 
-    expect(res.status).toBe(200);
-    expect(res.type).toMatch(/json/);
-    expect(res.body).toMatchObject({
-      ok: true,
-      org: expect.objectContaining({
-        id: expect.any(String),
-        name: expect.any(String),
-        slug: expect.any(String),
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-      }),
+      const isOrgDeleted = await deleteOrg(ctx.db, org);
+      expect(isOrgDeleted).toBe(true);
     });
-
-    const isOrgDeleted = await deleteOrg(ctx.db, res.body.org);
-    expect(isOrgDeleted).toBe(true);
-  });
-
-  test('returns error on duplicate org slug', async () => {
-    const org = await createOrg(ctx.db, {
-      name: 'ACME Inc.',
-      slug: 'acme',
-    });
-
-    const res = await request(server)
-      .post('/api/v1/org.create')
-      .send({
-        name: 'ACME S.A.',
-        slug: 'acme',
-      });
-    expect(res.body).toMatchObject({
-      ok: false,
-      error: {
-        code: 10003,
-        message: expect.any(String),
-      },
-    });
-
-    const isOrgDeleted = await deleteOrg(ctx.db, org);
-    expect(isOrgDeleted).toBe(true);
   });
 });

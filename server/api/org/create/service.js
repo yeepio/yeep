@@ -1,10 +1,17 @@
 import { DuplicateOrgError } from '../../../constants/errors';
 
-async function createOrg(db, { name, slug }) {
+async function createOrg(db, { name, slug, adminId }) {
   const OrgModel = db.model('Org');
+  const UserModel = db.model('User');
 
   try {
+    // create org
     const org = await OrgModel.create({ name, slug });
+
+    // push org ID to user orgs array
+    await UserModel.updateOne({ id: adminId }, { $push: { orgs: org._id } });
+
+    // TODO: assign "admin" role to admin
 
     return {
       id: org.id, // as hex string

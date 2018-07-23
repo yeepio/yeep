@@ -2,7 +2,10 @@ import Joi from 'joi';
 import compose from 'koa-compose';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { createValidationMiddleware } from '../../../middleware/validation';
+import createAuthnMiddleware from '../../../middleware/authn';
 import createOrg from './service';
+
+const authn = createAuthnMiddleware();
 
 const validation = createValidationMiddleware({
   body: {
@@ -30,4 +33,4 @@ async function handler({ request, response, db }) {
   };
 }
 
-export default compose([packJSONRPC, validation, handler]);
+export default compose([packJSONRPC, authn, validation, handler]);
