@@ -7,6 +7,7 @@ import createUser from '../../user/create/service';
 import createSessionToken from '../../session/create/service';
 import destroySessionToken from '../../session/destroy/service';
 import deleteUser from '../../user/delete/service';
+import getUserInfo from '../../user/info/service';
 
 describe('api/v1/org.create', () => {
   let ctx;
@@ -216,6 +217,9 @@ describe('api/v1/org.create', () => {
           updatedAt: expect.any(String),
         }),
       });
+
+      const admin = await getUserInfo(ctx.db, user);
+      expect(admin.orgs).toEqual(expect.arrayContaining([res.body.org.id]));
 
       const isOrgDeleted = await deleteOrg(ctx.db, res.body.org);
       expect(isOrgDeleted).toBe(true);
