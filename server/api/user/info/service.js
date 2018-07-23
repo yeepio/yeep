@@ -16,7 +16,7 @@ async function getUserInfo(db, { id }) {
     fullName: user.fullName,
     picture: user.picture,
     emails: user.emails,
-    orgs: user.orgs,
+    orgs: user.orgs.map((oid) => oid.toHexString()),
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
