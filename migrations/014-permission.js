@@ -7,7 +7,7 @@ exports.up = async function(next) {
     [
       {
         name: 'yeep.org.write',
-        description: 'Permission to write (i.e. create, update, delete) orgs',
+        description: 'Permission to write (i.e. update, delete) orgs',
         isSystemPermission: true,
         createdAt: now,
         updatedAt: now,
