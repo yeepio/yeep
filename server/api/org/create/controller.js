@@ -25,7 +25,10 @@ const validation = createValidationMiddleware({
 });
 
 async function handler({ request, response, db }) {
-  const org = await createOrg(db, request.body);
+  const org = await createOrg(db, {
+    ...request.body,
+    adminId: request.session.user.id,
+  });
 
   response.status = 200; // OK
   response.body = {
