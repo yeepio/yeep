@@ -229,6 +229,7 @@ describe('api/v1/org.create', () => {
       const org = await createOrg(ctx.db, {
         name: 'ACME Inc.',
         slug: 'acme',
+        adminId: user.id,
       });
 
       const res = await request(server)

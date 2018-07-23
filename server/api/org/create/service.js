@@ -3,15 +3,32 @@ import { DuplicateOrgError } from '../../../constants/errors';
 async function createOrg(db, { name, slug, adminId }) {
   const OrgModel = db.model('Org');
   const UserModel = db.model('User');
+  const PermissionModel = db.model('Permission');
+  const PermissionAssignmentModel = db.model('PermissionAssignment');
 
   try {
+    // TODO: use transactions
+
     // create org
     const org = await OrgModel.create({ name, slug });
 
     // push org ID to user orgs array
     await UserModel.updateOne({ _id: adminId }, { $push: { orgs: org._id } });
 
-    // TODO: assign "admin" role to admin
+    // assign admin permissions
+    const permissions = await PermissionModel.find({
+      name: { $in: ['yeep.org.write', 'yeep.org.read'] },
+    });
+
+    await PermissionAssignmentModel.create(
+      permissions.map((permission) => {
+        return {
+          user: adminId,
+          org: org.id,
+          permission: permission.id,
+        };
+      })
+    );
 
     return {
       id: org.id, // as hex string
