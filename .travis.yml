@@ -3,7 +3,9 @@ node_js:
   - 8.0
 env:
   global:
-    - MONGODB_URI=mongodb://localhost:27017/yeep JWT_SECRET="keep it safe, keep it hidden!"
+    - MONGODB_URI=mongodb://localhost:27017/yeep
+    - JWT_SECRET="keep it safe, keep it hidden!"
+    - NODE_ENV=development
   matrix:
     - MONGODB=4.0.0
 before_install:
