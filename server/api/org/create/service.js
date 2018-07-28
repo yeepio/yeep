@@ -1,9 +1,16 @@
+import memoize from 'lodash/memoize';
 import { DuplicateOrgError } from '../../../constants/errors';
+
+const getAdminPermissions = memoize((db) => {
+  const PermissionModel = db.model('Permission');
+  return PermissionModel.find({
+    name: { $in: ['yeep.org.write', 'yeep.org.read'] },
+  });
+}, () => 'permissions');
 
 async function createOrg(db, { name, slug, adminId }) {
   const OrgModel = db.model('Org');
   const UserModel = db.model('User');
-  const PermissionModel = db.model('Permission');
   const PermissionAssignmentModel = db.model('PermissionAssignment');
 
   try {
@@ -15,11 +22,10 @@ async function createOrg(db, { name, slug, adminId }) {
     // push org ID to user orgs array
     await UserModel.updateOne({ _id: adminId }, { $push: { orgs: org._id } });
 
-    // assign admin permissions
-    const permissions = await PermissionModel.find({
-      name: { $in: ['yeep.org.write', 'yeep.org.read'] },
-    });
+    // retrieve admin permissions
+    const permissions = await getAdminPermissions(db);
 
+    // assign admin permissions
     await PermissionAssignmentModel.create(
       permissions.map((permission) => {
         return {
