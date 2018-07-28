@@ -57,11 +57,6 @@ describe('authz middleware', () => {
     let session;
 
     beforeAll(async () => {
-      org = await createOrg(ctx.db, {
-        name: 'Acme Inc',
-        slug: 'acme',
-      });
-
       user = await createUser(ctx.db, {
         username: 'wile',
         password: 'catch-the-b1rd$',
@@ -74,7 +69,12 @@ describe('authz middleware', () => {
             isPrimary: true,
           },
         ],
-        orgs: [org.id],
+      });
+
+      org = await createOrg(ctx.db, {
+        name: 'Acme Inc',
+        slug: 'acme',
+        adminId: user.id,
       });
 
       session = await createSessionToken(ctx.db, ctx.jwt, {
@@ -183,16 +183,6 @@ describe('authz middleware', () => {
     let session;
 
     beforeAll(async () => {
-      org = await createOrg(ctx.db, {
-        name: 'Acme Inc',
-        slug: 'acme',
-      });
-
-      otherOrg = await createOrg(ctx.db, {
-        name: 'Speak Riddles Old Man Ltd',
-        slug: 'speakriddles',
-      });
-
       user = await createUser(ctx.db, {
         username: 'wile',
         password: 'catch-the-b1rd$',
@@ -205,7 +195,18 @@ describe('authz middleware', () => {
             isPrimary: true,
           },
         ],
-        orgs: [org.id, otherOrg.id],
+      });
+
+      org = await createOrg(ctx.db, {
+        name: 'Acme Inc',
+        slug: 'acme',
+        adminId: user.id,
+      });
+
+      otherOrg = await createOrg(ctx.db, {
+        name: 'Speak Riddles Old Man Ltd',
+        slug: 'speakriddles',
+        adminId: user.id,
       });
 
       const PermissionModel = ctx.db.model('Permission');
@@ -264,11 +265,6 @@ describe('authz middleware', () => {
     let session;
 
     beforeAll(async () => {
-      org = await createOrg(ctx.db, {
-        name: 'Acme Inc',
-        slug: 'acme',
-      });
-
       user = await createUser(ctx.db, {
         username: 'wile',
         password: 'catch-the-b1rd$',
@@ -281,7 +277,12 @@ describe('authz middleware', () => {
             isPrimary: true,
           },
         ],
-        orgs: [org.id],
+      });
+
+      org = await createOrg(ctx.db, {
+        name: 'Acme Inc',
+        slug: 'acme',
+        adminId: user.id,
       });
 
       const PermissionModel = ctx.db.model('Permission');
@@ -357,11 +358,6 @@ describe('authz middleware', () => {
     let session;
 
     beforeAll(async () => {
-      org = await createOrg(ctx.db, {
-        name: 'Acme Inc',
-        slug: 'acme',
-      });
-
       user = await createUser(ctx.db, {
         username: 'wile',
         password: 'catch-the-b1rd$',
@@ -374,7 +370,12 @@ describe('authz middleware', () => {
             isPrimary: true,
           },
         ],
-        orgs: [org.id],
+      });
+
+      org = await createOrg(ctx.db, {
+        name: 'Acme Inc',
+        slug: 'acme',
+        adminId: user.id,
       });
 
       const PermissionModel = ctx.db.model('Permission');

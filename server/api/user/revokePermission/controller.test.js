@@ -51,11 +51,6 @@ describe('api/v1/user.revokePermission', () => {
     let requestedPermissionAssignment;
 
     beforeAll(async () => {
-      org = await createOrg(ctx.db, {
-        name: 'Acme Inc',
-        slug: 'acme',
-      });
-
       user = await createUser(ctx.db, {
         username: 'wile',
         password: 'catch-the-b1rd$',
@@ -68,7 +63,12 @@ describe('api/v1/user.revokePermission', () => {
             isPrimary: true,
           },
         ],
-        orgs: [org.id],
+      });
+
+      org = await createOrg(ctx.db, {
+        name: 'Acme Inc',
+        slug: 'acme',
+        adminId: user.id,
       });
 
       const PermissionModel = ctx.db.model('Permission');
@@ -250,16 +250,6 @@ describe('api/v1/user.revokePermission', () => {
     let requestedPermissionAssignment;
 
     beforeAll(async () => {
-      org = await createOrg(ctx.db, {
-        name: 'Acme Inc',
-        slug: 'acme',
-      });
-
-      otherOrg = await createOrg(ctx.db, {
-        name: 'Monsters Inc',
-        slug: 'monsters',
-      });
-
       user = await createUser(ctx.db, {
         username: 'wile',
         password: 'catch-the-b1rd$',
@@ -272,7 +262,18 @@ describe('api/v1/user.revokePermission', () => {
             isPrimary: true,
           },
         ],
-        orgs: [org.id, otherOrg.id],
+      });
+
+      org = await createOrg(ctx.db, {
+        name: 'Acme Inc',
+        slug: 'acme',
+        adminId: user.id,
+      });
+
+      otherOrg = await createOrg(ctx.db, {
+        name: 'Monsters Inc',
+        slug: 'monsters',
+        adminId: user.id,
       });
 
       const PermissionModel = ctx.db.model('Permission');

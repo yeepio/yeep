@@ -31,11 +31,6 @@ describe('api/v1/user.info', () => {
     let otherOrg;
 
     beforeAll(async () => {
-      org = await createOrg(ctx.db, {
-        name: 'Acme Inc',
-        slug: 'acme',
-      });
-
       requestor = await createUser(ctx.db, {
         username: 'wile',
         password: 'catch-the-b1rd$',
@@ -48,7 +43,12 @@ describe('api/v1/user.info', () => {
             isPrimary: true,
           },
         ],
-        orgs: [org.id],
+      });
+
+      org = await createOrg(ctx.db, {
+        name: 'Acme Inc',
+        slug: 'acme',
+        adminId: requestor.id,
       });
 
       const PermissionModel = ctx.db.model('Permission');
@@ -67,11 +67,6 @@ describe('api/v1/user.info', () => {
         password: 'catch-the-b1rd$',
       });
 
-      otherOrg = await createOrg(ctx.db, {
-        name: 'Monsters Inc',
-        slug: 'monsters',
-      });
-
       user = await createUser(ctx.db, {
         username: 'runner',
         password: 'fast+furry-ous',
@@ -84,7 +79,13 @@ describe('api/v1/user.info', () => {
             isPrimary: true,
           },
         ],
-        orgs: [otherOrg.id, org.id],
+        orgs: [org.id],
+      });
+
+      otherOrg = await createOrg(ctx.db, {
+        name: 'Monsters Inc',
+        slug: 'monsters',
+        adminId: user.id,
       });
     });
 
@@ -235,11 +236,6 @@ describe('api/v1/user.info', () => {
     let globalUser;
 
     beforeAll(async () => {
-      org = await createOrg(ctx.db, {
-        name: 'Acme Inc',
-        slug: 'acme',
-      });
-
       requestor = await createUser(ctx.db, {
         username: 'wile',
         password: 'catch-the-b1rd$',
@@ -252,7 +248,12 @@ describe('api/v1/user.info', () => {
             isPrimary: true,
           },
         ],
-        orgs: [org.id],
+      });
+
+      org = await createOrg(ctx.db, {
+        name: 'Acme Inc',
+        slug: 'acme',
+        adminId: requestor.id,
       });
 
       const PermissionModel = ctx.db.model('Permission');
@@ -271,11 +272,6 @@ describe('api/v1/user.info', () => {
         password: 'catch-the-b1rd$',
       });
 
-      otherOrg = await createOrg(ctx.db, {
-        name: 'Monsters Inc',
-        slug: 'monsters',
-      });
-
       user = await createUser(ctx.db, {
         username: 'runner',
         password: 'fast+furry-ous',
@@ -288,7 +284,12 @@ describe('api/v1/user.info', () => {
             isPrimary: true,
           },
         ],
-        orgs: [otherOrg.id],
+      });
+
+      otherOrg = await createOrg(ctx.db, {
+        name: 'Monsters Inc',
+        slug: 'monsters',
+        adminId: user.id,
       });
 
       globalUser = await createUser(ctx.db, {

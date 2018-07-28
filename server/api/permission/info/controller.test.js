@@ -19,11 +19,6 @@ describe('api/v1/permission.info', () => {
     await server.setup();
     ctx = server.getAppContext();
 
-    ctx.org = await createOrg(ctx.db, {
-      name: 'Acme Inc',
-      slug: 'acme',
-    });
-
     ctx.user = await createUser(ctx.db, {
       username: 'wile',
       password: 'catch-the-b1rd$',
@@ -36,7 +31,12 @@ describe('api/v1/permission.info', () => {
           isPrimary: true,
         },
       ],
-      orgs: [ctx.org.id],
+    });
+
+    ctx.org = await createOrg(ctx.db, {
+      name: 'Acme Inc',
+      slug: 'acme',
+      adminId: ctx.user.id,
     });
 
     const PermissionModel = ctx.db.model('Permission');
