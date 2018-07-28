@@ -11,14 +11,8 @@ describe('api/v1/session.destroy', () => {
   beforeAll(async () => {
     await server.setup();
     ctx = server.getAppContext();
-  });
 
-  afterAll(async () => {
-    await server.teardown();
-  });
-
-  test('destroys session and responds as expected', async () => {
-    const user = await createUser(ctx.db, {
+    ctx.user = await createUser(ctx.db, {
       username: 'wile',
       password: 'catch-the-b1rd$',
       fullName: 'Wile E. Coyote',
@@ -31,7 +25,14 @@ describe('api/v1/session.destroy', () => {
         },
       ],
     });
+  });
 
+  afterAll(async () => {
+    await deleteUser(ctx.db, ctx.user);
+    await server.teardown();
+  });
+
+  test('destroys session and responds as expected', async () => {
     const session = await createSession(ctx.db, ctx.jwt, {
       username: 'wile',
       password: 'catch-the-b1rd$',
@@ -45,8 +46,5 @@ describe('api/v1/session.destroy', () => {
     expect(res.body).toMatchObject({
       ok: true,
     });
-
-    const isUserDeleted = await deleteUser(ctx.db, user);
-    expect(isUserDeleted).toBe(true);
   });
 });

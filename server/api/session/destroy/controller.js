@@ -2,12 +2,12 @@ import compose from 'koa-compose';
 import Boom from 'boom';
 import createAuthnMiddleware from '../../../middleware/authn';
 import packJSONRPC from '../../../middleware/packJSONRPC';
-import destroySession from './service';
+import destroySessionToken from './service';
 
 const authn = createAuthnMiddleware();
 
 async function handler({ db, request, response }) {
-  const isSessionDestroyed = await destroySession(db, {
+  const isSessionDestroyed = await destroySessionToken(db, {
     id: request.session.token.id,
   });
 

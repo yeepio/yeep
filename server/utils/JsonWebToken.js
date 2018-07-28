@@ -26,31 +26,23 @@ class JsonWebToken {
 
     if (!isString(secretKey)) {
       throw new TypeError(
-        `Invalid secretKey property; expected string, received ${typeOf(
-          secretKey
-        )}`
+        `Invalid secretKey property; expected string, received ${typeOf(secretKey)}`
       );
     }
 
     if (!isString(issuer)) {
-      throw new TypeError(
-        `Invalid issuer property; expected string, received ${typeOf(issuer)}`
-      );
+      throw new TypeError(`Invalid issuer property; expected string, received ${typeOf(issuer)}`);
     }
 
     if (!isString(algorithm)) {
       throw new TypeError(
-        `Invalid algorithm property; expected string, received ${typeOf(
-          algorithm
-        )}`
+        `Invalid algorithm property; expected string, received ${typeOf(algorithm)}`
       );
     }
 
     if (!isInteger(expiresIn)) {
       throw new TypeError(
-        `Invalid expiresIn property; expected integer, received ${typeOf(
-          expiresIn
-        )}`
+        `Invalid expiresIn property; expected integer, received ${typeOf(expiresIn)}`
       );
     }
 

@@ -5,23 +5,16 @@ import {
   DuplicateUsernameError,
 } from '../../../constants/errors';
 
-async function createUser(
-  db,
-  { username, password, fullName, picture, emails }
-) {
+async function createUser(db, { username, password, fullName, picture, emails, orgs = [] }) {
   const UserModel = db.model('User');
 
   // ensure there is exactly 1 primary email
   const primaryEmails = emails.filter((email) => email.isPrimary);
   if (primaryEmails.length < 1) {
-    throw new InvalidPrimaryEmailError(
-      'You must specify at least 1 primary email'
-    );
+    throw new InvalidPrimaryEmailError('You must specify at least 1 primary email');
   }
   if (primaryEmails.length > 1) {
-    throw new InvalidPrimaryEmailError(
-      'User cannot have more than 1 primary emails'
-    );
+    throw new InvalidPrimaryEmailError('User cannot have more than 1 primary emails');
   }
 
   // attempt to populate missing picture from gravatar
@@ -32,11 +25,7 @@ async function createUser(
   // generate salt + digest password
   const salt = await UserModel.generateSalt();
   const iterationCount = 100000; // ~0.3 secs on Macbook Pro Late 2011
-  const digestedPassword = await UserModel.digestPassword(
-    password,
-    salt,
-    iterationCount
-  );
+  const digestedPassword = await UserModel.digestPassword(password, salt, iterationCount);
 
   // create user in db
   try {
@@ -45,21 +34,19 @@ async function createUser(
       password: digestedPassword,
       salt,
       iterationCount,
-      fullName: fullName,
+      fullName,
       picture,
-      emails: emails,
-      orgs: [],
-      roles: [],
+      emails,
+      orgs,
     });
 
     return {
-      id: user._id,
+      id: user.id, // as hex string
       username: user.username,
       fullName: user.fullName,
       picture: user.picture,
       emails: user.emails,
       orgs: user.orgs,
-      roles: user.roles,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
@@ -70,9 +57,7 @@ async function createUser(
       }
 
       if (err.message.includes('username_uidx')) {
-        throw new DuplicateUsernameError(
-          `Username "${username}" already in use`
-        );
+        throw new DuplicateUsernameError(`Username "${username}" already in use`);
       }
     }
 

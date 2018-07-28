@@ -92,7 +92,10 @@ function createAuthnMiddleware({ ignore = false } = {}) {
         issuedAt,
         expiresAt,
       },
-      user: records[0].user,
+      user: {
+        ...records[0].user,
+        id: records[0].user._id,
+      },
     };
 
     await next();

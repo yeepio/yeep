@@ -39,3 +39,59 @@ export class DuplicateUsernameError extends Error {
     this.code = 10006;
   }
 }
+
+export class DuplicatePermissionError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10007;
+  }
+}
+
+export class PermissionNotFoundError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10008;
+  }
+}
+
+export class ImmutablePermissionError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10009;
+  }
+}
+
+export class DuplicatePermissionAssignmentError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10010;
+  }
+}
+
+export class OrgNotFoundError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10011;
+  }
+}
+
+export class InvalidPermissionAssignmentError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10011;
+  }
+}
+
+export class AuthorizationError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10012;
+  }
+}
+
+export class PermissionAssignmentNotFoundError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10013;
+  }
+}

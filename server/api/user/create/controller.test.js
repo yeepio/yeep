@@ -1,35 +1,92 @@
 /* eslint-env jest */
 import request from 'supertest';
 import server from '../../../server';
+import deleteUser from '../delete/service';
+import createUser from './service';
+import deletePermissionAssignment from '../revokePermission/service';
+import destroySessionToken from '../../session/destroy/service';
+import createSessionToken from '../../session/create/service';
+import createPermissionAssignment from '../assignPermission/service';
+import createOrg from '../../org/create/service';
+import deleteOrg from '../../org/delete/service';
 
 describe('api/v1/user.create', () => {
+  let ctx;
+  let org;
+  let requestor;
+  let permissionAssignment;
+  let session;
+
   beforeAll(async () => {
     await server.setup();
+    ctx = server.getAppContext();
+
+    requestor = await createUser(ctx.db, {
+      username: 'wile',
+      password: 'catch-the-b1rd$',
+      fullName: 'Wile E. Coyote',
+      picture: 'https://www.acme.com/pictures/coyote.png',
+      emails: [
+        {
+          address: 'coyote@acme.com',
+          isVerified: true,
+          isPrimary: true,
+        },
+      ],
+    });
+
+    org = await createOrg(ctx.db, {
+      name: 'Acme Inc',
+      slug: 'acme',
+      adminId: requestor.id,
+    });
+
+    const PermissionModel = ctx.db.model('Permission');
+    const permission = await PermissionModel.findOne({
+      name: 'yeep.user.write',
+      scope: { $exists: false },
+    });
+    permissionAssignment = await createPermissionAssignment(ctx.db, {
+      userId: requestor.id,
+      orgId: org.id,
+      permissionId: permission.id,
+    });
+
+    session = await createSessionToken(ctx.db, ctx.jwt, {
+      username: 'wile',
+      password: 'catch-the-b1rd$',
+    });
   });
 
   afterAll(async () => {
+    await destroySessionToken(ctx.db, session);
+    await deletePermissionAssignment(ctx.db, permissionAssignment);
+    await deleteUser(ctx.db, requestor);
+    await deleteOrg(ctx.db, org);
     await server.teardown();
   });
 
   test('returns error when `emails` contains duplicate addresses', async () => {
     const res = await request(server)
       .post('/api/v1/user.create')
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
-        username: 'wile',
-        password: 'catch-the-b1rd$',
-        fullName: 'Wile E. Coyote',
+        username: 'runner',
+        password: 'fast+furry-ous',
+        fullName: 'Road Runner',
         emails: [
           {
-            address: 'coyote@acme.com',
+            address: 'beep-beep@acme.com',
             isVerified: false,
             isPrimary: false,
           },
           {
-            address: 'coyote@acme.com',
+            address: 'beep-beep@acme.com',
             isVerified: false,
             isPrimary: false,
           },
         ],
+        orgs: [org.id],
       });
 
     expect(res.status).toBe(200);
@@ -48,22 +105,24 @@ describe('api/v1/user.create', () => {
   test('returns error when primary email is not specified', async () => {
     const res = await request(server)
       .post('/api/v1/user.create')
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
-        username: 'wile',
-        password: 'catch-the-b1rd$',
-        fullName: 'Wile E. Coyote',
+        username: 'runner',
+        password: 'fast+furry-ous',
+        fullName: 'Road Runner',
         emails: [
           {
-            address: 'coyote@acme.com',
+            address: 'beep-beep@acme.com',
             isVerified: false,
             isPrimary: false,
           },
           {
-            address: 'wile@acme.com',
+            address: 'roadrunner@acme.com',
             isVerified: false,
             isPrimary: false,
           },
         ],
+        orgs: [org.id],
       });
 
     expect(res.status).toBe(200);
@@ -79,22 +138,24 @@ describe('api/v1/user.create', () => {
   test('throws error when multiple primary emails are specified', async () => {
     const res = await request(server)
       .post('/api/v1/user.create')
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
-        username: 'wile',
-        password: 'catch-the-b1rd$',
-        fullName: 'Wile E. Coyote',
+        username: 'runner',
+        password: 'fast+furry-ous',
+        fullName: 'Road Runner',
         emails: [
           {
-            address: 'coyote@acme.com',
+            address: 'beep-beep@acme.com',
             isVerified: false,
             isPrimary: true,
           },
           {
-            address: 'wile@acme.com',
+            address: 'roadrunner@acme.com',
             isVerified: false,
             isPrimary: true,
           },
         ],
+        orgs: [org.id],
       });
 
     expect(res.status).toBe(200);
@@ -108,80 +169,12 @@ describe('api/v1/user.create', () => {
   });
 
   test('creates new user and returns expected response', async () => {
-    let res = await request(server)
+    const res = await request(server)
       .post('/api/v1/user.create')
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
-        username: 'Wile',
-        password: 'catch-the-b1rd$',
-        fullName: 'Wile E. Coyote',
-        emails: [
-          {
-            address: 'coyote@acme.com',
-            isVerified: true,
-            isPrimary: true,
-          },
-        ],
-      });
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual({
-      ok: true,
-      user: expect.objectContaining({
-        id: expect.any(String),
-        username: 'wile',
-        fullName: 'Wile E. Coyote',
-        picture: null,
-        emails: [
-          {
-            address: 'coyote@acme.com',
-            isVerified: true,
-            isPrimary: true,
-          },
-        ],
-        orgs: [],
-        roles: [],
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-      }),
-    });
-
-    res = await request(server)
-      .post('/api/v1/user.delete')
-      .send({
-        id: res.body.user.id,
-      });
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: true,
-    });
-  });
-
-  test('returns error on duplicate username', async () => {
-    let res = await request(server)
-      .post('/api/v1/user.create')
-      .send({
-        username: 'Wile',
-        password: 'catch-the-b1rd$',
-        fullName: 'Wile E. Coyote',
-        emails: [
-          {
-            address: 'coyote@acme.com',
-            isVerified: true,
-            isPrimary: true,
-          },
-        ],
-      });
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: true,
-    });
-
-    const { id } = res.body.user;
-
-    res = await request(server)
-      .post('/api/v1/user.create')
-      .send({
-        username: 'wile',
-        password: 'play-wolf',
+        username: 'runner',
+        password: 'fast+furry-ous',
         fullName: 'Road Runner',
         emails: [
           {
@@ -190,6 +183,63 @@ describe('api/v1/user.create', () => {
             isPrimary: true,
           },
         ],
+        orgs: [org.id],
+      });
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      ok: true,
+      user: expect.objectContaining({
+        id: expect.any(String),
+        username: 'runner',
+        fullName: 'Road Runner',
+        picture: null,
+        emails: [
+          {
+            address: 'beep-beep@acme.com',
+            isVerified: true,
+            isPrimary: true,
+          },
+        ],
+        orgs: expect.arrayContaining([org.id]),
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
+      }),
+    });
+
+    const isUserDeleted = await deleteUser(ctx.db, res.body.user);
+    expect(isUserDeleted).toBe(true);
+  });
+
+  test('returns error on duplicate username', async () => {
+    const user = await createUser(ctx.db, {
+      username: 'runner',
+      password: 'fast+furry-ous',
+      fullName: 'Road Runner',
+      picture: 'https://www.acme.com/pictures/roadrunner.png',
+      emails: [
+        {
+          address: 'beep-beep@acme.com',
+          isVerified: true,
+          isPrimary: true,
+        },
+      ],
+    });
+
+    const res = await request(server)
+      .post('/api/v1/user.create')
+      .set('Authorization', `Bearer ${session.token}`)
+      .send({
+        username: 'runner',
+        password: 'fast+furry-ous!!',
+        fullName: 'Road Runner Jr.',
+        emails: [
+          {
+            address: 'roadrunnerjr@acme.com',
+            isVerified: true,
+            isPrimary: true,
+          },
+        ],
+        orgs: [org.id],
       });
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
@@ -200,55 +250,45 @@ describe('api/v1/user.create', () => {
       },
     });
 
-    res = await request(server)
-      .post('/api/v1/user.delete')
-      .send({ id });
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: true,
-    });
+    const isUserDeleted = await deleteUser(ctx.db, user);
+    expect(isUserDeleted).toBe(true);
   });
 
   test('returns error on duplicate email address', async () => {
-    let res = await request(server)
-      .post('/api/v1/user.create')
-      .send({
-        username: 'Wile',
-        password: 'catch-the-b1rd$',
-        fullName: 'Wile E. Coyote',
-        emails: [
-          {
-            address: 'coyote@acme.com',
-            isVerified: true,
-            isPrimary: true,
-          },
-          {
-            address: 'carnivorous@acme.com',
-            isVerified: false,
-            isPrimary: false,
-          },
-        ],
-      });
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: true,
+    const user = await createUser(ctx.db, {
+      username: 'runner',
+      password: 'fast+furry-ous',
+      fullName: 'Road Runner',
+      picture: 'https://www.acme.com/pictures/roadrunner.png',
+      emails: [
+        {
+          address: 'beep-beep@acme.com',
+          isVerified: true,
+          isPrimary: true,
+        },
+        {
+          address: 'roadrunner@acme.com',
+          isVerified: false,
+          isPrimary: false,
+        },
+      ],
     });
 
-    const { id } = res.body.user;
-
-    res = await request(server)
+    const res = await request(server)
       .post('/api/v1/user.create')
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         username: 'roadrunner',
-        password: 'play-wolf',
+        password: 'fast+furry-ous',
         fullName: 'Road Runner',
         emails: [
           {
-            address: 'Carnivorous@acme.com',
+            address: 'RoadRunner@acme.com', // case-insensitive
             isVerified: true,
             isPrimary: true,
           },
         ],
+        orgs: [org.id],
       });
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
@@ -259,12 +299,34 @@ describe('api/v1/user.create', () => {
       },
     });
 
-    res = await request(server)
-      .post('/api/v1/user.delete')
-      .send({ id });
+    const isUserDeleted = await deleteUser(ctx.db, user);
+    expect(isUserDeleted).toBe(true);
+  });
+
+  test('returns error when creating global user without necessary permission', async () => {
+    const res = await request(server)
+      .post('/api/v1/user.create')
+      .set('Authorization', `Bearer ${session.token}`)
+      .send({
+        // absense of orgs denotes global user
+        username: 'roadrunner',
+        password: 'fast+furry-ous',
+        fullName: 'Road Runner',
+        emails: [
+          {
+            address: 'RoadRunner@acme.com', // case-insensitive
+            isVerified: true,
+            isPrimary: true,
+          },
+        ],
+      });
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
-      ok: true,
+      ok: false,
+      error: {
+        code: 10012,
+        message: expect.any(String),
+      },
     });
   });
 });

@@ -66,7 +66,6 @@ const userSchema = new Schema(
     },
     emails: [emailSchema],
     orgs: [Schema.Types.ObjectId],
-    roles: [Schema.Types.ObjectId],
   },
   {
     collection: 'users',

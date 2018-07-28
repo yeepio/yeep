@@ -3,6 +3,15 @@ import Boom from 'boom';
 import compose from 'koa-compose';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { createValidationMiddleware } from '../../../middleware/validation';
+import createAuthnMiddleware from '../../../middleware/authn';
+import createAuthzMiddleware from '../../../middleware/authz';
+import deleteOrg from './service';
+
+const authn = createAuthnMiddleware();
+const authz = createAuthzMiddleware({
+  permissions: ['yeep.org.write'],
+  org: (request) => request.body.id,
+});
 
 const validation = createValidationMiddleware({
   body: {
@@ -14,13 +23,16 @@ const validation = createValidationMiddleware({
 });
 
 async function handler({ request, response, db }) {
-  const OrgModel = db.model('Org');
+  const isOrgDeleted = await deleteOrg(db, {
+    ...request.body,
+    adminId: request.session.user.id,
+  });
 
-  const result = await OrgModel.deleteOne({ _id: request.body.id });
-
-  if (!result.ok) throw Boom.internal();
+  if (!isOrgDeleted) {
+    throw Boom.internal();
+  }
 
   response.status = 200; // OK
 }
 
-export default compose([packJSONRPC, validation, handler]);
+export default compose([packJSONRPC, authn, validation, authz, handler]);

@@ -3,6 +3,7 @@ import health from './health';
 import org from './org';
 import user from './user';
 import session from './session';
+import permission from './permission';
 
 const router = Router();
 
@@ -19,5 +20,6 @@ router.use('/api', health.routes(), health.allowedMethods());
 router.use('/api', org.routes(), org.allowedMethods());
 router.use('/api', user.routes(), user.allowedMethods());
 router.use('/api', session.routes(), session.allowedMethods());
+router.use('/api', permission.routes(), permission.allowedMethods());
 
 export default router;
