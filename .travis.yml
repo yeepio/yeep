@@ -7,6 +7,8 @@ env:
     - JWT_SECRET="keep it safe, keep it hidden!"
   matrix:
     - MONGODB=4.0.0
+before_install:
+  - npm i -g npm@latest
 install:
   - wget http://fastdl.mongodb.org/linux/mongodb-linux-x86_64-${MONGODB}.tgz
   - tar xzf mongodb-linux-x86_64-${MONGODB}.tgz
