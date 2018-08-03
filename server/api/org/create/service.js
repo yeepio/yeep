@@ -13,9 +13,10 @@ async function createOrg(db, { name, slug, adminId }) {
   const UserModel = db.model('User');
   const PermissionAssignmentModel = db.model('PermissionAssignment');
 
-  try {
-    // TODO: use transactions
+  const session = await db.startSession();
+  session.startTransaction();
 
+  try {
     // create org
     const org = await OrgModel.create({ name, slug });
 
@@ -36,6 +37,7 @@ async function createOrg(db, { name, slug, adminId }) {
       })
     );
 
+    await session.commitTransaction();
     return {
       id: org.id, // as hex string
       name: org.name,
@@ -48,7 +50,10 @@ async function createOrg(db, { name, slug, adminId }) {
       throw new DuplicateOrgError(`Org "${slug}" already exists`);
     }
 
+    await session.abortTransaction();
     throw err;
+  } finally {
+    session.endSession();
   }
 }
 
