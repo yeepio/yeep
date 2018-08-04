@@ -10,6 +10,7 @@ import Boom from 'boom';
 import mongoose from 'mongoose';
 import * as models from './models';
 import JsonWebToken from './utils/JsonWebToken';
+import SettingsStore from './utils/SettingsStore';
 
 import errorHandler from './middleware/errorHandler';
 import api from './api';
@@ -81,8 +82,12 @@ app.use(
 );
 
 server.teardown = async () => {
+  const { db, settings } = app.context;
+
+  // close setting store
+  await settings.teardown();
+
   // disconnect from mongodb
-  const { db } = app.context;
   await db.close();
 };
 
@@ -98,7 +103,12 @@ server.setup = async () => {
     db.model(key, schema);
   });
 
+  // setup settings store
+  const settings = new SettingsStore(db);
+  await settings.setup();
+
   // populate app context
+  app.context.settings = settings;
   app.context.db = db;
   app.context.jwt = jwt;
 };
