@@ -89,6 +89,7 @@ server.teardown = async () => {
 server.setup = async () => {
   // connect to mongodb + register models
   const db = await mongoose.createConnection(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
     autoIndex: false,
     bufferCommands: false,
   });
