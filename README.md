@@ -1,6 +1,6 @@
 # Yeep
 
-[![Build Status](https://travis-ci.org/yeepio/yeep.svg?branch=master)](https://travis-ci.org/yeepio/yeep)
+[![Build Status](https://travis-ci.com/yeepio/yeep.svg?branch=master)](https://travis-ci.com/yeepio/yeep)
 
 #### Requirements
 
