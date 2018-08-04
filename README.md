@@ -5,7 +5,7 @@
 #### Requirements
 
 * Node.js v.8+
-* MongoDB v.4+
+* MongoDB v.4+ with Replica Set
 
 ## License
 
