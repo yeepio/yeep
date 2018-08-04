@@ -1,26 +1,52 @@
+import omit from 'lodash/fp/omit';
+
+const omitId = omit('_id');
+
 class SettingsStore {
   constructor(db) {
-    this.db = db;
+    const SettingsModel = db.model('Settings');
+    this.model = SettingsModel;
+    this.cache = {};
+  }
+
+  async setup() {
+    // initialize internal cache
+    this.cache = await this.model.findOne({}, { _id: 0 }, { lean: true });
+
+    // create change stream
+    const changeStream = this.model.watch({
+      fullDocument: 'updateLookup',
+    });
+
+    // watch for external changes to settings
+    changeStream
+      .on('change', (change) => {
+        // update cache
+        this.cache = omitId(change.fullDocument);
+      })
+      .on('error', (err) => {
+        console.error(err);
+      });
+
+    // store changeStream reference
+    this.changeStream = changeStream;
+  }
+
+  async teardown() {
+    // explicitely close changeStream to avoid stupid MongoNetworkError
+    await this.changeStream.driverChangeStream.close();
   }
 
   async get(key) {
-    // populate internal cache if empty
-    if (!this._cache) {
-      const SettingsModel = this.db.model('Settings');
-      const nextSettings = await SettingsModel.findOne({}, { _id: 0 }, { lean: true });
-      this._cache = nextSettings;
-    }
-
-    if (!this._cache.hasOwnProperty(key)) {
+    if (!this.cache.hasOwnProperty(key)) {
       throw new Error(`Key "${key}" does not exist in settings`);
     }
 
-    return this._cache[key];
+    return this.cache[key];
   }
 
   async set(key, value) {
-    const SettingsModel = this.db.model('Settings');
-    const nextSettings = await SettingsModel.findOneAndUpdate(
+    const nextSettings = await this.model.findOneAndUpdate(
       {},
       {
         $set: {
@@ -38,12 +64,11 @@ class SettingsStore {
     );
 
     // update internal cache
-    this._cache = nextSettings;
+    this.cache = nextSettings;
   }
 
   async delete(key) {
-    const SettingsModel = this.db.model('Settings');
-    const nextSettings = await SettingsModel.findOneAndUpdate(
+    const nextSettings = await this.model.findOneAndUpdate(
       {},
       {
         $unset: {
@@ -61,7 +86,7 @@ class SettingsStore {
     );
 
     // update internal cache
-    this._cache = nextSettings;
+    this.cache = nextSettings;
   }
 }
 

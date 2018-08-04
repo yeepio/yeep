@@ -1,5 +1,6 @@
 /* eslint-env jest */
 import mongoose from 'mongoose';
+import { delay } from 'awaiting';
 import SettingsStore from './SettingsStore';
 import Schema from '../models/Settings';
 
@@ -15,9 +16,11 @@ describe('SettingsStore', () => {
     });
     db.model('Settings', Schema);
     settings = new SettingsStore(db);
+    await settings.setup();
   });
 
   afterAll(async () => {
+    await settings.teardown();
     await db.close();
   });
 
@@ -58,7 +61,7 @@ describe('SettingsStore', () => {
   });
 
   describe('delete', () => {
-    afterAll(async () => {
+    beforeAll(async () => {
       await settings.set('foo', 123);
     });
 
@@ -68,5 +71,39 @@ describe('SettingsStore', () => {
       // ensure key does not exist
       await expect(settings.get('foo')).rejects.toThrow();
     });
+  });
+
+  test('updates cache on external changes', async () => {
+    // add new prop
+    await db.model('Settings').updateOne(
+      {},
+      {
+        $set: { bar: 123 },
+      }
+    );
+    await delay(300);
+    const value = await settings.get('bar');
+    expect(value).toEqual(123);
+
+    // update prop
+    await db.model('Settings').updateOne(
+      {},
+      {
+        $set: { bar: 321 },
+      }
+    );
+    await delay(300);
+    const updatedValue = await settings.get('bar');
+    expect(updatedValue).toEqual(321);
+
+    // remove prop
+    await db.model('Settings').updateOne(
+      {},
+      {
+        $unset: { bar: '' },
+      }
+    );
+    await delay(300);
+    await expect(settings.get('bar')).rejects.toThrow();
   });
 });
