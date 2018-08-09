@@ -12,7 +12,12 @@ Requestor is automatically assigned with the "admin" role for the newly created 
 
 ## Requires auth
 
-Requestor must be authenticated.
+Requestor must be authenticated and assigned with the `yeep.org.write` permission depending on the `isOrgCreationOpen` setting (see table below).
+
+| isOrgCreationOpen | Required permission |
+| ----------------- | ------------------- |
+| `true` | `yeep.org.write` |
+| `false` | - |
 
 ## Parameters
 
@@ -35,7 +40,10 @@ Requestor must be authenticated.
 
 **Request**
 
-`POST /api/v1/org.create`
+```
+POST /api/v1/org.create
+Authorization: `Bearer ${authToken}`
+```
 
 ``` json
 {
