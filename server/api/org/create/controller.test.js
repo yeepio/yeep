@@ -8,6 +8,8 @@ import createSessionToken from '../../session/create/service';
 import destroySessionToken from '../../session/destroy/service';
 import deleteUser from '../../user/delete/service';
 import getUserInfo from '../../user/info/service';
+import createPermissionAssignment from '../../user/assignPermission/service';
+import deletePermissionAssignment from '../../user/revokePermission/service';
 
 describe('api/v1/org.create', () => {
   let ctx;
@@ -249,6 +251,112 @@ describe('api/v1/org.create', () => {
 
       const isOrgDeleted = await deleteOrg(ctx.db, org);
       expect(isOrgDeleted).toBe(true);
+    });
+  });
+
+  describe('when isOrgCreationOpen = false', () => {
+    let user;
+    let session;
+
+    beforeAll(async () => {
+      await ctx.settings.set('isOrgCreationOpen', false);
+
+      user = await createUser(ctx.db, {
+        username: 'wile',
+        password: 'catch-the-b1rd$',
+        fullName: 'Wile E. Coyote',
+        picture: 'https://www.acme.com/pictures/coyote.png',
+        emails: [
+          {
+            address: 'coyote@acme.com',
+            isVerified: true,
+            isPrimary: true,
+          },
+        ],
+      });
+
+      session = await createSessionToken(ctx.db, ctx.jwt, {
+        username: 'wile',
+        password: 'catch-the-b1rd$',
+      });
+    });
+
+    afterAll(async () => {
+      await ctx.settings.set('isOrgCreationOpen', true);
+      await destroySessionToken(ctx.db, session);
+      await deleteUser(ctx.db, user);
+    });
+
+    describe('user does not have required permission', () => {
+      test('returns authorization error', async () => {
+        const res = await request(server)
+          .post('/api/v1/org.create')
+          .set('Authorization', `Bearer ${session.token}`)
+          .send({
+            name: 'ACME Inc.',
+            slug: 'acme',
+          });
+
+        expect(res.status).toBe(200);
+        expect(res.type).toMatch(/json/);
+        expect(res.body).toMatchObject({
+          ok: false,
+          error: {
+            code: 10012,
+            message:
+              'User "wile" does not have permission "yeep.org.write" to access this resource',
+          },
+        });
+      });
+    });
+
+    describe('user has required permission', () => {
+      let permissionAssignment;
+
+      beforeAll(async () => {
+        const PermissionModel = ctx.db.model('Permission');
+        const permission = await PermissionModel.findOne({
+          name: 'yeep.org.write',
+          scope: { $exists: false },
+        });
+        permissionAssignment = await createPermissionAssignment(ctx.db, {
+          userId: user.id,
+          permissionId: permission.id,
+        });
+      });
+
+      afterAll(async () => {
+        await deletePermissionAssignment(ctx.db, permissionAssignment);
+      });
+
+      test('creates new org and returns expected response', async () => {
+        const res = await request(server)
+          .post('/api/v1/org.create')
+          .set('Authorization', `Bearer ${session.token}`)
+          .send({
+            name: 'ACME Inc.',
+            slug: 'acme',
+          });
+
+        expect(res.status).toBe(200);
+        expect(res.type).toMatch(/json/);
+        expect(res.body).toMatchObject({
+          ok: true,
+          org: expect.objectContaining({
+            id: expect.any(String),
+            name: expect.any(String),
+            slug: expect.any(String),
+            createdAt: expect.any(String),
+            updatedAt: expect.any(String),
+          }),
+        });
+
+        const admin = await getUserInfo(ctx.db, user);
+        expect(admin.orgs).toEqual(expect.arrayContaining([res.body.org.id]));
+
+        const isOrgDeleted = await deleteOrg(ctx.db, res.body.org);
+        expect(isOrgDeleted).toBe(true);
+      });
     });
   });
 });
