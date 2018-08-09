@@ -6,6 +6,10 @@ const settingsSchema = new Schema(
       type: Boolean,
       required: false,
     },
+    isOrgCreationOpen: {
+      type: Boolean,
+      required: false,
+    },
   },
   {
     collection: 'settings',
