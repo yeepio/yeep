@@ -100,6 +100,14 @@ userSchema.index(
 );
 
 /**
+ * Normalizes the designated username and returns a new string.
+ * @return {String} normalized username
+ */
+userSchema.statics.normalizeUsername = function(username) {
+  return username.normalize('NFKC').toLowerCase();
+};
+
+/**
  * Generates and returns a cryptographically secure pseudorandom buffer of 30 bytes.
  * @return {Promise<Buffer>} a Bluebird promise resolving to a Buffer.
  */
