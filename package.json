@@ -80,6 +80,7 @@
     "lodash": "^4.17.10",
     "mongoose": "^5.2.6",
     "mongoose-migrate-2": "^0.2.4",
+    "normalize-email": "^1.1.1",
     "randomstring": "^1.1.5",
     "rimraf": "^2.6.2",
     "typeof": "^1.0.0"
