@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import Promise from 'bluebird';
 import { Schema } from 'mongoose';
+import normalizeEmail from 'normalize-email';
 
 const randomBytes = Promise.promisify(crypto.randomBytes);
 const pbkdf2 = Promise.promisify(crypto.pbkdf2);
@@ -101,10 +102,20 @@ userSchema.index(
 
 /**
  * Normalizes the designated username and returns a new string.
+ * @param {String} username
  * @return {String} normalized username
  */
 userSchema.statics.normalizeUsername = function(username) {
   return username.normalize('NFKC').toLowerCase();
+};
+
+/**
+ * Normalizes the designated email address and returns new string.
+ * @param {String} emailAddress
+ * @return {String} normalized email address
+ */
+userSchema.statics.normalizeEmailAddress = function(emailAddress) {
+  return normalizeEmail(emailAddress);
 };
 
 /**
