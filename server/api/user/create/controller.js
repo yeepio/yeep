@@ -5,6 +5,7 @@ import { createValidationMiddleware } from '../../../middleware/validation';
 import createAuthnMiddleware from '../../../middleware/authn';
 import createAuthzMiddleware from '../../../middleware/authz';
 import createUser from './service';
+import { InvalidUsernameError } from '../../../constants/errors';
 
 const authn = createAuthnMiddleware();
 const authz = createAuthzMiddleware({
@@ -22,7 +23,7 @@ const validation = createValidationMiddleware({
       .trim()
       .min(2)
       .max(30)
-      .required()
+      .optional()
       .regex(/^[A-Za-z0-9_\-.]*$/, { name: 'username' }),
     password: Joi.string()
       .trim()
@@ -77,7 +78,13 @@ const validation = createValidationMiddleware({
   },
 });
 
-async function handler({ request, response, db }) {
+async function handler({ request, response, db, settings }) {
+  const isUsernameEnabled = await settings.get('isUsernameEnabled');
+
+  if (isUsernameEnabled && !request.body.username) {
+    throw new InvalidUsernameError('You must specify a username property');
+  }
+
   const user = await createUser(db, request.body);
 
   response.status = 200; // OK

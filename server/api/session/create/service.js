@@ -3,21 +3,55 @@ import { UserNotFoundError, InvalidCredentialsError } from '../../../constants/e
 
 async function createSessionToken(db, jwt, { username, password }) {
   const UserModel = db.model('User');
+  const CredentialsModel = db.model('Credentials');
 
   // retrieve user from db
-  const user = await UserModel.findOne({
-    username: username,
-  });
+  const users = await UserModel.aggregate([
+    { $match: { username } },
+    {
+      $lookup: {
+        from: 'credentials',
+        let: { userId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [{ $eq: ['$type', 'PASSWORD'] }, { $eq: ['$user', '$$userId'] }],
+              },
+            },
+          },
+        ],
+        as: 'credentials',
+      },
+    },
+    {
+      $unwind: '$credentials',
+    },
+    {
+      $project: {
+        _id: 1,
+        password: '$credentials.password',
+        salt: '$credentials.salt',
+        iterationCount: '$credentials.iterationCount',
+      },
+    },
+  ]).exec();
 
   // make sure user exists
-  if (!user) {
+  if (users.length === 0) {
     throw new UserNotFoundError(`User "${username}" not found`);
   }
 
-  // verify password
-  const digestedPassword = await UserModel.digestPassword(password, user.salt, user.iterationCount);
+  const user = users[0];
 
-  if (user.password.compare(digestedPassword) !== 0) {
+  // verify password
+  const digestedPassword = await CredentialsModel.digestPassword(
+    password,
+    user.salt.buffer,
+    user.iterationCount
+  );
+
+  if (user.password.buffer.compare(digestedPassword) !== 0) {
     throw new InvalidCredentialsError('Invalid username or password credentials');
   }
 
@@ -37,7 +71,7 @@ async function createSessionToken(db, jwt, { username, password }) {
   // generate JWT token
   const jwtToken = await jwt.sign(
     {
-      userId: user.id,
+      userId: user._id.toHexString(),
     },
     {
       jwtid: token.secret,

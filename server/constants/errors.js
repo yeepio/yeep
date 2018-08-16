@@ -95,3 +95,10 @@ export class PermissionAssignmentNotFoundError extends Error {
     this.code = 10013;
   }
 }
+
+export class InvalidUsernameError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10014;
+  }
+}

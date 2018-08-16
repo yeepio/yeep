@@ -54,7 +54,7 @@ Authorization: `Bearer ${authToken}`
 
 **Response**
 
-`200 Created`
+`200 OK`
 
 ``` json
 {

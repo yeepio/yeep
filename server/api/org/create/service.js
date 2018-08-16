@@ -38,6 +38,7 @@ async function createOrg(db, { name, slug, adminId }) {
     );
 
     await session.commitTransaction();
+
     return {
       id: org.id, // as hex string
       name: org.name,
@@ -46,11 +47,11 @@ async function createOrg(db, { name, slug, adminId }) {
       updatedAt: org.updatedAt,
     };
   } catch (err) {
+    await session.abortTransaction();
+
     if (err.code === 11000) {
       throw new DuplicateOrgError(`Org "${slug}" already exists`);
     }
-
-    await session.abortTransaction();
     throw err;
   } finally {
     session.endSession();
