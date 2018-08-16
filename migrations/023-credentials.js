@@ -15,5 +15,5 @@ exports.up = async function(next) {
 
 exports.down = async function(next) {
   await mongoose.connect(process.env.MONGODB_URI);
-  await mongoose.connection.db.collection('users').dropIndex('user_password_uidx', next);
+  await mongoose.connection.db.collection('credentials').dropIndex('user_password_uidx', next);
 };
