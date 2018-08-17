@@ -1,11 +1,11 @@
 import Joi from 'joi';
+import Boom from 'boom';
 import compose from 'koa-compose';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { createValidationMiddleware } from '../../../middleware/validation';
 import createAuthnMiddleware from '../../../middleware/authn';
 import createAuthzMiddleware from '../../../middleware/authz';
 import createUser from './service';
-import { InvalidUsernameError } from '../../../constants/errors';
 
 const authn = createAuthnMiddleware();
 const authz = createAuthzMiddleware({
@@ -82,7 +82,25 @@ async function handler({ request, response, db, settings }) {
   const isUsernameEnabled = await settings.get('isUsernameEnabled');
 
   if (isUsernameEnabled && !request.body.username) {
-    throw new InvalidUsernameError('You must specify a username property');
+    const boom = Boom.badRequest('Invalid request body');
+    boom.output.payload.details = [
+      {
+        path: ['username'],
+        type: 'any.required',
+      },
+    ];
+    throw boom;
+  }
+
+  if (request.body.username && !isUsernameEnabled) {
+    const boom = Boom.badRequest('Invalid request body');
+    boom.output.payload.details = [
+      {
+        path: ['username'],
+        type: 'any.forbidden',
+      },
+    ];
+    throw boom;
   }
 
   const user = await createUser(db, request.body);
