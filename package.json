@@ -14,7 +14,7 @@
     "build": "babel server --out-dir dist --source-maps --ignore '**/*.test.js,**/*.spec.js,**/*.snapshop.json' --verbose",
     "postinstall": "npm run migrate && npm run build",
     "test": "PORT=5002 jest --config=config/jest.json --runInBand",
-    "coverage": "jest --coverage --config=config/jest.json",
+    "coverage": "jest --config=config/jest.json --coverage",
     "migrate": "MIGRATION_CONFIG_PATH=./config/migrate.js mongoose-migrate-2",
     "prettier-fix": "prettier --write --config .prettierrc '**/*.js'"
   },
@@ -51,6 +51,7 @@
     "nodemon": "^1.17.3",
     "prettier": "^1.12.1",
     "prettier-eslint": "^8.8.1",
+    "regenerator-runtime": "^0.12.1",
     "supertest": "^3.1.0"
   },
   "dependencies": {
@@ -58,7 +59,6 @@
     "@babel/core": "^7.0.0-rc.1",
     "@babel/plugin-proposal-object-rest-spread": "^7.0.0-rc.1",
     "@babel/preset-env": "^7.0.0-rc.1",
-    "@babel/register": "^7.0.0-rc.1",
     "@koa/cors": "^2.2.1",
     "awaiting": "^3.0.0",
     "axios": "^0.18.0",
