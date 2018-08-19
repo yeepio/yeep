@@ -16,7 +16,7 @@ Requestor must be authenticated and assigned with the `yeep.user.write` permissi
 
 ### Body
 
-- **username** _(string)_ — the public name of the user (required if `isUsernameEnabled` is set to true, otherwise username is ignored)
+- **username** _(string)_ — the display name of the user (required if `isUsernameEnabled` setting is true, otherwise forbidden)
 - **password** _(string)_ — user password (required)
 - **fullName** _(string)_ — user full name, e.g. "Wile E. Coyote"
 (required)
