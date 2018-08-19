@@ -1,13 +1,27 @@
 import addSeconds from 'date-fns/add_seconds';
 import { UserNotFoundError, InvalidCredentialsError } from '../../../constants/errors';
 
-async function createSessionToken(db, jwt, { username, password }) {
+const constructMatchQuery = (username, emailAddress) => {
+  if (username) {
+    return { username };
+  }
+
+  return {
+    emails: { $elemMatch: { address: emailAddress } },
+  };
+};
+
+async function createSessionToken(db, jwt, { username, emailAddress, password }) {
   const UserModel = db.model('User');
   const CredentialsModel = db.model('Credentials');
 
+  const normalizedEmailAddress = emailAddress && UserModel.normalizeEmailAddress(emailAddress);
+
   // retrieve user from db
   const users = await UserModel.aggregate([
-    { $match: { username } },
+    {
+      $match: constructMatchQuery(username, normalizedEmailAddress),
+    },
     {
       $lookup: {
         from: 'credentials',
@@ -39,7 +53,11 @@ async function createSessionToken(db, jwt, { username, password }) {
 
   // make sure user exists
   if (users.length === 0) {
-    throw new UserNotFoundError(`User "${username}" not found`);
+    if (username) {
+      throw new UserNotFoundError(`User with username "${username}" not found`);
+    } else {
+      throw new UserNotFoundError(`User with email address "${emailAddress}" not found`);
+    }
   }
 
   const user = users[0];
