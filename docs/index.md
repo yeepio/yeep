@@ -22,3 +22,5 @@ The Yeep API provides programmatic access to yeep platform.
 | Method | Description | Requires Auth |
 | ------ | ----------- | :-----------: |
 | **[session.create](methods/session.create.md)** | Creates new session, a.k.a. sign-in | No |
+| **[session.destroy](methods/session.destroy.md)** | Destroys an existing session, a.k.a sign-out | Yes |
+| **[session.info](methods/session.info.md)** | Retrieves information on the currently active session | Yes |
