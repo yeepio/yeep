@@ -8,12 +8,14 @@ import destroySessionToken from '../destroy/service';
 
 describe('api/v1/session.info', () => {
   let ctx;
+  let user;
+  let session;
 
   beforeAll(async () => {
     await server.setup();
     ctx = server.getAppContext();
 
-    ctx.user = await createUser(ctx.db, {
+    user = await createUser(ctx.db, {
       username: 'wile',
       password: 'catch-the-b1rd$',
       fullName: 'Wile E. Coyote',
@@ -27,22 +29,22 @@ describe('api/v1/session.info', () => {
       ],
     });
 
-    ctx.session = await createSessionToken(ctx.db, ctx.jwt, {
+    session = await createSessionToken(ctx.db, ctx.jwt, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
   });
 
   afterAll(async () => {
-    await destroySessionToken(ctx.db, ctx.session);
-    await deleteUser(ctx.db, ctx.user);
+    await destroySessionToken(ctx.db, session);
+    await deleteUser(ctx.db, user);
     await server.teardown();
   });
 
   test('returns session info as expected', async () => {
     const res = await request(server)
       .post('/api/v1/session.info')
-      .set('Authorization', `Bearer ${ctx.session.token}`);
+      .set('Authorization', `Bearer ${session.token}`);
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual(

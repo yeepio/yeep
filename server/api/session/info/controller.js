@@ -6,7 +6,9 @@ const authn = createAuthnMiddleware();
 
 async function handler({ request, response }) {
   response.status = 200; // OK
-  response.body = request.session;
+  response.body = {
+    session: request.session,
+  };
 }
 
 export default compose([packJSONRPC, authn, handler]);
