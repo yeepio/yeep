@@ -14,12 +14,16 @@ import deletePermission from './service';
 
 describe('api/v1/permission.delete', () => {
   let ctx;
+  let user;
+  let org;
+  let permissionAssignment;
+  let session;
 
   beforeAll(async () => {
     await server.setup();
     ctx = server.getAppContext();
 
-    ctx.user = await createUser(ctx.db, {
+    user = await createUser(ctx.db, {
       username: 'wile',
       password: 'catch-the-b1rd$',
       fullName: 'Wile E. Coyote',
@@ -33,10 +37,10 @@ describe('api/v1/permission.delete', () => {
       ],
     });
 
-    ctx.org = await createOrg(ctx.db, {
+    org = await createOrg(ctx.db, {
       name: 'Acme Inc',
       slug: 'acme',
-      adminId: ctx.user.id,
+      adminId: user.id,
     });
 
     const PermissionModel = ctx.db.model('Permission');
@@ -44,30 +48,30 @@ describe('api/v1/permission.delete', () => {
       name: 'yeep.permission.write',
       scope: { $exists: false },
     });
-    ctx.permissionAssignment = await createPermissionAssignment(ctx.db, {
-      userId: ctx.user.id,
-      orgId: ctx.org.id,
+    permissionAssignment = await createPermissionAssignment(ctx.db, {
+      userId: user.id,
+      orgId: org.id,
       permissionId: permission.id,
     });
 
-    ctx.session = await createSessionToken(ctx.db, ctx.jwt, {
+    session = await createSessionToken(ctx.db, ctx.jwt, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
   });
 
   afterAll(async () => {
-    await destroySessionToken(ctx.db, ctx.session);
-    await deletePermissionAssignment(ctx.db, ctx.permissionAssignment);
-    await deleteOrg(ctx.db, ctx.org);
-    await deleteUser(ctx.db, ctx.user);
+    await destroySessionToken(ctx.db, session);
+    await deletePermissionAssignment(ctx.db, permissionAssignment);
+    await deleteOrg(ctx.db, org);
+    await deleteUser(ctx.db, user);
     await server.teardown();
   });
 
   test('returns error when permission does not exist', async () => {
     const res = await request(server)
       .post('/api/v1/permission.delete')
-      .set('Authorization', `Bearer ${ctx.session.token}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         id: '5b2d5dd0cd86b77258e16d39', // some random objectid
       });
@@ -89,13 +93,13 @@ describe('api/v1/permission.delete', () => {
       scope: { $exists: false },
     });
     const permissionAssignment = await createPermissionAssignment(ctx.db, {
-      userId: ctx.user.id,
+      userId: user.id,
       permissionId: permission.id,
     });
 
     const res = await request(server)
       .post('/api/v1/permission.delete')
-      .set('Authorization', `Bearer ${ctx.session.token}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         id: permission.id,
       });
@@ -116,12 +120,12 @@ describe('api/v1/permission.delete', () => {
     const permission = await createPermission(ctx.db, {
       name: 'yeep.permission.test',
       description: 'This is a test',
-      scope: ctx.org.id,
+      scope: org.id,
     });
 
     const res = await request(server)
       .post('/api/v1/permission.delete')
-      .set('Authorization', `Bearer ${ctx.session.token}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         id: permission.id,
       });
@@ -141,7 +145,7 @@ describe('api/v1/permission.delete', () => {
 
     const res = await request(server)
       .post('/api/v1/permission.delete')
-      .set('Authorization', `Bearer ${ctx.session.token}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         id: permission.id, // some random objectid
       });
