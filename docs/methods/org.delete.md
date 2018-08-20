@@ -43,8 +43,7 @@ Authorization: `Bearer ${authToken}`
 
 ``` json
 {
-  "name": "ACME Inc.",
-  "slug": "acme"
+  "id": "507f191e810c19729de860ea"
 }
 ```
 
