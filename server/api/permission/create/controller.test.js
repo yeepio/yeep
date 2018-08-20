@@ -63,12 +63,7 @@ describe('api/v1/permission.create', () => {
     await server.teardown();
   });
 
-  test('returns error when permission already exists', async () => {
-    const permission = await createPermission(ctx.db, {
-      name: 'yeep.permission.test',
-      description: 'This is a test',
-    });
-
+  test('returns error when permission name is reserved', async () => {
     const res = await request(server)
       .post('/api/v1/permission.create')
       .set('Authorization', `Bearer ${ctx.session.token}`)
@@ -81,8 +76,32 @@ describe('api/v1/permission.create', () => {
     expect(res.body).toMatchObject({
       ok: false,
       error: {
+        code: 10015,
+        message: 'Permissions starting with "yeep" are reserved for system use',
+      },
+    });
+  });
+
+  test('returns error when permission already exists', async () => {
+    const permission = await createPermission(ctx.db, {
+      name: 'acme.test',
+      description: 'This is a test',
+    });
+
+    const res = await request(server)
+      .post('/api/v1/permission.create')
+      .set('Authorization', `Bearer ${ctx.session.token}`)
+      .send({
+        name: 'acme.test',
+        description: 'This is a tost',
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
         code: 10007,
-        message: 'Permission "yeep.permission.test" with global scope already exists',
+        message: 'Global permission "acme.test" already exists',
       },
     });
 
@@ -92,7 +111,7 @@ describe('api/v1/permission.create', () => {
 
   test('returns error when permission + scope already exists', async () => {
     const permission = await createPermission(ctx.db, {
-      name: 'yeep.permission.test',
+      name: 'acme.test',
       description: 'This is a test',
       scope: '5b2d646ce248cb779e7f26cc',
     });
@@ -101,7 +120,7 @@ describe('api/v1/permission.create', () => {
       .post('/api/v1/permission.create')
       .set('Authorization', `Bearer ${ctx.session.token}`)
       .send({
-        name: 'yeep.permission.test',
+        name: 'acme.test',
         description: 'This is a tost',
         scope: '5b2d646ce248cb779e7f26cc',
       });
@@ -111,8 +130,7 @@ describe('api/v1/permission.create', () => {
       ok: false,
       error: {
         code: 10007,
-        message:
-          'Permission "yeep.permission.test" with 5b2d646ce248cb779e7f26cc scope already exists',
+        message: 'Permission "acme.test" already exists under org 5b2d646ce248cb779e7f26cc',
       },
     });
 
@@ -125,7 +143,7 @@ describe('api/v1/permission.create', () => {
       .post('/api/v1/permission.create')
       .set('Authorization', `Bearer ${ctx.session.token}`)
       .send({
-        name: 'yeep.permission.test',
+        name: 'acme.test',
         description: 'This is a test',
         scope: '5b2d649ce248cb779e7f26e2',
       });
@@ -134,7 +152,7 @@ describe('api/v1/permission.create', () => {
       ok: true,
       permission: expect.objectContaining({
         id: expect.any(String),
-        name: 'yeep.permission.test',
+        name: 'acme.test',
         description: 'This is a test',
         scope: '5b2d649ce248cb779e7f26e2',
         isSystemPermission: false,

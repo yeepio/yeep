@@ -1,7 +1,13 @@
-import { DuplicatePermissionError } from '../../../constants/errors';
+import { DuplicatePermissionError, InvalidPermissionError } from '../../../constants/errors';
 
 async function createPermission(db, { name, description, scope }) {
   const PermissionModel = db.model('Permission');
+
+  if (name.startsWith('yeep.')) {
+    throw new InvalidPermissionError(
+      'Permissions starting with "yeep" are reserved for system use'
+    );
+  }
 
   // create permission in db
   try {
@@ -24,7 +30,9 @@ async function createPermission(db, { name, description, scope }) {
   } catch (err) {
     if (err.code === 11000) {
       throw new DuplicatePermissionError(
-        `Permission "${name}" with ${scope ? scope : 'global'} scope already exists`
+        `${scope ? 'Permission' : 'Global permission'} "${name}" already exists${
+          scope ? ` under org ${scope}` : ''
+        }`
       );
     }
 

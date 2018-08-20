@@ -102,3 +102,10 @@ export class InvalidUsernameError extends Error {
     this.code = 10014;
   }
 }
+
+export class InvalidPermissionError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10015;
+  }
+}
