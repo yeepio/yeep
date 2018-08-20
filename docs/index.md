@@ -33,3 +33,4 @@ The Yeep API provides programmatic access to yeep platform.
 | **[permission.delete](methods/permission.delete.md)** | Deletes the designated permission | Yes |
 | **[permission.update](methods/permission.update.md)** | Updates the designated permission | Yes |
 | **[permission.list](methods/permission.list.md)** | Lists all permission | Yes |
+| **[permission.info](methods/permission.info.md)** | Retrieves information on the designated permission | Yes |
