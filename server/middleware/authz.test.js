@@ -134,7 +134,6 @@ describe('authz middleware', () => {
       const PermissionModel = ctx.db.model('Permission');
       const permission = await PermissionModel.findOne({
         name: 'yeep.permission.read',
-        scope: { $exists: false },
       });
       permissionAssignment = await createPermissionAssignment(ctx.db, {
         userId: user.id,
@@ -212,7 +211,6 @@ describe('authz middleware', () => {
       const PermissionModel = ctx.db.model('Permission');
       const permission = await PermissionModel.findOne({
         name: 'yeep.permission.write',
-        scope: { $exists: false },
       });
       permissionAssignment = await createPermissionAssignment(ctx.db, {
         userId: user.id,
@@ -288,7 +286,6 @@ describe('authz middleware', () => {
       const PermissionModel = ctx.db.model('Permission');
       const permission = await PermissionModel.findOne({
         name: 'yeep.permission.write',
-        scope: { $exists: false },
       });
       permissionAssignment = await createPermissionAssignment(ctx.db, {
         userId: user.id,
@@ -381,7 +378,6 @@ describe('authz middleware', () => {
       const PermissionModel = ctx.db.model('Permission');
       const permission = await PermissionModel.findOne({
         name: 'yeep.permission.write',
-        scope: { $exists: false },
       });
       permissionAssignment = await createPermissionAssignment(ctx.db, {
         // note the absence of orgId to mark this as global permission assignment

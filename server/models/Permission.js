@@ -37,10 +37,10 @@ const permissionSchema = new Schema(
 );
 
 permissionSchema.index(
-  { scope: 1, name: 1 },
+  { name: 1 },
   {
     unique: true,
-    name: 'permission_uidx',
+    name: 'name_uidx',
     collation: { locale: 'en', strength: 2 },
   }
 );

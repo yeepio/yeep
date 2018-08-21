@@ -29,11 +29,7 @@ async function createPermission(db, { name, description, scope }) {
     };
   } catch (err) {
     if (err.code === 11000) {
-      throw new DuplicatePermissionError(
-        `${scope ? 'Permission' : 'Global permission'} "${name}" already exists${
-          scope ? ` under org ${scope}` : ''
-        }`
-      );
+      throw new DuplicatePermissionError(`Permission "${name}" already exists`);
     }
 
     throw err;

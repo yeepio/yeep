@@ -44,10 +44,7 @@ describe('api/v1/permission.delete', () => {
     });
 
     const PermissionModel = ctx.db.model('Permission');
-    const permission = await PermissionModel.findOne({
-      name: 'yeep.permission.write',
-      scope: { $exists: false },
-    });
+    const permission = await PermissionModel.findOne({ name: 'yeep.permission.write' });
     permissionAssignment = await createPermissionAssignment(ctx.db, {
       userId: user.id,
       orgId: org.id,
@@ -88,10 +85,7 @@ describe('api/v1/permission.delete', () => {
 
   test('returns error when permission is system-defined', async () => {
     const PermissionModel = ctx.db.model('Permission');
-    const permission = await PermissionModel.findOne({
-      name: 'yeep.permission.write',
-      scope: { $exists: false },
-    });
+    const permission = await PermissionModel.findOne({ name: 'yeep.permission.write' });
     const permissionAssignment = await createPermissionAssignment(ctx.db, {
       userId: user.id,
       permissionId: permission.id,

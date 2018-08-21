@@ -68,7 +68,6 @@ describe('api/v1/user.create', () => {
       const PermissionModel = ctx.db.model('Permission');
       const permission = await PermissionModel.findOne({
         name: 'yeep.user.write',
-        scope: { $exists: false },
       });
       permissionAssignment = await createPermissionAssignment(ctx.db, {
         userId: requestor.id,

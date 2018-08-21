@@ -39,10 +39,7 @@ describe('api/v1/permission.create', () => {
     });
 
     const PermissionModel = ctx.db.model('Permission');
-    const permission = await PermissionModel.findOne({
-      name: 'yeep.permission.write',
-      scope: { $exists: false },
-    });
+    const permission = await PermissionModel.findOne({ name: 'yeep.permission.write' });
     ctx.permissionAssignment = await createPermissionAssignment(ctx.db, {
       userId: ctx.user.id,
       // orgId: ctx.org.id,

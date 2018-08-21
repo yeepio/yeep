@@ -7,7 +7,6 @@ exports.up = async function(next) {
     .collection('permissions')
     .find(
       {
-        scope: { $exists: false },
         name: { $regex: /^yeep\./ },
       },
       {
