@@ -19,6 +19,8 @@ async function getPermissionInfo(db, { id }) {
     description: permission.description,
     scope: permission.scope || null,
     isSystemPermission: permission.isSystemPermission === true,
+    createdAt: permission.createdAt,
+    updatedAt: permission.updatedAt,
   };
 }
 
