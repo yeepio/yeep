@@ -81,7 +81,7 @@ describe('SettingsStore', () => {
         $set: { bar: 123 },
       }
     );
-    await delay(300);
+    await delay(100);
     const value = await settings.get('bar');
     expect(value).toEqual(123);
 
@@ -92,7 +92,7 @@ describe('SettingsStore', () => {
         $set: { bar: 321 },
       }
     );
-    await delay(300);
+    await delay(100);
     const updatedValue = await settings.get('bar');
     expect(updatedValue).toEqual(321);
 
@@ -103,7 +103,7 @@ describe('SettingsStore', () => {
         $unset: { bar: '' },
       }
     );
-    await delay(300);
+    await delay(100);
     await expect(settings.get('bar')).rejects.toThrow();
   });
 });
