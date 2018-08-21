@@ -141,7 +141,7 @@ describe('api/v1/permission.delete', () => {
       .post('/api/v1/permission.delete')
       .set('Authorization', `Bearer ${session.token}`)
       .send({
-        id: permission.id, // some random objectid
+        id: permission.id,
       });
 
     expect(res.status).toBe(200);
