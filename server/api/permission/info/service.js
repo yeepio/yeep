@@ -17,7 +17,7 @@ async function getPermissionInfo(db, { id }) {
     id: permission.id, // as hex string
     name: permission.name,
     description: permission.description,
-    scope: permission.scope || null,
+    scope: permission.scope ? permission.scope.toHexString() : null,
     isSystemPermission: permission.isSystemPermission === true,
     createdAt: permission.createdAt,
     updatedAt: permission.updatedAt,

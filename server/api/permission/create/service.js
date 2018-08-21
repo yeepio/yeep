@@ -22,7 +22,7 @@ async function createPermission(db, { name, description, scope }) {
       id: permission.id, // as hex string
       name: permission.name,
       description: permission.description,
-      scope: permission.scope,
+      scope: permission.scope ? permission.scope.toHexString() : null,
       isSystemPermission: permission.isSystemPermission,
       createdAt: permission.createdAt,
       updatedAt: permission.updatedAt,
