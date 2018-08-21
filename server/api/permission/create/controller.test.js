@@ -98,7 +98,7 @@ describe('api/v1/permission.create', () => {
       ok: false,
       error: {
         code: 10007,
-        message: 'Global permission "acme.test" already exists',
+        message: 'Permission "acme.test" already exists',
       },
     });
 
@@ -127,7 +127,7 @@ describe('api/v1/permission.create', () => {
       ok: false,
       error: {
         code: 10007,
-        message: 'Permission "acme.test" already exists under org 5b2d646ce248cb779e7f26cc',
+        message: 'Permission "acme.test" already exists',
       },
     });
 
