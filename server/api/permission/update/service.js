@@ -37,13 +37,9 @@ async function updatePermission(db, permission, nextProps) {
     );
 
     return {
-      id: permission.id, // as hex string
-      name: nextProps.name || permission.name,
-      description: nextProps.description || permission.description,
-      scope: permission.scope,
-      isSystemPermission: permission.isSystemPermission,
-      createdAt: permission.createdAt,
-      updatedAt: updatedAt,
+      ...permission,
+      ...nextProps,
+      updatedAt,
     };
   } catch (err) {
     if (err.code === 11000) {
