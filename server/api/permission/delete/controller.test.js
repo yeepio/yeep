@@ -118,7 +118,7 @@ describe('api/v1/permission.delete', () => {
 
   test('deletes permission and returns expected response', async () => {
     const permission = await createPermission(ctx.db, {
-      name: 'yeep.permission.test',
+      name: 'acme.test',
       description: 'This is a test',
       scope: org.id,
     });
@@ -139,7 +139,7 @@ describe('api/v1/permission.delete', () => {
   test('returns error when permission is out of scope', async () => {
     const permission = await createPermission(ctx.db, {
       // note the absence of scope to denote global permission
-      name: 'yeep.permission.test',
+      name: 'acme.test',
       description: 'This is a test',
     });
 
