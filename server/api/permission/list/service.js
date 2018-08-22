@@ -53,9 +53,11 @@ async function listPermissions(db, { q, limit, cursor, userId }) {
   const permissions = await PermissionModel.aggregate([
     {
       $match: Object.assign(
-        {
-          scope: { $in: scopes },
-        },
+        scopes.includes(null)
+          ? {}
+          : {
+              scope: { $in: scopes },
+            },
         q
           ? {
               name: {
