@@ -9,6 +9,12 @@ const roleSchema = new Schema(
       maxlength: 64,
       minlength: 2,
     },
+    description: {
+      type: String,
+      required: false,
+      trim: true,
+      maxlength: 140,
+    },
     isSystemRole: {
       type: Boolean,
       required: true,
@@ -18,6 +24,7 @@ const roleSchema = new Schema(
       type: [String],
       required: true,
     },
+    scope: Schema.Types.ObjectId,
   },
   {
     collection: 'roles',
