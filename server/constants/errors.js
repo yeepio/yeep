@@ -109,3 +109,24 @@ export class InvalidPermissionError extends Error {
     this.code = 10015;
   }
 }
+
+export class DuplicateRoleError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10016;
+  }
+}
+
+export class RoleNotFoundError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10017;
+  }
+}
+
+export class ImmutableRoleError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10018;
+  }
+}

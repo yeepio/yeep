@@ -1,8 +1,8 @@
 /* eslint-env jest */
 import request from 'supertest';
 import server from '../../../server';
-import createPermission from '../create/service';
-import deletePermission from '../delete/service';
+import createPermission from '../../permission/create/service';
+import deletePermission from '../../permission/delete/service';
 import createUser from '../../user/create/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import createOrg from '../../org/create/service';
@@ -11,11 +11,14 @@ import destroySessionToken from '../../session/destroy/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
+import createRole from '../create/service';
+import deleteRole from '../delete/service';
 
-describe('api/v1/permission.info', () => {
+describe('api/v1/role.info', () => {
   let ctx;
   let user;
   let org;
+  let permission;
   let permissionAssignment;
   let session;
 
@@ -43,12 +46,18 @@ describe('api/v1/permission.info', () => {
       adminId: user.id,
     });
 
+    permission = await createPermission(ctx.db, {
+      name: 'acme.test',
+      description: 'you know, for testing',
+      scope: org.id,
+    });
+
     const PermissionModel = ctx.db.model('Permission');
-    const permission = await PermissionModel.findOne({ name: 'yeep.permission.read' });
+    const requiredPermission = await PermissionModel.findOne({ name: 'yeep.role.read' });
     permissionAssignment = await createPermissionAssignment(ctx.db, {
       userId: user.id,
       orgId: org.id,
-      permissionId: permission.id,
+      permissionId: requiredPermission.id,
     });
 
     session = await createSessionToken(ctx.db, ctx.jwt, {
@@ -60,14 +69,15 @@ describe('api/v1/permission.info', () => {
   afterAll(async () => {
     await destroySessionToken(ctx.db, session);
     await deletePermissionAssignment(ctx.db, permissionAssignment);
+    await deletePermission(ctx.db, permission);
     await deleteOrg(ctx.db, org);
     await deleteUser(ctx.db, user);
     await server.teardown();
   });
 
-  test('returns error when permission does not exist', async () => {
+  test('returns error when role does not exist', async () => {
     const res = await request(server)
-      .post('/api/v1/permission.info')
+      .post('/api/v1/role.info')
       .set('Authorization', `Bearer ${session.token}`)
       .send({
         id: '5b2d5dd0cd86b77258e16d39', // some random objectid
@@ -77,50 +87,60 @@ describe('api/v1/permission.info', () => {
     expect(res.body).toMatchObject({
       ok: false,
       error: {
-        code: 10008,
-        message: 'Permission 5b2d5dd0cd86b77258e16d39 cannot be found',
+        code: 10017,
+        message: 'Role 5b2d5dd0cd86b77258e16d39 cannot be found',
       },
     });
   });
 
-  test('retrieves permission info', async () => {
-    const permission = await createPermission(ctx.db, {
-      name: 'acme.test',
+  test('retrieves role info', async () => {
+    const globalPermission = await ctx.db
+      .model('Permission')
+      .findOne({ name: 'yeep.permission.read' });
+
+    const role = await createRole(ctx.db, {
+      name: 'acme:manager',
       description: 'This is a test',
+      permissions: [permission.id, globalPermission.id],
       scope: org.id,
     });
 
     const res = await request(server)
-      .post('/api/v1/permission.info')
+      .post('/api/v1/role.info')
       .set('Authorization', `Bearer ${session.token}`)
       .send({
-        id: permission.id,
+        id: role.id,
       });
 
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
       ok: true,
-      permission: {
-        id: permission.id,
+      role: {
+        id: role.id,
       },
     });
 
-    const isPermissionDeleted = await deletePermission(ctx.db, permission);
-    expect(isPermissionDeleted).toBe(true);
+    const isRoleDeleted = await deleteRole(ctx.db, role);
+    expect(isRoleDeleted).toBe(true);
   });
 
-  test('returns error when permission is out of scope', async () => {
-    const permission = await createPermission(ctx.db, {
-      // note the absence of scope to denote global permission
-      name: 'acme.test',
+  test('returns error when role is out of scope', async () => {
+    const globalPermission = await ctx.db
+      .model('Permission')
+      .findOne({ name: 'yeep.permission.read' });
+
+    const role = await createRole(ctx.db, {
+      // note the absence of scope to denote global role
+      name: 'manager',
       description: 'This is a test',
+      permissions: [globalPermission.id],
     });
 
     const res = await request(server)
-      .post('/api/v1/permission.info')
+      .post('/api/v1/role.info')
       .set('Authorization', `Bearer ${session.token}`)
       .send({
-        id: permission.id,
+        id: role.id,
       });
 
     expect(res.status).toBe(200);
@@ -128,12 +148,11 @@ describe('api/v1/permission.info', () => {
       ok: false,
       error: {
         code: 10012,
-        message:
-          'User "wile" does not have permission "yeep.permission.read" to access this resource',
+        message: 'User "wile" does not have permission "yeep.role.read" to access this resource',
       },
     });
 
-    const isPermissionDeleted = await deletePermission(ctx.db, permission);
-    expect(isPermissionDeleted).toBe(true);
+    const isRoleDeleted = await deleteRole(ctx.db, role);
+    expect(isRoleDeleted).toBe(true);
   });
 });
