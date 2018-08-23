@@ -34,3 +34,11 @@ The Yeep API provides programmatic access to yeep platform.
 | **[permission.update](methods/permission.update.md)** | Updates the designated permission | Yes |
 | **[permission.list](methods/permission.list.md)** | Lists all permission | Yes |
 | **[permission.info](methods/permission.info.md)** | Retrieves information on the designated permission | Yes |
+
+### Role
+
+| Method | Description | Requires Auth |
+| ------ | ----------- | :-----------: |
+| **[role.create](methods/role.create.md)** | Creates new role | Yes |
+| **[role.delete](methods/role.delete.md)** | Deletes the designated role | Yes |
+| **[role.info](methods/role.info.md)** | Retrieves information on the designated role | Yes |
