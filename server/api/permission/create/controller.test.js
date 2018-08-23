@@ -14,6 +14,9 @@ import deletePermissionAssignment from '../../user/revokePermission/service';
 
 describe('api/v1/permission.create', () => {
   let ctx;
+  let user;
+  let permissionAssignment;
+  let session;
 
   beforeAll(async () => {
     await server.setup();
@@ -24,7 +27,7 @@ describe('api/v1/permission.create', () => {
     //   slug: 'acme',
     // });
 
-    ctx.user = await createUser(ctx.db, {
+    user = await createUser(ctx.db, {
       username: 'wile',
       password: 'catch-the-b1rd$',
       fullName: 'Wile E. Coyote',
@@ -40,30 +43,30 @@ describe('api/v1/permission.create', () => {
 
     const PermissionModel = ctx.db.model('Permission');
     const permission = await PermissionModel.findOne({ name: 'yeep.permission.write' });
-    ctx.permissionAssignment = await createPermissionAssignment(ctx.db, {
-      userId: ctx.user.id,
+    permissionAssignment = await createPermissionAssignment(ctx.db, {
+      userId: user.id,
       // orgId: ctx.org.id,
       permissionId: permission.id,
     });
 
-    ctx.session = await createSessionToken(ctx.db, ctx.jwt, {
+    session = await createSessionToken(ctx.db, ctx.jwt, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
   });
 
   afterAll(async () => {
-    await destroySessionToken(ctx.db, ctx.session);
-    await deletePermissionAssignment(ctx.db, ctx.permissionAssignment);
+    await destroySessionToken(ctx.db, session);
+    await deletePermissionAssignment(ctx.db, permissionAssignment);
     // await deleteOrg(ctx.db, ctx.org);
-    await deleteUser(ctx.db, ctx.user);
+    await deleteUser(ctx.db, user);
     await server.teardown();
   });
 
   test('returns error when permission name is reserved', async () => {
     const res = await request(server)
       .post('/api/v1/permission.create')
-      .set('Authorization', `Bearer ${ctx.session.token}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         name: 'yeep.permission.test',
         description: 'This is a tost',
@@ -87,7 +90,7 @@ describe('api/v1/permission.create', () => {
 
     const res = await request(server)
       .post('/api/v1/permission.create')
-      .set('Authorization', `Bearer ${ctx.session.token}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         name: 'acme.test',
         description: 'This is a tost',
@@ -115,7 +118,7 @@ describe('api/v1/permission.create', () => {
 
     const res = await request(server)
       .post('/api/v1/permission.create')
-      .set('Authorization', `Bearer ${ctx.session.token}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         name: 'acme.test',
         description: 'This is a tost',
@@ -138,7 +141,7 @@ describe('api/v1/permission.create', () => {
   test('creates new permission and returns expected response', async () => {
     const res = await request(server)
       .post('/api/v1/permission.create')
-      .set('Authorization', `Bearer ${ctx.session.token}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         name: 'acme.test',
         description: 'This is a test',
