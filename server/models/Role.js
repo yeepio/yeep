@@ -21,7 +21,7 @@ const roleSchema = new Schema(
       default: false,
     },
     permissions: {
-      type: [String],
+      type: [Schema.Types.ObjectId],
       required: true,
     },
     scope: Schema.Types.ObjectId,
