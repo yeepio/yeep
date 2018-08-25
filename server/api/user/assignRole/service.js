@@ -77,7 +77,7 @@ async function createRoleAssignment(db, { userId, orgId, roleId, resourceId }) {
       userId: roleAssignment.user.toHexString(),
       orgId: roleAssignment.org ? roleAssignment.org.toHexString() : undefined,
       roleId: roleAssignment.role.toHexString(),
-      resourceId: roleAssignment.resourceId ? roleAssignment.resourceId.toHexString() : undefined,
+      resourceId: roleAssignment.resource,
     };
   } catch (err) {
     if (err.code === 11000) {
