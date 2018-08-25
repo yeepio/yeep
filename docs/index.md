@@ -16,6 +16,7 @@ The Yeep API provides programmatic access to yeep platform.
 | Method | Description | Requires Auth |
 | ------ | ----------- | :-----------: |
 | **[user.create](methods/user.create.md)** | Creates new user | Yes |
+| **[user.assignRole](methods/user.assignRole.md)** | Assigns the specified role to the designated user | Yes |
 
 ### Session
 
