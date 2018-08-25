@@ -42,3 +42,4 @@ The Yeep API provides programmatic access to yeep platform.
 | **[role.create](methods/role.create.md)** | Creates new role | Yes |
 | **[role.delete](methods/role.delete.md)** | Deletes the designated role | Yes |
 | **[role.info](methods/role.info.md)** | Retrieves information on the designated role | Yes |
+| **[role.update](methods/role.update.md)** | Updates the designated role | Yes |
