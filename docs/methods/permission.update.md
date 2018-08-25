@@ -20,7 +20,7 @@ Requestor must be authenticated and assigned with the `yeep.permission.write` pe
 - **name** _(string)_ — next permission name (optional)
 - **description** _(string)_ — next permission description (optional)
 
-_Please note: `name` or `permission` must be specified, otherwise update makes no sense._
+_Please note: `name` or `description` must be specified, otherwise update makes no sense._
 
 ***
 
