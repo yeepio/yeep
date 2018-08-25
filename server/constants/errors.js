@@ -144,3 +144,10 @@ export class DuplicateRoleAssignmentError extends Error {
     this.code = 10020;
   }
 }
+
+export class RoleAssignmentNotFoundError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10021;
+  }
+}
