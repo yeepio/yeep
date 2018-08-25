@@ -5,4 +5,5 @@ export { default as Token } from './Token';
 export { default as Permission } from './Permission';
 export { default as PermissionAssignment } from './PermissionAssignment';
 export { default as Role } from './Role';
+export { default as RoleAssignment } from './RoleAssignment';
 export { default as Settings } from './Settings';
