@@ -130,3 +130,17 @@ export class ImmutableRoleError extends Error {
     this.code = 10018;
   }
 }
+
+export class InvalidRoleAssignmentError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10019;
+  }
+}
+
+export class DuplicateRoleAssignmentError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10020;
+  }
+}
