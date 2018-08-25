@@ -17,6 +17,7 @@ The Yeep API provides programmatic access to yeep platform.
 | ------ | ----------- | :-----------: | ---------------------- |
 | **[user.create](methods/user.create.md)** | Creates new user | Yes | `yeep.user.write` |
 | **[user.assignRole](methods/user.assignRole.md)** | Assigns the specified role to the designated user | Yes | `yeep.role.assignment.write` |
+| **[user.revokeRole](methods/user.revokeRole.md)** | Dissociates the specified role from the the designated user | Yes | `yeep.role.assignment.write` |
 
 ### Session
 
