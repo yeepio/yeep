@@ -13,6 +13,7 @@ import createSessionToken from '../../session/create/service';
 import destroySessionToken from '../../session/destroy/service';
 import createRole from '../../role/create/service';
 import deleteRole from '../../role/delete/service';
+import deleteRoleAssignment from '../revokeRole/service';
 
 describe('api/v1/user.assignRole', () => {
   let ctx;
@@ -402,30 +403,27 @@ describe('api/v1/user.assignRole', () => {
       });
     });
 
-    // test('creates role assignment and returns expected response', async () => {
-    //   const res = await request(server)
-    //     .post('/api/v1/user.assignRole')
-    //     .set('Authorization', `Bearer ${session.token}`)
-    //     .send({
-    //       userId: user.id,
-    //       roleId: role.id,
-    //       orgId: org.id,
-    //     });
+    test('creates role assignment and returns expected response', async () => {
+      const res = await request(server)
+        .post('/api/v1/user.assignRole')
+        .set('Authorization', `Bearer ${session.token}`)
+        .send({
+          userId: user.id,
+          roleId: role.id,
+          orgId: org.id,
+        });
 
-    //   expect(res.status).toBe(200);
-    //   expect(res.body).toMatchObject({
-    //     ok: true,
-    //     roleAssignment: {
-    //       id: expect.any(String),
-    //     },
-    //   });
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: true,
+        roleAssignment: {
+          id: expect.any(String),
+        },
+      });
 
-    //   const isRoleAssignmentDeleted = await deletePermissionAssignment(
-    //     ctx.db,
-    //     res.body.roleAssignment
-    //   );
-    //   expect(isRoleAssignmentDeleted).toBe(true);
-    // });
+      const isRoleAssignmentDeleted = await deleteRoleAssignment(ctx.db, res.body.roleAssignment);
+      expect(isRoleAssignmentDeleted).toBe(true);
+    });
   });
 
   describe('user with invalid permission scope', () => {
