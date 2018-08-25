@@ -63,14 +63,14 @@ async function createRoleAssignment(db, { userId, orgId, roleId, resourceId }) {
 
   // create role assignment in db
   try {
-    const roleAssignment = await RoleAssignmentModel.create(
-      formatValues({
+    const roleAssignment = await RoleAssignmentModel.create({
+      ...formatValues({
         user: userId,
         org: orgId,
         role: roleId,
-        resource: resourceId,
-      })
-    );
+      }),
+      resource: resourceId,
+    });
 
     return {
       id: roleAssignment._id.toHexString(),
