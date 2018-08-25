@@ -20,7 +20,7 @@ const validation = createValidationMiddleware({
       .min(2)
       .max(64)
       .required()
-      .regex(/^[A-Za-z0-9_\-.:]*$/, { name: 'permission' }),
+      .regex(/^[A-Za-z0-9_\-.:]*$/, { name: 'role' }),
     description: Joi.string()
       .trim()
       .max(140)
