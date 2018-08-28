@@ -10,9 +10,9 @@ const formatUserPermissions = flow(
     id: record.permission._id.toHexString(),
     name: record.permission.name,
     isSystemPermission: record.permission.isSystemPermission,
-    orgId: record.org ? record.org.toHexString() : null,
-    resourceId: record.resource || null,
-    viaRoleId: record.role ? record.role.toHexString() : null,
+    orgId: record.org ? record.org.toHexString() : undefined,
+    resourceId: record.resource || undefined,
+    roleId: record.role ? record.role.toHexString() : undefined,
   })),
   sortBy(['name', 'orgId', 'resourceId']),
   sortedUniqBy((permission) =>
@@ -102,6 +102,9 @@ async function getUserPermissions(db, { userId }) {
           as: 'permission',
         },
       },
+      {
+        $unwind: '$permission',
+      },
     ]),
   ]);
 
@@ -118,6 +121,9 @@ async function getUserInfo(db, { id }) {
     throw new UserNotFoundError('User does not exist');
   }
 
+  // retrieve user permissions
+  const permissions = await getUserPermissions(db, { userId: id });
+
   return {
     id: user._id.toHexString(),
     username: user.username,
@@ -125,6 +131,7 @@ async function getUserInfo(db, { id }) {
     picture: user.picture,
     emails: user.emails,
     orgs: user.orgs.map((oid) => oid.toHexString()),
+    permissions,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
