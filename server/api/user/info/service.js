@@ -1,17 +1,125 @@
+import { ObjectId } from 'mongodb';
+import flow from 'lodash/fp/flow';
+import map from 'lodash/fp/map';
+import sortBy from 'lodash/fp/sortBy';
+import sortedUniqBy from 'lodash/fp/sortedUniqBy';
 import { UserNotFoundError } from '../../../constants/errors';
+
+const formatUserPermissions = flow(
+  map((record) => ({
+    id: record.permission._id.toHexString(),
+    name: record.permission.name,
+    isSystemPermission: record.permission.isSystemPermission,
+    orgId: record.org ? record.org.toHexString() : null,
+    resourceId: record.resource || null,
+    viaRoleId: record.role ? record.role.toHexString() : null,
+  })),
+  sortBy(['name', 'orgId', 'resourceId']),
+  sortedUniqBy((permission) =>
+    [permission.name, permission.orgId, permission.resourceId].filter(Boolean).join('::')
+  )
+);
+
+async function getUserPermissions(db, { userId }) {
+  const PermissionAssignmentModel = db.model('PermissionAssignment');
+  const RoleAssignmentModel = db.model('RoleAssignment');
+
+  const [permissionsDirect, permissionsViaRole] = await Promise.all([
+    // get permissions directly assigned to user
+    PermissionAssignmentModel.aggregate([
+      {
+        $match: {
+          user: ObjectId(userId),
+        },
+      },
+      {
+        $lookup: {
+          from: 'permissions',
+          localField: 'permission', // field in the orders collection
+          foreignField: '_id', // field in the items collection
+          as: 'permissions',
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            org: '$org',
+            resource: '$resource',
+            permission: { $arrayElemAt: ['$permissions', 0] },
+          },
+        },
+      },
+    ]),
+    // get permissions assigned to user via role assignment(s)
+    RoleAssignmentModel.aggregate([
+      {
+        $match: {
+          user: ObjectId(userId),
+        },
+      },
+      {
+        $lookup: {
+          from: 'roles',
+          let: { roleId: '$role' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$_id', '$$roleId'],
+                },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                permissions: 1,
+              },
+            },
+          ],
+          as: 'roles',
+        },
+      },
+      {
+        $unwind: '$roles',
+      },
+      {
+        $unwind: '$roles.permissions',
+      },
+      {
+        $project: {
+          _id: 0,
+          org: '$org',
+          resource: '$resource',
+          role: '$role',
+          permission: '$roles.permissions',
+        },
+      },
+      {
+        $lookup: {
+          from: 'permissions',
+          localField: 'permission',
+          foreignField: '_id',
+          as: 'permission',
+        },
+      },
+    ]),
+  ]);
+
+  return formatUserPermissions(permissionsDirect.concat(permissionsViaRole));
+}
 
 async function getUserInfo(db, { id }) {
   const UserModel = db.model('User');
 
   // ensure user exists
-  const user = await UserModel.findOne({ _id: id });
+  const user = await UserModel.findOne({ _id: ObjectId(id) });
 
   if (!user) {
     throw new UserNotFoundError('User does not exist');
   }
 
   return {
-    id: user.id, // as hex string
+    id: user._id.toHexString(),
     username: user.username,
     fullName: user.fullName,
     picture: user.picture,
@@ -23,3 +131,4 @@ async function getUserInfo(db, { id }) {
 }
 
 export default getUserInfo;
+export { getUserPermissions };
