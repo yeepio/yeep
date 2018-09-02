@@ -175,10 +175,10 @@ describe('authz middleware', () => {
   });
 
   describe('user has permission(s) to other org, i.e. not the org required', () => {
-    let org;
-    let otherOrg;
     let user;
-    let permissionAssignment;
+    let org;
+    let otherUser;
+    let otherOrg;
     let session;
 
     beforeAll(async () => {
@@ -202,20 +202,24 @@ describe('authz middleware', () => {
         adminId: user.id,
       });
 
+      otherUser = await createUser(ctx.db, {
+        username: 'runner',
+        password: 'fast+furry-ous',
+        fullName: 'Road Runner',
+        picture: 'https://www.acme.com/pictures/roadrunner.png',
+        emails: [
+          {
+            address: 'beep-beep@acme.com',
+            isVerified: true,
+            isPrimary: true,
+          },
+        ],
+      });
+
       otherOrg = await createOrg(ctx.db, {
         name: 'Speak Riddles Old Man Ltd',
         slug: 'speakriddles',
-        adminId: user.id,
-      });
-
-      const PermissionModel = ctx.db.model('Permission');
-      const permission = await PermissionModel.findOne({
-        name: 'yeep.permission.write',
-      });
-      permissionAssignment = await createPermissionAssignment(ctx.db, {
-        userId: user.id,
-        permissionId: permission.id,
-        orgId: otherOrg.id,
+        adminId: otherUser.id,
       });
 
       session = await createSessionToken(ctx.db, ctx.jwt, {
@@ -226,10 +230,10 @@ describe('authz middleware', () => {
 
     afterAll(async () => {
       await destroySessionToken(ctx.db, session);
-      await deletePermissionAssignment(ctx.db, permissionAssignment);
       await deleteOrg(ctx.db, org);
-      await deleteOrg(ctx.db, otherOrg);
       await deleteUser(ctx.db, user);
+      await deleteOrg(ctx.db, otherOrg);
+      await deleteUser(ctx.db, otherUser);
     });
 
     test('throws authorization error', async () => {
@@ -244,7 +248,7 @@ describe('authz middleware', () => {
           user,
         },
         body: {
-          org,
+          org: otherOrg,
         },
       };
 
@@ -259,7 +263,6 @@ describe('authz middleware', () => {
   describe('user has valid scoped permission(s)', () => {
     let org;
     let user;
-    let permissionAssignment;
     let session;
 
     beforeAll(async () => {
@@ -283,16 +286,6 @@ describe('authz middleware', () => {
         adminId: user.id,
       });
 
-      const PermissionModel = ctx.db.model('Permission');
-      const permission = await PermissionModel.findOne({
-        name: 'yeep.permission.write',
-      });
-      permissionAssignment = await createPermissionAssignment(ctx.db, {
-        userId: user.id,
-        permissionId: permission.id,
-        orgId: org.id,
-      });
-
       session = await createSessionToken(ctx.db, ctx.jwt, {
         username: 'wile',
         password: 'catch-the-b1rd$',
@@ -301,7 +294,6 @@ describe('authz middleware', () => {
 
     afterAll(async () => {
       await destroySessionToken(ctx.db, session);
-      await deletePermissionAssignment(ctx.db, permissionAssignment);
       await deleteOrg(ctx.db, org);
       await deleteUser(ctx.db, user);
     });
@@ -351,6 +343,7 @@ describe('authz middleware', () => {
   describe('user has valid global permission(s)', () => {
     let org;
     let user;
+    let otherUser;
     let permissionAssignment;
     let session;
 
@@ -375,13 +368,27 @@ describe('authz middleware', () => {
         adminId: user.id,
       });
 
+      otherUser = await createUser(ctx.db, {
+        username: 'runner',
+        password: 'fast+furry-ous',
+        fullName: 'Road Runner',
+        picture: 'https://www.acme.com/pictures/roadrunner.png',
+        emails: [
+          {
+            address: 'beep-beep@acme.com',
+            isVerified: true,
+            isPrimary: true,
+          },
+        ],
+      });
+
       const PermissionModel = ctx.db.model('Permission');
       const permission = await PermissionModel.findOne({
         name: 'yeep.permission.write',
       });
       permissionAssignment = await createPermissionAssignment(ctx.db, {
         // note the absence of orgId to mark this as global permission assignment
-        userId: user.id,
+        userId: otherUser.id,
         permissionId: permission.id,
       });
 
@@ -396,6 +403,7 @@ describe('authz middleware', () => {
       await deletePermissionAssignment(ctx.db, permissionAssignment);
       await deleteOrg(ctx.db, org);
       await deleteUser(ctx.db, user);
+      await deleteUser(ctx.db, otherUser);
     });
 
     test('calls next as expected', async () => {
@@ -407,7 +415,7 @@ describe('authz middleware', () => {
       const next = jest.fn(() => Promise.resolve());
       const request = {
         session: {
-          user,
+          user: otherUser,
         },
         body: {
           org,

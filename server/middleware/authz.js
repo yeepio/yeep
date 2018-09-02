@@ -1,22 +1,14 @@
-// import Boom from 'boom';
-// import isFunction from 'lodash/isFunction';
-// import isString from 'lodash/isString';
 import has from 'lodash/has';
 import typeOf from 'typeof';
-import { ObjectId } from 'mongodb';
+import flow from 'lodash/fp/flow';
+import filter from 'lodash/fp/filter';
+import castArray from 'lodash/fp/castArray';
+import concat from 'lodash/fp/concat';
+import binarySearch from '../utils/binarySearch';
 import { AuthorizationError } from '../constants/errors';
+import { getUserPermissions } from '../api/user/info/service';
 
-function constructOrgQueryClause(orgId) {
-  if (orgId == null) {
-    return { org: { $exists: false } };
-  }
-
-  if (Array.isArray(orgId)) {
-    return { $or: [{ org: { $in: orgId.map((e) => ObjectId(e)) } }, { org: { $exists: false } }] };
-  }
-
-  return { $or: [{ org: ObjectId(orgId) }, { org: { $exists: false } }] };
-}
+const formatOrgIds = flow(castArray, filter(Boolean), concat(['']));
 
 /**
  * Creates and returns authorization middleware with the specified options.
@@ -45,58 +37,28 @@ function createAuthzMiddleware({ org: getOrg, permissions = [] }) {
     // extract user id
     const userId = request.session.user.id;
 
-    // extract org id (if specified)
-    const orgId = getOrg ? getOrg(request) : null;
+    // extract org ids (if org function is specified)
+    const orgIds = formatOrgIds(getOrg ? getOrg(request) : '');
 
     // retrieve user permissions
-    const PermissionAssignmentModel = db.model('PermissionAssignment');
-    const records = await PermissionAssignmentModel.aggregate([
-      {
-        $match: {
-          $and: [{ user: ObjectId(userId) }, constructOrgQueryClause(orgId)],
-        },
-      },
-      {
-        $lookup: {
-          from: 'permissions',
-          localField: 'permission',
-          foreignField: '_id',
-          as: 'permission',
-        },
-      },
-      // {
-      //   $project: {
-      //     _id: 0,
-      //     permission: 1,
-      //   },
-      // },
-      {
-        $unwind: '$permission',
-      },
-      {
-        $group: {
-          _id: '$permission._id',
-          permission: { $first: '$permission' },
-        },
-      },
-      {
-        $project: {
-          _id: 0,
-          id: '$permission._id',
-          name: '$permission.name',
-          description: '$permission.description',
-          isSystemPermission: '$permission.isSystemPermission',
-          scope: '$permission.scope',
-        },
-      },
-    ]).exec();
-
-    // console.log(JSON.stringify(records, null, 2));
+    const userPermissions = await getUserPermissions(db, { userId });
 
     // check if permission requirements are met
-    const set = new Set(records.map((record) => record.name));
     permissions.forEach((permission) => {
-      if (!set.has(permission)) {
+      const isPermissionRequirementOk = orgIds.some((orgId) => {
+        const index = binarySearch(
+          userPermissions,
+          {
+            name: permission,
+            orgId,
+          },
+          (a, b) => a.name.localeCompare(b.name) || (a.orgId || '').localeCompare(b.orgId)
+        );
+
+        return index >= 0;
+      });
+
+      if (!isPermissionRequirementOk) {
         throw new AuthorizationError(
           `User "${
             request.session.user.username
