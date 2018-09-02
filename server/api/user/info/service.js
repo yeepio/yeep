@@ -111,7 +111,64 @@ async function getUserPermissions(db, { userId }) {
   return formatUserPermissions(permissionsDirect.concat(permissionsViaRole));
 }
 
-async function getUserInfo(db, { id }) {
+const formatRoles = flow(
+  map((record) => ({
+    id: record.role._id.toHexString(),
+    name: record.role.name,
+    isSystemRole: record.role.isSystemRole,
+    orgId: record.org ? record.org.toHexString() : undefined,
+    resourceId: record.resource || undefined,
+  })),
+  sortBy(['name', 'orgId', 'resourceId'])
+);
+
+async function getUserRoles(db, { userId }) {
+  const RoleAssignmentModel = db.model('RoleAssignment');
+
+  const roles = await RoleAssignmentModel.aggregate([
+    {
+      $match: {
+        user: ObjectId(userId),
+      },
+    },
+    {
+      $lookup: {
+        from: 'roles',
+        let: { roleId: '$role' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ['$_id', '$$roleId'],
+              },
+            },
+          },
+          {
+            $project: {
+              _id: 1,
+              name: 1,
+              isSystemRole: 1,
+            },
+          },
+        ],
+        as: 'roles',
+      },
+    },
+    {
+      $replaceRoot: {
+        newRoot: {
+          org: '$org',
+          resource: '$resource',
+          role: { $arrayElemAt: ['$roles', 0] },
+        },
+      },
+    },
+  ]);
+
+  return formatRoles(roles);
+}
+
+async function getUserInfo(db, { id, projection }) {
   const UserModel = db.model('User');
 
   // ensure user exists
@@ -122,7 +179,18 @@ async function getUserInfo(db, { id }) {
   }
 
   // retrieve user permissions
-  const permissions = await getUserPermissions(db, { userId: id });
+  let permissions;
+
+  if (projection.permissions) {
+    permissions = await getUserPermissions(db, { userId: id });
+  }
+
+  // retrieve user roles
+  let roles;
+
+  if (projection.roles) {
+    roles = await getUserRoles(db, { userId: id });
+  }
 
   return {
     id: user._id.toHexString(),
@@ -132,6 +200,7 @@ async function getUserInfo(db, { id }) {
     emails: user.emails,
     orgs: user.orgs.map((oid) => oid.toHexString()),
     permissions,
+    roles,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };

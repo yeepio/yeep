@@ -117,7 +117,13 @@ describe('api/v1/user.info', () => {
       const res = await request(server)
         .post('/api/v1/user.info')
         .set('Authorization', `Bearer ${session.token}`)
-        .send({ id: user.id });
+        .send({
+          id: user.id,
+          projection: {
+            permissions: true,
+            roles: true,
+          },
+        });
 
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -141,8 +147,42 @@ describe('api/v1/user.info', () => {
               orgId: otherOrg.id,
             }),
           ]),
+          roles: expect.arrayContaining([
+            expect.objectContaining({
+              isSystemRole: true,
+              orgId: otherOrg.id,
+            }),
+          ]),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
+        }),
+      });
+    });
+
+    test('retrieves user and returns response w/out permissions or roles', async () => {
+      const res = await request(server)
+        .post('/api/v1/user.info')
+        .set('Authorization', `Bearer ${session.token}`)
+        .send({
+          id: user.id,
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: true,
+        user: expect.not.objectContaining({
+          permissions: expect.arrayContaining([
+            expect.objectContaining({
+              isSystemPermission: true,
+              orgId: otherOrg.id,
+            }),
+          ]),
+          roles: expect.arrayContaining([
+            expect.objectContaining({
+              isSystemRole: true,
+              orgId: otherOrg.id,
+            }),
+          ]),
         }),
       });
     });

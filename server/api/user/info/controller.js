@@ -18,6 +18,16 @@ const validation = createValidationMiddleware({
       .length(24)
       .hex()
       .required(),
+    projection: Joi.object({
+      permissions: Joi.boolean()
+        .optional()
+        .default(false),
+      roles: Joi.boolean()
+        .optional()
+        .default(false),
+    })
+      .optional()
+      .default({}),
   },
 });
 
