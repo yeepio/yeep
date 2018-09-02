@@ -6,22 +6,23 @@ The Yeep API provides programmatic access to yeep platform.
 
 ### Org
 
-| Method | Description | Requires Auth | Permission(s) required |
+| Method | Description | Requires Auth | Permission(s) |
 | ------ | ----------- | :-----------: | ---------------------- |
 | **[org.create](methods/org.create.md)** | Creates new org | Yes | `yeep.org.write` |
 | **[org.delete](methods/org.delete.md)** | Deletes the designated org | Yes | `yeep.org.write` |
 
 ### User
 
-| Method | Description | Requires Auth | Permission(s) required |
+| Method | Description | Requires Auth | Permission(s) |
 | ------ | ----------- | :-----------: | ---------------------- |
 | **[user.create](methods/user.create.md)** | Creates new user | Yes | `yeep.user.write` |
+| **[user.info](methods/user.create.md)** | Retrieves details for the designated user | Yes | `yeep.user.read` |
 | **[user.assignRole](methods/user.assignRole.md)** | Assigns the specified role to the designated user | Yes | `yeep.role.assignment.write` |
 | **[user.revokeRole](methods/user.revokeRole.md)** | Dissociates the specified role from the the designated user | Yes | `yeep.role.assignment.write` |
 
 ### Session
 
-| Method | Description | Requires Auth | Permission(s) required |
+| Method | Description | Requires Auth | Permission(s) |
 | ------ | ----------- | :-----------: | ---------------------- |
 | **[session.create](methods/session.create.md)** | Creates new session, a.k.a. sign-in | No | - |
 | **[session.destroy](methods/session.destroy.md)** | Destroys an existing session, a.k.a sign-out | Yes | - |
@@ -29,7 +30,7 @@ The Yeep API provides programmatic access to yeep platform.
 
 ### Permission
 
-| Method | Description | Requires Auth | Permission(s) required |
+| Method | Description | Requires Auth | Permission(s) |
 | ------ | ----------- | :-----------: | ---------------------- |
 | **[permission.create](methods/permission.create.md)** | Creates new permission | Yes |  `yeep.permission.write` |
 | **[permission.delete](methods/permission.delete.md)** | Deletes the designated permission | Yes | `yeep.permission.write` |
@@ -39,7 +40,7 @@ The Yeep API provides programmatic access to yeep platform.
 
 ### Role
 
-| Method | Description | Requires Auth | Permission(s) required |
+| Method | Description | Requires Auth | Permission(s) |
 | ------ | ----------- | :-----------: | ---------------------- |
 | **[role.create](methods/role.create.md)** | Creates new role | Yes | `yeep.role.write` |
 | **[role.delete](methods/role.delete.md)** | Deletes the designated role | Yes | `yeep.role.write` |
