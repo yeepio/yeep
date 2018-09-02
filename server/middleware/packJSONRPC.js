@@ -10,6 +10,7 @@ async function packJSONRPC(ctx, next) {
   } catch (err) {
     ctx.response.status = 200;
 
+    // check if err is boom instance
     if (Boom.isBoom(err)) {
       ctx.response.body = {
         ok: false,
@@ -22,11 +23,27 @@ async function packJSONRPC(ctx, next) {
       return;
     }
 
+    // check if err is Yeep Error instance
+    if (err.code) {
+      ctx.response.body = {
+        ok: false,
+        error: {
+          code: err.code,
+          message: err.message,
+        },
+      };
+      return;
+    }
+
+    // handle unexpected runtime errors
+    console.error(err);
+    const boom = Boom.badImplementation(err.message);
     ctx.response.body = {
       ok: false,
       error: {
-        code: err.code || 0,
-        message: err.message,
+        code: boom.output.statusCode,
+        message: boom.message,
+        details: boom.output.payload.details,
       },
     };
   }
