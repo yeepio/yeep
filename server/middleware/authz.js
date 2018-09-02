@@ -67,6 +67,15 @@ function createAuthzMiddleware({ org: getOrg, permissions = [] }) {
       }
     });
 
+    // augment request session data
+    request.session = {
+      ...request.session,
+      user: {
+        ...request.session.user,
+        permissions: userPermissions,
+      },
+    };
+
     await next();
   };
 }
