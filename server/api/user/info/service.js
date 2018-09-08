@@ -10,9 +10,9 @@ const formatUserPermissions = flow(
     id: record.permission._id.toHexString(),
     name: record.permission.name,
     isSystemPermission: record.permission.isSystemPermission,
-    orgId: record.org ? record.org.toHexString() : undefined,
-    resourceId: record.resource || undefined,
-    roleId: record.role ? record.role.toHexString() : undefined,
+    orgId: record.org ? record.org.toHexString() : '',
+    resourceId: record.resource || '',
+    roleId: record.role ? record.role.toHexString() : '',
   })),
   sortBy(['name', 'orgId', 'resourceId']),
   sortedUniqBy((permission) =>
@@ -116,8 +116,8 @@ const formatRoles = flow(
     id: record.role._id.toHexString(),
     name: record.role.name,
     isSystemRole: record.role.isSystemRole,
-    orgId: record.org ? record.org.toHexString() : undefined,
-    resourceId: record.resource || undefined,
+    orgId: record.org ? record.org.toHexString() : '',
+    resourceId: record.resource || '',
   })),
   sortBy(['name', 'orgId', 'resourceId'])
 );
@@ -168,7 +168,7 @@ async function getUserRoles(db, { userId }) {
   return formatRoles(roles);
 }
 
-async function getUserInfo(db, { id, projection }) {
+async function getUserInfo(db, { id, projection = {} }) {
   const UserModel = db.model('User');
 
   // ensure user exists

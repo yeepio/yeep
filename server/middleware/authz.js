@@ -4,7 +4,7 @@ import flow from 'lodash/fp/flow';
 import filter from 'lodash/fp/filter';
 import castArray from 'lodash/fp/castArray';
 import concat from 'lodash/fp/concat';
-import binarySearch from '../utils/binarySearch';
+import binarySearch from 'binary-search';
 import { AuthorizationError } from '../constants/errors';
 import { getUserPermissions } from '../api/user/info/service';
 
@@ -52,7 +52,7 @@ function createAuthzMiddleware({ org: getOrg, permissions = [] }) {
             name: permission,
             orgId,
           },
-          (a, b) => a.name.localeCompare(b.name) || (a.orgId || '').localeCompare(b.orgId)
+          (a, b) => a.name.localeCompare(b.name) || a.orgId.localeCompare(b.orgId)
         );
 
         return index >= 0;
