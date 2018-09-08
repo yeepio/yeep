@@ -252,17 +252,18 @@ describe('api/v1/user.revokeRole', () => {
   });
 
   describe('user with invalid permission scope', () => {
-    let org;
-    let otherOrg;
-    let user;
-    let permissionAssignment;
+    let acme;
+    let monsters;
+    let wile;
+    let wazowski;
     let session;
     let permission;
     let role;
     let roleAssignment;
 
     beforeAll(async () => {
-      user = await createUser(ctx.db, {
+      // user "wile" is admin in "acme" org
+      wile = await createUser(ctx.db, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -275,60 +276,63 @@ describe('api/v1/user.revokeRole', () => {
           },
         ],
       });
-
-      org = await createOrg(ctx.db, {
+      acme = await createOrg(ctx.db, {
         name: 'Acme Inc',
         slug: 'acme',
-        adminId: user.id,
+        adminId: wile.id,
       });
 
-      otherOrg = await createOrg(ctx.db, {
+      // user "wazowski" is admin in "monsters" org
+      wazowski = await createUser(ctx.db, {
+        username: 'wazowski',
+        password: 'grrrrrrrrrrr',
+        fullName: 'Mike Wazowski',
+        picture: 'https://www.monstersinc.com/pictures/wazowski.png',
+        emails: [
+          {
+            address: 'wazowski@monstersinc.com',
+            isVerified: true,
+            isPrimary: true,
+          },
+        ],
+      });
+      monsters = await createOrg(ctx.db, {
         name: 'Monsters Inc',
         slug: 'monsters',
-        adminId: user.id,
+        adminId: wazowski.id,
       });
 
-      const PermissionModel = ctx.db.model('Permission');
-      const requiredPermission = await PermissionModel.findOne({
-        name: 'yeep.permission.assignment.write',
-      });
-      permissionAssignment = await createPermissionAssignment(ctx.db, {
-        userId: user.id,
-        permissionId: requiredPermission.id,
-        orgId: otherOrg.id, // note that the permission is scoped to "other"index.js org
-      });
-
+      // user "wile" is logged in
       session = await createSessionToken(ctx.db, ctx.jwt, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
 
+      // create test permission + role
       permission = await createPermission(ctx.db, {
         name: 'acme.code.write',
         description: 'Permission to edit (write, delete, update) source code',
-        scope: org.id,
       });
-
       role = await createRole(ctx.db, {
         name: 'acme:developer',
         description: 'Developer role',
         permissions: [permission.id],
-        scope: org.id,
       });
 
+      // assign test permission to user "wazowski"
       roleAssignment = await createRoleAssignment(ctx.db, {
-        userId: user.id,
-        orgId: org.id,
+        userId: wazowski.id,
+        orgId: monsters.id,
         roleId: role.id,
       });
     });
 
     afterAll(async () => {
       await destroySessionToken(ctx.db, session);
-      await deletePermissionAssignment(ctx.db, permissionAssignment);
-      await deleteOrg(ctx.db, org);
-      await deleteOrg(ctx.db, otherOrg);
-      await deleteUser(ctx.db, user);
+      await deleteOrg(ctx.db, acme);
+      await deleteUser(ctx.db, wile);
+      await deleteOrg(ctx.db, monsters);
+      await deleteUser(ctx.db, wazowski);
       await deleteRoleAssignment(ctx.db, roleAssignment);
       await deleteRole(ctx.db, role);
       await deletePermission(ctx.db, permission);
@@ -348,7 +352,7 @@ describe('api/v1/user.revokeRole', () => {
         error: {
           code: 10012,
           message: `User "${
-            user.username
+            wile.username
           }" does not have permission "yeep.role.assignment.write" to access this resource`,
         },
       });
