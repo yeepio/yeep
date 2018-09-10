@@ -105,7 +105,7 @@ describe('api/v1/role.list', () => {
           description: expect.any(String),
           isSystemRole: expect.any(Boolean),
           usersCount: expect.any(Number),
-          permissions: expect.arrayContaining([expect.any(Number)]),
+          permissions: expect.arrayContaining([expect.any(String)]),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
         }),
@@ -113,94 +113,94 @@ describe('api/v1/role.list', () => {
     });
   });
 
-  // test('limits number of permissions using `limit` param', async () => {
-  //   const res = await request(server)
-  //     .post('/api/v1/role.list')
-  //     .set('Authorization', `Bearer ${session.token}`)
-  //     .send({
-  //       limit: 1,
-  //     });
+  test('limits number of roles using `limit` param', async () => {
+    const res = await request(server)
+      .post('/api/v1/role.list')
+      .set('Authorization', `Bearer ${session.token}`)
+      .send({
+        limit: 1,
+      });
 
-  //   expect(res.status).toBe(200);
-  //   expect(res.body).toMatchObject({
-  //     ok: true,
-  //     permissions: expect.arrayContaining([
-  //       expect.objectContaining({
-  //         id: expect.any(String),
-  //         name: expect.any(String),
-  //         description: expect.any(String),
-  //         isSystemPermission: expect.any(Boolean),
-  //         usersCount: expect.any(Number),
-  //         rolesCount: expect.any(Number),
-  //         createdAt: expect.any(String),
-  //         updatedAt: expect.any(String),
-  //       }),
-  //     ]),
-  //     nextCursor: expect.any(String),
-  //   });
-  //   expect(res.body.permissions.length).toBe(1);
-  // });
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: true,
+      roles: expect.arrayContaining([
+        expect.objectContaining({
+          id: expect.any(String),
+          name: expect.any(String),
+          description: expect.any(String),
+          isSystemRole: expect.any(Boolean),
+          usersCount: expect.any(Number),
+          permissions: expect.arrayContaining([expect.any(String)]),
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+      ]),
+      nextCursor: expect.any(String),
+    });
+    expect(res.body.roles.length).toBe(1);
+  });
 
-  // test('paginates through permissions using `cursor` param', async () => {
-  //   const res = await request(server)
-  //     .post('/api/v1/role.list')
-  //     .set('Authorization', `Bearer ${session.token}`)
-  //     .send({
-  //       limit: 2,
-  //     });
-  //   expect(res.body).toMatchObject({
-  //     ok: true,
-  //   });
-  //   expect(res.body.permissions.length).toBe(2);
+  test('paginates through roles using `cursor` param', async () => {
+    const res = await request(server)
+      .post('/api/v1/role.list')
+      .set('Authorization', `Bearer ${session.token}`)
+      .send({
+        limit: 2,
+      });
+    expect(res.body).toMatchObject({
+      ok: true,
+    });
+    expect(res.body.roles.length).toBe(2);
 
-  //   const res1 = await request(server)
-  //     .post('/api/v1/role.list')
-  //     .set('Authorization', `Bearer ${session.token}`)
-  //     .send({
-  //       limit: 1,
-  //     });
-  //   expect(res1.body).toMatchObject({
-  //     ok: true,
-  //     nextCursor: expect.any(String),
-  //   });
-  //   expect(res1.body.permissions.length).toBe(1);
-  //   expect(res1.body.permissions[0]).toEqual(res.body.permissions[0]);
+    const res1 = await request(server)
+      .post('/api/v1/role.list')
+      .set('Authorization', `Bearer ${session.token}`)
+      .send({
+        limit: 1,
+      });
+    expect(res1.body).toMatchObject({
+      ok: true,
+      nextCursor: expect.any(String),
+    });
+    expect(res1.body.roles.length).toBe(1);
+    expect(res1.body.roles[0]).toEqual(res.body.roles[0]);
 
-  //   const res2 = await request(server)
-  //     .post('/api/v1/role.list')
-  //     .set('Authorization', `Bearer ${session.token}`)
-  //     .send({
-  //       limit: 1,
-  //       cursor: res1.body.nextCursor,
-  //     });
-  //   expect(res2.body).toMatchObject({
-  //     ok: true,
-  //   });
-  //   expect(res2.body.permissions.length).toBe(1);
-  //   expect(res2.body.permissions[0]).toEqual(res.body.permissions[1]);
-  // });
+    const res2 = await request(server)
+      .post('/api/v1/role.list')
+      .set('Authorization', `Bearer ${session.token}`)
+      .send({
+        limit: 1,
+        cursor: res1.body.nextCursor,
+      });
+    expect(res2.body).toMatchObject({
+      ok: true,
+    });
+    expect(res2.body.roles.length).toBe(1);
+    expect(res2.body.roles[0]).toEqual(res.body.roles[1]);
+  });
 
-  // test('filters permissions using `q` param', async () => {
-  //   const res = await request(server)
-  //     .post('/api/v1/role.list')
-  //     .set('Authorization', `Bearer ${session.token}`)
-  //     .send({
-  //       q: 'yeep.perm',
-  //     });
-  //   expect(res.body).toMatchObject({
-  //     ok: true,
-  //     permissions: expect.arrayContaining([
-  //       expect.objectContaining({
-  //         id: expect.any(String),
-  //         name: expect.stringMatching(/^yeep\.perm/),
-  //         description: expect.any(String),
-  //         isSystemPermission: expect.any(Boolean),
-  //         usersCount: expect.any(Number),
-  //         rolesCount: expect.any(Number),
-  //         createdAt: expect.any(String),
-  //         updatedAt: expect.any(String),
-  //       }),
-  //     ]),
-  //   });
-  // });
+  test('filters roles using `q` param', async () => {
+    const res = await request(server)
+      .post('/api/v1/role.list')
+      .set('Authorization', `Bearer ${session.token}`)
+      .send({
+        q: 'acme',
+      });
+    expect(res.body).toMatchObject({
+      ok: true,
+      roles: expect.arrayContaining([
+        expect.objectContaining({
+          id: expect.any(String),
+          name: expect.any(String),
+          description: expect.any(String),
+          isSystemRole: expect.any(Boolean),
+          usersCount: expect.any(Number),
+          permissions: expect.arrayContaining([expect.any(String)]),
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+      ]),
+    });
+  });
 });

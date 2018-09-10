@@ -1,7 +1,10 @@
 import { ObjectId } from 'mongodb';
+import flow from 'lodash/fp/flow';
+import get from 'lodash/fp/get';
+import filter from 'lodash/fp/filter';
+import map from 'lodash/fp/map';
+import uniq from 'lodash/fp/uniq';
 import escapeRegExp from 'lodash/escapeRegExp';
-
-let cachedRequiredPermissionId;
 
 export const stringifyCursor = ({ id }) => {
   return Buffer.from(JSON.stringify(id)).toString('base64');
@@ -12,50 +15,15 @@ export const parseCursor = (cursorStr) => {
   return { id };
 };
 
-async function findScopes(db, { userId, permissionId }) {
-  const PermissionAssignmentModel = db.model('PermissionAssignment');
+export const getScopesFromRequest = flow(
+  get(['session', 'user', 'permissions']),
+  filter((permission) => permission.name === 'yeep.role.read'),
+  map((permission) => permission.orgId || null),
+  uniq
+);
 
-  const records = await PermissionAssignmentModel.aggregate([
-    {
-      $match: {
-        user: ObjectId(userId),
-        permission: ObjectId(permissionId),
-      },
-    },
-    {
-      $group: {
-        _id: '$org',
-      },
-    },
-  ]).exec();
-
-  return records.map((record) => record._id);
-}
-
-async function listRoles(db, { q, limit, cursor, userId }) {
-  const PermissionModel = db.model('Permission');
+async function listRoles(db, { q, limit, cursor, scopes }) {
   const RoleModel = db.model('Role');
-
-  // retrieve read permission if not already in memory
-  if (!cachedRequiredPermissionId) {
-    const permission = await PermissionModel.findOne(
-      {
-        name: 'yeep.role.read',
-      },
-      {
-        _id: 1,
-      }
-    );
-    cachedRequiredPermissionId = permission._id.toHexString();
-  }
-
-  // find org scopes the user has access to
-  const scopes = await findScopes(db, {
-    userId,
-    permissionId: cachedRequiredPermissionId,
-  });
-
-  console.log(scopes);
 
   // retrieve roles
   const roles = await RoleModel.aggregate([
@@ -64,7 +32,7 @@ async function listRoles(db, { q, limit, cursor, userId }) {
         scopes.includes(null)
           ? {}
           : {
-              scope: { $in: scopes },
+              scope: { $in: scopes.map((scope) => ObjectId(scope)) },
             },
         q
           ? {
