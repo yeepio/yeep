@@ -35,7 +35,7 @@ The Yeep API provides programmatic access to yeep platform.
 | **[permission.create](methods/permission.create.md)** | Creates new permission | Yes |  `yeep.permission.write` |
 | **[permission.delete](methods/permission.delete.md)** | Deletes the designated permission | Yes | `yeep.permission.write` |
 | **[permission.update](methods/permission.update.md)** | Updates the designated permission | Yes | `yeep.permission.write` |
-| **[permission.list](methods/permission.list.md)** | Lists all permission | Yes | `yeep.permission.read` |
+| **[permission.list](methods/permission.list.md)** | Lists all permissions | Yes | `yeep.permission.read` |
 | **[permission.info](methods/permission.info.md)** | Retrieves information on the designated permission | Yes | `yeep.permission.read` |
 
 ### Role
@@ -44,5 +44,6 @@ The Yeep API provides programmatic access to yeep platform.
 | ------ | ----------- | :-----------: | ---------------------- |
 | **[role.create](methods/role.create.md)** | Creates new role | Yes | `yeep.role.write` |
 | **[role.delete](methods/role.delete.md)** | Deletes the designated role | Yes | `yeep.role.write` |
-| **[role.info](methods/role.info.md)** | Retrieves information on the designated role | Yes | `yeep.role.read` |
 | **[role.update](methods/role.update.md)** | Updates the designated role | Yes | `yeep.role.write` |
+| **[role.list](methods/role.list.md)** | Lists all roles | Yes | `yeep.role.read` |
+| **[role.info](methods/role.info.md)** | Retrieves information on the designated role | Yes | `yeep.role.read` |
