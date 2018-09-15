@@ -1,8 +1,6 @@
 import compose from 'koa-compose';
-import createAuthnMiddleware from '../../../middleware/authn';
+import { visitSession, isUserAuthenticated } from '../../../middleware/auth';
 import packJSONRPC from '../../../middleware/packJSONRPC';
-
-const authn = createAuthnMiddleware();
 
 async function handler({ request, response }) {
   response.status = 200; // OK
@@ -11,4 +9,4 @@ async function handler({ request, response }) {
   };
 }
 
-export default compose([packJSONRPC, authn, handler]);
+export default compose([packJSONRPC, visitSession(), isUserAuthenticated(), handler]);

@@ -11,7 +11,7 @@ import {
 } from '../../../middleware/auth';
 import listRoles, { parseCursor, stringifyCursor } from './service';
 
-const validateRequest = createValidationMiddleware({
+const validationSchema = {
   body: {
     q: Joi.string()
       .trim()
@@ -27,7 +27,7 @@ const validateRequest = createValidationMiddleware({
       .base64()
       .optional(),
   },
-});
+};
 
 async function handler({ request, response, db }) {
   const { q, limit, cursor } = request.body;
@@ -50,7 +50,7 @@ export default compose([
   packJSONRPC,
   visitSession(),
   isUserAuthenticated(),
+  createValidationMiddleware(validationSchema),
   visitUserPermissions(),
-  validateRequest,
   handler,
 ]);

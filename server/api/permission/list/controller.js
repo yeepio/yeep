@@ -48,9 +48,9 @@ async function handler({ request, response, db }) {
 
 export default compose([
   packJSONRPC,
-  validation,
   visitSession(),
   isUserAuthenticated(),
+  validation,
   visitUserPermissions(),
   handler,
 ]);

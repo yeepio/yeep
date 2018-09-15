@@ -3,29 +3,27 @@ import Boom from 'boom';
 import compose from 'koa-compose';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { createValidationMiddleware } from '../../../middleware/validation';
-import createAuthnMiddleware from '../../../middleware/authn';
-import createAuthzMiddleware from '../../../middleware/authz';
+import {
+  visitSession,
+  isUserAuthenticated,
+  visitUserPermissions,
+  isUserAuthorized,
+} from '../../../middleware/auth';
 import deleteRoleAssignment, { getRoleAssignment } from './service';
 
-const authn = createAuthnMiddleware();
-const authz = createAuthzMiddleware({
-  permissions: ['yeep.role.assignment.write'],
-  org: (request) => request.session.roleAssignment.orgId,
-});
-
-const validation = createValidationMiddleware({
+const validationSchema = {
   body: {
     id: Joi.string()
       .length(24)
       .hex()
       .required(),
   },
-});
+};
 
-const intermission = async ({ request, db }, next) => {
+const visitRoleAssignment = async ({ request, db }, next) => {
   const roleAssignment = await getRoleAssignment(db, request.body);
 
-  // augment with session data
+  // visit session object with roleAssignment data
   request.session = {
     ...request.session,
     roleAssignment,
@@ -44,4 +42,16 @@ async function handler({ request, response, db }) {
   response.status = 200; // OK
 }
 
-export default compose([packJSONRPC, authn, validation, intermission, authz, handler]);
+export default compose([
+  packJSONRPC,
+  visitSession(),
+  isUserAuthenticated(),
+  createValidationMiddleware(validationSchema),
+  visitRoleAssignment,
+  visitUserPermissions(),
+  isUserAuthorized({
+    permissions: ['yeep.role.assignment.write'],
+    org: (request) => request.session.roleAssignment.orgId,
+  }),
+  handler,
+]);

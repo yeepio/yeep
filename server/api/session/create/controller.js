@@ -5,7 +5,7 @@ import { createValidationMiddleware } from '../../../middleware/validation';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import createSessionToken from './service';
 
-const validation = createValidationMiddleware({
+const validationSchema = {
   body: {
     userKey: Joi.alternatives().try([
       Joi.string()
@@ -27,7 +27,7 @@ const validation = createValidationMiddleware({
       .max(50)
       .required(),
   },
-});
+};
 
 async function handler({ request, response, db, jwt }) {
   const { userKey, password } = request.body;
@@ -50,4 +50,4 @@ async function handler({ request, response, db, jwt }) {
   };
 }
 
-export default compose([packJSONRPC, validation, handler]);
+export default compose([packJSONRPC, createValidationMiddleware(validationSchema), handler]);

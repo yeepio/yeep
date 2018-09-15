@@ -2,15 +2,20 @@ import Joi from 'joi';
 import compose from 'koa-compose';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { createValidationMiddleware } from '../../../middleware/validation';
-import createAuthnMiddleware from '../../../middleware/authn';
-import createAuthzMiddleware from '../../../middleware/authz';
+import {
+  visitSession,
+  isUserAuthenticated,
+  visitUserPermissions,
+  isUserAuthorized,
+} from '../../../middleware/auth';
 import createOrg from './service';
 
-const authn = createAuthnMiddleware();
-const authz = createAuthzMiddleware({
-  permissions: ['yeep.org.write'],
-});
-
+const authz = compose([
+  visitUserPermissions(),
+  isUserAuthorized({
+    permissions: ['yeep.org.write'],
+  }),
+]);
 const adaptiveAuthZ = async (ctx, next) => {
   const { settings } = ctx;
   const isOrgCreationOpen = await settings.get('isOrgCreationOpen');
@@ -22,7 +27,7 @@ const adaptiveAuthZ = async (ctx, next) => {
   await next();
 };
 
-const validation = createValidationMiddleware({
+const validationSchema = {
   body: {
     name: Joi.string()
       .trim()
@@ -37,7 +42,7 @@ const validation = createValidationMiddleware({
       .required()
       .regex(/^[A-Za-z0-9\-_]*$/, { name: 'slug' }),
   },
-});
+};
 
 async function handler({ request, response, db }) {
   const org = await createOrg(db, {
@@ -51,4 +56,11 @@ async function handler({ request, response, db }) {
   };
 }
 
-export default compose([packJSONRPC, authn, validation, adaptiveAuthZ, handler]);
+export default compose([
+  packJSONRPC,
+  visitSession(),
+  isUserAuthenticated(),
+  createValidationMiddleware(validationSchema),
+  adaptiveAuthZ,
+  handler,
+]);
