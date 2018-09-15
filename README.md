@@ -1,6 +1,6 @@
 # Yeep
 
-[![Build Status](https://travis-ci.com/yeepio/yeep.svg?branch=master)](https://travis-ci.com/yeepio/yeep)
+[![Build Status](https://travis-ci.com/yeepio/yeep.svg?branch=master)](https://travis-ci.com/yeepio/yeep) [![Greenkeeper badge](https://badges.greenkeeper.io/yeepio/yeep.svg)](https://greenkeeper.io/)
 
 #### Requirements
 
