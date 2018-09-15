@@ -1,8 +1,6 @@
 import { ObjectId } from 'mongodb';
 import escapeRegExp from 'lodash/escapeRegExp';
 
-let cachedRequiredPermissionId;
-
 export const stringifyCursor = ({ id }) => {
   return Buffer.from(JSON.stringify(id)).toString('base64');
 };
@@ -12,42 +10,8 @@ export const parseCursor = (cursorStr) => {
   return { id };
 };
 
-async function findScopes(db, { userId, permissionId }) {
-  const PermissionAssignmentModel = db.model('PermissionAssignment');
-
-  const records = await PermissionAssignmentModel.aggregate([
-    {
-      $match: {
-        user: ObjectId(userId),
-        permission: ObjectId(permissionId),
-      },
-    },
-    {
-      $group: {
-        _id: '$org',
-      },
-    },
-  ]).exec();
-
-  return records.map((record) => record._id);
-}
-
-async function listPermissions(db, { q, limit, cursor, userId }) {
+async function listPermissions(db, { q, limit, cursor, scopes }) {
   const PermissionModel = db.model('Permission');
-
-  // retrieve read permission if not already in memory
-  if (!cachedRequiredPermissionId) {
-    const permission = await PermissionModel.findOne({
-      name: 'yeep.permission.read',
-    });
-    cachedRequiredPermissionId = permission._id.toHexString();
-  }
-
-  // find org scopes the user has access to
-  const scopes = await findScopes(db, {
-    userId,
-    permissionId: cachedRequiredPermissionId,
-  });
 
   // retrieve permissions
   const permissions = await PermissionModel.aggregate([
@@ -56,7 +20,7 @@ async function listPermissions(db, { q, limit, cursor, userId }) {
         scopes.includes(null)
           ? {}
           : {
-              scope: { $in: scopes },
+              scope: { $in: scopes.map((scope) => ObjectId(scope)) },
             },
         q
           ? {
