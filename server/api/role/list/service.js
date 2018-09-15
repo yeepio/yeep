@@ -1,9 +1,4 @@
 import { ObjectId } from 'mongodb';
-import flow from 'lodash/fp/flow';
-import get from 'lodash/fp/get';
-import filter from 'lodash/fp/filter';
-import map from 'lodash/fp/map';
-import uniq from 'lodash/fp/uniq';
 import escapeRegExp from 'lodash/escapeRegExp';
 
 export const stringifyCursor = ({ id }) => {
@@ -14,13 +9,6 @@ export const parseCursor = (cursorStr) => {
   const id = JSON.parse(Buffer.from(cursorStr, 'base64').toString('utf8'));
   return { id };
 };
-
-export const getScopesFromRequest = flow(
-  get(['session', 'user', 'permissions']),
-  filter((permission) => permission.name === 'yeep.role.read'),
-  map((permission) => permission.orgId || null),
-  uniq
-);
 
 async function listRoles(db, { q, limit, cursor, scopes }) {
   const RoleModel = db.model('Role');

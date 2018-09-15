@@ -3,8 +3,13 @@ import compose from 'koa-compose';
 import last from 'lodash/last';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { createValidationMiddleware } from '../../../middleware/validation';
-import { visitSession, isUserAuthenticated, visitUserPermissions } from '../../../middleware/auth';
-import listRoles, { parseCursor, stringifyCursor, getScopesFromRequest } from './service';
+import {
+  visitSession,
+  isUserAuthenticated,
+  visitUserPermissions,
+  getAuthorizedUniqueOrgIds,
+} from '../../../middleware/auth';
+import listRoles, { parseCursor, stringifyCursor } from './service';
 
 const validateRequest = createValidationMiddleware({
   body: {
@@ -31,7 +36,7 @@ async function handler({ request, response, db }) {
     q,
     limit,
     cursor: cursor ? parseCursor(cursor) : null,
-    scopes: getScopesFromRequest(request),
+    scopes: getAuthorizedUniqueOrgIds(request),
   });
 
   response.status = 200; // OK
