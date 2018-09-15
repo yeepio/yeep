@@ -2,7 +2,7 @@ import Joi from 'joi';
 import compose from 'koa-compose';
 import last from 'lodash/last';
 import packJSONRPC from '../../../middleware/packJSONRPC';
-import { createValidationMiddleware } from '../../../middleware/validation';
+import { validateRequest } from '../../../middleware/validation';
 import {
   visitSession,
   isUserAuthenticated,
@@ -11,7 +11,7 @@ import {
 } from '../../../middleware/auth';
 import listPermissions, { parseCursor, stringifyCursor } from './service';
 
-const validation = createValidationMiddleware({
+const validation = validateRequest({
   body: {
     q: Joi.string()
       .trim()

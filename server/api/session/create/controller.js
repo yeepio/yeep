@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import isemail from 'isemail';
 import compose from 'koa-compose';
-import { createValidationMiddleware } from '../../../middleware/validation';
+import { validateRequest } from '../../../middleware/validation';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import createSessionToken from './service';
 
@@ -50,4 +50,4 @@ async function handler({ request, response, db, jwt }) {
   };
 }
 
-export default compose([packJSONRPC, createValidationMiddleware(validationSchema), handler]);
+export default compose([packJSONRPC, validateRequest(validationSchema), handler]);

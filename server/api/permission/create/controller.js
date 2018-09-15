@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import compose from 'koa-compose';
 import packJSONRPC from '../../../middleware/packJSONRPC';
-import { createValidationMiddleware } from '../../../middleware/validation';
+import { validateRequest } from '../../../middleware/validation';
 import {
   visitSession,
   isUserAuthenticated,
@@ -43,7 +43,7 @@ export default compose([
   packJSONRPC,
   visitSession(),
   isUserAuthenticated(),
-  createValidationMiddleware(validationSchema),
+  validateRequest(validationSchema),
   visitUserPermissions(),
   isUserAuthorized({
     permissions: ['yeep.permission.write'],
