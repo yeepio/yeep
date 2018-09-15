@@ -6,6 +6,7 @@ exports.up = async function(next) {
     { username: 1 },
     {
       unique: true,
+      sparse: true,
       name: 'username_uidx',
       collation: { locale: 'en', strength: 2 },
     },

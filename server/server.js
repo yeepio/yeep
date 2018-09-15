@@ -97,6 +97,7 @@ server.setup = async () => {
     useNewUrlParser: true,
     autoIndex: false,
     bufferCommands: false,
+    ignoreUndefined: true,
   });
 
   Object.entries(models).forEach(([key, schema]) => {

@@ -1,9 +1,5 @@
-import crypto from 'crypto';
-import Promise from 'bluebird';
 import { Schema } from 'mongoose';
-
-const randomBytes = Promise.promisify(crypto.randomBytes);
-const pbkdf2 = Promise.promisify(crypto.pbkdf2);
+import normalizeEmail from 'normalize-email';
 
 const emailSchema = new Schema(
   {
@@ -33,23 +29,10 @@ const userSchema = new Schema(
   {
     username: {
       type: String,
-      required: true,
+      required: false,
       trim: true,
       maxlength: 30,
       minlength: 2,
-    },
-    password: {
-      type: Buffer,
-      required: true,
-    },
-    salt: {
-      type: Buffer,
-      required: true,
-    },
-    iterationCount: {
-      type: Number,
-      required: true,
-      min: 1,
     },
     fullName: {
       type: String,
@@ -85,6 +68,7 @@ userSchema.index(
   { username: 1 },
   {
     unique: true,
+    sparse: true,
     name: 'username_uidx',
     collation: { locale: 'en', strength: 2 },
   }
@@ -100,30 +84,21 @@ userSchema.index(
 );
 
 /**
- * Generates and returns a cryptographically secure pseudorandom buffer of 30 bytes.
- * @return {Promise<Buffer>} a Bluebird promise resolving to a Buffer.
+ * Normalizes the designated username and returns a new string.
+ * @param {String} username
+ * @return {String} normalized username
  */
-userSchema.statics.generatePassword = function() {
-  return randomBytes(30);
+userSchema.statics.normalizeUsername = function(username) {
+  return username.normalize('NFKC').toLowerCase();
 };
 
 /**
- * Generates and returns a cryptographically secure pseudorandom buffer of 128 bytes.
- * @return {Promise<Buffer>} a Bluebird promise resolving to a Buffer.
+ * Normalizes the designated email address and returns new string.
+ * @param {String} emailAddress
+ * @return {String} normalized email address
  */
-userSchema.statics.generateSalt = function() {
-  return randomBytes(128);
-};
-
-/**
- * Returns a secure hash of the designated password using the supplied salt and iterations count.
- * @param {string} password
- * @param {Buffer} salt
- * @param {number} iterations
- * @return {Promise<Buffer>}
- */
-userSchema.statics.digestPassword = function(password, salt, iterations) {
-  return pbkdf2(password, salt, iterations, 128, 'sha512');
+userSchema.statics.normalizeEmailAddress = function(emailAddress) {
+  return normalizeEmail(emailAddress);
 };
 
 export default userSchema;

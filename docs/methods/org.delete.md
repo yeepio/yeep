@@ -12,7 +12,7 @@ Users are automatically dissociated with the deleted org. Assigned roles and per
 
 ## Requires auth
 
-Requestor must be authenticated and authorized with `yeep.org.write` permission for the designated org.
+Requestor must be authenticated and assigned with the `yeep.org.write` permission within the scope of the designated org.
 
 ## Parameters
 
@@ -26,6 +26,8 @@ Requestor must be authenticated and authorized with `yeep.org.write` permission 
 
 **200 OK** alongside `Object` with the following properties:
 
+- **ok** _(boolean)_ — indicates whether the request was successfully completed
+- **error** _(Object)_ — contains error details in case of an error
 - **org** _(Object)_ — the newly delete org
 
 ***
@@ -34,18 +36,20 @@ Requestor must be authenticated and authorized with `yeep.org.write` permission 
 
 **Request**
 
-`POST /api/v1/org.delete`
+```
+POST /api/v1/org.delete
+Authorization: `Bearer ${authToken}`
+```
 
 ``` json
 {
-  "name": "ACME Inc.",
-  "slug": "acme"
+  "id": "507f191e810c19729de860ea"
 }
 ```
 
 **Response**
 
-`200 Created`
+`200 OK`
 
 ``` json
 {

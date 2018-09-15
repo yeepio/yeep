@@ -1,18 +1,16 @@
 import Joi from 'joi';
 import compose from 'koa-compose';
 import packJSONRPC from '../../../middleware/packJSONRPC';
-import { createValidationMiddleware } from '../../../middleware/validation';
-import createAuthnMiddleware from '../../../middleware/authn';
-import createAuthzMiddleware from '../../../middleware/authz';
+import { validateRequest } from '../../../middleware/validation';
+import {
+  visitSession,
+  isUserAuthenticated,
+  visitUserPermissions,
+  isUserAuthorized,
+} from '../../../middleware/auth';
 import createPermissionAssignment from './service';
 
-const authn = createAuthnMiddleware();
-const authz = createAuthzMiddleware({
-  permissions: ['yeep.permission.assignment.write'],
-  org: (request) => request.body.orgId,
-});
-
-const validation = createValidationMiddleware({
+const validationSchema = {
   body: {
     userId: Joi.string()
       .length(24)
@@ -34,7 +32,7 @@ const validation = createValidationMiddleware({
         .max(140)
     ),
   },
-});
+};
 
 async function handler({ request, response, db }) {
   const permissionAssignment = await createPermissionAssignment(db, request.body);
@@ -45,4 +43,15 @@ async function handler({ request, response, db }) {
   };
 }
 
-export default compose([packJSONRPC, authn, validation, authz, handler]);
+export default compose([
+  packJSONRPC,
+  visitSession(),
+  isUserAuthenticated(),
+  validateRequest(validationSchema),
+  visitUserPermissions(),
+  isUserAuthorized({
+    permissions: ['yeep.permission.assignment.write'],
+    org: (request) => request.body.orgId,
+  }),
+  handler,
+]);

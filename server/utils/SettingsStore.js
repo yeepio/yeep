@@ -25,7 +25,9 @@ class SettingsStore {
         this.cache = omitId(change.fullDocument);
       })
       .on('error', (err) => {
-        console.error(err);
+        if (err.codeName !== 'CursorKilled') {
+          console.error(err);
+        }
       });
 
     // store changeStream reference

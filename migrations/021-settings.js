@@ -5,6 +5,7 @@ exports.up = async function(next) {
   await mongoose.connection.db.collection('settings').insertOne(
     {
       isUsernameEnabled: true,
+      isOrgCreationOpen: true,
     },
     next
   );

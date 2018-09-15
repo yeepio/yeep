@@ -1,28 +1,24 @@
 import Joi from 'joi';
+import Boom from 'boom';
 import compose from 'koa-compose';
 import packJSONRPC from '../../../middleware/packJSONRPC';
-import { createValidationMiddleware } from '../../../middleware/validation';
-import createAuthnMiddleware from '../../../middleware/authn';
-import createAuthzMiddleware from '../../../middleware/authz';
+import { validateRequest } from '../../../middleware/validation';
+import {
+  visitSession,
+  isUserAuthenticated,
+  visitUserPermissions,
+  isUserAuthorized,
+} from '../../../middleware/auth';
 import createUser from './service';
 
-const authn = createAuthnMiddleware();
-const authz = createAuthzMiddleware({
-  permissions: ['yeep.user.write'],
-  org: (request) => {
-    const { orgs } = request.body;
-    return orgs.length === 1 ? orgs[0] : null;
-  },
-});
-
-const validation = createValidationMiddleware({
+const validationSchema = {
   body: {
     username: Joi.string()
       .lowercase()
       .trim()
       .min(2)
       .max(30)
-      .required()
+      .optional()
       .regex(/^[A-Za-z0-9_\-.]*$/, { name: 'username' }),
     password: Joi.string()
       .trim()
@@ -75,9 +71,33 @@ const validation = createValidationMiddleware({
       .default([])
       .optional(),
   },
-});
+};
 
-async function handler({ request, response, db }) {
+async function handler({ request, response, db, settings }) {
+  const isUsernameEnabled = await settings.get('isUsernameEnabled');
+
+  if (isUsernameEnabled && !request.body.username) {
+    const boom = Boom.badRequest('Invalid request body');
+    boom.output.payload.details = [
+      {
+        path: ['username'],
+        type: 'any.required',
+      },
+    ];
+    throw boom;
+  }
+
+  if (request.body.username && !isUsernameEnabled) {
+    const boom = Boom.badRequest('Invalid request body');
+    boom.output.payload.details = [
+      {
+        path: ['username'],
+        type: 'any.forbidden',
+      },
+    ];
+    throw boom;
+  }
+
   const user = await createUser(db, request.body);
 
   response.status = 200; // OK
@@ -86,4 +106,18 @@ async function handler({ request, response, db }) {
   };
 }
 
-export default compose([packJSONRPC, authn, validation, authz, handler]);
+export default compose([
+  packJSONRPC,
+  visitSession(),
+  isUserAuthenticated(),
+  validateRequest(validationSchema),
+  visitUserPermissions(),
+  isUserAuthorized({
+    permissions: ['yeep.user.write'],
+    org: (request) => {
+      const { orgs } = request.body;
+      return orgs.length === 1 ? orgs[0] : null;
+    },
+  }),
+  handler,
+]);

@@ -74,7 +74,6 @@ describe('api/v1/user.revokePermission', () => {
       const PermissionModel = ctx.db.model('Permission');
       const permission = await PermissionModel.findOne({
         name: 'yeep.permission.assignment.write',
-        scope: { $exists: false },
       });
       permissionAssignment = await createPermissionAssignment(ctx.db, {
         userId: user.id,
@@ -241,16 +240,17 @@ describe('api/v1/user.revokePermission', () => {
   });
 
   describe('user with invalid permission scope', () => {
-    let org;
-    let otherOrg;
-    let user;
-    let permissionAssignment;
+    let wile;
+    let acme;
+    let wazowski;
+    let monsters;
     let session;
     let requestedPermission;
     let requestedPermissionAssignment;
 
     beforeAll(async () => {
-      user = await createUser(ctx.db, {
+      // user "wile" is admin in "acme" org
+      wile = await createUser(ctx.db, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -263,52 +263,58 @@ describe('api/v1/user.revokePermission', () => {
           },
         ],
       });
-
-      org = await createOrg(ctx.db, {
+      acme = await createOrg(ctx.db, {
         name: 'Acme Inc',
         slug: 'acme',
-        adminId: user.id,
+        adminId: wile.id,
       });
 
-      otherOrg = await createOrg(ctx.db, {
+      // user "wazowski" is admin in "monsters" org
+      wazowski = await createUser(ctx.db, {
+        username: 'wazowski',
+        password: 'grrrrrrrrrrr',
+        fullName: 'Mike Wazowski',
+        picture: 'https://www.monstersinc.com/pictures/wazowski.png',
+        emails: [
+          {
+            address: 'wazowski@monstersinc.com',
+            isVerified: true,
+            isPrimary: true,
+          },
+        ],
+      });
+      monsters = await createOrg(ctx.db, {
         name: 'Monsters Inc',
         slug: 'monsters',
-        adminId: user.id,
+        adminId: wazowski.id,
       });
 
-      const PermissionModel = ctx.db.model('Permission');
-      const permission = await PermissionModel.findOne({
-        name: 'yeep.permission.assignment.write',
-        scope: { $exists: false },
-      });
-      permissionAssignment = await createPermissionAssignment(ctx.db, {
-        userId: user.id,
-        permissionId: permission.id,
-        orgId: otherOrg.id,
-      });
-
-      session = await createSessionToken(ctx.db, ctx.jwt, {
-        username: 'wile',
-        password: 'catch-the-b1rd$',
-      });
-
+      // create test permission
       requestedPermission = await createPermission(ctx.db, {
         name: 'acme.permission.test',
         description: 'Test permission',
       });
+
+      // assign test permission to user "wazowski"
       requestedPermissionAssignment = await createPermissionAssignment(ctx.db, {
-        userId: user.id,
-        orgId: org.id,
+        userId: wazowski.id,
+        orgId: monsters.id,
         permissionId: requestedPermission.id,
+      });
+
+      // user "wile" is logged in
+      session = await createSessionToken(ctx.db, ctx.jwt, {
+        username: 'wile',
+        password: 'catch-the-b1rd$',
       });
     });
 
     afterAll(async () => {
       await destroySessionToken(ctx.db, session);
-      await deletePermissionAssignment(ctx.db, permissionAssignment);
-      await deleteOrg(ctx.db, org);
-      await deleteOrg(ctx.db, otherOrg);
-      await deleteUser(ctx.db, user);
+      await deleteOrg(ctx.db, acme);
+      await deleteUser(ctx.db, wile);
+      await deleteOrg(ctx.db, monsters);
+      await deleteUser(ctx.db, wazowski);
       await deletePermissionAssignment(ctx.db, requestedPermissionAssignment);
       await deletePermission(ctx.db, requestedPermission);
     });
@@ -327,7 +333,7 @@ describe('api/v1/user.revokePermission', () => {
         error: {
           code: 10012,
           message: `User "${
-            user.username
+            wile.username
           }" does not have permission "yeep.permission.assignment.write" to access this resource`,
         },
       });

@@ -23,13 +23,12 @@ describe('api/v1/user.delete', () => {
   });
 
   describe('authorized requestor', () => {
-    let org;
-    let requestor;
-    let permissionAssignment;
+    let acme;
+    let wile;
     let session;
 
     beforeAll(async () => {
-      requestor = await createUser(ctx.db, {
+      wile = await createUser(ctx.db, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -43,21 +42,10 @@ describe('api/v1/user.delete', () => {
         ],
       });
 
-      org = await createOrg(ctx.db, {
+      acme = await createOrg(ctx.db, {
         name: 'Acme Inc',
         slug: 'acme',
-        adminId: requestor.id,
-      });
-
-      const PermissionModel = ctx.db.model('Permission');
-      const permission = await PermissionModel.findOne({
-        name: 'yeep.user.write',
-        scope: { $exists: false },
-      });
-      permissionAssignment = await createPermissionAssignment(ctx.db, {
-        userId: requestor.id,
-        orgId: org.id,
-        permissionId: permission.id,
+        adminId: wile.id,
       });
 
       session = await createSessionToken(ctx.db, ctx.jwt, {
@@ -68,9 +56,8 @@ describe('api/v1/user.delete', () => {
 
     afterAll(async () => {
       await destroySessionToken(ctx.db, session);
-      await deletePermissionAssignment(ctx.db, permissionAssignment);
-      await deleteUser(ctx.db, requestor);
-      await deleteOrg(ctx.db, org);
+      await deleteUser(ctx.db, wile);
+      await deleteOrg(ctx.db, acme);
     });
 
     test('returns error when `id` contains invalid characters', async () => {
@@ -185,7 +172,7 @@ describe('api/v1/user.delete', () => {
             isPrimary: true,
           },
         ],
-        orgs: [org.id],
+        orgs: [acme.id],
       });
 
       const res = await request(server)
@@ -233,7 +220,6 @@ describe('api/v1/user.delete', () => {
       const PermissionModel = ctx.db.model('Permission');
       const permission = await PermissionModel.findOne({
         name: 'yeep.user.write',
-        scope: { $exists: false },
       });
       permissionAssignment = await createPermissionAssignment(ctx.db, {
         userId: requestor.id,

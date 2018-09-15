@@ -2,7 +2,7 @@ import Boom from 'boom';
 import Joi from 'joi';
 import has from 'lodash/has';
 
-function createValidationMiddleware(schema, opts = {}) {
+function validateRequest(schema, opts = {}) {
   return async function({ request }, next) {
     // validate headers
     if (has(schema, 'headers')) {
@@ -73,4 +73,4 @@ function createValidationMiddleware(schema, opts = {}) {
   };
 }
 
-export { createValidationMiddleware };
+export { validateRequest };

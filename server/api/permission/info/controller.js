@@ -1,30 +1,28 @@
 import Joi from 'joi';
 import compose from 'koa-compose';
 import packJSONRPC from '../../../middleware/packJSONRPC';
-import { createValidationMiddleware } from '../../../middleware/validation';
-import createAuthnMiddleware from '../../../middleware/authn';
-import createAuthzMiddleware from '../../../middleware/authz';
+import { validateRequest } from '../../../middleware/validation';
+import {
+  visitSession,
+  isUserAuthenticated,
+  visitUserPermissions,
+  isUserAuthorized,
+} from '../../../middleware/auth';
 import getPermissionInfo from './service';
 
-const authn = createAuthnMiddleware();
-const authz = createAuthzMiddleware({
-  permissions: ['yeep.permission.read'],
-  org: (request) => request.session.permission.scope,
-});
-
-const validation = createValidationMiddleware({
+const validationSchema = {
   body: {
     id: Joi.string()
       .length(24)
       .hex()
       .required(),
   },
-});
+};
 
-const customMiddleware = async ({ request, db }, next) => {
+const visitRequestedPermission = async ({ request, db }, next) => {
   const permission = await getPermissionInfo(db, request.body);
 
-  // augment request object with session data
+  // visit session with requested permission data
   request.session = {
     ...request.session,
     permission,
@@ -40,4 +38,16 @@ async function handler({ request, response }) {
   };
 }
 
-export default compose([packJSONRPC, authn, validation, customMiddleware, authz, handler]);
+export default compose([
+  packJSONRPC,
+  visitSession(),
+  isUserAuthenticated(),
+  validateRequest(validationSchema),
+  visitRequestedPermission,
+  visitUserPermissions(),
+  isUserAuthorized({
+    permissions: ['yeep.permission.read'],
+    org: (request) => request.session.permission.scope,
+  }),
+  handler,
+]);

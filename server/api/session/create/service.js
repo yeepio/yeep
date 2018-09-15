@@ -1,23 +1,75 @@
 import addSeconds from 'date-fns/add_seconds';
 import { UserNotFoundError, InvalidCredentialsError } from '../../../constants/errors';
 
-async function createSessionToken(db, jwt, { username, password }) {
-  const UserModel = db.model('User');
-
-  // retrieve user from db
-  const user = await UserModel.findOne({
-    username: username,
-  });
-
-  // make sure user exists
-  if (!user) {
-    throw new UserNotFoundError(`User "${username}" not found`);
+const constructMatchQuery = (username, emailAddress) => {
+  if (username) {
+    return { username };
   }
 
-  // verify password
-  const digestedPassword = await UserModel.digestPassword(password, user.salt, user.iterationCount);
+  return {
+    emails: { $elemMatch: { address: emailAddress } },
+  };
+};
 
-  if (user.password.compare(digestedPassword) !== 0) {
+async function createSessionToken(db, jwt, { username, emailAddress, password }) {
+  const UserModel = db.model('User');
+  const CredentialsModel = db.model('Credentials');
+
+  const normalizedEmailAddress = emailAddress && UserModel.normalizeEmailAddress(emailAddress);
+
+  // retrieve user from db
+  const users = await UserModel.aggregate([
+    {
+      $match: constructMatchQuery(username, normalizedEmailAddress),
+    },
+    {
+      $lookup: {
+        from: 'credentials',
+        let: { userId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [{ $eq: ['$type', 'PASSWORD'] }, { $eq: ['$user', '$$userId'] }],
+              },
+            },
+          },
+        ],
+        as: 'credentials',
+      },
+    },
+    {
+      $unwind: '$credentials',
+    },
+    {
+      $project: {
+        _id: 1,
+        password: '$credentials.password',
+        salt: '$credentials.salt',
+        iterationCount: '$credentials.iterationCount',
+      },
+    },
+  ]).exec();
+
+  // make sure user exists
+  if (users.length === 0) {
+    if (username) {
+      throw new UserNotFoundError(`User with username "${username}" not found`);
+    } else {
+      throw new UserNotFoundError(`User with email address "${emailAddress}" not found`);
+    }
+  }
+
+  const user = users[0];
+
+  // verify password
+  const digestedPassword = await CredentialsModel.digestPassword(
+    password,
+    user.salt.buffer,
+    user.iterationCount
+  );
+
+  if (user.password.buffer.compare(digestedPassword) !== 0) {
     throw new InvalidCredentialsError('Invalid username or password credentials');
   }
 
@@ -37,7 +89,7 @@ async function createSessionToken(db, jwt, { username, password }) {
   // generate JWT token
   const jwtToken = await jwt.sign(
     {
-      userId: user.id,
+      userId: user._id.toHexString(),
     },
     {
       jwtid: token.secret,

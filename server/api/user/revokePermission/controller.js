@@ -2,30 +2,28 @@ import Joi from 'joi';
 import Boom from 'boom';
 import compose from 'koa-compose';
 import packJSONRPC from '../../../middleware/packJSONRPC';
-import { createValidationMiddleware } from '../../../middleware/validation';
-import createAuthnMiddleware from '../../../middleware/authn';
-import createAuthzMiddleware from '../../../middleware/authz';
+import { validateRequest } from '../../../middleware/validation';
+import {
+  visitSession,
+  isUserAuthenticated,
+  visitUserPermissions,
+  isUserAuthorized,
+} from '../../../middleware/auth';
 import deletePermissionAssignment, { getPermissionAssignment } from './service';
 
-const authn = createAuthnMiddleware();
-const authz = createAuthzMiddleware({
-  permissions: ['yeep.permission.assignment.write'],
-  org: (request) => request.session.requestedPermissionAssignment.orgId,
-});
-
-const validation = createValidationMiddleware({
+const validationSchema = {
   body: {
     id: Joi.string()
       .length(24)
       .hex()
       .required(),
   },
-});
+};
 
-const intermission = async ({ request, db }, next) => {
+const visitRequestedPermissionAssignment = async ({ request, db }, next) => {
   const permissionAssignment = await getPermissionAssignment(db, request.body);
 
-  // augment request object with session data
+  // visit session object with requested permissionAssignment data
   request.session = {
     ...request.session,
     requestedPermissionAssignment: permissionAssignment,
@@ -44,4 +42,16 @@ async function handler({ request, response, db }) {
   response.status = 200; // OK
 }
 
-export default compose([packJSONRPC, authn, validation, intermission, authz, handler]);
+export default compose([
+  packJSONRPC,
+  visitSession(),
+  isUserAuthenticated(),
+  validateRequest(validationSchema),
+  visitRequestedPermissionAssignment,
+  visitUserPermissions(),
+  isUserAuthorized({
+    permissions: ['yeep.permission.assignment.write'],
+    org: (request) => request.session.requestedPermissionAssignment.orgId,
+  }),
+  handler,
+]);

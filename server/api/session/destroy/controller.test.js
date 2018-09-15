@@ -7,12 +7,13 @@ import deleteUser from '../../user/delete/service';
 
 describe('api/v1/session.destroy', () => {
   let ctx;
+  let user;
 
   beforeAll(async () => {
     await server.setup();
     ctx = server.getAppContext();
 
-    ctx.user = await createUser(ctx.db, {
+    user = await createUser(ctx.db, {
       username: 'wile',
       password: 'catch-the-b1rd$',
       fullName: 'Wile E. Coyote',
@@ -28,7 +29,7 @@ describe('api/v1/session.destroy', () => {
   });
 
   afterAll(async () => {
-    await deleteUser(ctx.db, ctx.user);
+    await deleteUser(ctx.db, user);
     await server.teardown();
   });
 

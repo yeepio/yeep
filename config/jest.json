@@ -8,8 +8,12 @@
     "/node_modules",
     "/dist"
   ],
+  "transform": {
+    "^.+\\.jsx$": "babel-jest",
+    "^.+\\.js$": "babel-jest"
+  },
   "setupFiles": [
-    "<rootDir>/config/polyfills.js"
+    "<rootDir>/config/jestSetup.js"
   ],
   "verbose": true
 }

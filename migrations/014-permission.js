@@ -98,7 +98,6 @@ exports.down = async function(next) {
   await mongoose.connect(process.env.MONGODB_URI);
   await mongoose.connection.db.collection('permissions').deleteMany(
     {
-      scope: { $exists: false },
       name: {
         $in: [
           'yeep.org.write',

@@ -14,6 +14,10 @@ const roleAssignmentSchema = new Schema(
       type: Schema.Types.ObjectId,
       required: true,
     },
+    resource: {
+      type: Schema.Types.Mixed,
+      required: false,
+    },
   },
   {
     collection: 'roleAssignments',
@@ -30,7 +34,7 @@ const roleAssignmentSchema = new Schema(
 );
 
 roleAssignmentSchema.index(
-  { user: 1, org: 1, role: 1 },
+  { user: 1, org: 1, role: 1, resource: 1 },
   {
     unique: true,
     name: 'assignment_uidx',

@@ -9,15 +9,22 @@ const roleSchema = new Schema(
       maxlength: 64,
       minlength: 2,
     },
+    description: {
+      type: String,
+      required: false,
+      trim: true,
+      maxlength: 140,
+    },
     isSystemRole: {
       type: Boolean,
       required: true,
       default: false,
     },
     permissions: {
-      type: [String],
+      type: [Schema.Types.ObjectId],
       required: true,
     },
+    scope: Schema.Types.ObjectId,
   },
   {
     collection: 'roles',

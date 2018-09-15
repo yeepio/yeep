@@ -6,12 +6,13 @@ import deleteUser from '../../user/delete/service';
 
 describe('api/v1/session.create', () => {
   let ctx;
+  let user;
 
   beforeAll(async () => {
     await server.setup();
     ctx = server.getAppContext();
 
-    ctx.user = await createUser(ctx.db, {
+    user = await createUser(ctx.db, {
       username: 'wile',
       password: 'catch-the-b1rd$',
       fullName: 'Wile E. Coyote',
@@ -27,7 +28,7 @@ describe('api/v1/session.create', () => {
   });
 
   afterAll(async () => {
-    await deleteUser(ctx.db, ctx.user);
+    await deleteUser(ctx.db, user);
     await server.teardown();
   });
 
@@ -35,7 +36,7 @@ describe('api/v1/session.create', () => {
     const res = await request(server)
       .post('/api/v1/session.create')
       .send({
-        username: 'a',
+        userKey: 'a',
         password: 'password',
       });
 
@@ -50,11 +51,29 @@ describe('api/v1/session.create', () => {
     });
   });
 
-  test('returns error when user does not exist', async () => {
+  test('returns error when email does not exist', async () => {
     const res = await request(server)
       .post('/api/v1/session.create')
       .send({
-        username: 'notuser',
+        userKey: 'unknown@email.com',
+        password: 'password',
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 10001,
+        message: expect.any(String),
+      },
+    });
+  });
+
+  test('returns error when username does not exist', async () => {
+    const res = await request(server)
+      .post('/api/v1/session.create')
+      .send({
+        userKey: 'notuser',
         password: 'password',
       });
 
@@ -72,7 +91,7 @@ describe('api/v1/session.create', () => {
     const res = await request(server)
       .post('/api/v1/session.create')
       .send({
-        username: 'wile',
+        userKey: 'wile',
         password: 'invalid-password',
       });
 
@@ -86,11 +105,29 @@ describe('api/v1/session.create', () => {
     });
   });
 
-  test('creates new session', async () => {
+  test('creates new session with username + password', async () => {
     const res = await request(server)
       .post('/api/v1/session.create')
       .send({
-        username: 'Wile',
+        userKey: 'Wile', // this will be automaticaly lower-cased
+        password: 'catch-the-b1rd$',
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual(
+      expect.objectContaining({
+        ok: true,
+        token: expect.any(String),
+        expiresIn: expect.any(Number),
+      })
+    );
+  });
+
+  test('creates new session with email address + password', async () => {
+    const res = await request(server)
+      .post('/api/v1/session.create')
+      .send({
+        userKey: 'coyote@acme.com',
         password: 'catch-the-b1rd$',
       });
 
