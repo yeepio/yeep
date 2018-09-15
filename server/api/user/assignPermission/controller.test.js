@@ -8,7 +8,6 @@ import deletePermission from '../../permission/delete/service';
 import createOrg from '../../org/create/service';
 import deleteOrg from '../../org/delete/service';
 import deletePermissionAssignment from '../revokePermission/service';
-import createPermissionAssignment from './service';
 import createSessionToken from '../../session/create/service';
 import destroySessionToken from '../../session/destroy/service';
 
@@ -45,14 +44,13 @@ describe('api/v1/user.assignPermission', () => {
   });
 
   describe('authorized user', () => {
-    let org;
-    let user;
-    let requestedPermission;
-    let permissionAssignment;
+    let acme;
+    let wile;
+    let permission;
     let session;
 
     beforeAll(async () => {
-      user = await createUser(ctx.db, {
+      wile = await createUser(ctx.db, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -66,26 +64,16 @@ describe('api/v1/user.assignPermission', () => {
         ],
       });
 
-      org = await createOrg(ctx.db, {
+      acme = await createOrg(ctx.db, {
         name: 'Acme Inc',
         slug: 'acme',
-        adminId: user.id,
+        adminId: wile.id,
       });
 
-      requestedPermission = await createPermission(ctx.db, {
+      permission = await createPermission(ctx.db, {
         name: 'acme.permission.test',
         description: 'Test permission',
-        scope: org.id,
-      });
-
-      const PermissionModel = ctx.db.model('Permission');
-      const permission = await PermissionModel.findOne({
-        name: 'yeep.permission.assignment.write',
-      });
-      permissionAssignment = await createPermissionAssignment(ctx.db, {
-        userId: user.id,
-        orgId: org.id,
-        permissionId: permission.id,
+        scope: acme.id,
       });
 
       session = await createSessionToken(ctx.db, ctx.jwt, {
@@ -96,10 +84,9 @@ describe('api/v1/user.assignPermission', () => {
 
     afterAll(async () => {
       await destroySessionToken(ctx.db, session);
-      await deletePermissionAssignment(ctx.db, permissionAssignment);
-      await deleteOrg(ctx.db, org);
-      await deleteUser(ctx.db, user);
-      await deletePermission(ctx.db, requestedPermission);
+      await deleteOrg(ctx.db, acme);
+      await deleteUser(ctx.db, wile);
+      await deletePermission(ctx.db, permission);
     });
 
     test('returns error when `userId` contains invalid characters', async () => {
@@ -185,7 +172,7 @@ describe('api/v1/user.assignPermission', () => {
         .post('/api/v1/user.assignPermission')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
+          userId: wile.id,
           orgId: '507f1f77bcf86cd79943901@',
         });
       expect(res.status).toBe(200);
@@ -206,7 +193,7 @@ describe('api/v1/user.assignPermission', () => {
         .post('/api/v1/user.assignPermission')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
+          userId: wile.id,
           orgId: '507f1f77bcf86cd7994390112',
         });
       expect(res.status).toBe(200);
@@ -227,7 +214,7 @@ describe('api/v1/user.assignPermission', () => {
         .post('/api/v1/user.assignPermission')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
+          userId: wile.id,
           orgId: '507f1f77bcf86cd79943901',
         });
       expect(res.status).toBe(200);
@@ -248,7 +235,7 @@ describe('api/v1/user.assignPermission', () => {
         .post('/api/v1/user.assignPermission')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
+          userId: wile.id,
           orgId: '507f1f77bcf86cd799439012', // some random object id
           permissionId: '507f1f77bcf86cd79943901@',
         });
@@ -270,7 +257,7 @@ describe('api/v1/user.assignPermission', () => {
         .post('/api/v1/user.assignPermission')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
+          userId: wile.id,
           orgId: '507f1f77bcf86cd799439012', // some random object id
           permissionId: '507f1f77bcf86cd7994390112',
         });
@@ -292,7 +279,7 @@ describe('api/v1/user.assignPermission', () => {
         .post('/api/v1/user.assignPermission')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
+          userId: wile.id,
           orgId: '507f1f77bcf86cd799439012', // some random object id
           permissionId: '507f1f77bcf86cd79943901',
         });
@@ -314,7 +301,7 @@ describe('api/v1/user.assignPermission', () => {
         .post('/api/v1/user.assignPermission')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
+          userId: wile.id,
         });
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -334,8 +321,8 @@ describe('api/v1/user.assignPermission', () => {
         .post('/api/v1/user.assignPermission')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
-          permissionId: requestedPermission.id,
+          userId: wile.id,
+          permissionId: permission.id,
           foo: 'bar',
         });
       expect(res.status).toBe(200);
@@ -357,8 +344,8 @@ describe('api/v1/user.assignPermission', () => {
         .set('Authorization', `Bearer ${session.token}`)
         .send({
           userId: '507f191e810c19729de860ea', // some random object id
-          permissionId: requestedPermission.id,
-          orgId: org.id,
+          permissionId: permission.id,
+          orgId: acme.id,
         });
 
       expect(res.status).toBe(200);
@@ -376,9 +363,9 @@ describe('api/v1/user.assignPermission', () => {
         .post('/api/v1/user.assignPermission')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
+          userId: wile.id,
           permissionId: '507f191e810c19729de860ea', // some random object id
-          orgId: org.id,
+          orgId: acme.id,
         });
 
       expect(res.status).toBe(200);
@@ -396,9 +383,9 @@ describe('api/v1/user.assignPermission', () => {
         .post('/api/v1/user.assignPermission')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
-          permissionId: requestedPermission.id,
-          orgId: org.id,
+          userId: wile.id,
+          permissionId: permission.id,
+          orgId: acme.id,
         });
 
       expect(res.status).toBe(200);
@@ -415,15 +402,14 @@ describe('api/v1/user.assignPermission', () => {
   });
 
   describe('user with invalid permission scope', () => {
-    let org;
-    let otherOrg;
-    let user;
-    let requestedPermission;
-    let permissionAssignment;
+    let acme;
+    let monsters;
+    let wile;
+    let permission;
     let session;
 
     beforeAll(async () => {
-      user = await createUser(ctx.db, {
+      wile = await createUser(ctx.db, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -437,31 +423,22 @@ describe('api/v1/user.assignPermission', () => {
         ],
       });
 
-      org = await createOrg(ctx.db, {
+      acme = await createOrg(ctx.db, {
         name: 'Acme Inc',
         slug: 'acme',
-        adminId: user.id,
+        adminId: wile.id,
       });
 
-      otherOrg = await createOrg(ctx.db, {
+      monsters = await createOrg(ctx.db, {
         name: 'Monsters Inc',
         slug: 'monsters',
-        adminId: user.id,
+        adminId: wile.id,
       });
 
-      requestedPermission = await createPermission(ctx.db, {
+      permission = await createPermission(ctx.db, {
         name: 'acme.permission.test',
         description: 'Test permission',
-        scope: otherOrg.id,
-      });
-
-      const PermissionModel = ctx.db.model('Permission');
-      const permission = await PermissionModel.findOne({
-        name: 'yeep.permission.assignment.write',
-      });
-      permissionAssignment = await createPermissionAssignment(ctx.db, {
-        userId: user.id,
-        permissionId: permission.id,
+        scope: monsters.id,
       });
 
       session = await createSessionToken(ctx.db, ctx.jwt, {
@@ -472,11 +449,10 @@ describe('api/v1/user.assignPermission', () => {
 
     afterAll(async () => {
       await destroySessionToken(ctx.db, session);
-      await deletePermissionAssignment(ctx.db, permissionAssignment);
-      await deleteOrg(ctx.db, org);
-      await deleteOrg(ctx.db, otherOrg);
-      await deleteUser(ctx.db, user);
-      await deletePermission(ctx.db, requestedPermission);
+      await deleteOrg(ctx.db, acme);
+      await deleteOrg(ctx.db, monsters);
+      await deleteUser(ctx.db, wile);
+      await deletePermission(ctx.db, permission);
     });
 
     test('returns error when permission scope does not match the designated org', async () => {
@@ -484,9 +460,9 @@ describe('api/v1/user.assignPermission', () => {
         .post('/api/v1/user.assignPermission')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
-          permissionId: requestedPermission.id,
-          orgId: org.id,
+          userId: wile.id,
+          permissionId: permission.id,
+          orgId: acme.id,
         });
 
       expect(res.status).toBe(200);
@@ -494,7 +470,7 @@ describe('api/v1/user.assignPermission', () => {
         ok: false,
         error: {
           code: 10011,
-          message: `Permission ${requestedPermission.id} cannot be assigned to the designated org`,
+          message: `Permission ${permission.id} cannot be assigned to the designated org`,
         },
       });
     });
@@ -504,16 +480,16 @@ describe('api/v1/user.assignPermission', () => {
         .post('/api/v1/user.assignPermission')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
-          permissionId: requestedPermission.id,
+          userId: wile.id,
+          permissionId: permission.id,
         });
 
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
         ok: false,
         error: {
-          code: 10011,
-          message: `Permission ${requestedPermission.id} cannot be assigned to the designated org`,
+          code: 10012,
+          message: `User "wile" does not have permission "yeep.permission.assignment.write" to access this resource`,
         },
       });
     });
