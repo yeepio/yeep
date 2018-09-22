@@ -16,6 +16,7 @@ The Yeep API provides programmatic access to users, permissions, roles, session,
 | Method | Description |
 | :----- | :---------- |
 | **[user.create](methods/user.create.md)** | Creates new user |
+| **[user.list](methods/user.list.md)** | Lists all users |
 | **[user.info](methods/user.info.md)** | Retrieves details for the designated user |
 | **[user.delete](methods/user.delete.md)** | Deletes the designated user |
 | **[user.assignRole](methods/user.assignRole.md)** | Assigns the specified role to the designated user |
