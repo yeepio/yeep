@@ -5,9 +5,8 @@ import flow from 'lodash/fp/flow';
 import filter from 'lodash/fp/filter';
 import castArray from 'lodash/fp/castArray';
 import concat from 'lodash/fp/concat';
-import get from 'lodash/fp/get';
-import map from 'lodash/fp/map';
-import uniq from 'lodash/fp/uniq';
+import get from 'lodash/get';
+import uniq from 'lodash/uniq';
 import binarySearch from 'binary-search';
 import { AuthorizationError } from '../constants/errors';
 import { getUserPermissions } from '../api/user/info/service';
@@ -181,9 +180,8 @@ export const isUserAuthorized = ({ org: getOrg, permissions = [] }) => {
   };
 };
 
-export const getAuthorizedUniqueOrgIds = flow(
-  get(['session', 'user', 'permissions']),
-  filter((permission) => permission.name === 'yeep.role.read'),
-  map((permission) => permission.orgId || null),
-  uniq
-);
+export const getAuthorizedUniqueOrgIds = (request, permission) => {
+  const userPermissions = get(request, ['session', 'user', 'permissions']);
+  const orgIds = userPermissions.filter((e) => e.name === permission).map((e) => e.orgId || null);
+  return uniq(orgIds);
+};

@@ -36,7 +36,7 @@ async function handler({ request, response, db }) {
     q,
     limit,
     cursor: cursor ? parseCursor(cursor) : null,
-    scopes: getAuthorizedUniqueOrgIds(request),
+    scopes: getAuthorizedUniqueOrgIds(request, 'yeep.permission.read'),
   });
 
   response.status = 200; // OK
