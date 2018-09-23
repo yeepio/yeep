@@ -19,7 +19,15 @@ Requestor must be authenticated and assigned with the `yeep.user.read` role.
 - **q** _(string)_ — filters users by the designated query (optional)
 - **limit** _(string)_ — maximum number of users to return (optional)
 - **cursor** _(string)_ — paginates through users by setting the `cursor` param (optional)
-
+- **projection** _(Object)_ — user fields to return (optional)
+  - **id** _(boolean)_ — (optional; defaults to `true`)
+  - **username** _(boolean)_ - (optional; defaults to `true`)
+  - **fullName** _(boolean)_ - (optional; defaults to `true`)
+  - **picture** _(boolean)_ - (optional; defaults to `true`)
+  - **emails** _(boolean)_ - (optional; defaults to `true`)
+  - **orgs** _(boolean)_ - (optional; defaults to `true`)
+  - **createdAt** _(boolean)_ - (optional; defaults to `true`)
+  - **updatedAt** _(boolean)_ - (optional; defaults to `true`)
 ***
 
 ## Returns
@@ -46,7 +54,10 @@ Authorization: `Bearer ${authToken}`
 {
   "q": "acme",
   "limit": 1,
-  "cursor": "IjViN2QwZGIyMzg1YzcyNWY5ZjNkODkwOSI="
+  "cursor": "IjViN2QwZGIyMzg1YzcyNWY5ZjNkODkwOSI=",
+  "projection": {
+    "emails": false
+  }
 }
 ```
 
@@ -62,13 +73,6 @@ Authorization: `Bearer ${authToken}`
     "username": "wile",
     "fullName": "Wile E. Coyote",
     "picture": "https://www.acme.com/pictures/coyote.png",
-    "emails": [
-      {
-        "address": "coyote@acme.com",
-        "isVerified": true,
-        "isPrimary": true,
-      },
-    ],
     "orgs": [
       "5b85b610394ca184fe18076e"
     ],
