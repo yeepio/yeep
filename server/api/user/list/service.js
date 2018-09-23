@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
 import escapeRegExp from 'lodash/escapeRegExp';
+import pick from 'lodash/pick';
 
 export const stringifyCursor = ({ id }) => {
   return Buffer.from(JSON.stringify(id)).toString('base64');
@@ -10,7 +11,18 @@ export const parseCursor = (cursorStr) => {
   return { id };
 };
 
-async function listUsers(db, { q, limit, cursor, scopes }) {
+export const defaultProjection = {
+  id: true,
+  username: true,
+  fullName: true,
+  picture: true,
+  emails: true,
+  orgs: true,
+  createdAt: true,
+  updatedAt: true,
+};
+
+async function listUsers(db, { q, limit, cursor, scopes, projection }) {
   const UserModel = db.model('User');
 
   // retrieve users
@@ -65,16 +77,29 @@ async function listUsers(db, { q, limit, cursor, scopes }) {
     },
   ]);
 
-  return users.map((user) => ({
-    id: user._id.toHexString(),
-    username: user.username,
-    fullName: user.fullName,
-    picture: user.picture,
-    emails: user.emails,
-    orgs: user.orgs.map((oid) => oid.toHexString()),
-    createdAt: user.createdAt,
-    updatedAt: user.updatedAt,
-  }));
+  const fields = Object.entries(projection).reduce((accumulator, [key, value]) => {
+    if (value) {
+      return accumulator.concat(key);
+    }
+    return accumulator;
+  }, []);
+
+  // Please note: if you add a new prop to user, remember to update the defaultProjection obj
+  return users.map((user) =>
+    pick(
+      {
+        id: user._id.toHexString(),
+        username: user.username,
+        fullName: user.fullName,
+        picture: user.picture,
+        emails: user.emails,
+        orgs: user.orgs.map((oid) => oid.toHexString()),
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      },
+      fields
+    )
+  );
 }
 
 export default listUsers;

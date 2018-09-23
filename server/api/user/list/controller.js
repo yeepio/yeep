@@ -9,7 +9,7 @@ import {
   visitUserPermissions,
   getAuthorizedUniqueOrgIds,
 } from '../../../middleware/auth';
-import listUsers, { parseCursor, stringifyCursor } from './service';
+import listUsers, { parseCursor, stringifyCursor, defaultProjection } from './service';
 
 const validationSchema = {
   body: {
@@ -26,17 +26,46 @@ const validationSchema = {
     cursor: Joi.string()
       .base64()
       .optional(),
+    projection: Joi.object({
+      id: Joi.boolean()
+        .optional()
+        .default(defaultProjection.id),
+      username: Joi.boolean()
+        .optional()
+        .default(defaultProjection.username),
+      fullName: Joi.boolean()
+        .optional()
+        .default(defaultProjection.fullName),
+      picture: Joi.boolean()
+        .optional()
+        .default(defaultProjection.picture),
+      emails: Joi.boolean()
+        .optional()
+        .default(defaultProjection.emails),
+      orgs: Joi.boolean()
+        .optional()
+        .default(defaultProjection.orgs),
+      createdAt: Joi.boolean()
+        .optional()
+        .default(defaultProjection.createdAt),
+      updatedAt: Joi.boolean()
+        .optional()
+        .default(defaultProjection.updatedAt),
+    })
+      .optional()
+      .default(defaultProjection),
   },
 };
 
 async function handler({ request, response, db }) {
-  const { q, limit, cursor } = request.body;
+  const { q, limit, cursor, projection } = request.body;
 
   const users = await listUsers(db, {
     q,
     limit,
     cursor: cursor ? parseCursor(cursor) : null,
     scopes: getAuthorizedUniqueOrgIds(request, 'yeep.user.read'),
+    projection,
   });
 
   response.status = 200; // OK

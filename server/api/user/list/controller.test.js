@@ -277,6 +277,35 @@ describe('api/v1/user.list', () => {
       expect(res.body.users.length).toBe(1);
     });
 
+    test('projects user props using `projection` param', async () => {
+      const res = await request(server)
+        .post('/api/v1/user.list')
+        .set('Authorization', `Bearer ${session.token}`)
+        .send({
+          projection: {
+            emails: false,
+            updatedAt: false,
+          },
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: true,
+        users: expect.arrayContaining([
+          expect.not.objectContaining({
+            emails: [
+              {
+                address: expect.any(String),
+                isVerified: true,
+                isPrimary: true,
+              },
+            ],
+            updatedAt: expect.any(String),
+          }),
+        ]),
+      });
+    });
+
     describe('without permission', () => {
       let otherSession;
 
