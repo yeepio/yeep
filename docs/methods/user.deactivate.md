@@ -19,7 +19,7 @@ Requestor must be authenticated and assigned with the global `yeep.user.write` p
 ### Body
 
 - **id** _(string)_ — user ID (required)
-- **ttl** _(number)_ — number of seconds after which the user will become deactivated (optional; defaults to 0)
+- **deactivateAfterSeconds** _(number)_ — number of seconds after which the user will become deactivated (optional; defaults to 0)
 
 ***
 
@@ -45,7 +45,7 @@ Authorization: `Bearer ${authToken}`
 ``` json
 {
   "id": "507f191e810c19729de860ea",
-  "ttl": 3600
+  "deactivateAfterSeconds": 3600
 }
 ```
 

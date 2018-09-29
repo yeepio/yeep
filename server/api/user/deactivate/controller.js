@@ -16,7 +16,7 @@ const validationSchema = {
       .length(24)
       .hex()
       .required(),
-    ttl: Joi.number()
+    deactivateAfterSeconds: Joi.number()
       .integer()
       .min(0)
       .max(7 * 365 * 24 * 60 * 60) // i.e. 7 years

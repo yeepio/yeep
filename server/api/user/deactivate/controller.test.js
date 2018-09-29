@@ -167,14 +167,14 @@ describe('api/v1/user.deactivate', () => {
       );
     });
 
-    test('deactivates user with TTL and returns expected response', async () => {
+    test('deactivates user after the designated time and returns expected response', async () => {
       const startDate = new Date();
       let res = await request(server)
         .post('/api/v1/user.deactivate')
         .set('Authorization', `Bearer ${wileSession.token}`)
         .send({
           id: runner.id,
-          ttl: 3600, // deactivate after 1 hour, i.e. 3600 seconds
+          deactivateAfterSeconds: 3600, // deactivate after 1 hour, i.e. 3600 seconds
         });
       const endDate = new Date();
 
