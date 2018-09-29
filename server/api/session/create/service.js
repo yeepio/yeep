@@ -1,5 +1,5 @@
 import addSeconds from 'date-fns/add_seconds';
-import isAfter from 'date-fns/is_before';
+import isBefore from 'date-fns/is_before';
 import {
   UserNotFoundError,
   InvalidCredentialsError,
@@ -52,6 +52,7 @@ async function createSessionToken(db, jwt, { username, emailAddress, password })
         password: '$credentials.password',
         salt: '$credentials.salt',
         iterationCount: '$credentials.iterationCount',
+        deactivatedAt: 1,
       },
     },
   ]).exec();
@@ -64,7 +65,7 @@ async function createSessionToken(db, jwt, { username, emailAddress, password })
   const user = users[0];
 
   // make sure user is active
-  if (!!user.deactivatedAt && isAfter(user.deactivatedAt, new Date())) {
+  if (!!user.deactivatedAt && isBefore(user.deactivatedAt, new Date())) {
     throw new UserDeactivatedError(`User "${username || emailAddress}" is deactivated`);
   }
 
