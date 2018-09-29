@@ -4,7 +4,8 @@ import { UserNotFoundError } from '../../../constants/errors';
 
 async function deactivateUser(db, { id, ttl = 0 }) {
   const UserModel = db.model('User');
-  const deactivatedAt = addSeconds(new Date(), ttl);
+  const currentDate = new Date();
+  const deactivatedAt = addSeconds(currentDate, ttl);
 
   // ensure user exists
   const user = await UserModel.findOne({ _id: ObjectId(id) });
@@ -21,6 +22,7 @@ async function deactivateUser(db, { id, ttl = 0 }) {
     {
       $set: {
         deactivatedAt,
+        updatedAt: currentDate,
       },
     }
   );
@@ -28,6 +30,7 @@ async function deactivateUser(db, { id, ttl = 0 }) {
   return {
     id: user._id.toHexString(),
     deactivatedAt,
+    updatedAt: currentDate,
   };
 }
 

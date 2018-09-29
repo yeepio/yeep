@@ -129,6 +129,7 @@ describe('api/v1/user.deactivate', () => {
         user: expect.objectContaining({
           id: expect.any(String),
           deactivatedAt: expect.any(String),
+          updatedAt: expect.any(String),
         }),
       });
 
@@ -183,6 +184,7 @@ describe('api/v1/user.deactivate', () => {
         user: expect.objectContaining({
           id: expect.any(String),
           deactivatedAt: expect.any(String),
+          updatedAt: expect.any(String),
         }),
       });
 

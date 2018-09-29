@@ -125,6 +125,7 @@ describe('api/v1/user.activate', () => {
         user: expect.objectContaining({
           id: expect.any(String),
           deactivatedAt: null,
+          updatedAt: expect.any(String),
         }),
       });
     });
