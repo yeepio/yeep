@@ -320,128 +320,24 @@ describe('api/v1/user.deactivate', () => {
       expect(res.body.error.details[0].path).toEqual(['foo']);
       expect(res.body.error.details[0].type).toBe('object.allowUnknown');
     });
+
+    test('returns error with invalid permission scope', async () => {
+      const res = await request(server)
+        .post('/api/v1/user.deactivate')
+        .set('Authorization', `Bearer ${runnerSession.token}`)
+        .send({
+          id: wile.id,
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 10012,
+          message:
+            'User "runner" does not have permission "yeep.user.write" to access this resource',
+        },
+      });
+    });
   });
-
-  // describe('requestor has invalid permission scope', () => {
-  //   let org;
-  //   let requestor;
-  //   let permissionAssignment;
-  //   let session;
-  //   let otherOrg;
-  //   let user;
-  //   let globalUser;
-
-  //   beforeAll(async () => {
-  //     requestor = await createUser(ctx.db, {
-  //       username: 'wile',
-  //       password: 'catch-the-b1rd$',
-  //       fullName: 'Wile E. Coyote',
-  //       picture: 'https://www.acme.com/pictures/coyote.png',
-  //       emails: [
-  //         {
-  //           address: 'coyote@acme.com',
-  //           isVerified: true,
-  //           isPrimary: true,
-  //         },
-  //       ],
-  //     });
-
-  //     org = await createOrg(ctx.db, {
-  //       name: 'Acme Inc',
-  //       slug: 'acme',
-  //       adminId: requestor.id,
-  //     });
-
-  //     const PermissionModel = ctx.db.model('Permission');
-  //     const permission = await PermissionModel.findOne({
-  //       name: 'yeep.user.read',
-  //     });
-  //     permissionAssignment = await createPermissionAssignment(ctx.db, {
-  //       userId: requestor.id,
-  //       orgId: org.id,
-  //       permissionId: permission.id,
-  //     });
-
-  //     session = await createSessionToken(ctx.db, ctx.jwt, {
-  //       username: 'wile',
-  //       password: 'catch-the-b1rd$',
-  //     });
-
-  //     user = await createUser(ctx.db, {
-  //       username: 'runner',
-  //       password: 'fast+furry-ous',
-  //       fullName: 'Road Runner',
-  //       picture: 'https://www.acme.com/pictures/roadrunner.png',
-  //       emails: [
-  //         {
-  //           address: 'beep-beep@acme.com',
-  //           isVerified: true,
-  //           isPrimary: true,
-  //         },
-  //       ],
-  //     });
-
-  //     otherOrg = await createOrg(ctx.db, {
-  //       name: 'Monsters Inc',
-  //       slug: 'monsters',
-  //       adminId: user.id,
-  //     });
-
-  //     globalUser = await createUser(ctx.db, {
-  //       username: 'porky',
-  //       password: "Th-th-th-that's all folks!",
-  //       fullName: 'Porky Pig',
-  //       picture: 'https://www.acme.com/pictures/porky.png',
-  //       emails: [
-  //         {
-  //           address: 'porky@acme.com',
-  //           isVerified: true,
-  //           isPrimary: true,
-  //         },
-  //       ],
-  //     });
-  //   });
-
-  //   afterAll(async () => {
-  //     await destroySessionToken(ctx.db, session);
-  //     await deletePermissionAssignment(ctx.db, permissionAssignment);
-  //     await deleteUser(ctx.db, requestor);
-  //     await deleteOrg(ctx.db, org);
-  //     await deleteOrg(ctx.db, otherOrg);
-  //     await deleteUser(ctx.db, user);
-  //     await deleteUser(ctx.db, globalUser);
-  //   });
-
-  //   test('returns error when requested user is member of another org', async () => {
-  //     const res = await request(server)
-  //       .post('/api/v1/user.deactivate')
-  //       .set('Authorization', `Bearer ${session.token}`)
-  //       .send({ id: user.id });
-
-  //     expect(res.status).toBe(200);
-  //     expect(res.body).toMatchObject({
-  //       ok: false,
-  //       error: {
-  //         code: 10012,
-  //         message: 'User "wile" does not have permission "yeep.user.read" to access this resource',
-  //       },
-  //     });
-  //   });
-
-  //   test('returns error when requested user is NOT member of any orgs (i.e. global user)', async () => {
-  //     const res = await request(server)
-  //       .post('/api/v1/user.deactivate')
-  //       .set('Authorization', `Bearer ${session.token}`)
-  //       .send({ id: globalUser.id });
-
-  //     expect(res.status).toBe(200);
-  //     expect(res.body).toMatchObject({
-  //       ok: false,
-  //       error: {
-  //         code: 10012,
-  //         message: 'User "wile" does not have permission "yeep.user.read" to access this resource',
-  //       },
-  //     });
-  //   });
-  // });
 });
