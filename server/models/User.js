@@ -49,6 +49,10 @@ const userSchema = new Schema(
     },
     emails: [emailSchema],
     orgs: [Schema.Types.ObjectId],
+    deactivatedAt: {
+      type: Date,
+      required: false, // optional
+    },
   },
   {
     collection: 'users',
