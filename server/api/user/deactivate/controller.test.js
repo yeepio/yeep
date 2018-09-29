@@ -113,7 +113,7 @@ describe('api/v1/user.deactivate', () => {
       await deleteOrg(ctx.db, acme);
     });
 
-    test('desactivates user and returns expected response', async () => {
+    test('deactivates user and returns expected response', async () => {
       const startDate = new Date();
       let res = await request(server)
         .post('/api/v1/user.deactivate')
