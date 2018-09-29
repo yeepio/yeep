@@ -151,3 +151,10 @@ export class RoleAssignmentNotFoundError extends Error {
     this.code = 10021;
   }
 }
+
+export class UserDeactivatedError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10022;
+  }
+}
