@@ -7,6 +7,8 @@ import revokePermission from './revokePermission';
 import assignRole from './assignRole';
 import revokeRole from './revokeRole';
 import listUsers from './list';
+import deactivateUser from './deactivate';
+import activateUser from './activate';
 
 const router = Router();
 
@@ -18,5 +20,7 @@ router.post('/v1/user.revokePermission', revokePermission);
 router.post('/v1/user.assignRole', assignRole);
 router.post('/v1/user.revokeRole', revokeRole);
 router.post('/v1/user.list', listUsers);
+router.post('/v1/user.deactivate', deactivateUser);
+router.post('/v1/user.activate', activateUser);
 
 export default router;

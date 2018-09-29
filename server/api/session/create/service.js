@@ -1,5 +1,10 @@
 import addSeconds from 'date-fns/add_seconds';
-import { UserNotFoundError, InvalidCredentialsError } from '../../../constants/errors';
+import isBefore from 'date-fns/is_before';
+import {
+  UserNotFoundError,
+  InvalidCredentialsError,
+  UserDeactivatedError,
+} from '../../../constants/errors';
 
 const constructMatchQuery = (username, emailAddress) => {
   if (username) {
@@ -47,20 +52,22 @@ async function createSessionToken(db, jwt, { username, emailAddress, password })
         password: '$credentials.password',
         salt: '$credentials.salt',
         iterationCount: '$credentials.iterationCount',
+        deactivatedAt: 1,
       },
     },
   ]).exec();
 
   // make sure user exists
   if (users.length === 0) {
-    if (username) {
-      throw new UserNotFoundError(`User with username "${username}" not found`);
-    } else {
-      throw new UserNotFoundError(`User with email address "${emailAddress}" not found`);
-    }
+    throw new UserNotFoundError(`User "${username || emailAddress}" not found`);
   }
 
   const user = users[0];
+
+  // make sure user is active
+  if (!!user.deactivatedAt && isBefore(user.deactivatedAt, new Date())) {
+    throw new UserDeactivatedError(`User "${username || emailAddress}" is deactivated`);
+  }
 
   // verify password
   const digestedPassword = await CredentialsModel.digestPassword(
