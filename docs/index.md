@@ -23,6 +23,8 @@ The Yeep API provides programmatic access to users, permissions, roles, session,
 | **[user.revokeRole](methods/user.revokeRole.md)** | Revokes the designated role assigment |
 | **[user.assignPermission](methods/user.assignPermission.md)** | Assigns the specified permission to the designated user |
 | **[user.revokePermission](methods/user.revokePermission.md)** | Revokes the designated permission assignment |
+| **[user.deactivate](methods/user.deactivate.md)** | Deactivates the designated user |
+| **[user.activate](methods/user.activate.md)** | Activates the designated user |
 
 ### Session
 
