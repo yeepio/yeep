@@ -51,13 +51,23 @@ export const visitSession = () => async ({ request, jwt, db }, next) => {
   // retrieve user info
   const TokenModel = db.model('Token');
   const records = await TokenModel.aggregate([
-    { $match: { secret: tokenSecret } },
+    {
+      $match: { secret: tokenSecret },
+    },
     {
       $lookup: {
         from: 'users',
         localField: 'userId',
         foreignField: '_id',
         as: 'user',
+      },
+    },
+    {
+      $match: {
+        $or: [
+          { 'user.deactivatedAt': null }, // i.e. null or undefined
+          { 'user.deactivatedAt': { $gte: new Date() } }, // i.e. is not deactivated yet
+        ],
       },
     },
     {
