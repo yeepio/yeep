@@ -97,4 +97,24 @@ orgMembershipSchema.index(
   }
 );
 
+orgMembershipSchema.index(
+  {
+    'permissions.id': 1,
+    'permissions.resourceId': 1,
+  },
+  {
+    name: 'permissionAssignment_idx',
+  }
+);
+
+orgMembershipSchema.index(
+  {
+    'roles.id': 1,
+    'roles.resourceId': 1,
+  },
+  {
+    name: 'roleAssignment_idx',
+  }
+);
+
 export default orgMembershipSchema;
