@@ -1,14 +1,16 @@
-async function deleteOrg(db, { id, adminId }) {
+import { ObjectId } from 'mongodb';
+
+async function deleteOrg(db, { id }) {
   const OrgModel = db.model('Org');
-  const UserModel = db.model('User');
-  const PermissionAssignmentModel = db.model('PermissionAssignment');
+  const OrgMembershipModel = db.model('OrgMembership');
 
   const session = await db.startSession();
   session.startTransaction();
 
   try {
-    await PermissionAssignmentModel.deleteMany({ user: adminId, org: id });
-    await UserModel.updateOne({ _id: adminId }, { $pull: { orgs: id } });
+    await OrgMembershipModel.deleteMany({
+      orgId: ObjectId(id),
+    });
     const result = await OrgModel.deleteOne({ _id: id });
     await session.commitTransaction();
     return !!result.ok;

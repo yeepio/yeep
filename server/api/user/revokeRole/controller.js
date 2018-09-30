@@ -9,27 +9,30 @@ import {
   visitUserPermissions,
   isUserAuthorized,
 } from '../../../middleware/auth';
-import deleteRoleAssignment, { getRoleAssignment } from './service';
+import deleteRoleAssignment from './service';
 
 const validationSchema = {
   body: {
-    id: Joi.string()
+    userId: Joi.string()
       .length(24)
       .hex()
       .required(),
+    orgId: Joi.string()
+      .length(24)
+      .hex()
+      .optional(),
+    roleId: Joi.string()
+      .length(24)
+      .hex()
+      .required(),
+    resourceId: Joi.alternatives().try(
+      Joi.number(),
+      Joi.string()
+        .trim()
+        .min(2)
+        .max(140)
+    ),
   },
-};
-
-const visitRoleAssignment = async ({ request, db }, next) => {
-  const roleAssignment = await getRoleAssignment(db, request.body);
-
-  // visit session object with roleAssignment data
-  request.session = {
-    ...request.session,
-    roleAssignment,
-  };
-
-  await next();
 };
 
 async function handler({ request, response, db }) {
@@ -47,11 +50,10 @@ export default compose([
   visitSession(),
   isUserAuthenticated(),
   validateRequest(validationSchema),
-  visitRoleAssignment,
   visitUserPermissions(),
   isUserAuthorized({
     permissions: ['yeep.role.assignment.write'],
-    org: (request) => request.session.roleAssignment.orgId,
+    org: (request) => request.body.orgId,
   }),
   handler,
 ]);

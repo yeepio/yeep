@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import compose from 'koa-compose';
+import mapValues from 'lodash/mapValues';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import {
@@ -8,7 +9,7 @@ import {
   visitUserPermissions,
   isUserAuthorized,
 } from '../../../middleware/auth';
-import getUserInfo from './service';
+import getUserInfo, { defaultProjection } from './service';
 
 const validationSchema = {
   body: {
@@ -16,16 +17,15 @@ const validationSchema = {
       .length(24)
       .hex()
       .required(),
-    projection: Joi.object({
-      permissions: Joi.boolean()
-        .optional()
-        .default(false),
-      roles: Joi.boolean()
-        .optional()
-        .default(false),
-    })
+    projection: Joi.object(
+      mapValues(defaultProjection, (value) =>
+        Joi.boolean()
+          .optional()
+          .default(value)
+      )
+    )
       .optional()
-      .default({}),
+      .default(defaultProjection),
   },
 };
 

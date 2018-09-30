@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import memoize from 'lodash/memoize';
 import { DuplicateOrgError } from '../../../constants/errors';
 
@@ -15,8 +16,10 @@ const getAdminRole = memoize((db) => {
 
 async function createOrg(db, { name, slug, adminId }) {
   const OrgModel = db.model('Org');
-  const UserModel = db.model('User');
-  const RoleAssignmentModel = db.model('RoleAssignment');
+  const OrgMembershipModel = db.model('OrgMembership');
+
+  // retrieve admin role
+  const adminRole = await getAdminRole(db);
 
   const session = await db.startSession();
   session.startTransaction();
@@ -25,23 +28,21 @@ async function createOrg(db, { name, slug, adminId }) {
     // create org
     const org = await OrgModel.create({ name, slug });
 
-    // push org ID to user orgs array
-    await UserModel.updateOne({ _id: adminId }, { $push: { orgs: org._id } });
-
-    // retrieve admin role
-    const role = await getAdminRole(db);
-
-    // assign admin permissions
-    await RoleAssignmentModel.create({
-      user: adminId,
-      org: org.id,
-      role: role._id.toHexString(),
+    // create org membership
+    await OrgMembershipModel.create({
+      userId: ObjectId(adminId),
+      orgId: org._id,
+      roles: [
+        {
+          id: adminRole._id,
+        },
+      ],
     });
 
     await session.commitTransaction();
 
     return {
-      id: org.id, // as hex string
+      id: org._id.toHexString(),
       name: org.name,
       slug: org.slug,
       createdAt: org.createdAt,

@@ -48,15 +48,15 @@ describe('api/v1/user.assignRole', () => {
   });
 
   describe('authorized user', () => {
-    let org;
-    let user;
+    let acme;
+    let wile;
     let permission;
     let permissionAssignment;
     let role;
     let session;
 
     beforeAll(async () => {
-      user = await createUser(ctx.db, {
+      wile = await createUser(ctx.db, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -70,10 +70,10 @@ describe('api/v1/user.assignRole', () => {
         ],
       });
 
-      org = await createOrg(ctx.db, {
+      acme = await createOrg(ctx.db, {
         name: 'Acme Inc',
         slug: 'acme',
-        adminId: user.id,
+        adminId: wile.id,
       });
 
       const PermissionModel = ctx.db.model('Permission');
@@ -81,22 +81,22 @@ describe('api/v1/user.assignRole', () => {
         name: 'yeep.role.assignment.write',
       });
       permissionAssignment = await createPermissionAssignment(ctx.db, {
-        userId: user.id,
-        orgId: org.id,
+        userId: wile.id,
+        orgId: acme.id,
         permissionId: requiredPermission.id,
       });
 
       permission = await createPermission(ctx.db, {
         name: 'acme.code.write',
         description: 'Permission to edit (write, delete, update) source code',
-        scope: org.id,
+        scope: acme.id,
       });
 
       role = await createRole(ctx.db, {
         name: 'acme:developer',
         description: 'Developer role',
         permissions: [permission.id],
-        scope: org.id,
+        scope: acme.id,
       });
 
       session = await createSessionToken(ctx.db, ctx.jwt, {
@@ -110,8 +110,8 @@ describe('api/v1/user.assignRole', () => {
       await deletePermissionAssignment(ctx.db, permissionAssignment);
       await deletePermission(ctx.db, permission);
       await deleteRole(ctx.db, role);
-      await deleteOrg(ctx.db, org);
-      await deleteUser(ctx.db, user);
+      await deleteOrg(ctx.db, acme);
+      await deleteUser(ctx.db, wile);
     });
 
     test('returns error when `userId` contains invalid characters', async () => {
@@ -197,7 +197,7 @@ describe('api/v1/user.assignRole', () => {
         .post('/api/v1/user.assignRole')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
+          userId: wile.id,
           orgId: '507f1f77bcf86cd79943901@',
         });
       expect(res.status).toBe(200);
@@ -218,7 +218,7 @@ describe('api/v1/user.assignRole', () => {
         .post('/api/v1/user.assignRole')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
+          userId: wile.id,
           orgId: '507f1f77bcf86cd7994390112',
         });
       expect(res.status).toBe(200);
@@ -239,7 +239,7 @@ describe('api/v1/user.assignRole', () => {
         .post('/api/v1/user.assignRole')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
+          userId: wile.id,
           orgId: '507f1f77bcf86cd79943901',
         });
       expect(res.status).toBe(200);
@@ -260,7 +260,7 @@ describe('api/v1/user.assignRole', () => {
         .post('/api/v1/user.assignRole')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
+          userId: wile.id,
           orgId: '507f1f77bcf86cd799439012', // some random object id
           roleId: '507f1f77bcf86cd79943901@',
         });
@@ -282,7 +282,7 @@ describe('api/v1/user.assignRole', () => {
         .post('/api/v1/user.assignRole')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
+          userId: wile.id,
           orgId: '507f1f77bcf86cd799439012', // some random object id
           roleId: '507f1f77bcf86cd7994390112',
         });
@@ -304,7 +304,7 @@ describe('api/v1/user.assignRole', () => {
         .post('/api/v1/user.assignRole')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
+          userId: wile.id,
           orgId: '507f1f77bcf86cd799439012', // some random object id
           roleId: '507f1f77bcf86cd79943901',
         });
@@ -326,7 +326,7 @@ describe('api/v1/user.assignRole', () => {
         .post('/api/v1/user.assignRole')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
+          userId: wile.id,
         });
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -346,7 +346,7 @@ describe('api/v1/user.assignRole', () => {
         .post('/api/v1/user.assignRole')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
+          userId: wile.id,
           roleId: role.id,
           foo: 'bar',
         });
@@ -370,7 +370,7 @@ describe('api/v1/user.assignRole', () => {
         .send({
           userId: '507f191e810c19729de860ea', // some random object id
           roleId: role.id,
-          orgId: org.id,
+          orgId: acme.id,
         });
 
       expect(res.status).toBe(200);
@@ -388,9 +388,9 @@ describe('api/v1/user.assignRole', () => {
         .post('/api/v1/user.assignRole')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
+          userId: wile.id,
           roleId: '507f191e810c19729de860ea', // some random object id
-          orgId: org.id,
+          orgId: acme.id,
         });
 
       expect(res.status).toBe(200);
@@ -408,16 +408,18 @@ describe('api/v1/user.assignRole', () => {
         .post('/api/v1/user.assignRole')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userId: user.id,
+          userId: wile.id,
           roleId: role.id,
-          orgId: org.id,
+          orgId: acme.id,
         });
 
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
         ok: true,
         roleAssignment: {
-          id: expect.any(String),
+          userId: wile.id,
+          roleId: role.id,
+          orgId: acme.id,
         },
       });
 

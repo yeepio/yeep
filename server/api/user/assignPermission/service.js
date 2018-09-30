@@ -1,54 +1,53 @@
-import omitBy from 'lodash/fp/omitBy';
+import { ObjectId } from 'mongodb';
 import {
   DuplicatePermissionAssignmentError,
   UserNotFoundError,
   OrgNotFoundError,
   PermissionNotFoundError,
   InvalidPermissionAssignmentError,
+  OrgMembershipNotFoundError,
 } from '../../../constants/errors';
 
-const omitUndefinedOptionalValues = omitBy((v) => v === undefined);
+const existsPermissionAssignment = (permissionAssignments, { id, resourceId }) => {
+  return permissionAssignments.some((permissionAssignment) => {
+    return permissionAssignment.id.equals(id) && permissionAssignment.resourceId === resourceId;
+  });
+};
 
 async function createPermissionAssignment(db, { userId, orgId, permissionId, resourceId }) {
   const UserModel = db.model('User');
   const OrgModel = db.model('Org');
   const PermissionModel = db.model('Permission');
-  const PermissionAssignmentModel = db.model('PermissionAssignment');
+  const OrgMembershipModel = db.model('OrgMembership');
 
-  // ensure user exists
+  // acquire user from db
   const user = await UserModel.findOne({
-    _id: userId,
+    _id: ObjectId(userId),
   });
 
+  // ensure user exists
   if (!user) {
     throw new UserNotFoundError('User does not exist');
   }
 
   if (orgId) {
-    // ensure org exists (if specified)
+    // acquire org from db
     const org = await OrgModel.findOne({
-      _id: orgId,
+      _id: ObjectId(orgId),
     });
 
+    // ensure org exists (if specified)
     if (!org) {
       throw new OrgNotFoundError('Org does not exist');
     }
-
-    // ensure user is member of org
-    const isMemberOf = user.orgs.some((oid) => oid.equals(org._id));
-
-    if (!isMemberOf) {
-      throw new InvalidPermissionAssignmentError(
-        `User ${user.id} is not a member of the designated org`
-      );
-    }
   }
 
-  // ensure permission exists
+  // acquire permission from db
   const permission = await PermissionModel.findOne({
-    _id: permissionId,
+    _id: ObjectId(permissionId),
   });
 
+  // ensure permission exists
   if (!permission) {
     throw new PermissionNotFoundError('Permission does not exist');
   }
@@ -60,33 +59,51 @@ async function createPermissionAssignment(db, { userId, orgId, permissionId, res
     );
   }
 
-  // create permission assignment in db
-  try {
-    const permissionAssignment = await PermissionAssignmentModel.create(
-      omitUndefinedOptionalValues({
-        user: userId,
-        org: orgId,
-        permission: permissionId,
-        resource: resourceId,
-      })
-    );
+  // acquire org membership from db
+  const orgMembership = await OrgMembershipModel.findOne({
+    orgId: orgId ? ObjectId(orgId) : null,
+    userId: ObjectId(userId),
+  });
 
-    return {
-      id: permissionAssignment.id,
-      userId: permissionAssignment.user,
-      orgId: permissionAssignment.org,
-      permissionId: permissionAssignment.permission,
-      resourceId: permissionAssignment.resourceId,
-    };
-  } catch (err) {
-    if (err.code === 11000) {
-      throw new DuplicatePermissionAssignmentError(
-        `Permission ${permission.id} already assigned to the designated user`
-      );
-    }
-
-    throw err;
+  // ensure user is member of org
+  if (!orgMembership) {
+    throw new OrgMembershipNotFoundError(`User ${user.id} is not a member of org ${orgId}`);
   }
+
+  // ensure permission assignments does not already exist
+  if (
+    existsPermissionAssignment(orgMembership.permissions, {
+      id: ObjectId(permissionId),
+      resourceId,
+    })
+  ) {
+    throw new DuplicatePermissionAssignmentError(
+      `Permission ${permission.id} already assigned to the designated user`
+    );
+  }
+
+  // create permission assignment
+  await OrgMembershipModel.updateOne(
+    {
+      orgId: orgId ? ObjectId(orgId) : null,
+      userId: ObjectId(userId),
+    },
+    {
+      $push: {
+        permissions: {
+          id: ObjectId(permissionId),
+          resourceId,
+        },
+      },
+    }
+  );
+
+  return {
+    userId,
+    orgId: orgId || null,
+    permissionId,
+    resourceId,
+  };
 }
 
 export default createPermissionAssignment;
