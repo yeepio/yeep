@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import { ImmutablePermissionError } from '../../../constants/errors';
 
 async function deletePermission(db, permission) {
@@ -10,7 +11,7 @@ async function deletePermission(db, permission) {
     );
   }
 
-  const result = await PermissionModel.deleteOne({ _id: permission.id });
+  const result = await PermissionModel.deleteOne({ _id: ObjectId(permission.id) });
   return !!result.ok;
 }
 

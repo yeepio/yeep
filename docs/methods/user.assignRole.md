@@ -29,7 +29,7 @@ Requestor must be authenticated and assigned with the `yeep.role.assignment.writ
 
 - **ok** _(boolean)_ — indicates whether the request was successfully completed
 - **error** _(Object)_ — contains error details in case of an error
-- **roleAssignment** _(Object)_ — details on the newly created role-assignment
+- **roleAssignment** _(Object)_ — details on the newly created role assignment
 
 ***
 
@@ -46,7 +46,7 @@ Authorization: `Bearer ${authToken}`
 {
   "userId": "507f191e810c19729de860ea",
   "roleId": "402f191e901c19729de720ba",
-  "orgId": "333a291e810c19729de902ee",
+  "orgId": "333a291e810c19729de902ee"
 }
 ```
 
@@ -58,7 +58,6 @@ Authorization: `Bearer ${authToken}`
 {
   "ok": true,
   "roleAssignment": {
-    "id": "1000291e910c19729de903ab",
     "userId": "507f191e810c19729de860ea",
     "roleId": "402f191e901c19729de720ba",
     "orgId": "333a291e810c19729de902ee"

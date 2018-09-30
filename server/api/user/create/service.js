@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import { getGravatarUrl } from '../../../utils/gravatar';
 import {
   InvalidPrimaryEmailError,
@@ -10,6 +11,7 @@ import commonNames from '../../../utils/commonNames';
 async function createUser(db, { username, password, fullName, picture, emails, orgs = [] }) {
   const UserModel = db.model('User');
   const CredentialsModel = db.model('Credentials');
+  const OrgMembershipModel = db.model('OrgMembership');
 
   // ensure there is exactly 1 primary email
   const primaryEmails = emails.filter((email) => email.isPrimary);
@@ -55,13 +57,12 @@ async function createUser(db, { username, password, fullName, picture, emails, o
   session.startTransaction();
 
   try {
-    // create use
+    // create user
     const user = await UserModel.create({
       username: normalizedUsername,
       fullName,
       picture,
       emails: normalizedEmails,
-      orgs,
     });
 
     // create password credentials
@@ -73,15 +74,27 @@ async function createUser(db, { username, password, fullName, picture, emails, o
       iterationCount,
     });
 
+    // create org membership(s)
+    await OrgMembershipModel.insertMany([
+      {
+        orgId: null,
+        userId: user._id,
+      },
+      ...orgs.map((org) => ({
+        orgId: ObjectId(org),
+        userId: user._id,
+      })),
+    ]);
+
     await session.commitTransaction();
 
     return {
-      id: user.id, // as hex string
+      id: user._id.toHexString(),
       username: user.username,
       fullName: user.fullName,
       picture: user.picture,
       emails: user.emails,
-      orgs: user.orgs,
+      orgs,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
@@ -97,6 +110,7 @@ async function createUser(db, { username, password, fullName, picture, emails, o
         throw new DuplicateUsernameError(`Username "${username}" already in use`);
       }
     }
+
     throw err;
   } finally {
     session.endSession();

@@ -22,26 +22,58 @@ export const defaultProjection = {
   updatedAt: true,
 };
 
-async function listUsers(db, { q, limit, cursor, scopes, projection }) {
+async function listUsers(db, { q, limit, cursor, scopes, projection = defaultProjection }) {
   const UserModel = db.model('User');
 
-  // retrieve users
   const users = await UserModel.aggregate([
     {
-      $match: Object.assign(
-        scopes.includes(null)
-          ? {}
-          : {
-              orgs: { $in: scopes.map((scope) => ObjectId(scope)) },
+      $match: q
+        ? {
+            username: {
+              $regex: `^${escapeRegExp(q)}`,
+              $options: 'i',
             },
-        q
-          ? {
-              username: {
-                $regex: `^${escapeRegExp(q)}`,
-                $options: 'i',
+          }
+        : {},
+    },
+    {
+      $lookup: {
+        from: 'orgMemberships',
+        let: { userId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ['$userId', '$$userId'] },
+                  scopes.includes(null)
+                    ? {
+                        $eq: ['$orgId', null],
+                      }
+                    : {
+                        $in: ['$orgId', scopes.map((scope) => ObjectId(scope))],
+                      },
+                ],
               },
-            }
-          : {},
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              orgId: 1,
+            },
+          },
+        ],
+        as: 'orgMemberships',
+      },
+    },
+    {
+      $match: Object.assign(
+        {
+          orgMemberships: {
+            $not: { $size: 0 },
+          },
+        },
         cursor
           ? {
               _id: {
@@ -51,27 +83,6 @@ async function listUsers(db, { q, limit, cursor, scopes, projection }) {
           : {}
       ),
     },
-    // {
-    //   $lookup: {
-    //     from: 'roleAssignments',
-    //     let: { userId: '$_id' },
-    //     pipeline: [
-    //       {
-    //         $match: {
-    //           $expr: {
-    //             $eq: ['$user', '$$userId'],
-    //           },
-    //         },
-    //       },
-    //       // {
-    //       //   $group: {
-    //       //     _id: '$role',
-    //       //   },
-    //       // },
-    //     ],
-    //     as: 'roleAssignments',
-    //   },
-    // },
     {
       $limit: limit,
     },
@@ -93,7 +104,7 @@ async function listUsers(db, { q, limit, cursor, scopes, projection }) {
         fullName: user.fullName,
         picture: user.picture,
         emails: user.emails,
-        orgs: user.orgs.map((oid) => oid.toHexString()),
+        orgs: user.orgMemberships.map((orgMembership) => orgMembership.orgId.toHexString()),
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       },

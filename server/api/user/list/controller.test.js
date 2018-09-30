@@ -50,7 +50,6 @@ describe('api/v1/user.list', () => {
     let session;
 
     beforeAll(async () => {
-      // user "wile" is admin in acme + monsters org
       wile = await createUser(ctx.db, {
         username: 'wile',
         password: 'catch-the-b1rd$',
@@ -64,6 +63,7 @@ describe('api/v1/user.list', () => {
           },
         ],
       });
+
       [acme, monsters] = await Promise.all([
         createOrg(ctx.db, {
           name: 'Acme Inc',
@@ -92,6 +92,7 @@ describe('api/v1/user.list', () => {
         ],
         orgs: [acme.id],
       });
+
       wazowski = await createUser(ctx.db, {
         username: 'wazowski',
         password: 'grrrrrrrrrrr',
@@ -106,6 +107,7 @@ describe('api/v1/user.list', () => {
         ],
         orgs: [monsters.id],
       });
+
       spongebob = await createUser(ctx.db, {
         username: 'spongebob',
         password: 'weeeeedddd',
