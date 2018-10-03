@@ -8,7 +8,6 @@
     "dev": "node --require dotenv/config --require @babel/register server/index.js",
     "watch": "nodemon server/index.js --exec 'node --require dotenv/config --require @babel/register'",
     "lint": "eslint .",
-    "precommit": "lint-staged",
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
     "build": "babel server --out-dir dist --source-maps --ignore '**/*.test.js,**/*.spec.js,**/*.snapshop.json' --verbose",
@@ -45,7 +44,7 @@
     "eslint-config-prettier": "^3.0.1",
     "eslint-plugin-import": "^2.11.0",
     "eslint-plugin-prettier": "^2.6.0",
-    "husky": "^0.14.3",
+    "husky": "^1.0.0",
     "jest-cli": "^23.5.0",
     "lint-staged": "^7.0.5",
     "nodemon": "^1.17.3",
@@ -87,6 +86,11 @@
     "randomstring": "^1.1.5",
     "rimraf": "^2.6.2",
     "typeof": "^1.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   },
   "lint-staged": {
     "*.js": [
