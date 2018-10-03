@@ -41,19 +41,19 @@ async function listPermissions(db, { q, limit, cursor, scopes }) {
     },
     {
       $lookup: {
-        from: 'permissionAssignments',
+        from: 'orgMemberships',
         let: { permissionId: '$_id' },
         pipeline: [
           {
             $match: {
               $expr: {
-                $eq: ['$permission', '$$permissionId'],
+                $eq: ['$permissions.id', '$$permissionId'],
               },
             },
           },
           {
             $group: {
-              _id: '$user',
+              _id: '$userId',
             },
           },
         ],
