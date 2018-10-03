@@ -73,7 +73,7 @@
     "joi": "^13.7.0",
     "jsonwebtoken": "^8.3.0",
     "koa": "^2.5.3",
-    "koa-bodyparser": "^4.2.0",
+    "koa-bodyparser": "^4.2.1",
     "koa-compose": "^4.0.0",
     "koa-connect": "^2.0.1",
     "koa-helmet": "^4.0.0",
