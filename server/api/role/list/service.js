@@ -41,19 +41,19 @@ async function listRoles(db, { q, limit, cursor, scopes }) {
     },
     {
       $lookup: {
-        from: 'roleAssignments',
+        from: 'orgMemberships',
         let: { roleId: '$_id' },
         pipeline: [
           {
             $match: {
               $expr: {
-                $eq: ['$role', '$$roleId'],
+                $eq: ['$roles.id', '$$roleId'],
               },
             },
           },
           {
             $group: {
-              _id: '$user',
+              _id: '$userId',
             },
           },
         ],
