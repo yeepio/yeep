@@ -57,7 +57,7 @@
     "@babel/cli": "^7.1.2",
     "@babel/core": "^7.1.2",
     "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
-    "@babel/preset-env": "^7.0.0",
+    "@babel/preset-env": "^7.1.0",
     "@babel/register": "^7.0.0",
     "@koa/cors": "^2.2.1",
     "awaiting": "^3.0.0",
