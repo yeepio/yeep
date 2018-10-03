@@ -158,3 +158,10 @@ export class UserDeactivatedError extends Error {
     this.code = 10022;
   }
 }
+
+export class OrgMembershipNotFoundError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10023;
+  }
+}

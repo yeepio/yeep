@@ -16,7 +16,10 @@ Requestor must be authenticated and assigned with the `yeep.permission.assignmen
 
 ### Body
 
-- **id** _(string)_ — the ID of permission assignment (required)
+- **userId** _(string)_ — the ID of the assignee user (required)
+- **permissionId** _(string)_ — the ID of the permission assigned to user (required)
+- **orgId** _(string)_ — the org context of the assignment; implies global context if left undefined (optional)
+- **resourceId** _(string|number)_ — the resource ID that the assigned permission applies to (optional)
 
 ***
 
@@ -40,7 +43,9 @@ Authorization: `Bearer ${authToken}`
 
 ``` json
 {
-  "id": "1000291e910c19729de903ab"
+  "userId": "507f191e810c19729de860ea",
+  "permissionId": "402f191e901c19729de720ba",
+  "orgId": "333a291e810c19729de902ee"
 }
 ```
 

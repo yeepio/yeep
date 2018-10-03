@@ -21,10 +21,7 @@ const validationSchema = {
 };
 
 async function handler({ request, response, db }) {
-  const isOrgDeleted = await deleteOrg(db, {
-    ...request.body,
-    adminId: request.session.user.id,
-  });
+  const isOrgDeleted = await deleteOrg(db, request.body);
 
   if (!isOrgDeleted) {
     throw Boom.internal();

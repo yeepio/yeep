@@ -47,15 +47,15 @@ describe('api/v1/user.revokeRole', () => {
   });
 
   describe('authorized user', () => {
-    let org;
-    let user;
+    let acme;
+    let wile;
     let permissionAssignment;
-    let session;
+    let wileSession;
     let permission;
     let role;
 
     beforeAll(async () => {
-      user = await createUser(ctx.db, {
+      wile = await createUser(ctx.db, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -69,10 +69,10 @@ describe('api/v1/user.revokeRole', () => {
         ],
       });
 
-      org = await createOrg(ctx.db, {
+      acme = await createOrg(ctx.db, {
         name: 'Acme Inc',
         slug: 'acme',
-        adminId: user.id,
+        adminId: wile.id,
       });
 
       const PermissionModel = ctx.db.model('Permission');
@@ -80,12 +80,12 @@ describe('api/v1/user.revokeRole', () => {
         name: 'yeep.role.assignment.write',
       });
       permissionAssignment = await createPermissionAssignment(ctx.db, {
-        userId: user.id,
-        orgId: org.id,
+        userId: wile.id,
+        orgId: acme.id,
         permissionId: requiredPermission.id,
       });
 
-      session = await createSessionToken(ctx.db, ctx.jwt, {
+      wileSession = await createSessionToken(ctx.db, ctx.jwt, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
@@ -93,32 +93,32 @@ describe('api/v1/user.revokeRole', () => {
       permission = await createPermission(ctx.db, {
         name: 'acme.code.write',
         description: 'Permission to edit (write, delete, update) source code',
-        scope: org.id,
+        scope: acme.id,
       });
 
       role = await createRole(ctx.db, {
         name: 'acme:developer',
         description: 'Developer role',
         permissions: [permission.id],
-        scope: org.id,
+        scope: acme.id,
       });
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx.db, session);
+      await destroySessionToken(ctx.db, wileSession);
       await deleteRole(ctx.db, role);
       await deletePermissionAssignment(ctx.db, permissionAssignment);
       await deletePermission(ctx.db, permission);
-      await deleteUser(ctx.db, user);
-      await deleteOrg(ctx.db, org);
+      await deleteUser(ctx.db, wile);
+      await deleteOrg(ctx.db, acme);
     });
 
-    test('returns error when `id` contains invalid characters', async () => {
+    test('returns error when `userId` contains invalid characters', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokeRole')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${wileSession.token}`)
         .send({
-          id: '507f1f77bcf86cd79943901@',
+          userId: '507f1f77bcf86cd79943901@',
         });
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -129,16 +129,16 @@ describe('api/v1/user.revokeRole', () => {
           details: expect.any(Array),
         },
       });
-      expect(res.body.error.details[0].path).toEqual(['id']);
+      expect(res.body.error.details[0].path).toEqual(['userId']);
       expect(res.body.error.details[0].type).toBe('string.hex');
     });
 
-    test('returns error when `id` contains more than 24 characters', async () => {
+    test('returns error when `userId` contains more than 24 characters', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokeRole')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${wileSession.token}`)
         .send({
-          id: '507f1f77bcf86cd7994390112',
+          userId: '507f1f77bcf86cd7994390112',
         });
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -149,16 +149,16 @@ describe('api/v1/user.revokeRole', () => {
           details: expect.any(Array),
         },
       });
-      expect(res.body.error.details[0].path).toEqual(['id']);
+      expect(res.body.error.details[0].path).toEqual(['userId']);
       expect(res.body.error.details[0].type).toBe('string.length');
     });
 
-    test('returns error when `id` contains less than 24 characters', async () => {
+    test('returns error when `userId` contains less than 24 characters', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokeRole')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${wileSession.token}`)
         .send({
-          id: '507f1f77bcf86cd79943901',
+          userId: '507f1f77bcf86cd79943901',
         });
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -169,14 +169,14 @@ describe('api/v1/user.revokeRole', () => {
           details: expect.any(Array),
         },
       });
-      expect(res.body.error.details[0].path).toEqual(['id']);
+      expect(res.body.error.details[0].path).toEqual(['userId']);
       expect(res.body.error.details[0].type).toBe('string.length');
     });
 
-    test('returns error when `id` is unspecified', async () => {
+    test('returns error when `userId` is unspecified', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokeRole')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${wileSession.token}`)
         .send({});
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -187,16 +187,166 @@ describe('api/v1/user.revokeRole', () => {
           details: expect.any(Array),
         },
       });
-      expect(res.body.error.details[0].path).toEqual(['id']);
+      expect(res.body.error.details[0].path).toEqual(['userId']);
+      expect(res.body.error.details[0].type).toBe('any.required');
+    });
+
+    test('returns error when `orgId` contains invalid characters', async () => {
+      const res = await request(server)
+        .post('/api/v1/user.revokeRole')
+        .set('Authorization', `Bearer ${wileSession.token}`)
+        .send({
+          userId: wile.id,
+          orgId: '507f1f77bcf86cd79943901@',
+        });
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 400,
+          message: 'Invalid request body',
+          details: expect.any(Array),
+        },
+      });
+      expect(res.body.error.details[0].path).toEqual(['orgId']);
+      expect(res.body.error.details[0].type).toBe('string.hex');
+    });
+
+    test('returns error when `orgId` contains more than 24 characters', async () => {
+      const res = await request(server)
+        .post('/api/v1/user.revokeRole')
+        .set('Authorization', `Bearer ${wileSession.token}`)
+        .send({
+          userId: wile.id,
+          orgId: '507f1f77bcf86cd7994390112',
+        });
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 400,
+          message: 'Invalid request body',
+          details: expect.any(Array),
+        },
+      });
+      expect(res.body.error.details[0].path).toEqual(['orgId']);
+      expect(res.body.error.details[0].type).toBe('string.length');
+    });
+
+    test('returns error when `orgId` contains less than 24 characters', async () => {
+      const res = await request(server)
+        .post('/api/v1/user.revokeRole')
+        .set('Authorization', `Bearer ${wileSession.token}`)
+        .send({
+          userId: wile.id,
+          orgId: '507f1f77bcf86cd79943901',
+        });
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 400,
+          message: 'Invalid request body',
+          details: expect.any(Array),
+        },
+      });
+      expect(res.body.error.details[0].path).toEqual(['orgId']);
+      expect(res.body.error.details[0].type).toBe('string.length');
+    });
+
+    test('returns error when `roleId` contains invalid characters', async () => {
+      const res = await request(server)
+        .post('/api/v1/user.revokeRole')
+        .set('Authorization', `Bearer ${wileSession.token}`)
+        .send({
+          userId: wile.id,
+          orgId: '507f1f77bcf86cd799439012', // some random object id
+          roleId: '507f1f77bcf86cd79943901@',
+        });
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 400,
+          message: 'Invalid request body',
+          details: expect.any(Array),
+        },
+      });
+      expect(res.body.error.details[0].path).toEqual(['roleId']);
+      expect(res.body.error.details[0].type).toBe('string.hex');
+    });
+
+    test('returns error when `roleId` contains more than 24 characters', async () => {
+      const res = await request(server)
+        .post('/api/v1/user.revokeRole')
+        .set('Authorization', `Bearer ${wileSession.token}`)
+        .send({
+          userId: wile.id,
+          orgId: '507f1f77bcf86cd799439012', // some random object id
+          roleId: '507f1f77bcf86cd7994390112',
+        });
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 400,
+          message: 'Invalid request body',
+          details: expect.any(Array),
+        },
+      });
+      expect(res.body.error.details[0].path).toEqual(['roleId']);
+      expect(res.body.error.details[0].type).toBe('string.length');
+    });
+
+    test('returns error when `roleId` contains less than 24 characters', async () => {
+      const res = await request(server)
+        .post('/api/v1/user.revokeRole')
+        .set('Authorization', `Bearer ${wileSession.token}`)
+        .send({
+          userId: wile.id,
+          orgId: '507f1f77bcf86cd799439012', // some random object id
+          roleId: '507f1f77bcf86cd79943901',
+        });
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 400,
+          message: 'Invalid request body',
+          details: expect.any(Array),
+        },
+      });
+      expect(res.body.error.details[0].path).toEqual(['roleId']);
+      expect(res.body.error.details[0].type).toBe('string.length');
+    });
+
+    test('returns error when `roleId` is unspecified', async () => {
+      const res = await request(server)
+        .post('/api/v1/user.revokeRole')
+        .set('Authorization', `Bearer ${wileSession.token}`)
+        .send({
+          userId: wile.id,
+        });
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 400,
+          message: 'Invalid request body',
+          details: expect.any(Array),
+        },
+      });
+      expect(res.body.error.details[0].path).toEqual(['roleId']);
       expect(res.body.error.details[0].type).toBe('any.required');
     });
 
     test('returns error when payload contains unknown properties', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokeRole')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${wileSession.token}`)
         .send({
-          id: '507f191e810c19729de860ea',
+          userId: wile.id,
+          roleId: role.id,
           foo: 'bar',
         });
       expect(res.status).toBe(200);
@@ -212,36 +362,60 @@ describe('api/v1/user.revokeRole', () => {
       expect(res.body.error.details[0].type).toBe('object.allowUnknown');
     });
 
-    test('returns error when role assignment does not exist', async () => {
+    test('returns error when user does not exist', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokeRole')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${wileSession.token}`)
         .send({
-          id: '507f191e810c19729de860ea', // some random object id
+          userId: '507f191e810c19729de860ea', // some random object id
+          roleId: role.id,
+          orgId: acme.id,
         });
 
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
         ok: false,
         error: {
-          code: 10021,
-          message: 'RoleAssignment 507f191e810c19729de860ea does not exist',
+          code: 10001,
+          message: 'User does not exist',
+        },
+      });
+    });
+
+    test('returns error when role does not exist', async () => {
+      const res = await request(server)
+        .post('/api/v1/user.revokeRole')
+        .set('Authorization', `Bearer ${wileSession.token}`)
+        .send({
+          userId: wile.id,
+          roleId: '507f191e810c19729de860ea', // some random object id
+          orgId: acme.id,
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 10017,
+          message: 'Role 507f191e810c19729de860ea does not exist',
         },
       });
     });
 
     test('deletes role assignment and returns expected response', async () => {
-      const roleAssignment = await createRoleAssignment(ctx.db, {
-        userId: user.id,
-        orgId: org.id,
+      await createRoleAssignment(ctx.db, {
+        userId: wile.id,
+        orgId: acme.id,
         roleId: role.id,
       });
 
       const res = await request(server)
         .post('/api/v1/user.revokeRole')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${wileSession.token}`)
         .send({
-          id: roleAssignment.id,
+          userId: wile.id,
+          orgId: acme.id,
+          roleId: role.id,
         });
 
       expect(res.status).toBe(200);
@@ -256,13 +430,12 @@ describe('api/v1/user.revokeRole', () => {
     let monsters;
     let wile;
     let wazowski;
-    let session;
+    let wileSession;
     let permission;
     let role;
     let roleAssignment;
 
     beforeAll(async () => {
-      // user "wile" is admin in "acme" org
       wile = await createUser(ctx.db, {
         username: 'wile',
         password: 'catch-the-b1rd$',
@@ -276,13 +449,13 @@ describe('api/v1/user.revokeRole', () => {
           },
         ],
       });
+
       acme = await createOrg(ctx.db, {
         name: 'Acme Inc',
         slug: 'acme',
         adminId: wile.id,
       });
 
-      // user "wazowski" is admin in "monsters" org
       wazowski = await createUser(ctx.db, {
         username: 'wazowski',
         password: 'grrrrrrrrrrr',
@@ -296,30 +469,29 @@ describe('api/v1/user.revokeRole', () => {
           },
         ],
       });
+
       monsters = await createOrg(ctx.db, {
         name: 'Monsters Inc',
         slug: 'monsters',
         adminId: wazowski.id,
       });
 
-      // user "wile" is logged in
-      session = await createSessionToken(ctx.db, ctx.jwt, {
+      wileSession = await createSessionToken(ctx.db, ctx.jwt, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
 
-      // create test permission + role
       permission = await createPermission(ctx.db, {
         name: 'acme.code.write',
         description: 'Permission to edit (write, delete, update) source code',
       });
+
       role = await createRole(ctx.db, {
         name: 'acme:developer',
         description: 'Developer role',
         permissions: [permission.id],
       });
 
-      // assign test permission to user "wazowski"
       roleAssignment = await createRoleAssignment(ctx.db, {
         userId: wazowski.id,
         orgId: monsters.id,
@@ -328,22 +500,24 @@ describe('api/v1/user.revokeRole', () => {
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx.db, session);
+      await destroySessionToken(ctx.db, wileSession);
+      await deleteRoleAssignment(ctx.db, roleAssignment);
+      await deleteRole(ctx.db, role);
+      await deletePermission(ctx.db, permission);
       await deleteOrg(ctx.db, acme);
       await deleteUser(ctx.db, wile);
       await deleteOrg(ctx.db, monsters);
       await deleteUser(ctx.db, wazowski);
-      await deleteRoleAssignment(ctx.db, roleAssignment);
-      await deleteRole(ctx.db, role);
-      await deletePermission(ctx.db, permission);
     });
 
     test('returns error when user permission scope does not match the roleAssignment org context', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokeRole')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${wileSession.token}`)
         .send({
-          id: roleAssignment.id,
+          userId: wazowski.id,
+          orgId: monsters.id,
+          roleId: role.id,
         });
 
       expect(res.status).toBe(200);

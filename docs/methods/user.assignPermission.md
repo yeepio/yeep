@@ -46,7 +46,7 @@ Authorization: `Bearer ${authToken}`
 {
   "userId": "507f191e810c19729de860ea",
   "permissionId": "402f191e901c19729de720ba",
-  "orgId": "333a291e810c19729de902ee",
+  "orgId": "333a291e810c19729de902ee"
 }
 ```
 
@@ -58,7 +58,6 @@ Authorization: `Bearer ${authToken}`
 {
   "ok": true,
   "permissionAssignment": {
-    "id": "1000291e910c19729de903ab",
     "userId": "507f191e810c19729de860ea",
     "permissionId": "402f191e901c19729de720ba",
     "orgId": "333a291e810c19729de902ee"

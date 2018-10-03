@@ -9,27 +9,30 @@ import {
   visitUserPermissions,
   isUserAuthorized,
 } from '../../../middleware/auth';
-import deletePermissionAssignment, { getPermissionAssignment } from './service';
+import deletePermissionAssignment from './service';
 
 const validationSchema = {
   body: {
-    id: Joi.string()
+    userId: Joi.string()
       .length(24)
       .hex()
       .required(),
+    orgId: Joi.string()
+      .length(24)
+      .hex()
+      .optional(),
+    permissionId: Joi.string()
+      .length(24)
+      .hex()
+      .required(),
+    resourceId: Joi.alternatives().try(
+      Joi.number(),
+      Joi.string()
+        .trim()
+        .min(2)
+        .max(140)
+    ),
   },
-};
-
-const visitRequestedPermissionAssignment = async ({ request, db }, next) => {
-  const permissionAssignment = await getPermissionAssignment(db, request.body);
-
-  // visit session object with requested permissionAssignment data
-  request.session = {
-    ...request.session,
-    requestedPermissionAssignment: permissionAssignment,
-  };
-
-  await next();
 };
 
 async function handler({ request, response, db }) {
@@ -47,11 +50,10 @@ export default compose([
   visitSession(),
   isUserAuthenticated(),
   validateRequest(validationSchema),
-  visitRequestedPermissionAssignment,
   visitUserPermissions(),
   isUserAuthorized({
     permissions: ['yeep.permission.assignment.write'],
-    org: (request) => request.session.requestedPermissionAssignment.orgId,
+    org: (request) => request.body.orgId,
   }),
   handler,
 ]);

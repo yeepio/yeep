@@ -2,11 +2,13 @@ const mongoose = require('mongoose');
 
 exports.up = async function(next) {
   await mongoose.connect(process.env.MONGODB_URI);
-  await mongoose.connection.db.collection('permissionAssignments').createIndex(
-    { user: 1, org: 1, permission: 1, resource: 1 },
+  await mongoose.connection.db.collection('orgMemberships').createIndex(
     {
-      unique: true,
-      name: 'assignment_uidx',
+      'permissions.id': 1,
+      'permissions.resourceId': 1,
+    },
+    {
+      name: 'permissionAssignment_idx',
     },
     next
   );
@@ -15,6 +17,6 @@ exports.up = async function(next) {
 exports.down = async function(next) {
   await mongoose.connect(process.env.MONGODB_URI);
   await mongoose.connection.db
-    .collection('permissionAssignments')
-    .dropIndex('assignment_uidx', next);
+    .collection('orgMemberships')
+    .dropIndex('permissionAssignment_idx', next);
 };

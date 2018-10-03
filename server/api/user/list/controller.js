@@ -1,6 +1,7 @@
 import Joi from 'joi';
 import compose from 'koa-compose';
 import last from 'lodash/last';
+import mapValues from 'lodash/mapValues';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import {
@@ -26,32 +27,13 @@ const validationSchema = {
     cursor: Joi.string()
       .base64()
       .optional(),
-    projection: Joi.object({
-      id: Joi.boolean()
-        .optional()
-        .default(defaultProjection.id),
-      username: Joi.boolean()
-        .optional()
-        .default(defaultProjection.username),
-      fullName: Joi.boolean()
-        .optional()
-        .default(defaultProjection.fullName),
-      picture: Joi.boolean()
-        .optional()
-        .default(defaultProjection.picture),
-      emails: Joi.boolean()
-        .optional()
-        .default(defaultProjection.emails),
-      orgs: Joi.boolean()
-        .optional()
-        .default(defaultProjection.orgs),
-      createdAt: Joi.boolean()
-        .optional()
-        .default(defaultProjection.createdAt),
-      updatedAt: Joi.boolean()
-        .optional()
-        .default(defaultProjection.updatedAt),
-    })
+    projection: Joi.object(
+      mapValues(defaultProjection, (value) =>
+        Joi.boolean()
+          .optional()
+          .default(value)
+      )
+    )
       .optional()
       .default(defaultProjection),
   },

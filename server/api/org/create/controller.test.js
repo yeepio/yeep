@@ -42,11 +42,11 @@ describe('api/v1/org.create', () => {
   });
 
   describe('authorized user', () => {
-    let user;
+    let wile;
     let session;
 
     beforeAll(async () => {
-      user = await createUser(ctx.db, {
+      wile = await createUser(ctx.db, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -68,7 +68,7 @@ describe('api/v1/org.create', () => {
 
     afterAll(async () => {
       await destroySessionToken(ctx.db, session);
-      await deleteUser(ctx.db, user);
+      await deleteUser(ctx.db, wile);
     });
 
     test('returns error when `slug` contains invalid characters', async () => {
@@ -220,7 +220,7 @@ describe('api/v1/org.create', () => {
         }),
       });
 
-      const admin = await getUserInfo(ctx.db, user);
+      const admin = await getUserInfo(ctx.db, wile);
       expect(admin.orgs).toEqual(expect.arrayContaining([res.body.org.id]));
 
       const isOrgDeleted = await deleteOrg(ctx.db, res.body.org);
@@ -231,7 +231,7 @@ describe('api/v1/org.create', () => {
       const org = await createOrg(ctx.db, {
         name: 'ACME Inc.',
         slug: 'acme',
-        adminId: user.id,
+        adminId: wile.id,
       });
 
       const res = await request(server)
@@ -319,6 +319,7 @@ describe('api/v1/org.create', () => {
         permissionAssignment = await createPermissionAssignment(ctx.db, {
           userId: user.id,
           permissionId: permission.id,
+          // global org
         });
       });
 
