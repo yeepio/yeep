@@ -8,6 +8,7 @@ import compression from 'compression';
 import koaConnect from 'koa-connect';
 import Boom from 'boom';
 import mongoose from 'mongoose';
+import createNextApp from 'next';
 import * as models from './models';
 import JsonWebToken from './utils/JsonWebToken';
 import SettingsStore from './utils/SettingsStore';
@@ -17,6 +18,11 @@ import api from './api';
 
 const app = new Koa();
 const server = http.createServer(app.callback());
+
+const nextApp = createNextApp({
+  dev: process.env.NODE_ENV !== 'production',
+  dir: './app',
+});
 
 const jwt = new JsonWebToken({
   secretKey: process.env.JWT_SECRET,
@@ -81,6 +87,13 @@ app.use(
   })
 );
 
+// pass other (*) requests to next.js handler
+const handle = nextApp.getRequestHandler();
+api.get('*', async (ctx) => {
+  await handle(ctx.req, ctx.res);
+  ctx.respond = false;
+});
+
 server.teardown = async () => {
   const { db, settings } = app.context;
 
@@ -89,9 +102,15 @@ server.teardown = async () => {
 
   // disconnect from mongodb
   await db.close();
+
+  // stop next.js app
+  await nextApp.close();
 };
 
 server.setup = async () => {
+  // prepare next.js app
+  await nextApp.prepare();
+
   // connect to mongodb + register models
   const db = await mongoose.createConnection(process.env.MONGODB_URI, {
     useNewUrlParser: true,
