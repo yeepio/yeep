@@ -31,6 +31,10 @@ export const parseMultipartForm = ({
   form.maxFields = maxFields;
   form.hash = hash;
   form.multiples = multiples;
-  request.body = await form.parseAsync(req);
+  const { fields, files } = await form.parseAsync(req);
+  request.body = {
+    ...files,
+    ...fields,
+  };
   await next();
 };
