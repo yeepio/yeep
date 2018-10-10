@@ -142,7 +142,11 @@ export const visitUserPermissions = () => async ({ request, db }, next) => {
   await next();
 };
 
-const formatOrgIds = flow(castArray, filter(Boolean), concat(['']));
+const formatOrgIds = flow(
+  castArray,
+  filter(Boolean),
+  concat([''])
+);
 
 export const isUserAuthorized = ({ org: getOrg, permissions = [] }) => {
   if (!Array.isArray(permissions)) {
