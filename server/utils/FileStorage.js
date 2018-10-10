@@ -10,7 +10,7 @@ const unlinkAsync = promisify(fs.unlink);
 
 class FileStorage {
   constructor({ uploadDir }) {
-    if (isString(uploadDir)) {
+    if (!isString(uploadDir)) {
       throw new Error(`Invalid uploadDir prop; expected string, received ${typeOf(uploadDir)}`);
     }
 
