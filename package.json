@@ -84,6 +84,7 @@
     "koa-router": "^7.4.0",
     "koa-sslify": "^2.1.2",
     "lodash": "^4.17.11",
+    "mime": "^2.3.1",
     "mongoose": "^5.3.1",
     "mongoose-migrate-2": "^0.2.4",
     "normalize-email": "^1.1.1",
