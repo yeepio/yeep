@@ -1,5 +1,6 @@
 import path from 'path';
 import http from 'http';
+import url from 'url';
 import Koa from 'koa';
 import cors from '@koa/cors';
 import enforceHttps from 'koa-sslify';
@@ -108,7 +109,7 @@ server.setup = async () => {
   // setup storage layer
   const storage = new FileStorage({
     uploadDir: path.resolve(__dirname, '../uploads'),
-    baseUrl: process.env.BASE_URL,
+    baseUrl: url.resolve(process.env.BASE_URL, '/media/'),
   });
 
   // setup settings store

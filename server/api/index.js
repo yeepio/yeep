@@ -5,6 +5,7 @@ import user from './user';
 import session from './session';
 import permission from './permission';
 import role from './role';
+import media from './media';
 
 const router = Router();
 
@@ -23,5 +24,6 @@ router.use('/api', user.routes(), user.allowedMethods());
 router.use('/api', session.routes(), session.allowedMethods());
 router.use('/api', permission.routes(), permission.allowedMethods());
 router.use('/api', role.routes(), role.allowedMethods());
+router.use(media.routes(), media.allowedMethods());
 
 export default router;
