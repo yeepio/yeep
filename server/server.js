@@ -108,6 +108,7 @@ server.setup = async () => {
   // setup storage layer
   const storage = new FileStorage({
     uploadDir: path.resolve(__dirname, '../uploads'),
+    baseUrl: process.env.BASE_URL,
   });
 
   // setup settings store

@@ -1,4 +1,5 @@
 import fs from 'fs';
+import url from 'url';
 import path from 'path';
 import { promisify } from 'util';
 import isString from 'lodash/isString';
@@ -9,20 +10,30 @@ const readFileAsync = promisify(fs.readFile);
 const unlinkAsync = promisify(fs.unlink);
 
 class FileStorage {
-  constructor({ uploadDir }) {
+  constructor({ uploadDir, baseUrl }) {
     if (!isString(uploadDir)) {
       throw new Error(`Invalid uploadDir prop; expected string, received ${typeOf(uploadDir)}`);
     }
 
+    if (!isString(baseUrl)) {
+      throw new Error(`Invalid baseUrl prop; expected string, received ${typeOf(baseUrl)}`);
+    }
+
     this.props = {
       uploadDir,
+      baseUrl,
     };
+  }
+
+  resolveUrl(filename) {
+    return url.resolve(this.props.baseUrl, filename);
   }
 
   async writeFile(filename, data) {
     const { uploadDir } = this.props;
     const filepath = path.join(uploadDir, filename);
-    return writeFileAsync(filepath, data);
+    await writeFileAsync(filepath, data);
+    return 'http';
   }
 
   async readFile(filename) {
