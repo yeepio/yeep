@@ -38,9 +38,9 @@ const validationSchema = {
 };
 
 async function handler({ request, response, db, storage }) {
-  await setUserPicture(db, storage, request.body);
+  const user = await setUserPicture(db, storage, request.body);
   response.status = 200; // OK
-  response.body = request.body;
+  response.body = user;
 }
 
 export default compose([

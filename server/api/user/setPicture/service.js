@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { promisify } from 'util';
-// import { ObjectId } from 'mongodb';
+import { ObjectId } from 'mongodb';
 import readChunk from 'read-chunk';
 import imageType from 'image-type';
 import getImageSize from 'image-size';
@@ -15,12 +15,12 @@ import {
 const unlinkAsync = promisify(fs.unlink);
 const getImageSizeAsync = promisify(getImageSize);
 
-const acceptedTypes = new Set(['png', 'jpeg', 'webp']);
+const acceptedTypes = new Set(['png', 'jpg', 'webp']);
 export const minImageSize = 200; // px
 export const maxImageSize = 10000; // px
 
 async function setUserPicture(db, storage, { id, picture, cropSize, cropX, cropY }) {
-  // const UserModel = db.model('User');
+  const UserModel = db.model('User');
 
   try {
     // detect image type
@@ -29,9 +29,8 @@ async function setUserPicture(db, storage, { id, picture, cropSize, cropX, cropY
 
     // make sure image is of valid type
     if (!type || !acceptedTypes.has(type.ext)) {
-      await unlinkAsync(picture.path);
       throw new UnprocessableImage(
-        'Unprocessable image type; exp, InvalidImageCropAreaected one of "png", "jpg" or "webp'
+        'Unprocessable image type; expected one of "png", "jpg" or "webp"'
       );
     }
 
@@ -65,33 +64,45 @@ async function setUserPicture(db, storage, { id, picture, cropSize, cropX, cropY
     }
 
     // process image
+    const format = type.ext === 'png' ? 'png' : 'jpeg';
     const buf = await sharp(picture.path)
       .extract({ left: cropX, top: cropY, width: cropSize, height: cropSize })
       .resize(400, 400)
+      .jpeg({
+        quality: 80,
+      })
+      .png({
+        compressionLevel: 9,
+      })
+      .toFormat(format)
       .toBuffer();
 
     // persist image to storage layer
-    await storage.writeFile(`${id}.${type.ext}`, buf);
+    await storage.writeFile(`${id}.${format}`, buf);
+
+    // resolve image URL
+    const nextPicture = storage.resolveUrl(`${id}.${format}`);
+
+    // update user in db
+    await UserModel.updateOne(
+      {
+        id: ObjectId(id),
+      },
+      {
+        $set: {
+          picture: nextPicture,
+        },
+      }
+    );
+
+    return {
+      id,
+      picture: nextPicture,
+    };
   } finally {
     // remove temp image from fs
     await unlinkAsync(picture.path);
   }
-
-  // save image to disk
-  // image.getBuffer( mime, cb );
-  // await jimpImage.write(type.mime);
-  // const result = await UserModel.updateOne(
-  //   {
-  //     id: ObjectId(id),
-  //   },
-  //   {
-  //     $set: {
-  //       picture,
-  //     },
-  //   }
-  // );
-
-  // return !!result.ok;
 }
 
 export default setUserPicture;
