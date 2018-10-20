@@ -22,6 +22,6 @@ install:
   - mongo --eval 'rs.initiate()'
   - npm ci
   - npm run migrate up
-  - npm run mkdir:uploads
+  - npm run mkdir:uploads -- -m 666
 after_script:
   - pkill mongod

@@ -11,7 +11,7 @@
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
     "build": "babel server --out-dir dist --source-maps --ignore '**/*.test.js,**/*.spec.js,**/*.snapshop.json' --verbose",
-    "mkdir:uploads": "mkdirp -m 664 ./uploads",
+    "mkdir:uploads": "mkdirp ./uploads",
     "postinstall": "npm run migrate && npm run build && npm run mkdir:uploads",
     "test": "PORT=5002 jest --config=config/jest.json --runInBand",
     "coverage": "jest --config=config/jest.json --coverage",
