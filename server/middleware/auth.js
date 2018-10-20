@@ -7,6 +7,9 @@ import castArray from 'lodash/fp/castArray';
 import concat from 'lodash/fp/concat';
 import get from 'lodash/get';
 import uniq from 'lodash/uniq';
+import isString from 'lodash/isString';
+import isUndefined from 'lodash/isUndefined';
+import isNull from 'lodash/isNull';
 import binarySearch from 'binary-search';
 import { AuthorizationError } from '../constants/errors';
 import { getUserPermissions } from '../api/user/info/service';
@@ -147,6 +150,33 @@ const formatOrgIds = flow(
   filter(Boolean),
   concat([''])
 );
+
+/**
+ * Finds and returns the index of the user permission object that matches the specified properties.
+ * @param {Array<Object>} userPermissions array of user permissions to inspect
+ * @param {Object} props matching properties
+ * @prop {string} props.name permission name
+ * @prop {string} [props.orgId] permission orgId (optional)
+ * @returns {Number}
+ */
+export const findUserPermissionIndex = (userPermissions, { name, orgId }) => {
+  if (!isString(name)) {
+    throw new TypeError(`Invalid name prop; expected string, received ${typeOf(name)}`);
+  }
+
+  if (!(isNull(orgId) || isUndefined(orgId) || isString(orgId))) {
+    throw new TypeError(`Invalid orgId prop; expected string, received ${typeOf(orgId)}`);
+  }
+
+  return binarySearch(
+    userPermissions,
+    {
+      name,
+      orgId: orgId || '',
+    },
+    (a, b) => a.name.localeCompare(b.name) || a.orgId.localeCompare(b.orgId)
+  );
+};
 
 export const isUserAuthorized = ({ org: getOrg, permissions = [] }) => {
   if (!Array.isArray(permissions)) {
