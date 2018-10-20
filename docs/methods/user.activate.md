@@ -43,12 +43,7 @@ Authorization: `Bearer ${authToken}`
 
 ``` json
 {
-  "id": "507f191e810c19729de860ea",
-  "user": {
-    "id": "507f191e810c19729de860ea",
-    "deactivatedAt": null,
-    "updatedAt": "2017-07-13T05:42:42.222Z"
-  }
+  "id": "507f191e810c19729de860ea"
 }
 ```
 
@@ -58,6 +53,11 @@ Authorization: `Bearer ${authToken}`
 
 ``` json
 {
-  "ok": true
+  "ok": true,
+  "user": {
+    "id": "507f191e810c19729de860ea",
+    "deactivatedAt": null,
+    "updatedAt": "2017-07-13T05:42:42.222Z"
+  }
 }
 ```
