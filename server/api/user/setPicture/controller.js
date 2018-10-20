@@ -56,7 +56,9 @@ const isUserAuthorized = async ({ request }, next) => {
 async function handler({ request, response, db, storage }) {
   const user = await setUserPicture(db, storage, request.body);
   response.status = 200; // OK
-  response.body = user;
+  response.body = {
+    user,
+  };
 }
 
 export default compose([
