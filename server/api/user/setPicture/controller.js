@@ -45,7 +45,9 @@ const isUserAuthorized = async ({ request }, next) => {
       orgId: null, // i.e. global permission
     }) === -1
   ) {
-    throw new AuthorizationError("You don't have permission to access this resource");
+    throw new AuthorizationError(
+      'Requestor does not have sufficient permission to access this resource'
+    );
   }
 
   await next();
