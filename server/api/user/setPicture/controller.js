@@ -1,16 +1,16 @@
 import Joi from 'joi';
-// import Boom from 'boom';
 import compose from 'koa-compose';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import {
   visitSession,
-  // isUserAuthenticated,
-  // visitUserPermissions,
-  // isUserAuthorized,
+  isUserAuthenticated,
+  visitUserPermissions,
+  findUserPermissionIndex,
 } from '../../../middleware/auth';
 import { parseMultipartForm } from '../../../middleware/multipartForm';
 import setUserPicture, { minImageSize, maxImageSize } from './service';
+import { AuthorizationError } from '../../../constants/errors';
 
 const validationSchema = {
   body: {
@@ -37,6 +37,20 @@ const validationSchema = {
   },
 };
 
+const isUserAuthorized = async ({ request }, next) => {
+  if (
+    request.session.user.id !== request.body.id &&
+    findUserPermissionIndex(request.session.user.permissions, {
+      name: 'yeep.user.write',
+      orgId: null, // i.e. global permission
+    }) === -1
+  ) {
+    throw new AuthorizationError("You don't have permission to access this resource");
+  }
+
+  await next();
+};
+
 async function handler({ request, response, db, storage }) {
   const user = await setUserPicture(db, storage, request.body);
   response.status = 200; // OK
@@ -46,16 +60,10 @@ async function handler({ request, response, db, storage }) {
 export default compose([
   packJSONRPC,
   visitSession(),
-  // isUserAuthenticated(),
+  isUserAuthenticated(),
   parseMultipartForm(),
   validateRequest(validationSchema),
-  // visitUserPermissions(),
-  // isUserAuthorized({
-  //   permissions: ['yeep.user.write'],
-  //   org: (request) => {
-  //     const { orgs } = request.body;
-  //     return orgs.length === 1 ? orgs[0] : null;
-  //   },
-  // }),
+  visitUserPermissions(),
+  isUserAuthorized,
   handler,
 ]);
