@@ -21,6 +21,7 @@ export const maxImageSize = 10000; // px
 
 async function setUserPicture(db, storage, { id, picture, cropSize, cropX, cropY }) {
   const UserModel = db.model('User');
+  const currentDate = new Date();
 
   try {
     // detect image type
@@ -91,6 +92,7 @@ async function setUserPicture(db, storage, { id, picture, cropSize, cropX, cropY
       {
         $set: {
           picture: nextPicture,
+          updatedAt: currentDate,
         },
       }
     );
@@ -98,6 +100,7 @@ async function setUserPicture(db, storage, { id, picture, cropSize, cropX, cropY
     return {
       id,
       picture: nextPicture,
+      updatedAt: currentDate,
     };
   } finally {
     // remove temp image from fs
