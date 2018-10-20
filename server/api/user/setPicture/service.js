@@ -82,7 +82,7 @@ async function setUserPicture(db, storage, { id, picture, cropSize, cropX, cropY
     await storage.writeFile(`${id}.${format}`, buf);
 
     // resolve image URL
-    const nextPicture = storage.resolveUrl(`${id}.${format}`);
+    const nextPicture = storage.resolve(`${id}.${format}`);
 
     // update user in db
     await UserModel.updateOne(

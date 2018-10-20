@@ -1,5 +1,5 @@
 import fs from 'fs';
-import url from 'url';
+import { URL } from 'url';
 import path from 'path';
 import { promisify } from 'util';
 import isString from 'lodash/isString';
@@ -25,8 +25,20 @@ class FileStorage {
     };
   }
 
-  resolveUrl(filename) {
-    return url.resolve(this.props.baseUrl, filename);
+  resolve(filename) {
+    const u = new URL(filename, this.props.baseUrl);
+    return u.toString();
+  }
+
+  relative(url) {
+    if (!url.startsWith(this.props.baseUrl)) {
+      const err = new Error('The designated URL does not conform to storage schema');
+      err.code = 'ERR_INVALID_URL';
+      throw err;
+    }
+
+    const u = new URL(url);
+    return u.pathname;
   }
 
   async writeFile(filename, data) {
