@@ -8,6 +8,7 @@ import createSessionToken from '../../session/create/service';
 import destroySessionToken from '../../session/destroy/service';
 import deletePermissionAssignment from '../revokePermission/service';
 import deleteUser from '../delete/service';
+import deleteUserPicture from '../deletePicture/service';
 
 describe('api/v1/user.setPicture', () => {
   let ctx;
@@ -118,6 +119,11 @@ describe('api/v1/user.setPicture', () => {
           updatedAt: expect.any(String),
         }),
       });
+
+      const filename = ctx.storage.relative(res.body.user.picture);
+      await expect(ctx.storage.existsFile(filename)).resolves.toBe(true);
+
+      await deleteUserPicture(ctx.db, ctx.storage, res.body.user);
     });
 
     test('returns error when `id` contains invalid characters', async () => {
@@ -247,6 +253,11 @@ describe('api/v1/user.setPicture', () => {
           updatedAt: expect.any(String),
         }),
       });
+
+      const filename = ctx.storage.relative(res.body.user.picture);
+      await expect(ctx.storage.existsFile(filename)).resolves.toBe(true);
+
+      await deleteUserPicture(ctx.db, ctx.storage, res.body.user);
     });
   });
 });
