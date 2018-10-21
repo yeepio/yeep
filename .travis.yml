@@ -5,7 +5,9 @@ env:
   global:
     - MONGODB_URI=mongodb://localhost:27017/yeep
     - JWT_SECRET="keep it safe, keep it hidden!"
+    - STORAGE_TYPE="fs"
     - NODE_ENV=development
+    - BASE_URL="https://test.yeep.app/"
   matrix:
     - MONGODB=4.0.0
 before_install:
@@ -20,5 +22,6 @@ install:
   - mongo --eval 'rs.initiate()'
   - npm ci
   - npm run migrate up
+  - npm run mkdir:uploads -- -m 666
 after_script:
   - pkill mongod

@@ -9,6 +9,8 @@ import revokeRole from './revokeRole';
 import listUsers from './list';
 import deactivateUser from './deactivate';
 import activateUser from './activate';
+import setUserPicture from './setPicture';
+import deleteUserPicture from './deletePicture';
 
 const router = Router();
 
@@ -22,5 +24,7 @@ router.post('/v1/user.revokeRole', revokeRole);
 router.post('/v1/user.list', listUsers);
 router.post('/v1/user.deactivate', deactivateUser);
 router.post('/v1/user.activate', activateUser);
+router.post('/v1/user.setPicture', setUserPicture);
+router.post('/v1/user.deletePicture', deleteUserPicture);
 
 export default router;

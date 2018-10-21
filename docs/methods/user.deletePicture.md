@@ -1,18 +1,18 @@
-# user.activate
+# user.deletePicture
 
-`POST /api/v1/user.activate`
+`POST /api/v1/user.deletePicture`
 
 ## Description
 
-Activates the designated user.
-
-This function only makes sense if the user had previously been deactivated.
+Deletes the profile picture of the designated user.
 
 ***
 
 ## Requires auth
 
-Requestor must be authenticated and assigned with the global `yeep.user.write` permission.
+Requestor must be authenticated and assigned with global `yeep.user.write` permission to set the profile picture of another user.
+
+Otherwise, users are able to delete their own profile picture.
 
 ## Parameters
 
@@ -37,7 +37,7 @@ Requestor must be authenticated and assigned with the global `yeep.user.write` p
 **Request**
 
 ```
-POST /api/v1/user.activate
+POST /api/v1/user.deletePicture
 Authorization: `Bearer ${authToken}`
 ```
 
@@ -56,7 +56,7 @@ Authorization: `Bearer ${authToken}`
   "ok": true,
   "user": {
     "id": "507f191e810c19729de860ea",
-    "deactivatedAt": null,
+    "picture": null,
     "updatedAt": "2017-07-13T05:42:42.222Z"
   }
 }

@@ -165,3 +165,31 @@ export class OrgMembershipNotFoundError extends Error {
     this.code = 10023;
   }
 }
+
+export class UnprocessableImage extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10024;
+  }
+}
+
+export class ImageTooSmall extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10025;
+  }
+}
+
+export class ImageTooLarge extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10025;
+  }
+}
+
+export class InvalidImageCropArea extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10026;
+  }
+}

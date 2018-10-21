@@ -1,4 +1,6 @@
+import path from 'path';
 import http from 'http';
+import url from 'url';
 import Koa from 'koa';
 import cors from '@koa/cors';
 import enforceHttps from 'koa-sslify';
@@ -11,7 +13,7 @@ import mongoose from 'mongoose';
 import * as models from './models';
 import JsonWebToken from './utils/JsonWebToken';
 import SettingsStore from './utils/SettingsStore';
-
+import FileStorage from './utils/FileStorage';
 import errorHandler from './middleware/errorHandler';
 import api from './api';
 
@@ -104,6 +106,12 @@ server.setup = async () => {
     db.model(key, schema);
   });
 
+  // setup storage layer
+  const storage = new FileStorage({
+    uploadDir: path.resolve(__dirname, '../uploads'),
+    baseUrl: url.resolve(process.env.BASE_URL, '/media/'),
+  });
+
   // setup settings store
   const settings = new SettingsStore(db);
   await settings.setup();
@@ -112,6 +120,7 @@ server.setup = async () => {
   app.context.settings = settings;
   app.context.db = db;
   app.context.jwt = jwt;
+  app.context.storage = storage;
 };
 
 server.getAppContext = () => {
