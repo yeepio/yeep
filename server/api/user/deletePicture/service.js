@@ -32,7 +32,6 @@ async function deleteUserPicture(db, storage, { id }) {
   } catch (err) {
     if (err.code === 'ERR_INVALID_URL') {
       // this must be a gravatar or external URL, so do nothing
-      filename = null;
     } else {
       throw err;
     }
@@ -46,7 +45,7 @@ async function deleteUserPicture(db, storage, { id }) {
   // update user in db
   await UserModel.updateOne(
     {
-      id: ObjectId(id),
+      _id: ObjectId(id),
     },
     {
       $set: {

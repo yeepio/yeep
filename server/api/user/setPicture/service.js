@@ -87,7 +87,7 @@ async function setUserPicture(db, storage, { id, picture, cropSize, cropX, cropY
     // update user in db
     await UserModel.updateOne(
       {
-        id: ObjectId(id),
+        _id: ObjectId(id),
       },
       {
         $set: {
