@@ -8,6 +8,7 @@ import typeOf from 'typeof';
 const writeFileAsync = promisify(fs.writeFile);
 const readFileAsync = promisify(fs.readFile);
 const unlinkAsync = promisify(fs.unlink);
+const accessAsync = promisify(fs.access);
 
 class FileStorage {
   constructor({ uploadDir, baseUrl }) {
@@ -52,6 +53,17 @@ class FileStorage {
     const { uploadDir } = this.props;
     const filepath = path.join(uploadDir, filename);
     return readFileAsync(filepath);
+  }
+
+  async existsFile(filename) {
+    const { uploadDir } = this.props;
+    const filepath = path.join(uploadDir, filename);
+    try {
+      await accessAsync(filepath);
+      return true;
+    } catch (err) {
+      return false;
+    }
   }
 
   async removeFile(filename) {
