@@ -37,9 +37,11 @@ class FileStorage {
       err.code = 'ERR_INVALID_URL';
       throw err;
     }
-
-    const u = new URL(url);
-    return u.pathname;
+    const filename = url.slice(this.props.baseUrl.length);
+    if (filename[0] === '/') {
+      return filename.slice(1);
+    }
+    return filename;
   }
 
   async writeFile(filename, data) {
