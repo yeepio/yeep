@@ -1,6 +1,7 @@
 import path from 'path';
 import http from 'http';
 import url from 'url';
+import EventEmitter from 'events';
 import Koa from 'koa';
 import cors from '@koa/cors';
 import enforceHttps from 'koa-sslify';
@@ -89,6 +90,9 @@ server.teardown = async () => {
 };
 
 server.setup = async () => {
+  // create message bus
+  const bus = new EventEmitter();
+
   // connect to mongodb + register models
   const db = await mongoose.createConnection(process.env.MONGODB_URI, {
     useNewUrlParser: true,
@@ -113,6 +117,7 @@ server.setup = async () => {
 
   // populate app context
   app.context.settings = settings;
+  app.context.bus = bus;
   app.context.db = db;
   app.context.jwt = jwt;
   app.context.storage = storage;
