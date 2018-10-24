@@ -13,7 +13,7 @@ const tokenSchema = new Schema(
     type: {
       type: String,
       required: true,
-      enum: ['AUTHENTICATION'],
+      enum: ['AUTHENTICATION', 'PASSWORD_RESET'],
     },
     payload: {
       type: Map,
