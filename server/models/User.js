@@ -88,8 +88,8 @@ userSchema.index(
 
 /**
  * Normalizes the designated username and returns a new string.
- * @param {String} username
- * @return {String} normalized username
+ * @param {string} username
+ * @return {string} normalized username
  */
 userSchema.statics.normalizeUsername = function(username) {
   return username.normalize('NFKC').toLowerCase();
@@ -97,11 +97,25 @@ userSchema.statics.normalizeUsername = function(username) {
 
 /**
  * Normalizes the designated email address and returns new string.
- * @param {String} emailAddress
- * @return {String} normalized email address
+ * @param {string} emailAddress
+ * @return {string} normalized email address
  */
 userSchema.statics.normalizeEmailAddress = function(emailAddress) {
   return normalizeEmail(emailAddress);
+};
+
+/**
+ * Finds and returns the user's primary email address.
+ * @return {string|null} primary email address
+ */
+userSchema.methods.findPrimaryEmail = function() {
+  const primaryEmail = this.emails.find((email) => email.isPrimary);
+
+  if (primaryEmail) {
+    return primaryEmail.address;
+  }
+
+  return null;
 };
 
 export default userSchema;
