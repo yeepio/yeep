@@ -17,6 +17,7 @@ import SettingsStore from './utils/SettingsStore';
 import FileStorage from './utils/FileStorage';
 import errorHandler from './middleware/errorHandler';
 import api from './api';
+import events from './events';
 
 const app = new Koa();
 const server = http.createServer(app.callback());
@@ -80,7 +81,10 @@ app.use(
 );
 
 server.teardown = async () => {
-  const { db, settings } = app.context;
+  const { db, settings, bus } = app.context;
+
+  // remove event handlers
+  bus.removeAllListeners();
 
   // close setting store
   await settings.teardown();
@@ -121,6 +125,11 @@ server.setup = async () => {
   app.context.db = db;
   app.context.jwt = jwt;
   app.context.storage = storage;
+
+  // register event handlers
+  Object.entries(events, ([eventKey, handler]) => {
+    bus.on(eventKey, (props) => handler(app.context, props));
+  });
 };
 
 server.getAppContext = () => {
