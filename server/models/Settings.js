@@ -10,6 +10,10 @@ const settingsSchema = new Schema(
       type: Boolean,
       required: false,
     },
+    passwordResetEmailTemplate: {
+      type: String,
+      required: false,
+    },
   },
   {
     collection: 'settings',
