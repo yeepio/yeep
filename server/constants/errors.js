@@ -193,3 +193,10 @@ export class InvalidImageCropArea extends Error {
     this.code = 10026;
   }
 }
+
+export class TokenNotFoundError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10027;
+  }
+}
