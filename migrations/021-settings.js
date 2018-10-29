@@ -6,8 +6,8 @@ const mongoose = require('mongoose');
 const readFileAsync = promisify(fs.readFile);
 
 exports.up = async function(next) {
-  const passwordResetEmailTemplate = await readFileAsync(
-    path.resolve(__dirname, '../server/views/passwordReset.html'),
+  const passwordResetInitEmail = await readFileAsync(
+    path.resolve(__dirname, '../server/views/passwordResetInit.html'),
     {
       encoding: 'utf8',
     }
@@ -17,7 +17,7 @@ exports.up = async function(next) {
     {
       isUsernameEnabled: true,
       isOrgCreationOpen: true,
-      passwordResetEmailTemplate,
+      passwordResetInitEmail,
     },
     next
   );

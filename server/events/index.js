@@ -1,7 +1,7 @@
-import passwordReset from './passwordReset';
+import passwordResetInit from './passwordResetInit';
 
-const events = {
-  password_reset: passwordReset,
+const eventsMap = {
+  password_reset_init: passwordResetInit,
 };
 
-export default events;
+export default eventsMap;

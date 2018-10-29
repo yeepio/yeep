@@ -43,7 +43,7 @@ describe('api/v1/user.forgotPassword', () => {
 
     test('initiates forgot-password process and returns expected response', async () => {
       const f = jest.fn();
-      ctx.bus.once('password_reset', f);
+      ctx.bus.once('password_reset_init', f);
 
       const startDate = new Date();
       let res = await request(server)
