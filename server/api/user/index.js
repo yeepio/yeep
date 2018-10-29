@@ -12,6 +12,7 @@ import activateUser from './activate';
 import setUserPicture from './setPicture';
 import deleteUserPicture from './deletePicture';
 import forgotPassword from './forgotPassword';
+import resetPassword from './resetPassword';
 
 const router = Router();
 
@@ -28,5 +29,6 @@ router.post('/v1/user.activate', activateUser);
 router.post('/v1/user.setPicture', setUserPicture);
 router.post('/v1/user.deletePicture', deleteUserPicture);
 router.post('/v1/user.forgotPassword', forgotPassword);
+router.post('/v1/user.resetPassword', resetPassword);
 
 export default router;
