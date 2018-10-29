@@ -10,7 +10,7 @@ const settingsSchema = new Schema(
       type: Boolean,
       required: false,
     },
-    passwordResetEmailTemplate: {
+    passwordResetInitEmail: {
       type: String,
       required: false,
     },

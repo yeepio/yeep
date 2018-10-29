@@ -34,8 +34,8 @@ async function initPasswordReset(db, bus, { username, emailAddress, tokenExpires
     expiresAt: addSeconds(new Date(), tokenExpiresInSeconds), // i.e. in 1 hour
   });
 
-  // emit password_reset event
-  bus.emit('password_reset', {
+  // emit event
+  bus.emit('password_reset_init', {
     user: {
       id: user._id.toHexString(),
       fullName: user.fullName,

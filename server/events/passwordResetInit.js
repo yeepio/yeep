@@ -11,7 +11,7 @@ let compileTemplate = memoize(
 );
 
 const handler = ({ settings }, props) => {
-  const template = compileTemplate(settings.get('passwordResetEmailTemplate'));
+  const template = compileTemplate(settings.get('passwordResetInitEmailTemplate'));
   console.log(template(props));
 };
 
