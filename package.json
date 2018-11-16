@@ -52,7 +52,7 @@
     "nodemon": "^1.18.4",
     "prettier": "^1.14.3",
     "prettier-eslint": "^8.8.2",
-    "regenerator-runtime": "^0.12.1",
+    "regenerator-runtime": "^0.13.0",
     "supertest": "^3.3.0"
   },
   "dependencies": {
