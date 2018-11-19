@@ -1,13 +1,13 @@
+require('dotenv').config();
+
 module.exports = {
-  baseUrl: 'http://localhost:5000/',
+  baseUrl: process.env.BASE_URL,
   jwt: {
     type: 'hmac',
-    secret: 'keep it safe, keep it hidden!',
+    secret: process.env.JWT_SECRET,
   },
-  database: {
-    mongo: {
-      uri: 'mongodb://localhost:27017/yeep',
-    },
+  mongo: {
+    uri: process.env.MONGODB_URI,
   },
   storage: {
     type: 'fs',

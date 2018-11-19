@@ -19,3 +19,7 @@ export const renderInvalidCommand = (command) => `
 
   See 'yeep --help'.
 `;
+
+export const renderNativeError = (err) => `
+  ${chalk.red(`Error: ${err.message}`)}
+`;

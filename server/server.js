@@ -22,11 +22,6 @@ import events from './events';
 const app = new Koa();
 const server = http.createServer(app.callback());
 
-const jwt = new JsonWebToken({
-  secretKey: process.env.JWT_SECRET,
-  issuer: 'Yeep',
-});
-
 // check if in production mode
 if (process.env.NODE_ENV === 'production') {
   // trust proxy
@@ -93,12 +88,12 @@ server.teardown = async () => {
   await db.close();
 };
 
-server.setup = async () => {
+server.setup = async (config) => {
   // create message bus
   const bus = new EventEmitter();
 
   // connect to mongodb + register models
-  const db = await mongoose.createConnection(process.env.MONGODB_URI, {
+  const db = await mongoose.createConnection(config.mongo.uri, {
     useNewUrlParser: true,
     autoIndex: false,
     bufferCommands: false,
@@ -111,8 +106,16 @@ server.setup = async () => {
 
   // setup storage layer
   const storage = new FileStorage({
-    uploadDir: path.resolve(__dirname, '../uploads'),
-    baseUrl: url.resolve(process.env.BASE_URL, '/media/'),
+    uploadDir: path.isAbsolute(config.storage.uploadDir)
+      ? config.storage.uploadDir
+      : path.resolve(config.storage.uploadDir),
+    baseUrl: url.resolve(config.baseUrl, '/media/'),
+  });
+
+  // configure JWT
+  const jwt = new JsonWebToken({
+    secretKey: config.jwt.secret,
+    issuer: 'Yeep',
   });
 
   // setup settings store
