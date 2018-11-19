@@ -12,8 +12,5 @@
     "^.+\\.jsx$": "babel-jest",
     "^.+\\.js$": "babel-jest"
   },
-  "setupFiles": [
-    "<rootDir>/config/jestSetup.js"
-  ],
   "verbose": true
 }
