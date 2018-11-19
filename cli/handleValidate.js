@@ -1,4 +1,4 @@
-const { renderMissingConfig } = require('./templates');
+import { renderMissingConfig } from './templates';
 
 const renderHelp = () => `
   validates the designated config file
@@ -23,4 +23,4 @@ const handleValidate = (inputArr, flagsObj) => {
   }
 };
 
-module.exports = handleValidate;
+export default handleValidate;

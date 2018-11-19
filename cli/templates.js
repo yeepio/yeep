@@ -1,27 +1,21 @@
-const chalk = require('chalk');
+import chalk from 'chalk';
 
-const renderMissingConfig = () => `
+export const renderMissingConfig = () => `
   ${chalk.red('Error: missing required "config" flag.')}
     -c, --config=<path>   path to yeep configuration file
 
   See 'yeep --help'.
 `;
 
-const renderInvalidMigrationDir = (dir) => `
+export const renderInvalidMigrationDir = (dir) => `
   ${chalk.red('Error: unknown migration direction')}
     expected "up" or "down", received "${dir}"
 
   See 'yeep --help'.
 `;
 
-const renderInvalidCommand = (command) => `
+export const renderInvalidCommand = (command) => `
   ${chalk.red(`Error: "${command}" is not a yeep command.`)}
 
   See 'yeep --help'.
 `;
-
-module.exports = {
-  renderInvalidCommand,
-  renderMissingConfig,
-  renderInvalidMigrationDir,
-};

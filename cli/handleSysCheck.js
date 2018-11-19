@@ -1,4 +1,4 @@
-const { renderMissingConfig } = require('./templates');
+import { renderMissingConfig } from './templates';
 
 const renderHelp = () => `
   performs a systems-check and prints diagnostics
@@ -23,4 +23,4 @@ const handleSysCheck = (inputArr, flagsObj) => {
   }
 };
 
-module.exports = handleSysCheck;
+export default handleSysCheck;

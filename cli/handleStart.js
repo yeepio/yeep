@@ -1,4 +1,4 @@
-const { renderMissingConfig } = require('./templates');
+import { renderMissingConfig } from './templates';
 
 const renderHelp = () => `
   starts the yeep server
@@ -23,4 +23,4 @@ const handleStart = (inputArr, flagsObj) => {
   }
 };
 
-module.exports = handleStart;
+export default handleStart;

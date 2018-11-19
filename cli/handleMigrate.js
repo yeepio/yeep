@@ -1,4 +1,4 @@
-const { renderMissingConfig, renderInvalidMigrationDir } = require('./templates');
+import { renderMissingConfig, renderInvalidMigrationDir } from './templates';
 
 const renderHelp = () => `
   applies database migration
@@ -33,4 +33,4 @@ const handleMigrate = (inputArr, flagsObj) => {
   }
 };
 
-module.exports = handleMigrate;
+export default handleMigrate;

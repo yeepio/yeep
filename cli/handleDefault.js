@@ -1,4 +1,4 @@
-const { renderInvalidCommand } = require('./templates');
+import { renderInvalidCommand } from './templates';
 
 const renderHelp = () => `
   CLI to interact with yeep.
@@ -16,7 +16,7 @@ const renderHelp = () => `
     $ yeep start --config=yeep.config.js
 `;
 
-const handleBase = (inputArr) => {
+const handleDefault = (inputArr) => {
   if (inputArr.length !== 0) {
     console.error(renderInvalidCommand(inputArr[0]));
   } else {
@@ -24,4 +24,4 @@ const handleBase = (inputArr) => {
   }
 };
 
-module.exports = handleBase;
+export default handleDefault;
