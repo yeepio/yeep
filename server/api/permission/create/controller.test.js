@@ -1,6 +1,7 @@
 /* eslint-env jest */
 import request from 'supertest';
 import server from '../../../server';
+import config from '../../../../yeep.config';
 import createPermission from './service';
 import deletePermission from '../delete/service';
 import createUser from '../../user/create/service';
@@ -19,7 +20,7 @@ describe('api/v1/permission.create', () => {
   let session;
 
   beforeAll(async () => {
-    await server.setup();
+    await server.setup(config);
     ctx = server.getAppContext();
 
     // ctx.org = await createOrg(ctx.db, {

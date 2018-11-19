@@ -2,6 +2,7 @@
 import request from 'supertest';
 import compareDesc from 'date-fns/compare_desc';
 import server from '../../../server';
+import config from '../../../../yeep.config';
 import createPermission from '../create/service';
 import createOrg from '../../org/create/service';
 import createUser from '../../user/create/service';
@@ -21,7 +22,7 @@ describe('api/v1/permission.update', () => {
   let session;
 
   beforeAll(async () => {
-    await server.setup();
+    await server.setup(config);
     ctx = server.getAppContext();
 
     user = await createUser(ctx.db, {

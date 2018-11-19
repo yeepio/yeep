@@ -1,6 +1,7 @@
 /* eslint-env jest */
 import request from 'supertest';
 import server from '../../../server';
+import config from '../../../../yeep.config';
 import createOrg from '../../org/create/service';
 import createUser from '../create/service';
 import createPermissionAssignment from '../assignPermission/service';
@@ -14,7 +15,7 @@ describe('api/v1/user.activate', () => {
   let ctx;
 
   beforeAll(async () => {
-    await server.setup();
+    await server.setup(config);
     ctx = server.getAppContext();
   });
 

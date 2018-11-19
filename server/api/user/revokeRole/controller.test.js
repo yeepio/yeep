@@ -1,6 +1,7 @@
 /* eslint-env jest */
 import request from 'supertest';
 import server from '../../../server';
+import config from '../../../../yeep.config';
 import createPermissionAssignment from '../assignPermission/service';
 import deleteUser from '../delete/service';
 import deletePermission from '../../permission/delete/service';
@@ -20,7 +21,7 @@ describe('api/v1/user.revokeRole', () => {
   let ctx;
 
   beforeAll(async () => {
-    await server.setup();
+    await server.setup(config);
     ctx = server.getAppContext();
   });
 
