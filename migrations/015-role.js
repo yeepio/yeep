@@ -1,9 +1,6 @@
-const mongoose = require('mongoose');
-
-exports.up = async function(next) {
-  await mongoose.connect(process.env.MONGODB_URI);
+export const up = async (db) => {
   const now = new Date();
-  const permissions = await mongoose.connection.db
+  const permissions = await db
     .collection('permissions')
     .find(
       {
@@ -16,24 +13,17 @@ exports.up = async function(next) {
       }
     )
     .toArray();
-  await mongoose.connection.db.collection('roles').insertOne(
-    {
-      name: 'admin',
-      isSystemRole: true,
-      permissions: permissions.map((e) => e._id),
-      createdAt: now,
-      updatedAt: now,
-    },
-    next
-  );
+  await db.collection('roles').insertOne({
+    name: 'admin',
+    isSystemRole: true,
+    permissions: permissions.map((e) => e._id),
+    createdAt: now,
+    updatedAt: now,
+  });
 };
 
-exports.down = async function(next) {
-  await mongoose.connect(process.env.MONGODB_URI);
-  await mongoose.connection.db.collection('roles').deleteOne(
-    {
-      name: 'admin',
-    },
-    next
-  );
+export const down = async (db) => {
+  await db.collection('roles').deleteOne({
+    name: 'admin',
+  });
 };

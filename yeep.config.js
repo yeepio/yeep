@@ -8,6 +8,7 @@ module.exports = {
   },
   mongo: {
     uri: process.env.MONGODB_URI,
+    migrationDir: 'migrations/',
   },
   storage: {
     type: 'fs',
