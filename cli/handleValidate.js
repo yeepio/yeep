@@ -1,4 +1,12 @@
-import { renderMissingConfig } from './templates';
+import path from 'path';
+import Ajv from 'ajv';
+import {
+  renderMissingConfig,
+  renderNativeError,
+  successMessage,
+  renderMissingConfigParameter,
+} from './templates';
+import schema from './configuration.schema';
 
 const renderHelp = () => `
   validates the designated config file
@@ -19,7 +27,22 @@ const handleValidate = (inputArr, flagsObj) => {
   } else if (!flagsObj.config) {
     console.error(renderMissingConfig());
   } else {
-    console.log(123);
+    const ajv = new Ajv();
+    let config;
+    const configPath = path.resolve(flagsObj.config);
+    try {
+      config = require(configPath);
+    } catch (err) {
+      console.error(renderNativeError(err));
+    }
+    const validate = ajv.compile(schema);
+    const valid = validate(config);
+    if (!valid) {
+      const missingParams = validate.errors[0].params.missingProperty;
+      console.error(renderMissingConfigParameter(missingParams, configPath));
+    } else {
+      console.log(successMessage(`Configuration OK`));
+    }
   }
 };
 

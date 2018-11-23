@@ -23,3 +23,12 @@ export const renderInvalidCommand = (command) => `
 export const renderNativeError = (err) => `
   ${chalk.red(`Error: ${err.message}`)}
 `;
+
+export const successMessage = (message) => `
+  ${chalk.green('✔')} ${message}
+`;
+
+export const renderMissingConfigParameter = (param, destination) => `
+  ${chalk.red('Validation Failed')}
+  Missing parameter "${param}" from ${destination}
+`;
