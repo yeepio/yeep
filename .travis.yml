@@ -21,7 +21,7 @@ install:
   - sleep 20
   - mongo --eval 'rs.initiate()'
   - npm ci
-  - npm run migrate up
+  - NODE_ENV=development ./cli/index.js migrate up --config=yeep.config.js
   - npm run mkdir:uploads -- -m 666
 after_script:
   - pkill mongod
