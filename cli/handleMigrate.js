@@ -1,7 +1,8 @@
 import path from 'path';
 import chalk from 'chalk';
+import ora from 'ora';
 import { renderMissingConfig, renderInvalidMigrationDir, renderNativeError } from './templates';
-import { migrateUp, migrateDown } from '../server/utils/dbMigrator';
+import DatabaseMigrator from '../server/utils/DatabaseMigrator';
 
 const renderHelp = () => `
   applies database migration
@@ -30,27 +31,42 @@ const handleMigrate = (inputArr, flagsObj) => {
       return;
     }
 
-    console.log('Migrating yeep database');
+    // create spinner
+    const spinner = ora();
+    spinner.start('Migrating yeep database...');
 
     // load config file from path
     let config;
     try {
       config = require(path.resolve(flagsObj.config));
     } catch (err) {
-      console.error(renderNativeError(err));
+      spinner.fail(renderNativeError(err));
     }
 
-    (dir === 'up' ? migrateUp : migrateDown)({
-      migrationId: flagsObj.to,
-      migrationDir: path.resolve(config.mongo.migrationDir),
+    const dbMigrator = new DatabaseMigrator({
       mongoUri: config.mongo.uri,
-      verbose: true,
-    })
+      migrationDir: config.mongo.migrationDir,
+    });
+
+    dbMigrator.once('migration', () => {
+      spinner.info('Migrating yeep database...');
+    });
+
+    dbMigrator.on('migration', ({ dir, id }) => {
+      spinner.stopAndPersist({
+        symbol: dir === 'up' ? chalk.green('↑') : chalk.red('↓'),
+        text: id,
+      });
+    });
+
+    (dir === 'up' ? dbMigrator.migrateUp(flagsObj.to) : dbMigrator.migrateDown(flagsObj.to))
       .then(() => {
-        console.log(chalk.green('✓'), 'Migration complete');
+        spinner.succeed('Migration complete');
+        dbMigrator.removeAllListeners();
       })
       .catch((err) => {
-        console.error(renderNativeError(err));
+        spinner.fail(renderNativeError(err));
+        dbMigrator.removeAllListeners('migration');
       });
   }
 };
