@@ -28,7 +28,16 @@ export const successMessage = (message) => `
   ${chalk.green('✔')} ${message}
 `;
 
-export const renderMissingConfigParameter = (param, destination) => `
+export const renderMissingConfigParameter = (param, destination, parent) => `
   ${chalk.red('Validation Failed')}
-  Missing parameter "${param}" from ${destination}
+  Configuration File: ${destination}
+
+  Missing property "${param}" ${parent ? `from key "${parent}"` : ''}
+`;
+
+export const renderWrongFormatForParam = (value, param, message, destination) => `
+  ${chalk.red('Validation Failed')}
+  Configuration File: ${destination}
+
+  Value "${value}" for property "${param}" ${message}
 `;

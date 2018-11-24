@@ -5,6 +5,7 @@ import {
   renderNativeError,
   successMessage,
   renderMissingConfigParameter,
+  renderWrongFormatForParam,
 } from './templates';
 import schema from './configuration.schema';
 
@@ -27,7 +28,6 @@ const handleValidate = (inputArr, flagsObj) => {
   } else if (!flagsObj.config) {
     console.error(renderMissingConfig());
   } else {
-    const ajv = new Ajv();
     let config;
     const configPath = path.resolve(flagsObj.config);
     try {
@@ -35,11 +35,24 @@ const handleValidate = (inputArr, flagsObj) => {
     } catch (err) {
       console.error(renderNativeError(err));
     }
+    const ajv = new Ajv();
     const validate = ajv.compile(schema);
     const valid = validate(config);
     if (!valid) {
-      const missingParams = validate.errors[0].params.missingProperty;
-      console.error(renderMissingConfigParameter(missingParams, configPath));
+      // errors array will always contain one element, unless specified otherwise in the instantiation
+      const error = validate.errors[0];
+      const errorType = error.keyword;
+      const parent = error.dataPath.split('.').splice(1);
+      if (errorType === 'required') {
+        console.error(
+          renderMissingConfigParameter(error.params.missingProperty, configPath, parent)
+        );
+      } else {
+        const currentValue = parent.reduce((o, i) => o[i], config);
+        console.error(
+          renderWrongFormatForParam(currentValue, parent.join('.'), error.message, configPath)
+        );
+      }
     } else {
       console.log(successMessage(`Configuration OK`));
     }

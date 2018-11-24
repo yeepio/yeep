@@ -27,6 +27,7 @@ export default {
       properties: {
         uri: {
           type: 'string',
+          format: 'uri',
         },
         migrationDir: {
           type: 'string',
@@ -36,6 +37,8 @@ export default {
     },
     port: {
       type: 'number',
+      minimum: 0,
+      maximum: 65535,
     },
     storage: {
       type: 'object',
