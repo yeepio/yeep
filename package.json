@@ -15,7 +15,6 @@
     "postinstall": "npm run migrate && npm run build && npm run mkdir:uploads",
     "test": "PORT=5002 jest --config=config/jest.json --runInBand",
     "coverage": "jest --config=config/jest.json --coverage",
-    "migrate": "MIGRATION_CONFIG_PATH=./config/migrate.js mongoose-migrate-2",
     "prettier-fix": "prettier --write --config .prettierrc '**/*.js'"
   },
   "repository": {
