@@ -3,7 +3,6 @@ import https from 'https';
 import ora from 'ora';
 import { format as formatUrl } from 'url';
 import { renderMissingConfig, renderNativeError } from './templates';
-import server from '../server/server';
 
 const renderHelp = () => `
   starts the yeep server
@@ -26,7 +25,7 @@ const handleStart = (inputArr, flagsObj) => {
   } else {
     // create spinner
     const spinner = ora();
-    spinner.start('Starting yeep server');
+    spinner.info('Starting yeep server...');
 
     // load config file from path
     let config;
@@ -36,7 +35,10 @@ const handleStart = (inputArr, flagsObj) => {
       spinner.fail(renderNativeError(err));
     }
 
-    // setup server
+    // load server
+    const { default: server } = require('../server/server');
+
+    // start server
     server
       .setup(config)
       .then(() => {
