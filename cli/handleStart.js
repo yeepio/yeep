@@ -3,6 +3,7 @@ import https from 'https';
 import ora from 'ora';
 import { format as formatUrl } from 'url';
 import { renderMissingConfig, renderNativeError } from './templates';
+import interopDefault from '../server/utils/interopDefault';
 
 const renderHelp = () => `
   starts the yeep server
@@ -36,7 +37,7 @@ const handleStart = (inputArr, flagsObj) => {
     }
 
     // load server
-    const { default: server } = require('../server/server');
+    const server = interopDefault(require('../server/server'));
 
     // start server
     server
