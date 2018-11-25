@@ -54,6 +54,7 @@
     "regenerator-runtime": "^0.12.1",
     "rollup": "^0.67.3",
     "rollup-plugin-babel": "^4.0.3",
+    "rollup-plugin-progress": "^0.4.0",
     "supertest": "^3.3.0"
   },
   "dependencies": {
