@@ -12,6 +12,7 @@
     "prebuild": "rimraf ./dist",
     "build": "rollup -c",
     "mkdir:uploads": "mkdirp ./uploads",
+    "postinstall": "npm run mkdir:uploads",
     "test": "PORT=5002 jest --config=config/jest.json --runInBand",
     "coverage": "jest --config=config/jest.json --coverage",
     "prettier-fix": "prettier --write --config .prettierrc '**/*.js'"
