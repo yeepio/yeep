@@ -49,8 +49,15 @@ const handleValidate = (inputArr, flagsObj) => {
         );
       } else {
         const currentValue = parent.reduce((o, i) => o[i], config);
+        const allowedValues = error.params.allowedValues;
         console.error(
-          renderWrongFormatForParam(currentValue, parent.join('.'), error.message, configPath)
+          renderWrongFormatForParam(
+            currentValue,
+            parent.join('.'),
+            error.message,
+            allowedValues,
+            configPath
+          )
         );
       }
     } else {

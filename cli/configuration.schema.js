@@ -14,6 +14,7 @@ export default {
       properties: {
         type: {
           type: 'string',
+          enum: ['hmac'],
         },
         secret: {
           type: 'string',
@@ -46,6 +47,7 @@ export default {
       properties: {
         type: {
           type: 'string',
+          enum: ['fs', 's3', 'gcs'],
         },
         uploadDir: {
           type: 'string',
