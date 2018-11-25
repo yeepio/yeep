@@ -53,6 +53,7 @@
     "prettier-eslint": "^8.8.2",
     "regenerator-runtime": "^0.12.1",
     "rollup": "^0.67.3",
+    "rollup-plugin-babel": "^4.0.3",
     "supertest": "^3.3.0"
   },
   "dependencies": {
