@@ -38,6 +38,7 @@
   },
   "homepage": "https://github.com/yeepio/yeep#readme",
   "devDependencies": {
+    "@babel/plugin-syntax-dynamic-import": "^7.0.0",
     "babel-core": "^7.0.0-bridge.0",
     "babel-jest": "^23.6.0",
     "eslint": "^5.6.1",
