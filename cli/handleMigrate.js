@@ -45,7 +45,7 @@ const handleMigrate = (inputArr, flagsObj) => {
 
     const dbMigrator = new DatabaseMigrator({
       mongoUri: config.mongo.uri,
-      migrationDir: config.mongo.migrationDir,
+      migrationDir: path.resolve(__dirname, '../migrations'),
     });
 
     dbMigrator.once('migration', () => {
