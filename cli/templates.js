@@ -23,3 +23,22 @@ export const renderInvalidCommand = (command) => `
 export const renderNativeError = (err) => `
   ${chalk.red(`Error: ${err.message}`)}
 `;
+
+export const successMessage = (message) => `
+  ${chalk.green('✔')} ${message}
+`;
+
+export const renderMissingConfigParameter = (param, destination, parent) => `
+  ${chalk.red('Validation Failed')}
+  Configuration File: ${destination}
+
+  Missing property "${param}" ${parent ? `from key "${parent}"` : ''}
+`;
+
+export const renderWrongFormatForParam = (value, param, message, allowedValues, destination) => `
+  ${chalk.red('Validation Failed')}
+  Configuration File: ${destination}
+
+  Value "${value}" for property "${param}" ${message}
+  ${allowedValues ? `Allowed values: ${allowedValues}` : ''}
+`;
