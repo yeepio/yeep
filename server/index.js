@@ -1,13 +1,12 @@
 import https from 'https';
 import { format as formatUrl } from 'url';
 import server from './server';
-
-const PORT = parseInt(process.env.PORT, 10) || 5000;
+import config from '../yeep.config';
 
 server
-  .setup()
+  .setup(config)
   .then(() => {
-    server.listen(PORT);
+    server.listen(config.port);
     const address = server.address();
     const baseUrl = formatUrl({
       protocol: server instanceof https.Server ? 'https' : 'http',

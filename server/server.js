@@ -11,6 +11,7 @@ import compression from 'compression';
 import koaConnect from 'koa-connect';
 import Boom from 'boom';
 import mongoose from 'mongoose';
+import createNextApp from 'next';
 import * as models from './models';
 import JsonWebToken from './utils/JsonWebToken';
 import SettingsStore from './utils/SettingsStore';
@@ -21,6 +22,10 @@ import events from './events';
 
 const app = new Koa();
 const server = http.createServer(app.callback());
+const next = createNextApp({
+  dev: process.env.NODE_ENV !== 'production',
+  dir: path.resolve(__dirname, '../admin_ui'),
+});
 
 // check if in production mode
 if (process.env.NODE_ENV === 'production') {
@@ -75,8 +80,20 @@ app.use(
   })
 );
 
+// pass other (*) requests to next handler
+const handle = next.getRequestHandler();
+api.get('*', async (ctx) => {
+  await handle(ctx.req, ctx.res);
+  ctx.respond = false;
+});
+
 server.teardown = async () => {
   const { db, settings, bus } = app.context;
+
+  // stop next app
+  if (process.env.NODE_ENV !== 'test') {
+    await next.close();
+  }
 
   // remove event handlers
   bus.removeAllListeners();
@@ -121,6 +138,11 @@ server.setup = async (config) => {
   // setup settings store
   const settings = new SettingsStore(db);
   await settings.setup();
+
+  // prepare next app
+  if (process.env.NODE_ENV !== 'test') {
+    await next.prepare();
+  }
 
   // populate app context
   app.context.settings = settings;
