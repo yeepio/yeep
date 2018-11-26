@@ -7,7 +7,7 @@ import {
   renderMissingConfigParameter,
   renderWrongFormatForParam,
 } from './templates';
-import schema from './configuration.schema';
+import schema from '../server/constants/config.schema.json';
 
 const renderHelp = () => `
   validates the designated config file

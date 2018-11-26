@@ -1,52 +1,60 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
-  "title": "Yeep config object",
+  "$schema": "http://json-schema.org/schema#",
+  "title": "Yeep Configuration",
   "type": "object",
+  "required": ["baseUrl", "jwt", "mongo", "storage"],
   "properties": {
     "baseUrl": {
       "type": "string",
-      "maxLength": 255
+      "format": "uri",
+      "description": "Server base url"
     },
     "jwt": {
       "type": "object",
+      "required": ["type","secret"],
       "properties": {
         "type": {
+          "type": "string",
           "enum": ["hmac"]
         },
         "secret": {
+          "type": "string",
+          "minLength": 8
+        }
+      },
+      "description": "JWT configuration object"
+    },
+    "mongo": {
+      "type": "object",
+      "required": [
+        "uri"
+      ],
+      "properties": {
+        "uri": {
+          "type": "string",
+          "format": "uri"
+        }
+      },
+      "description": "Mongo configuration object"
+    },
+    "port": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 65535
+    },
+    "storage": {
+      "type": "object",
+      "required": ["type","uploadDir"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["fs","s3","gcs"]
+        },
+        "uploadDir": {
           "type": "string"
         }
       },
-      "required": ["type", "secret"]
-    },
-    "database": {
-      "type": "object",
-      "properties": {
-        "mongo": {
-          "type": "object",
-          "properties": {
-            "uri": {
-              "type": "string"
-            }
-          },
-          "required": ["uri"]
-        }
-      },
-      "required": ["mongo"]
+      "description": "Storage configuration object"
     }
-  },
-  "storage": {
-    "type": "object",
-    "properties": {
-      "type": {
-        "enum": ["fs"]
-      },
-      "uploadDir": {
-        "type": "string"
-      }
-    },
-    "required": ["type", "uploadDir"]
-  },
-  "required": ["baseUrl", "jwt", "database", "storage"],
-  "additionalProperties": false
+  }
 }
