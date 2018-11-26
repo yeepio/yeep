@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "node --require dotenv/config dist/index.js",
-    "dev": "node --require dotenv/config --require @babel/register server/index.js",
-    "watch": "nodemon server/index.js --exec 'node --require dotenv/config --require @babel/register'",
+    "dev": "node --require @babel/register server/index.js",
+    "watch": "nodemon server/index.js --exec 'node --require @babel/register'",
     "lint": "eslint .",
     "clean": "rimraf dist",
     "prebuild": "rimraf ./dist",
