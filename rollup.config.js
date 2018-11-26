@@ -6,6 +6,7 @@ import replace from 'rollup-plugin-replace';
 import commonjs from 'rollup-plugin-commonjs';
 import esModuleInterop from 'rollup-plugin-es-module-interop';
 import copy from 'rollup-plugin-copy';
+import json from 'rollup-plugin-json';
 import glob from 'glob';
 
 export default [
@@ -24,6 +25,7 @@ export default [
       }),
       commonjs(),
       esModuleInterop(),
+      json(),
       babel({
         exclude: 'node_modules/**',
       }),
@@ -56,6 +58,7 @@ export default [
         only: [/^\.{0,2}\//],
       }),
       commonjs(),
+      json(),
       babel({
         exclude: 'node_modules/**',
       }),
