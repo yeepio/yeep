@@ -27,6 +27,7 @@ yarn-error.log*
 
 #build files
 /dist
+.next
 
 #uploads
 /uploads
