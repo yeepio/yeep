@@ -1,8 +1,13 @@
 import path from 'path';
 import ora from 'ora';
+import fs from 'fs';
+import { promisify } from 'util';
 import chalk from 'chalk';
 import { renderMissingConfig, renderNativeError } from './templates';
 import { MongoClient } from 'mongodb';
+
+const dirExistsAsync = promisify(fs.exists);
+const accessAsync = promisify(fs.access);
 
 const renderHelp = () => `
   performs a systems-check and prints diagnostics
@@ -61,8 +66,27 @@ const validateMongo = async (uri, spinner) => {
   }
 };
 
-const validateStorage = async (directory) => {
-  return directory;
+const validateStorage = async (directory, spinner) => {
+  const dirExists = await dirExistsAsync(directory);
+  if (!dirExists) {
+    throw new Error(`Directory ${directory} does not exist`);
+  }
+  spinner.stopAndPersist({
+    symbol: chalk.green('✔'),
+    text: 'Upload directory exists',
+  });
+
+  try {
+    await accessAsync(directory, fs.W_OK);
+  } catch (err) {
+    spinner.fail(`Directory ${directory} has no write permissions`);
+    throw err;
+  }
+
+  spinner.stopAndPersist({
+    symbol: chalk.green('✔'),
+    text: 'Upload Directory has write permissions',
+  });
 };
 
 const handleSysCheck = (inputArr, flagsObj) => {
@@ -83,21 +107,21 @@ const handleSysCheck = (inputArr, flagsObj) => {
 
     validateMongo(config.mongo.uri, spinner)
       .then(() => {
-        spinner.succeed('System check complete.');
+        spinner.succeed('Mongo check complete.');
       })
       .catch((err) => {
         // i didn't like the extra space of the text from the x of the spinner
-        spinner.fail('System check failed');
+        spinner.fail('Mongo check failed');
         console.error(renderNativeError(err));
       });
 
     if (config.storage && config.storage.type === 'fs') {
-      validateStorage(config.storage.uploadDir)
+      validateStorage(config.storage.uploadDir, spinner)
         .then(() => {
           spinner.succeed('File system check complete');
         })
         .catch((err) => {
-          spinner.fail('System check failed');
+          spinner.fail('File system check failed');
           console.error(renderNativeError(err));
         });
     }
