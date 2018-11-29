@@ -11,6 +11,7 @@
     "clean": "rimraf dist",
     "prebuild": "rimraf ./dist",
     "build": "rollup -c",
+    "postbuild": "next build dist/admin_ui",
     "mkdir:uploads": "mkdirp ./uploads",
     "postinstall": "npm run mkdir:uploads",
     "test": "PORT=5002 jest --config=config/jest.json --runInBand",

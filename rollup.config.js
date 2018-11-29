@@ -20,6 +20,14 @@ export default [
       },
     ],
     plugins: [
+      copy({
+        admin_ui: 'dist/admin_ui',
+        verbose: true,
+      }),
+      replace({
+        '../admin_ui': './admin_ui',
+        delimiters: ['', ''],
+      }),
       resolve({
         only: [/^\.{0,2}\//],
       }),
