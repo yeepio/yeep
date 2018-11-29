@@ -116,11 +116,10 @@ class DatabaseMigrator extends EventEmitter {
       throw new Error('Database not connected; did you forget to call connect()?');
     }
 
-    // retrieve file names from migration dir
-    const migrationFiles = await this.getMigrationFiles();
-
-    // retrieve applied migrations
-    const appliedMigrations = await this.getAppliedMigrations();
+    const [migrationFiles, appliedMigrations] = await Promise.all([
+      this.getMigrationFiles(), // retrieve file names from migration dir
+      this.getAppliedMigrations(), // retrieve applied migrations
+    ]);
 
     return difference(migrationFiles, appliedMigrations);
   }
