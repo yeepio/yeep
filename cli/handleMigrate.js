@@ -61,7 +61,7 @@ const handleMigrate = (inputArr, flagsObj) => {
     });
 
     // wrap everything in bluebird to ensure Promise.finally() with older Node.js runtimes
-    Promise.resolve(() => dbMigrator.connect())
+    Promise.resolve(dbMigrator.connect())
       .then(() => {
         if (dir === 'up') {
           return dbMigrator.migrateUp(flagsObj.to);

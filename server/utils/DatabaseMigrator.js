@@ -249,7 +249,7 @@ class DatabaseMigrator extends EventEmitter {
     const appliedMigrations = await this.getAppliedMigrations();
 
     // check if specified migration is NOT applied
-    if (appliedMigrations.includes(targetMigrationFile)) {
+    if (appliedMigrations.every((record) => record !== targetMigrationFile)) {
       return; // exit gracefully
     }
 
