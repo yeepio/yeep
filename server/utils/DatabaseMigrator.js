@@ -4,6 +4,7 @@ import { promisify } from 'util';
 import EventEmitter from 'events';
 import last from 'lodash/last';
 import head from 'lodash/head';
+import difference from 'lodash/difference';
 import isPlainObject from 'lodash/isPlainObject';
 import isString from 'lodash/isString';
 import typeOf from 'typeof';
@@ -11,12 +12,12 @@ import { MongoClient } from 'mongodb';
 
 const readdirAsync = promisify(fs.readdir);
 
-const findLatestAppliedMigrationIndex = (migrationFiles, migrationRecords) => {
-  if (migrationRecords.length === 0) {
+const findLatestAppliedMigrationIndex = (migrationFiles, appliedMigrations) => {
+  if (appliedMigrations.length === 0) {
     return -1;
   }
 
-  const needle = last(migrationRecords)._id;
+  const needle = last(appliedMigrations);
   return migrationFiles.findIndex((e) => e === needle);
 };
 
@@ -50,11 +51,88 @@ class DatabaseMigrator extends EventEmitter {
     };
   }
 
-  async migrateUp(migrationId) {
-    const { migrationDir, mongoUri } = this.props;
+  async connect() {
+    // check if already connected
+    if (this.client) {
+      return;
+    }
+
+    // connect to mongodb
+    const { mongoUri } = this.props;
+    this.client = await MongoClient.connect(
+      mongoUri,
+      {
+        useNewUrlParser: true,
+        ignoreUndefined: true,
+      }
+    );
+  }
+
+  async disconnect() {
+    // check if already disconnected
+    if (!this.client) {
+      return;
+    }
+
+    // connect to mongodb
+    await this.client.close();
+    this.client = null;
+  }
+
+  async getMigrationFiles() {
+    const { migrationDir } = this.props;
 
     // retrieve file names from migration dir
     const migrationFiles = await readdirAsync(migrationDir);
+
+    return migrationFiles;
+  }
+
+  async getAppliedMigrations() {
+    // ensure db is connected
+    if (!this.client) {
+      throw new Error('Database not connected; did you forget to call connect()?');
+    }
+
+    // retrieve db migration records
+    const migrationRecords = await this.client
+      .db()
+      .collection('migrations')
+      .find({})
+      .toArray();
+
+    return migrationRecords.map((record) => record._id);
+  }
+
+  readSyncMigrationFile(fileName) {
+    const { migrationDir } = this.props;
+
+    return require(path.resolve(path.join(migrationDir, fileName)));
+  }
+
+  async findPendingMigrations() {
+    // ensure db is connected
+    if (!this.client) {
+      throw new Error('Database not connected; did you forget to call connect()?');
+    }
+
+    // retrieve file names from migration dir
+    const migrationFiles = await this.getMigrationFiles();
+
+    // retrieve applied migrations
+    const appliedMigrations = await this.getAppliedMigrations();
+
+    return difference(migrationFiles, appliedMigrations);
+  }
+
+  async migrateUp(migrationId) {
+    // ensure db is connected
+    if (!this.client) {
+      throw new Error('Database not connected; did you forget to call connect()?');
+    }
+
+    // retrieve file names from migration dir
+    const migrationFiles = await this.getMigrationFiles();
 
     // ensure migration dir is NOT empty
     if (migrationFiles.length === 0) {
@@ -83,72 +161,58 @@ class DatabaseMigrator extends EventEmitter {
       targetMigrationFileIndex = migrationFiles.length - 1;
     }
 
-    // connect to db
-    const client = await MongoClient.connect(
-      mongoUri,
-      {
-        useNewUrlParser: true,
-        ignoreUndefined: true,
-      }
+    const db = this.client.db();
+
+    // create "migrations" collection (if not already exists)
+    await db.createCollection('migrations');
+
+    // retrieve applied migrations
+    const appliedMigrations = await this.getAppliedMigrations();
+
+    // check if specified migration is already applied
+    if (appliedMigrations.includes(targetMigrationFile)) {
+      return; // migration is already applied - exit gracefully
+    }
+
+    // find latest applied migration
+    const latestAppliedMigrationIndex = findLatestAppliedMigrationIndex(
+      migrationFiles,
+      appliedMigrations
     );
-    const db = client.db();
 
-    try {
-      // create "migrations" collection (if not already exists)
-      await db.createCollection('migrations');
+    // ensure migration order is maintained
+    if (latestAppliedMigrationIndex > targetMigrationFile) {
+      throw new Error('Inconsistent migration state');
+    }
 
-      // retrieve db migration records
-      const migrationRecords = await db
-        .collection('migrations')
-        .find({})
-        .toArray();
+    // define migration queue
+    const migrationQueue = migrationFiles.slice(
+      latestAppliedMigrationIndex + 1,
+      targetMigrationFileIndex + 1
+    );
 
-      // check if specified migration is already applied
-      if (migrationRecords.some((record) => record._id === targetMigrationFile)) {
-        return; // migration is already applied - exit gracefully
-      }
-
-      // find latest applied migration
-      const latestAppliedMigrationIndex = findLatestAppliedMigrationIndex(
-        migrationFiles,
-        migrationRecords
-      );
-
-      // ensure migration order is maintained
-      if (latestAppliedMigrationIndex > targetMigrationFile) {
-        throw new Error('Inconsistent migration state');
-      }
-
-      // define migration queue
-      const migrationQueue = migrationFiles.slice(
-        latestAppliedMigrationIndex + 1,
-        targetMigrationFileIndex + 1
-      );
-
-      // process migration queue
-      for (let i = 0; i < migrationQueue.length; i += 1) {
-        const migration = require(path.resolve(path.join(migrationDir, migrationQueue[i])));
-        await migration.up(db);
-        await db.collection('migrations').insertOne({
-          _id: migrationQueue[i],
-        });
-        this.emit('migration', {
-          dir: 'up',
-          id: migrationQueue[i],
-        });
-      }
-    } catch (err) {
-      throw err;
-    } finally {
-      await client.close();
+    // process migration queue
+    for (let i = 0; i < migrationQueue.length; i += 1) {
+      const migration = this.readSyncMigrationFile(migrationQueue[i]);
+      await migration.up(db);
+      await db.collection('migrations').insertOne({
+        _id: migrationQueue[i],
+      });
+      this.emit('migration', {
+        dir: 'up',
+        id: migrationQueue[i],
+      });
     }
   }
 
   async migrateDown(migrationId) {
-    const { migrationDir, mongoUri } = this.props;
+    // ensure db is connected
+    if (!this.client) {
+      throw new Error('Database not connected; did you forget to call connect()?');
+    }
 
     // retrieve file names from migration dir
-    const migrationFiles = await readdirAsync(migrationDir);
+    const migrationFiles = await this.getMigrationFiles();
 
     // ensure migration dir is NOT empty
     if (migrationFiles.length === 0) {
@@ -177,59 +241,42 @@ class DatabaseMigrator extends EventEmitter {
       targetMigrationFileIndex = 0;
     }
 
-    // connect to db
-    const client = await MongoClient.connect(
-      mongoUri,
-      {
-        useNewUrlParser: true,
-        ignoreUndefined: true,
-      }
+    const db = this.client.db();
+
+    // create "migrations" collection (if not already exists)
+    await db.createCollection('migrations');
+
+    // retrieve applied migrations
+    const appliedMigrations = await this.getAppliedMigrations();
+
+    // check if specified migration is NOT applied
+    if (appliedMigrations.includes(targetMigrationFile)) {
+      return; // exit gracefully
+    }
+
+    // find latest applied migration
+    const latestAppliedMigrationIndex = findLatestAppliedMigrationIndex(
+      migrationFiles,
+      appliedMigrations
     );
-    const db = client.db();
 
-    try {
-      // create "migrations" collection (if not already exists)
-      await db.createCollection('migrations');
+    // determine migration queue
+    const migrationQueue = migrationFiles.slice(
+      targetMigrationFileIndex,
+      latestAppliedMigrationIndex + 1
+    );
 
-      // retrieve db migration records
-      const migrationRecords = await db
-        .collection('migrations')
-        .find({})
-        .toArray();
-
-      // check if specified migration is NOT applied
-      if (migrationRecords.every((record) => record._id !== targetMigrationFile)) {
-        return; // exit gracefully
-      }
-
-      // find latest applied migration
-      const latestAppliedMigrationIndex = findLatestAppliedMigrationIndex(
-        migrationFiles,
-        migrationRecords
-      );
-
-      // determine migration queue
-      const migrationQueue = migrationFiles.slice(
-        targetMigrationFileIndex,
-        latestAppliedMigrationIndex + 1
-      );
-
-      // process migration queue in reverse
-      for (let i = migrationQueue.length - 1; i >= 0; i -= 1) {
-        await db.collection('migrations').deleteOne({
-          _id: migrationQueue[i],
-        });
-        const migration = require(path.resolve(path.join(migrationDir, migrationQueue[i])));
-        await migration.down(db);
-        this.emit('migration', {
-          dir: 'down',
-          id: migrationQueue[i],
-        });
-      }
-    } catch (err) {
-      throw err;
-    } finally {
-      await client.close();
+    // process migration queue in reverse
+    for (let i = migrationQueue.length - 1; i >= 0; i -= 1) {
+      await db.collection('migrations').deleteOne({
+        _id: migrationQueue[i],
+      });
+      const migration = this.readSyncMigrationFile(migrationQueue[i]);
+      await migration.down(db);
+      this.emit('migration', {
+        dir: 'down',
+        id: migrationQueue[i],
+      });
     }
   }
 }

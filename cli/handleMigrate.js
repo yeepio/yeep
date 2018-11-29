@@ -1,6 +1,7 @@
 import path from 'path';
 import chalk from 'chalk';
 import ora from 'ora';
+import Promise from 'bluebird';
 import { renderMissingConfig, renderInvalidMigrationDir, renderNativeError } from './templates';
 import DatabaseMigrator from '../server/utils/DatabaseMigrator';
 
@@ -59,7 +60,15 @@ const handleMigrate = (inputArr, flagsObj) => {
       });
     });
 
-    (dir === 'up' ? dbMigrator.migrateUp(flagsObj.to) : dbMigrator.migrateDown(flagsObj.to))
+    // wrap everything in bluebird to ensure Promise.finally() with older Node.js runtimes
+    Promise.resolve(() => dbMigrator.connect())
+      .then(() => {
+        if (dir === 'up') {
+          return dbMigrator.migrateUp(flagsObj.to);
+        } else {
+          return dbMigrator.migrateDown(flagsObj.to);
+        }
+      })
       .then(() => {
         spinner.succeed('Migration complete');
         dbMigrator.removeAllListeners();
@@ -67,7 +76,8 @@ const handleMigrate = (inputArr, flagsObj) => {
       .catch((err) => {
         spinner.fail(renderNativeError(err));
         dbMigrator.removeAllListeners('migration');
-      });
+      })
+      .finally(() => dbMigrator.disconnect());
   }
 };
 
