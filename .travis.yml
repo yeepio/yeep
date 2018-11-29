@@ -6,7 +6,7 @@ env:
     - MONGODB_URI=mongodb://localhost:27017/yeep
     - JWT_SECRET="keep it safe, keep it hidden!"
     - STORAGE_TYPE="fs"
-    - NODE_ENV=development
+    - NODE_ENV=test
     - BASE_URL="https://test.yeep.app/"
   matrix:
     - MONGODB=4.0.0
