@@ -3,6 +3,7 @@ import ora from 'ora';
 import fs from 'fs';
 import { promisify } from 'util';
 import chalk from 'chalk';
+import DatabaseMigrator from '../server/utils/DatabaseMigrator';
 import { renderMissingConfig, renderNativeError } from './templates';
 import { MongoClient } from 'mongodb';
 
@@ -32,33 +33,51 @@ const validateMongo = async (uri, spinner) => {
     symbol: chalk.green('✔'),
     text: 'Connected to database',
   });
+
   const db = client.db();
   try {
     // TODO: Verify that the uri has the username:password format if the authentication fails!
     const buildInfo = await db.admin().buildInfo();
     const isVersionValid = buildInfo.versionArray[0] >= 4;
     if (!isVersionValid) {
-      spinner.fail(`Mongo version ${buildInfo.version} needs to be higher than 4.0.0`);
-      throw new Error('Mongo version missmatch');
+      throw new Error(
+        `Incompatible MongoDB version detected; yeep requires v.4+, current version is ${
+          buildInfo.version
+        }`
+      );
     }
     spinner.stopAndPersist({
       symbol: chalk.green('✔'),
-      text: `Mongo version ${buildInfo.version} is valid (>= 4.0.0)`,
+      text: `Mongo version ${buildInfo.version} is valid`,
     });
 
-    let replStatus;
     try {
-      replStatus = await db.admin().replSetGetStatus();
+      await db.admin().replSetGetStatus();
     } catch (err) {
-      spinner.fail(`Mongo database needs to exist within a replica set`);
-      throw err;
+      throw new Error('Invalid MongoDB deployment status; yeep requires a replica set');
     }
     spinner.stopAndPersist({
       symbol: chalk.green('✔'),
-      text: `Mongo replica set ${replStatus.set} found`,
+      text: 'Mongo replica set detected',
     });
 
     // check migrations
+    const dbMigrator = new DatabaseMigrator({
+      mongoUri: uri,
+      migrationDir: path.resolve(__dirname, '../migrations'),
+    });
+
+    try {
+      await dbMigrator.connect();
+      const pendingMigrations = await dbMigrator.findPendingMigrations();
+      if (pendingMigrations.length !== 0) {
+        throw new Error('Pending migrations detected; please apply all db migrations');
+      }
+    } catch (err) {
+      throw err;
+    } finally {
+      await dbMigrator.disconnect();
+    }
   } catch (err) {
     throw err;
   } finally {
@@ -66,10 +85,13 @@ const validateMongo = async (uri, spinner) => {
   }
 };
 
-const validateStorage = async (directory, spinner) => {
+const validateStorage = async (type, directory, spinner) => {
+  if (type !== 'fs') {
+    return;
+  }
   const dirExists = await dirExistsAsync(directory);
   if (!dirExists) {
-    throw new Error(`Directory ${directory} does not exist`);
+    throw new Error(`Upload directory ${directory} does not exist`);
   }
   spinner.stopAndPersist({
     symbol: chalk.green('✔'),
@@ -79,8 +101,7 @@ const validateStorage = async (directory, spinner) => {
   try {
     await accessAsync(directory, fs.W_OK);
   } catch (err) {
-    spinner.fail(`Directory ${directory} has no write permissions`);
-    throw err;
+    throw new Error(`Upload directory ${directory} does not have write permissions`);
   }
 
   spinner.stopAndPersist({
@@ -106,25 +127,12 @@ const handleSysCheck = (inputArr, flagsObj) => {
     spinner.start('Checking system status...');
 
     validateMongo(config.mongo.uri, spinner)
-      .then(() => {
-        spinner.succeed('Mongo check complete.');
-      })
+      .then(() => validateStorage(config.storage.type, config.storage.uploadDir, spinner))
+      .then(() => spinner.succeed('System check complete.'))
       .catch((err) => {
-        // i didn't like the extra space of the text from the x of the spinner
-        spinner.fail('Mongo check failed');
         console.error(renderNativeError(err));
+        spinner.fail('System check failed.');
       });
-
-    if (config.storage && config.storage.type === 'fs') {
-      validateStorage(config.storage.uploadDir, spinner)
-        .then(() => {
-          spinner.succeed('File system check complete');
-        })
-        .catch((err) => {
-          spinner.fail('File system check failed');
-          console.error(renderNativeError(err));
-        });
-    }
   }
 };
 
