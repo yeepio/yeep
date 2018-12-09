@@ -22,6 +22,6 @@ install:
   - mongo --eval 'rs.initiate()'
   - npm ci
   - NODE_ENV=development ./cli/index.js migrate up --config=yeep.config.js
-  - npm run mkdir:uploads -- -m 666
+  - NODE_ENV=development ./cli/index.js mkdirupload --config=yeep.config.js
 after_script:
   - pkill mongod
