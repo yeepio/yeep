@@ -65,7 +65,7 @@ const handleMkDirUpload = (inputArr, flagsObj) => {
   }
 
   // create uploadDir
-  mkdirpAsync(uploadDirPath, { mode: 0o666 })
+  mkdirpAsync(uploadDirPath, { mode: 0o744 })
     .then(() => {
       spinner.succeed(renderUploadDirCreated(uploadDirPath));
     })
