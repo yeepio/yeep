@@ -7,10 +7,11 @@ import {
   visitSession,
   isUserAuthenticated,
   visitUserPermissions,
-  isUserAuthorized,
+  findUserPermissionIndex,
 } from '../../../middleware/auth';
 import deleteUser from './service';
 import getUserInfo from '../info/service';
+import { AuthorizationError } from '../../../constants/errors';
 
 const validationSchema = {
   body: {
@@ -33,6 +34,31 @@ const visitRequestedUser = async ({ request, db }, next) => {
   await next();
 };
 
+const isUserAuthorized = async ({ request }, next) => {
+  const isUserRequestorIdentical = request.session.user.id === request.body.id;
+  const hasPermission = request.session.requestedUser.orgs
+    .concat(null)
+    .reduce((accumulator, orgId) => {
+      return (
+        accumulator ||
+        findUserPermissionIndex(request.session.user.permissions, {
+          name: 'yeep.user.write',
+          orgId,
+        }) !== -1
+      );
+    }, false);
+
+  if (!isUserRequestorIdentical && !hasPermission) {
+    throw new AuthorizationError(
+      `User "${
+        request.session.user.username
+      }" does not have sufficient permissions to access this resource`
+    );
+  }
+
+  await next();
+};
+
 async function handler({ request, response, db }) {
   const isUserDeleted = await deleteUser(db, request.session.requestedUser);
 
@@ -50,9 +76,6 @@ export default compose([
   validateRequest(validationSchema),
   visitRequestedUser,
   visitUserPermissions(),
-  isUserAuthorized({
-    permissions: ['yeep.user.write'],
-    org: (request) => request.session.requestedUser.orgs,
-  }),
+  isUserAuthorized,
   handler,
 ]);

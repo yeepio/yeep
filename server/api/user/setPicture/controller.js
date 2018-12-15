@@ -38,15 +38,18 @@ const validationSchema = {
 };
 
 const isUserAuthorized = async ({ request }, next) => {
-  if (
-    request.session.user.id !== request.body.id &&
+  const isUserRequestorIdentical = request.session.user.id === request.body.id;
+  const hasPermission =
     findUserPermissionIndex(request.session.user.permissions, {
       name: 'yeep.user.write',
       orgId: null, // i.e. global permission
-    }) === -1
-  ) {
+    }) !== -1;
+
+  if (!isUserRequestorIdentical && !hasPermission) {
     throw new AuthorizationError(
-      'Requestor does not have sufficient permission to access this resource'
+      `User "${
+        request.session.user.username
+      }" does not have sufficient permissions to access this resource`
     );
   }
 
