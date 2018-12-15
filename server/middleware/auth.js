@@ -1,10 +1,6 @@
 import Boom from 'boom';
 import typeOf from 'typeof';
 import has from 'lodash/has';
-import flow from 'lodash/fp/flow';
-import filter from 'lodash/fp/filter';
-import castArray from 'lodash/fp/castArray';
-import concat from 'lodash/fp/concat';
 import get from 'lodash/get';
 import uniq from 'lodash/uniq';
 import isString from 'lodash/isString';
@@ -145,12 +141,6 @@ export const visitUserPermissions = () => async ({ request, db }, next) => {
   await next();
 };
 
-const formatOrgIds = flow(
-  castArray,
-  filter(Boolean),
-  concat([''])
-);
-
 /**
  * Finds and returns the index of the user permission object that matches the specified properties.
  * @param {Array<Object>} userPermissions array of user permissions to inspect
@@ -178,52 +168,6 @@ export const findUserPermissionIndex = (userPermissions, { name, orgId }) => {
   );
 
   return Math.max(index, -1);
-};
-
-export const isUserAuthorized = ({ org: getOrg, permissions = [] }) => {
-  if (!Array.isArray(permissions)) {
-    throw new TypeError(
-      `Invalid "permissions" property; expected array, received ${typeOf(permissions)}`
-    );
-  }
-
-  if (permissions.length === 0) {
-    throw new TypeError('You must specify at least one permission to authorize against');
-  }
-
-  return async ({ request }, next) => {
-    // extract org ids (if org function is specified)
-    const orgIds = formatOrgIds(getOrg ? getOrg(request) : '');
-
-    // extract user permissions
-    const userPermissions = request.session.user.permissions;
-
-    // check if permission requirements are met
-    permissions.forEach((permission) => {
-      const isPermissionRequirementOk = orgIds.some((orgId) => {
-        const index = binarySearch(
-          userPermissions,
-          {
-            name: permission,
-            orgId,
-          },
-          (a, b) => a.name.localeCompare(b.name) || a.orgId.localeCompare(b.orgId)
-        );
-
-        return index >= 0;
-      });
-
-      if (!isPermissionRequirementOk) {
-        throw new AuthorizationError(
-          `User "${
-            request.session.user.username
-          }" does not have permission "${permission}" to access this resource`
-        );
-      }
-    });
-
-    await next();
-  };
 };
 
 export const getAuthorizedUniqueOrgIds = (request, permission) => {
