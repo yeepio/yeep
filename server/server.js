@@ -17,6 +17,7 @@ import * as models from './models';
 import JsonWebToken from './utils/JsonWebToken';
 import SettingsStore from './utils/SettingsStore';
 import FileStorage from './utils/FileStorage';
+import MailService from './utils/MailService';
 import errorHandler from './middleware/errorHandler';
 import api from './api';
 import events from './events';
@@ -126,6 +127,10 @@ server.setup = async (config) => {
     issuer: 'Yeep',
   });
 
+  const mail = new MailService({
+    options: config.mail,
+  });
+
   // setup settings store
   const settings = new SettingsStore(db);
   await settings.setup();
@@ -136,6 +141,7 @@ server.setup = async (config) => {
   app.context.db = db;
   app.context.jwt = jwt;
   app.context.storage = storage;
+  app.context.mail = mail;
 
   // register event handlers
   Object.entries(events, ([eventKey, handler]) => {

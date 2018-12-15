@@ -18,4 +18,20 @@ module.exports = {
     type: 'fs',
     uploadDir: 'uploads/',
   },
+  mail: {
+    transport: 'SMTP',
+    from: 'myemail@address.com',
+    // from: "'Custom Name' <myemail@address.com>",
+    templatePath: 'server/views/passwordResetInit.html',
+    options: {
+      // service: 'Mailgun',
+      service: 'gmail',
+      // host: 'YOUR-SES-SERVER-NAME',
+      // port: 465,
+      auth: {
+        user: process.env.MAIL_AUTH_USERNAME,
+        pass: process.env.MAIL_AUTH_PASSWORD,
+      },
+    },
+  },
 };
