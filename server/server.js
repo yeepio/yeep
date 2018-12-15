@@ -11,6 +11,7 @@ import compression from 'compression';
 import koaConnect from 'koa-connect';
 import Boom from 'boom';
 import mongoose from 'mongoose';
+import createNextApp from 'next';
 import * as models from './models';
 import JsonWebToken from './utils/JsonWebToken';
 import SettingsStore from './utils/SettingsStore';
@@ -21,10 +22,9 @@ import events from './events';
 
 const app = new Koa();
 const server = http.createServer(app.callback());
-
-const jwt = new JsonWebToken({
-  secretKey: process.env.JWT_SECRET,
-  issuer: 'Yeep',
+const next = createNextApp({
+  dev: process.env.NODE_ENV !== 'production',
+  dir: path.resolve(__dirname, '../admin_ui'),
 });
 
 // check if in production mode
@@ -80,8 +80,20 @@ app.use(
   })
 );
 
+// pass other (*) requests to next handler
+const handle = next.getRequestHandler();
+api.get('*', async (ctx) => {
+  await handle(ctx.req, ctx.res);
+  ctx.respond = false;
+});
+
 server.teardown = async () => {
   const { db, settings, bus } = app.context;
+
+  // stop next app
+  if (process.env.NODE_ENV !== 'test') {
+    await next.close();
+  }
 
   // remove event handlers
   bus.removeAllListeners();
@@ -93,12 +105,12 @@ server.teardown = async () => {
   await db.close();
 };
 
-server.setup = async () => {
+server.setup = async (config) => {
   // create message bus
   const bus = new EventEmitter();
 
   // connect to mongodb + register models
-  const db = await mongoose.createConnection(process.env.MONGODB_URI, {
+  const db = await mongoose.createConnection(config.mongo.uri, {
     useNewUrlParser: true,
     autoIndex: false,
     bufferCommands: false,
@@ -111,13 +123,26 @@ server.setup = async () => {
 
   // setup storage layer
   const storage = new FileStorage({
-    uploadDir: path.resolve(__dirname, '../uploads'),
-    baseUrl: url.resolve(process.env.BASE_URL, '/media/'),
+    uploadDir: path.isAbsolute(config.storage.uploadDir)
+      ? config.storage.uploadDir
+      : path.resolve(config.storage.uploadDir),
+    baseUrl: url.resolve(config.baseUrl, '/media/'),
+  });
+
+  // configure JWT
+  const jwt = new JsonWebToken({
+    secretKey: config.jwt.secret,
+    issuer: 'Yeep',
   });
 
   // setup settings store
   const settings = new SettingsStore(db);
   await settings.setup();
+
+  // prepare next app
+  if (process.env.NODE_ENV !== 'test') {
+    await next.prepare();
+  }
 
   // populate app context
   app.context.settings = settings;

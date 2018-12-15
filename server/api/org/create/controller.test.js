@@ -1,5 +1,6 @@
 /* eslint-env jest */
 import request from 'supertest';
+import config from '../../../../yeep.config';
 import server from '../../../server';
 import deleteOrg from '../delete/service';
 import createOrg from './service';
@@ -15,7 +16,7 @@ describe('api/v1/org.create', () => {
   let ctx;
 
   beforeAll(async () => {
-    await server.setup();
+    await server.setup(config);
     ctx = server.getAppContext();
   });
 

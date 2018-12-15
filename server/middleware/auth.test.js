@@ -1,5 +1,6 @@
 /* eslint-env jest */
 import server from '../server';
+import config from '../../yeep.config';
 import createUser from '../api/user/create/service';
 import deleteUser from '../api/user/delete/service';
 import createSessionToken from '../api/session/create/service';
@@ -15,7 +16,7 @@ describe('auth middleware', () => {
   let ctx;
 
   beforeAll(async () => {
-    await server.setup();
+    await server.setup(config);
     ctx = server.getAppContext();
   });
 

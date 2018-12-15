@@ -3,6 +3,7 @@ import request from 'supertest';
 import isWithinRange from 'date-fns/is_within_range';
 import addSeconds from 'date-fns/add_seconds';
 import server from '../../../server';
+import config from '../../../../yeep.config';
 import createUser from '../create/service';
 import deleteUser from '../delete/service';
 
@@ -10,7 +11,7 @@ describe('api/v1/user.forgotPassword', () => {
   let ctx;
 
   beforeAll(async () => {
-    await server.setup();
+    await server.setup(config);
     ctx = server.getAppContext();
   });
 

@@ -3,13 +3,14 @@ import mongoose from 'mongoose';
 import { delay } from 'awaiting';
 import SettingsStore from './SettingsStore';
 import Schema from '../models/Settings';
+import config from '../../yeep.config';
 
 describe('SettingsStore', () => {
   let db;
   let settings;
 
   beforeAll(async () => {
-    db = await mongoose.createConnection(process.env.MONGODB_URI, {
+    db = await mongoose.createConnection(config.mongo.uri, {
       useNewUrlParser: true,
       autoIndex: false,
       bufferCommands: false,

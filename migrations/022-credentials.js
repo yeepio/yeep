@@ -1,11 +1,7 @@
-const mongoose = require('mongoose');
-
-exports.up = async function(next) {
-  await mongoose.connect(process.env.MONGODB_URI);
-  await mongoose.connection.db.createCollection('credentials', next);
+export const up = async (db) => {
+  await db.createCollection('credentials');
 };
 
-exports.down = async function(next) {
-  await mongoose.connect(process.env.MONGODB_URI);
-  mongoose.connection.db.dropCollection('credentials', next);
+export const down = async (db) => {
+  await db.dropCollection('credentials');
 };

@@ -2,6 +2,7 @@
 import request from 'supertest';
 import { event } from 'awaiting';
 import server from '../../../server';
+import config from '../../../../yeep.config';
 import createUser from '../create/service';
 import deleteUser from '../delete/service';
 import initPasswordReset from '../forgotPassword/service';
@@ -10,7 +11,7 @@ describe('api/v1/user.resetPassword', () => {
   let ctx;
 
   beforeAll(async () => {
-    await server.setup();
+    await server.setup(config);
     ctx = server.getAppContext();
   });
 

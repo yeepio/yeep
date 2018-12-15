@@ -1,20 +1,15 @@
-const mongoose = require('mongoose');
-
-exports.up = async function(next) {
-  await mongoose.connect(process.env.MONGODB_URI);
-  await mongoose.connection.db.collection('users').createIndex(
+export const up = async (db) => {
+  await db.collection('users').createIndex(
     { username: 1 },
     {
       unique: true,
       sparse: true,
       name: 'username_uidx',
       collation: { locale: 'en', strength: 2 },
-    },
-    next
+    }
   );
 };
 
-exports.down = async function(next) {
-  await mongoose.connect(process.env.MONGODB_URI);
-  await mongoose.connection.db.collection('users').dropIndex('username_uidx', next);
+export const down = async (db) => {
+  await db.collection('users').dropIndex('username_uidx');
 };
