@@ -23,9 +23,9 @@ const renderHelp = () => `
     $ yeep syscheck --config=yeep.config.js
 `;
 
-const validateMongo = async (uri, spinner) => {
+const validateMongoSetup = async (config, spinner) => {
   const client = await MongoClient.connect(
-    uri,
+    config.mongo.uri,
     { useNewUrlParser: true }
   );
 
@@ -39,75 +39,75 @@ const validateMongo = async (uri, spinner) => {
     // TODO: Verify that the uri has the username:password format if the authentication fails!
     const buildInfo = await db.admin().buildInfo();
     const isVersionValid = buildInfo.versionArray[0] >= 4;
-    if (!isVersionValid) {
+
+    if (isVersionValid) {
+      spinner.stopAndPersist({
+        symbol: chalk.green('✔'),
+        text: `Mongo v.${buildInfo.version} detected`,
+      });
+    } else {
       throw new Error(
         `Incompatible MongoDB version detected; yeep requires v.4+, current version is ${
           buildInfo.version
         }`
       );
     }
-    spinner.stopAndPersist({
-      symbol: chalk.green('✔'),
-      text: `Mongo version ${buildInfo.version} is valid`,
-    });
 
     try {
       await db.admin().replSetGetStatus();
+      spinner.stopAndPersist({
+        symbol: chalk.green('✔'),
+        text: 'Mongo replica set detected',
+      });
     } catch (err) {
       throw new Error('Invalid MongoDB deployment status; yeep requires a replica set');
     }
-    spinner.stopAndPersist({
-      symbol: chalk.green('✔'),
-      text: 'Mongo replica set detected',
-    });
-
-    // check migrations
-    const dbMigrator = new DatabaseMigrator({
-      mongoUri: uri,
-      migrationDir: path.resolve(__dirname, '../migrations'),
-    });
-
-    try {
-      await dbMigrator.connect();
-      const pendingMigrations = await dbMigrator.findPendingMigrations();
-      if (pendingMigrations.length !== 0) {
-        throw new Error('Pending migrations detected; please apply all db migrations');
-      }
-    } catch (err) {
-      throw err;
-    } finally {
-      await dbMigrator.disconnect();
-    }
-  } catch (err) {
-    throw err;
   } finally {
     await client.close();
   }
 };
 
-const validateStorage = async (type, directory, spinner) => {
-  if (type !== 'fs') {
-    return;
-  }
-  const dirExists = await dirExistsAsync(directory);
-  if (!dirExists) {
-    throw new Error(`Upload directory ${directory} does not exist`);
-  }
-  spinner.stopAndPersist({
-    symbol: chalk.green('✔'),
-    text: 'Upload directory exists',
+const validateMigrationStatus = async (config) => {
+  const dbMigrator = new DatabaseMigrator({
+    mongoUri: config.mongo.uri,
+    migrationDir: path.resolve(__dirname, '../migrations'),
   });
 
   try {
-    await accessAsync(directory, fs.W_OK);
-  } catch (err) {
-    throw new Error(`Upload directory ${directory} does not have write permissions`);
+    await dbMigrator.connect();
+    const pendingMigrations = await dbMigrator.findPendingMigrations();
+    if (pendingMigrations.length !== 0) {
+      throw new Error('Pending migrations detected; please apply all db migrations');
+    }
+  } finally {
+    await dbMigrator.disconnect();
+  }
+};
+
+const validateStorage = async (config, spinner) => {
+  if (config.storage.type !== 'fs') {
+    return;
   }
 
-  spinner.stopAndPersist({
-    symbol: chalk.green('✔'),
-    text: 'Upload Directory has write permissions',
-  });
+  const dirExists = await dirExistsAsync(config.storage.uploadDir);
+  if (dirExists) {
+    spinner.stopAndPersist({
+      symbol: chalk.green('✔'),
+      text: 'Upload directory exists',
+    });
+  } else {
+    throw new Error(`Upload directory ${config.storage.uploadDir} does not exist`);
+  }
+
+  try {
+    await accessAsync(config.storage.uploadDir, fs.W_OK);
+    spinner.stopAndPersist({
+      symbol: chalk.green('✔'),
+      text: 'Upload directory has write permissions',
+    });
+  } catch (err) {
+    throw new Error(`Upload directory ${config.storage.uploadDir} does not have write permissions`);
+  }
 };
 
 const handleSysCheck = (inputArr, flagsObj) => {
@@ -126,12 +126,13 @@ const handleSysCheck = (inputArr, flagsObj) => {
     const spinner = ora();
     spinner.start('Checking system status...');
 
-    validateMongo(config.mongo.uri, spinner)
-      .then(() => validateStorage(config.storage.type, config.storage.uploadDir, spinner))
-      .then(() => spinner.succeed('System check complete.'))
+    validateMongoSetup(config, spinner)
+      .then(() => validateMigrationStatus(config, spinner))
+      .then(() => validateStorage(config, spinner))
+      .then(() => spinner.succeed('System check complete: all systems are functional'))
       .catch((err) => {
-        console.error(renderNativeError(err));
-        spinner.fail('System check failed.');
+        spinner.fail(`${err.message}`);
+        spinner.fail('System check failed');
       });
   }
 };
