@@ -7,9 +7,10 @@ import {
   visitSession,
   isUserAuthenticated,
   visitUserPermissions,
-  isUserAuthorized,
+  findUserPermissionIndex,
 } from '../../../middleware/auth';
 import deleteRoleAssignment from './service';
+import { AuthorizationError } from '../../../constants/errors';
 
 const validationSchema = {
   body: {
@@ -35,6 +36,31 @@ const validationSchema = {
   },
 };
 
+const isUserAuthorized = async ({ request }, next) => {
+  const hasPermission = [request.body.orgId]
+    .filter(Boolean)
+    .concat(null)
+    .reduce((accumulator, orgId) => {
+      return (
+        accumulator ||
+        findUserPermissionIndex(request.session.user.permissions, {
+          name: 'yeep.role.assignment.write',
+          orgId,
+        }) !== -1
+      );
+    }, false);
+
+  if (!hasPermission) {
+    throw new AuthorizationError(
+      `User "${
+        request.session.user.username
+      }" does not have sufficient permissions to access this resource`
+    );
+  }
+
+  await next();
+};
+
 async function handler({ request, response, db }) {
   const isRoleAssignmentDeleted = await deleteRoleAssignment(db, request.body);
 
@@ -51,9 +77,6 @@ export default compose([
   isUserAuthenticated(),
   validateRequest(validationSchema),
   visitUserPermissions(),
-  isUserAuthorized({
-    permissions: ['yeep.role.assignment.write'],
-    org: (request) => request.body.orgId,
-  }),
+  isUserAuthorized,
   handler,
 ]);

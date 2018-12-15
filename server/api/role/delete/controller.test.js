@@ -172,7 +172,7 @@ describe('api/v1/role.delete', () => {
       ok: false,
       error: {
         code: 10012,
-        message: 'User "wile" does not have permission "yeep.role.write" to access this resource',
+        message: 'User "wile" does not have sufficient permissions to access this resource',
       },
     });
 

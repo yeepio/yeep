@@ -7,10 +7,11 @@ import {
   visitSession,
   isUserAuthenticated,
   visitUserPermissions,
-  isUserAuthorized,
+  findUserPermissionIndex,
 } from '../../../middleware/auth';
 import deletePermission from './service';
 import getPermissionInfo from '../info/service';
+import { AuthorizationError } from '../../../constants/errors';
 
 const validationSchema = {
   body: {
@@ -33,6 +34,24 @@ const visitRequestedPermission = async ({ request, db }, next) => {
   await next();
 };
 
+const isUserAuthorized = async ({ request }, next) => {
+  const hasPermission =
+    findUserPermissionIndex(request.session.user.permissions, {
+      name: 'yeep.permission.write',
+      orgId: request.session.permission.scope,
+    }) !== -1;
+
+  if (!hasPermission) {
+    throw new AuthorizationError(
+      `User "${
+        request.session.user.username
+      }" does not have sufficient permissions to access this resource`
+    );
+  }
+
+  await next();
+};
+
 async function handler({ request, response, db }) {
   const isPermissionDeleted = await deletePermission(db, request.session.permission);
 
@@ -50,9 +69,6 @@ export default compose([
   validateRequest(validationSchema),
   visitRequestedPermission,
   visitUserPermissions(),
-  isUserAuthorized({
-    permissions: ['yeep.permission.write'],
-    org: (request) => request.session.permission.scope,
-  }),
+  isUserAuthorized,
   handler,
 ]);

@@ -129,8 +129,7 @@ describe('api/v1/permission.info', () => {
       ok: false,
       error: {
         code: 10012,
-        message:
-          'User "wile" does not have permission "yeep.permission.read" to access this resource',
+        message: 'User "wile" does not have sufficient permissions to access this resource',
       },
     });
 

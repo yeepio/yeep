@@ -6,26 +6,10 @@ import {
   visitSession,
   isUserAuthenticated,
   visitUserPermissions,
-  isUserAuthorized,
+  findUserPermissionIndex,
 } from '../../../middleware/auth';
 import createOrg from './service';
-
-const authz = compose([
-  visitUserPermissions(),
-  isUserAuthorized({
-    permissions: ['yeep.org.write'],
-  }),
-]);
-const adaptiveAuthZ = async (ctx, next) => {
-  const { settings } = ctx;
-  const isOrgCreationOpen = await settings.get('isOrgCreationOpen');
-
-  if (!isOrgCreationOpen) {
-    return authz(ctx, next);
-  }
-
-  await next();
-};
+import { AuthorizationError } from '../../../constants/errors';
 
 const validationSchema = {
   body: {
@@ -42,6 +26,37 @@ const validationSchema = {
       .required()
       .regex(/^[A-Za-z0-9\-_]*$/, { name: 'slug' }),
   },
+};
+
+const isUserAuthorized = async ({ request }, next) => {
+  const hasPermission =
+    findUserPermissionIndex(request.session.user.permissions, {
+      name: 'yeep.org.write',
+      orgId: null,
+    }) !== -1;
+
+  if (!hasPermission) {
+    throw new AuthorizationError(
+      `User "${
+        request.session.user.username
+      }" does not have sufficient permissions to access this resource`
+    );
+  }
+
+  await next();
+};
+
+const authz = compose([visitUserPermissions(), isUserAuthorized]);
+
+const adaptiveAuthZ = async (ctx, next) => {
+  const { settings } = ctx;
+  const isOrgCreationOpen = await settings.get('isOrgCreationOpen');
+
+  if (!isOrgCreationOpen) {
+    return authz(ctx, next);
+  }
+
+  await next();
 };
 
 async function handler({ request, response, db }) {

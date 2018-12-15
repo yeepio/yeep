@@ -528,7 +528,7 @@ describe('api/v1/user.revokeRole', () => {
           code: 10012,
           message: `User "${
             wile.username
-          }" does not have permission "yeep.role.assignment.write" to access this resource`,
+          }" does not have sufficient permissions to access this resource`,
         },
       });
     });

@@ -168,7 +168,7 @@ export const findUserPermissionIndex = (userPermissions, { name, orgId }) => {
     throw new TypeError(`Invalid orgId prop; expected string, received ${typeOf(orgId)}`);
   }
 
-  return binarySearch(
+  const index = binarySearch(
     userPermissions,
     {
       name,
@@ -176,6 +176,8 @@ export const findUserPermissionIndex = (userPermissions, { name, orgId }) => {
     },
     (a, b) => a.name.localeCompare(b.name) || a.orgId.localeCompare(b.orgId)
   );
+
+  return Math.max(index, -1);
 };
 
 export const isUserAuthorized = ({ org: getOrg, permissions = [] }) => {
