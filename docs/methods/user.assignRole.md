@@ -8,9 +8,9 @@ Assigns the designated role to the specified user, in the context of org, applyi
 
 ***
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.role.assignment.write` permission.
+Requestor must be authenticated and assigned with the `yeep.role.assignment.write` permission for the specified org (see body parameters below).
 
 ## Parameters
 

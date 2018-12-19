@@ -8,9 +8,9 @@ Retrieves list of permissions that the requestor has access to.
 
 ***
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.permission.read` permission.
+Requestor must be authenticated. No explicit permissions are required; only retrieves permissions that the requestor can access via `yeep.permission.read`.
 
 ## Parameters
 

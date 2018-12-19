@@ -8,9 +8,9 @@ Creates new permission with the specified properties.
 
 ***
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.permission.write` permission.
+Requestor must be authenticated and assigned with the `yeep.permission.write` permission for the specified org scope (see body params below).
 
 ## Parameters
 
@@ -18,7 +18,7 @@ Requestor must be authenticated and assigned with the `yeep.permission.write` pe
 
 - **name** _(string)_ — permission name (required)
 - **description** _(string)_ — permission description (optional)
-- **scope** _(string)_ — org ID that the permission can be applied to; implies global permission if left empty (optional)
+- **scope** _(string)_ — org ID that the permission can be applied to; implies _global_ scope if left empty (optional)
 
 _Please note: global permissions can be applied to any org._
 

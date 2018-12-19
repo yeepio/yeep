@@ -10,9 +10,9 @@ This function only makes sense if the user had previously been deactivated.
 
 ***
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the global `yeep.user.write` permission.
+Requestor must be authenticated and assigned with `yeep.user.write` permission in _global_ scope.
 
 ## Parameters
 

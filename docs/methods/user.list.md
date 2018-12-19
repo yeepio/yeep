@@ -8,9 +8,9 @@ Retrieves list of users that the requestor has access to.
 
 ***
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.user.read` role.
+Requestor must be authenticated. No explicit permissions required; retrieves users that the requestor can access via `yeep.user.read`.
 
 ## Parameters
 

@@ -8,13 +8,19 @@ Retrieves details for the designated user.
 
 ***
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.user.read` permission.
+### A. Performing on another user
+
+Requestor must be authenticated and assigned with `yeep.user.read` permission in _global_ scope to retrieve details for another user.
 
 Please note:
 1. When `projection.permissions` is set to `true` user should additionally be assigned with the `yeep.permission.assignment.read` permissions;
 2. When `projection.roles` is set to `true` user should additionally be assigned with the `yeep.role.assignment.read` permissions.
+
+### B. Requestor is same as user
+
+Users are able to retrieve their own details without explicit permissions.
 
 ## Parameters
 
