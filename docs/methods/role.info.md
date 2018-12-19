@@ -8,9 +8,9 @@ Retrieves information on the designated role.
 
 ***
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.role.read` permission.
+Requestor must be authenticated and assigned with the `yeep.role.read` permission for the designated role's org scope.
 
 ## Parameters
 

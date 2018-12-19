@@ -8,9 +8,9 @@ Deletes the designated role.
 
 ***
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.role.write` permission.
+Requestor must be authenticated and assigned with the `yeep.role.write` permission for the designated role's org scope.
 
 ## Parameters
 

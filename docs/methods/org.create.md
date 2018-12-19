@@ -10,14 +10,14 @@ Requestor is automatically assigned with the "admin" role for the newly created 
 
 ***
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.org.write` permission depending on the `isOrgCreationOpen` setting (see table below).
+Requestor must be authenticated and assigned with the `yeep.org.write` permission depending on the `isOrgCreationOpen` config setting (see table below).
 
 | isOrgCreationOpen | Required permission |
 | ----------------- | ------------------- |
-| `true` | `yeep.org.write` |
-| `false` | - |
+| `false` | `yeep.org.write` |
+| `true` | - |
 
 ## Parameters
 

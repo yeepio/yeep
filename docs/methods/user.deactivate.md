@@ -10,9 +10,9 @@ Deactivated users function as if they were deleted, i.e. cannot create new sessi
 
 ***
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the global `yeep.user.write` permission.
+Requestor must be authenticated and assigned with the `yeep.user.write` permission in _global_ scope.
 
 ## Parameters
 

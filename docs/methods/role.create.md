@@ -8,9 +8,9 @@ Creates new role with the specified properties.
 
 ***
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.role.write` permission.
+Requestor must be authenticated and assigned with the `yeep.role.write` permission for the specified org scope (see body params below).
 
 ## Parameters
 

@@ -8,9 +8,9 @@ Retrieves list of roles that the requestor has access to.
 
 ***
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.role.read` role.
+Requestor must be authenticated. No explicit permissions are required; only retrieves permissions that the requestor can access via `yeep.role.read`.
 
 ## Parameters
 

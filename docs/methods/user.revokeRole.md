@@ -8,9 +8,9 @@ Dissociates the specified role from the the designated user.
 
 ***
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.role.assignment.write` permission.
+Requestor must be authenticated and assigned with the `yeep.role.assignment.write` permission for the specified org (see body params below).
 
 ## Parameters
 

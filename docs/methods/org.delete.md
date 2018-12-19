@@ -10,9 +10,9 @@ Users are automatically dissociated with the deleted org. Assigned roles and per
 
 ***
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.org.write` permission within the scope of the designated org.
+Requestor must be authenticated and assigned with the `yeep.org.write` permission with _global_ scope or within the scope of the designated org.
 
 ## Parameters
 

@@ -8,7 +8,9 @@ Retrieves information on the currently active session.
 
 ***
 
-## Parameters
+## Auth logic
+
+Requestor must be authenticated.
 
 ***
 

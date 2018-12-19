@@ -8,9 +8,9 @@ Deletes the designated permission.
 
 ***
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.permission.write` permission.
+Requestor must be authenticated and assigned with the `yeep.permission.write` permission for the designated permission's scope.
 
 ## Parameters
 

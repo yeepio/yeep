@@ -8,9 +8,9 @@ Retrieves information on the designated permission.
 
 ***
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.permission.read` permission.
+Requestor must be authenticated and assigned with the `yeep.permission.read` permission for the designated permission's org scope.
 
 ## Parameters
 

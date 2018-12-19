@@ -10,11 +10,9 @@ After calling `session.destroy()` the user will not be able to perform auth-requ
 
 ***
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated to the system.
-
-## Parameters
+Requestor must be authenticated.
 
 ***
 
