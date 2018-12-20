@@ -76,13 +76,18 @@ const validationSchema = {
 
 const isUserAuthorized = async ({ request }, next) => {
   const { orgs } = request.body;
-  const orgId = orgs.length === 1 ? orgs[0] : null;
 
-  const hasPermission =
-    findUserPermissionIndex(request.session.user.permissions, {
-      name: 'yeep.user.write',
-      orgId,
-    }) !== -1;
+  const hasPermission = [orgs.length === 1 ? orgs[0] : null]
+    .filter(Boolean)
+    .concat(null)
+    .reduce((accumulator, orgId) => {
+      return accumulator
+        ? accumulator
+        : findUserPermissionIndex(request.session.user.permissions, {
+            name: 'yeep.user.write',
+            orgId,
+          }) !== -1;
+    }, false);
 
   if (!hasPermission) {
     throw new AuthorizationError(

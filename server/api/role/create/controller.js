@@ -47,13 +47,12 @@ const isUserAuthorized = async ({ request }, next) => {
     .filter(Boolean)
     .concat(null)
     .reduce((accumulator, orgId) => {
-      return (
-        accumulator ||
-        findUserPermissionIndex(request.session.user.permissions, {
-          name: 'yeep.role.write',
-          orgId,
-        }) !== -1
-      );
+      return accumulator
+        ? accumulator
+        : findUserPermissionIndex(request.session.user.permissions, {
+            name: 'yeep.role.write',
+            orgId,
+          }) !== -1;
     }, false);
 
   if (!hasPermission) {

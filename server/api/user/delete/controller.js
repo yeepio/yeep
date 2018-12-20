@@ -36,17 +36,11 @@ const visitRequestedUser = async ({ request, db }, next) => {
 
 const isUserAuthorized = async ({ request }, next) => {
   const isUserRequestorIdentical = request.session.user.id === request.body.id;
-  const hasPermission = request.session.requestedUser.orgs
-    .concat(null)
-    .reduce((accumulator, orgId) => {
-      return (
-        accumulator ||
-        findUserPermissionIndex(request.session.user.permissions, {
-          name: 'yeep.user.write',
-          orgId,
-        }) !== -1
-      );
-    }, false);
+  const hasPermission =
+    findUserPermissionIndex(request.session.user.permissions, {
+      name: 'yeep.user.write',
+      orgId: null,
+    }) !== -1;
 
   if (!isUserRequestorIdentical && !hasPermission) {
     throw new AuthorizationError(

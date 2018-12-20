@@ -43,6 +43,14 @@ describe('api/v1/user.delete', () => {
         ],
       });
 
+      const PermissionModel = ctx.db.model('Permission');
+      const requiredPermission = await PermissionModel.findOne({ name: 'yeep.user.write' });
+      await createPermissionAssignment(ctx.db, {
+        userId: wile.id,
+        orgId: null,
+        permissionId: requiredPermission.id,
+      });
+
       acme = await createOrg(ctx.db, {
         name: 'Acme Inc',
         slug: 'acme',
