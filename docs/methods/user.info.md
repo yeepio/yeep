@@ -6,19 +6,20 @@
 
 Retrieves details for the designated user.
 
-***
+---
 
 ## Auth logic
 
-### A. Performing on another user
+### A. Retrieving details for another user
 
 Requestor must be authenticated and assigned with `yeep.user.read` permission in _global_ scope to retrieve details for another user.
 
 Please note:
+
 1. When `projection.permissions` is set to `true` user should additionally be assigned with the `yeep.permission.assignment.read` permissions;
 2. When `projection.roles` is set to `true` user should additionally be assigned with the `yeep.role.assignment.read` permissions.
 
-### B. Requestor is same as user
+### B. Retrieving the requestor's own details
 
 Users are able to retrieve their own details without explicit permissions.
 
@@ -30,7 +31,8 @@ Users are able to retrieve their own details without explicit permissions.
 - **projection** _(Object)_ — user fields to return (optional)
   - **permissions** _(boolean)_ — indicates whether user permissions should be returned (optional; defaults to `false`)
   - **roles** _(boolean)_ — indicates whether user roles should be returned (optional; defaults to `false`)
-***
+
+---
 
 ## Returns
 
@@ -40,7 +42,7 @@ Users are able to retrieve their own details without explicit permissions.
 - **error** _(Object)_ — contains error details in case of an error
 - **user** _(Object)_ — the newly created user
 
-***
+---
 
 ## Example
 
@@ -51,7 +53,7 @@ POST /api/v1/user.info
 Authorization: `Bearer ${authToken}`
 ```
 
-``` json
+```json
 {
   "id": "507f191e810c19729de860ea",
   "projection": {
@@ -65,7 +67,7 @@ Authorization: `Bearer ${authToken}`
 
 `200 OK`
 
-``` json
+```json
 {
   "ok": true,
   "user": {
@@ -77,12 +79,10 @@ Authorization: `Bearer ${authToken}`
       {
         "address": "coyote@acme.com",
         "isVerified": true,
-        "isPrimary": true,
-      },
+        "isPrimary": true
+      }
     ],
-    "orgs": [
-      "5b85b610394ca184fe18076e"
-    ],
+    "orgs": ["5b85b610394ca184fe18076e"],
     "permissions": [
       {
         "id": "5b85b4f7c7451d8448128740",

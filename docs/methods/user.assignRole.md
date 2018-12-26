@@ -6,11 +6,11 @@
 
 Assigns the designated role to the specified user, in the context of org, applying to the given resource.
 
-***
+---
 
 ## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.role.assignment.write` permission for the specified org (see body parameters below).
+Requestor must be authenticated and assigned with the `yeep.role.assignment.write` permission for the specified org scope (see body parameters below) or the _global_ scope.
 
 ## Parameters
 
@@ -21,7 +21,7 @@ Requestor must be authenticated and assigned with the `yeep.role.assignment.writ
 - **orgId** _(string)_ — optional org ID to define the context of the assignment; implies global context (i.e. all orgs) if left undefined (optional)
 - **resourceId** _(string|number)_ — optional resource ID to limit the application of the role assignment (optional)
 
-***
+---
 
 ## Returns
 
@@ -31,7 +31,7 @@ Requestor must be authenticated and assigned with the `yeep.role.assignment.writ
 - **error** _(Object)_ — contains error details in case of an error
 - **roleAssignment** _(Object)_ — details on the newly created role assignment
 
-***
+---
 
 ## Example
 
@@ -42,7 +42,7 @@ POST /api/v1/user.assignRole
 Authorization: `Bearer ${authToken}`
 ```
 
-``` json
+```json
 {
   "userId": "507f191e810c19729de860ea",
   "roleId": "402f191e901c19729de720ba",
@@ -54,7 +54,7 @@ Authorization: `Bearer ${authToken}`
 
 `200 OK`
 
-``` json
+```json
 {
   "ok": true,
   "roleAssignment": {

@@ -22,15 +22,13 @@ const validationSchema = {
 };
 
 const isUserAuthorized = async ({ request }, next) => {
-  const hasPermission = [request.body.id, null].reduce((accumulator, orgId) => {
-    return (
-      accumulator ||
+  const hasPermission = [request.body.id, null].some(
+    (orgId) =>
       findUserPermissionIndex(request.session.user.permissions, {
         name: 'yeep.org.write',
         orgId,
       }) !== -1
-    );
-  }, false);
+  );
 
   if (!hasPermission) {
     throw new AuthorizationError(

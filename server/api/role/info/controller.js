@@ -33,11 +33,13 @@ const visitRequestedRole = async ({ request, db }, next) => {
 };
 
 const isUserAuthorized = async ({ request }, next) => {
-  const hasPermission =
-    findUserPermissionIndex(request.session.user.permissions, {
-      name: 'yeep.role.read',
-      orgId: request.session.role.scope,
-    }) !== -1;
+  const hasPermission = Array.from(new Set([request.session.role.scope, null])).some(
+    (orgId) =>
+      findUserPermissionIndex(request.session.user.permissions, {
+        name: 'yeep.role.read',
+        orgId,
+      }) !== -1
+  );
 
   if (!hasPermission) {
     throw new AuthorizationError(
