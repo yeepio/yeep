@@ -32,17 +32,25 @@ const validationSchema = {
 
 const isUserAuthorized = async ({ request }, next) => {
   const isUserRequestorIdentical = request.session.user.id === request.body.id;
-  const hasPermission = request.session.requestedUser.orgs
-    .concat(null)
-    .reduce((accumulator, orgId) => {
-      return (
-        accumulator ||
-        findUserPermissionIndex(request.session.user.permissions, {
-          name: 'yeep.user.read',
-          orgId,
-        }) !== -1
-      );
-    }, false);
+  const hasPermission = Array.from(new Set([...request.session.requestedUser.orgs, null])).some(
+    (orgId) =>
+      findUserPermissionIndex(request.session.user.permissions, {
+        name: 'yeep.user.read',
+        orgId,
+      }) !== -1 &&
+      (request.body.projection.permissions
+        ? findUserPermissionIndex(request.session.user.permissions, {
+            name: 'yeep.permission.assignment.read',
+            orgId,
+          }) !== -1
+        : true) &&
+      (request.body.projection.roles
+        ? findUserPermissionIndex(request.session.user.permissions, {
+            name: 'yeep.role.assignment.read',
+            orgId,
+          }) !== -1
+        : true)
+  );
 
   if (!isUserRequestorIdentical && !hasPermission) {
     throw new AuthorizationError(

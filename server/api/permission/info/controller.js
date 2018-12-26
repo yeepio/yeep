@@ -33,17 +33,13 @@ const visitRequestedPermission = async ({ request, db }, next) => {
 };
 
 const isUserAuthorized = async ({ request }, next) => {
-  const hasPermission = [request.session.permission.scope]
-    .filter(Boolean)
-    .concat(null)
-    .reduce((accumulator, orgId) => {
-      return accumulator
-        ? accumulator
-        : findUserPermissionIndex(request.session.user.permissions, {
-            name: 'yeep.permission.read',
-            orgId,
-          }) !== -1;
-    }, false);
+  const hasPermission = Array.from(new Set([request.session.permission.scope, null])).some(
+    (orgId) =>
+      findUserPermissionIndex(request.session.user.permissions, {
+        name: 'yeep.permission.read',
+        orgId,
+      }) !== -1
+  );
 
   if (!hasPermission) {
     throw new AuthorizationError(
