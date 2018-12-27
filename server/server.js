@@ -138,7 +138,7 @@ server.setup = async (config) => {
   });
 
   const mail = new MailService({
-    options: config.mail,
+    ...config.mail,
   });
 
   // setup settings store
@@ -159,7 +159,7 @@ server.setup = async (config) => {
   app.context.mail = mail;
 
   // register event handlers
-  Object.entries(events, ([eventKey, handler]) => {
+  Object.entries(events).map(([eventKey, handler]) => {
     bus.on(eventKey, (props) => handler(app.context, props));
   });
 };

@@ -19,13 +19,15 @@ module.exports = {
     uploadDir: 'uploads/',
   },
   mail: {
-    transport: 'SMTP',
-    from: 'myemail@address.com',
+    transport: 'smtp',
+    from: 'admin@yeep.com',
     // from: "'Custom Name' <myemail@address.com>",
     templatePath: 'server/views/passwordResetInit.html',
     options: {
       // service: 'Mailgun',
-      service: 'gmail',
+      // service: 'gmail',
+      host: 'smtp.ethereal.email',
+      port: 587,
       // host: 'YOUR-SES-SERVER-NAME',
       // port: 465,
       auth: {

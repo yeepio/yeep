@@ -7,8 +7,7 @@ describe('MailService', () => {
 
   beforeAll(async () => {
     mailService = new MailService({
-      service: config.mail.options.service,
-      auth: config.mail.options.auth,
+      ...config.mail,
     });
   });
 
@@ -18,7 +17,9 @@ describe('MailService', () => {
 
   describe('sendMail', () => {
     test('sends email', async () => {
-      mailService.sendMail('spidey_nr@hotmail.com');
+      await mailService.sendMail({
+        to: 'spidey_nr@hotmail.com',
+      });
     });
   });
 });
