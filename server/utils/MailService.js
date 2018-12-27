@@ -21,31 +21,25 @@ class MailService extends EventEmitter {
       );
     }
 
-    const { auth, service, host, from, templatePath } = props;
-    // transport: 'SMTP',
-    // from: 'myemail@address.com',
-    // from2: "'Custom Name' <myemail@address.com>",
-    // templatePath: 'server/views/passwordResetInit.html',
-    // options: {
-    //   service: 'Mailgun',
-    //   host: 'YOUR-SES-SERVER-NAME',
-    //   port: 465,
-    //   auth: {
-    //     user: 'postmaster@example.mailgun.org',
-    //     pass: '1234567890',
-    //   },
-    // },
+    const { transport, from, templatePath, options } = props;
+    const { auth, service, host } = options;
+
     if (!isPlainObject(auth)) {
       throw new TypeError(
         `Invalid "auth" argument; expected plain object, received ${typeOf(auth)}`
       );
     }
-    if (!isString(service)) {
+
+    if (service && !isString(service)) {
       throw new Error(`Invalid service prop; expected string, received ${typeOf(service)}`);
     }
 
     if (host && !isString(host)) {
       throw new Error(`Invalid host prop; expected string, received ${typeOf(host)}`);
+    }
+
+    if (!host && !service) {
+      throw new Error(`Expecting service or a host to be defined in the configuration`);
     }
 
     if (from && !isString(from)) {
@@ -58,31 +52,47 @@ class MailService extends EventEmitter {
       );
     }
 
-    // create reusable transport method (opens pool of SMTP connections)
-    const transport = nodemailer.createTransport({ service, auth });
+    if (transport === 'debug') {
+      this.transport = {
+        sendMail: (message) => {
+          return new Promise((resolve) => {
+            console.log(`
+              **Mail transport not configured; this is the email message that we would normally send**
+
+              from: ${message.from}
+              to: ${message.to}
+              subject: ${message.subject}
+
+              text: ${message.text}
+              html: ${message.html}
+            `);
+            resolve();
+          });
+        },
+      };
+    } else {
+      // TODO: create reusable transport method (opens pool of SMTP connections)
+      this.transport = nodemailer.createTransport(options);
+    }
 
     this.props = {
       service,
       auth,
-      transport,
       from,
       templatePath,
+      transport,
     };
   }
 
-  connect() {
-    const { service, auth } = this.props;
-    this.transport = nodemailer.createTransport('SMTP', { service, auth });
-  }
-
-  async sendMail(receiver) {
-    const { transport, from } = this.props;
+  async sendMail(message) {
+    const { transport } = this;
+    const { from } = this.props;
     const mailOptions = {
       from,
-      to: receiver,
-      subject: 'Hello ✔',
-      text: 'Hello world ✔',
-      html: '<b>Hello world ✔</b>',
+      to: message.to,
+      subject: message.subject || 'Hello ✔',
+      text: message.text || 'Hello world ✔',
+      html: message.html || '<b>Hello world ✔</b>',
     };
 
     return await transport.sendMail(mailOptions);
