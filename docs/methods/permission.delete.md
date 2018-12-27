@@ -6,11 +6,11 @@
 
 Deletes the designated permission.
 
-***
+---
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.permission.write` permission.
+Requestor must be authenticated and assigned with the `yeep.permission.write` permission for the designated permission's scope or the _global_ scope.
 
 ## Parameters
 
@@ -18,7 +18,7 @@ Requestor must be authenticated and assigned with the `yeep.permission.write` pe
 
 - **id** _(string)_ — permission ID (required)
 
-***
+---
 
 ## Returns
 
@@ -27,7 +27,7 @@ Requestor must be authenticated and assigned with the `yeep.permission.write` pe
 - **ok** _(boolean)_ — indicates whether the request was successfully completed
 - **error** _(Object)_ — contains error details in case of an error
 
-***
+---
 
 ## Example
 
@@ -38,7 +38,7 @@ POST /api/v1/permission.delete
 Authorization: `Bearer ${authToken}`
 ```
 
-``` json
+```json
 {
   "id": "5b2d649ce248cb779e7f26e2"
 }
@@ -48,7 +48,7 @@ Authorization: `Bearer ${authToken}`
 
 `200 OK`
 
-``` json
+```json
 {
   "ok": true
 }

@@ -6,11 +6,11 @@
 
 Retrieves information on the designated role.
 
-***
+---
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.role.read` permission.
+Requestor must be authenticated and assigned with the `yeep.role.read` permission for the designated role's org scope or the _global_ scope.
 
 ## Parameters
 
@@ -18,7 +18,7 @@ Requestor must be authenticated and assigned with the `yeep.role.read` permissio
 
 - **id** _(string)_ — role ID (required)
 
-***
+---
 
 ## Returns
 
@@ -28,7 +28,7 @@ Requestor must be authenticated and assigned with the `yeep.role.read` permissio
 - **error** _(Object)_ — contains error details in case of an error
 - **role** _(Object)_ — role details
 
-***
+---
 
 ## Example
 
@@ -39,7 +39,7 @@ POST /api/v1/role.info
 Authorization: `Bearer ${authToken}`
 ```
 
-``` json
+```json
 {
   "id": "507f191e810c19729de860ea"
 }
@@ -49,16 +49,14 @@ Authorization: `Bearer ${authToken}`
 
 `200 OK`
 
-``` json
+```json
 {
   "ok": true,
   "role": {
     "id": "507f191e810c19729de860ea",
     "name": "acme:manager",
     "description": "Manager role",
-    "permissions": [
-      "327f191e810c19729de76232"
-    ],
+    "permissions": ["327f191e810c19729de76232"],
     "scope": "5b2d649ce248cb779e7f26e2",
     "isSystemRole": false,
     "createdAt": "2017-07-13T05:00:42.145Z",

@@ -6,11 +6,11 @@
 
 Creates new permission with the specified properties.
 
-***
+---
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.permission.write` permission.
+Requestor must be authenticated and assigned with the `yeep.permission.write` permission for the specified org scope (see body params below) or the _global_ scope.
 
 ## Parameters
 
@@ -18,11 +18,11 @@ Requestor must be authenticated and assigned with the `yeep.permission.write` pe
 
 - **name** _(string)_ — permission name (required)
 - **description** _(string)_ — permission description (optional)
-- **scope** _(string)_ — org ID that the permission can be applied to; implies global permission if left empty (optional)
+- **scope** _(string)_ — org ID that the permission can be applied to; implies _global_ scope if left empty (optional)
 
 _Please note: global permissions can be applied to any org._
 
-***
+---
 
 ## Returns
 
@@ -32,7 +32,7 @@ _Please note: global permissions can be applied to any org._
 - **error** _(Object)_ — contains error details in case of an error
 - **permission** _(Object)_ — permission details
 
-***
+---
 
 ## Example
 
@@ -43,7 +43,7 @@ POST /api/v1/permission.create
 Authorization: `Bearer ${authToken}`
 ```
 
-``` json
+```json
 {
   "name": "acme.test",
   "description": "This is a test",
@@ -55,7 +55,7 @@ Authorization: `Bearer ${authToken}`
 
 `200 OK`
 
-``` json
+```json
 {
   "ok": true,
   "permission": {

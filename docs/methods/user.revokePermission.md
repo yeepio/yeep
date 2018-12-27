@@ -6,11 +6,11 @@
 
 Dissociates the specified permission from the the designated user.
 
-***
+---
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.permission.assignment.write` permission.
+Requestor must be authenticated and assigned with the `yeep.permission.assignment.write` permission for the specified org scope (see body params below) or the _global_ scope.
 
 ## Parameters
 
@@ -21,7 +21,7 @@ Requestor must be authenticated and assigned with the `yeep.permission.assignmen
 - **orgId** _(string)_ — the org context of the assignment; implies global context if left undefined (optional)
 - **resourceId** _(string|number)_ — the resource ID that the assigned permission applies to (optional)
 
-***
+---
 
 ## Returns
 
@@ -30,7 +30,7 @@ Requestor must be authenticated and assigned with the `yeep.permission.assignmen
 - **ok** _(boolean)_ — indicates whether the request was successfully completed
 - **error** _(Object)_ — contains error details in case of an error
 
-***
+---
 
 ## Example
 
@@ -41,7 +41,7 @@ POST /api/v1/user.revokePermission
 Authorization: `Bearer ${authToken}`
 ```
 
-``` json
+```json
 {
   "userId": "507f191e810c19729de860ea",
   "permissionId": "402f191e901c19729de720ba",
@@ -53,7 +53,7 @@ Authorization: `Bearer ${authToken}`
 
 `200 OK`
 
-``` json
+```json
 {
   "ok": true
 }

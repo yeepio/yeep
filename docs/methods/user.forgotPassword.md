@@ -8,6 +8,10 @@ Initiates the _forgot password_ process for the designated user.
 
 ***
 
+## Public method
+
+This method is publicly available.
+
 ## Parameters
 
 ### Body

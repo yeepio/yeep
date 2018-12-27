@@ -304,8 +304,7 @@ describe('api/v1/org.create', () => {
           ok: false,
           error: {
             code: 10012,
-            message:
-              'User "wile" does not have permission "yeep.org.write" to access this resource',
+            message: 'User "wile" does not have sufficient permissions to access this resource',
           },
         });
       });

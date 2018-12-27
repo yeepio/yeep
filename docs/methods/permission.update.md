@@ -6,11 +6,11 @@
 
 Updates the designated permission with the specified properties.
 
-***
+---
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.permission.write` permission.
+Requestor must be authenticated and assigned with the `yeep.permission.write` permission for the designated permission's org scope or the _global_ scope.
 
 ## Parameters
 
@@ -22,7 +22,7 @@ Requestor must be authenticated and assigned with the `yeep.permission.write` pe
 
 _Please note: `name` or `description` must be specified, otherwise update makes no sense._
 
-***
+---
 
 ## Returns
 
@@ -32,7 +32,7 @@ _Please note: `name` or `description` must be specified, otherwise update makes 
 - **error** _(Object)_ — contains error details in case of an error
 - **permission** _(Object)_ — permission details
 
-***
+---
 
 ## Example
 
@@ -43,7 +43,7 @@ POST /api/v1/permission.update
 Authorization: `Bearer ${authToken}`
 ```
 
-``` json
+```json
 {
   "id": "327f191e810c19729de76232",
   "name": "acme.tost",
@@ -55,7 +55,7 @@ Authorization: `Bearer ${authToken}`
 
 `200 OK`
 
-``` json
+```json
 {
   "ok": true,
   "permission": {

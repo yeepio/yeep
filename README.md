@@ -28,6 +28,7 @@ Yeep provides a simple, open-source, privacy-first solution to user management.
 ## Docs
 
 * [API Reference](docs/index.md)
+* [Contributing Guide](CONTRIBUTING.md)
 
 ## License
 

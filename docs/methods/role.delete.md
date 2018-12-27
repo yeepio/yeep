@@ -6,11 +6,11 @@
 
 Deletes the designated role.
 
-***
+---
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.role.write` permission.
+Requestor must be authenticated and assigned with the `yeep.role.write` permission for the designated role's org scope or the _global_ scope.
 
 ## Parameters
 
@@ -18,7 +18,7 @@ Requestor must be authenticated and assigned with the `yeep.role.write` permissi
 
 - **id** _(string)_ — role ID (required)
 
-***
+---
 
 ## Returns
 
@@ -27,7 +27,7 @@ Requestor must be authenticated and assigned with the `yeep.role.write` permissi
 - **ok** _(boolean)_ — indicates whether the request was successfully completed
 - **error** _(Object)_ — contains error details in case of an error
 
-***
+---
 
 ## Example
 
@@ -38,7 +38,7 @@ POST /api/v1/role.delete
 Authorization: `Bearer ${authToken}`
 ```
 
-``` json
+```json
 {
   "id": "507f191e810c19729de860ea"
 }
@@ -48,7 +48,7 @@ Authorization: `Bearer ${authToken}`
 
 `200 OK`
 
-``` json
+```json
 {
   "ok": true
 }

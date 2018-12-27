@@ -8,6 +8,10 @@ Creates new session, a.k.a. sign-in, for the designated user.
 
 ***
 
+## Public method
+
+This method is publicly available.
+
 ## Parameters
 
 ### Body

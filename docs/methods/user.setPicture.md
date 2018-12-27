@@ -8,11 +8,15 @@ Sets the profile picture of the designated user.
 
 ***
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with global `yeep.user.write` permission to set the profile picture of another user.
+### A. Performing on another user
 
-Otherwise, users are able to set their own profile picture.
+Requestor must be authenticated and assigned with `yeep.user.write` in _global_ scope permission to set the profile picture of another user.
+
+### B. Requestor is same as user
+
+Users are able to set their own profile picture without explicit permission.
 
 ## Parameters
 

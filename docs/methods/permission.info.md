@@ -6,11 +6,11 @@
 
 Retrieves information on the designated permission.
 
-***
+---
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.permission.read` permission.
+Requestor must be authenticated and assigned with the `yeep.permission.read` permission for the designated permission's org scope or the _global_ scope.
 
 ## Parameters
 
@@ -18,7 +18,7 @@ Requestor must be authenticated and assigned with the `yeep.permission.read` per
 
 - **id** _(string)_ — permission ID (required)
 
-***
+---
 
 ## Returns
 
@@ -28,7 +28,7 @@ Requestor must be authenticated and assigned with the `yeep.permission.read` per
 - **error** _(Object)_ — contains error details in case of an error
 - **permission** _(Object)_ — permission details
 
-***
+---
 
 ## Example
 
@@ -39,7 +39,7 @@ POST /api/v1/permission.info
 Authorization: `Bearer ${authToken}`
 ```
 
-``` json
+```json
 {
   "id": "327f191e810c19729de76232"
 }
@@ -49,7 +49,7 @@ Authorization: `Bearer ${authToken}`
 
 `200 OK`
 
-``` json
+```json
 {
   "ok": true,
   "permission": {

@@ -337,8 +337,7 @@ describe('api/v1/user.deactivate', () => {
         ok: false,
         error: {
           code: 10012,
-          message:
-            'User "runner" does not have permission "yeep.user.write" to access this resource',
+          message: 'User "runner" does not have sufficient permissions to access this resource',
         },
       });
     });

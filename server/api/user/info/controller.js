@@ -7,9 +7,10 @@ import {
   visitSession,
   isUserAuthenticated,
   visitUserPermissions,
-  isUserAuthorized,
+  findUserPermissionIndex,
 } from '../../../middleware/auth';
 import getUserInfo, { defaultProjection } from './service';
+import { AuthorizationError } from '../../../constants/errors';
 
 const validationSchema = {
   body: {
@@ -27,6 +28,39 @@ const validationSchema = {
       .optional()
       .default(defaultProjection),
   },
+};
+
+const isUserAuthorized = async ({ request }, next) => {
+  const isUserRequestorIdentical = request.session.user.id === request.body.id;
+  const hasPermission = Array.from(new Set([...request.session.requestedUser.orgs, null])).some(
+    (orgId) =>
+      findUserPermissionIndex(request.session.user.permissions, {
+        name: 'yeep.user.read',
+        orgId,
+      }) !== -1 &&
+      (request.body.projection.permissions
+        ? findUserPermissionIndex(request.session.user.permissions, {
+            name: 'yeep.permission.assignment.read',
+            orgId,
+          }) !== -1
+        : true) &&
+      (request.body.projection.roles
+        ? findUserPermissionIndex(request.session.user.permissions, {
+            name: 'yeep.role.assignment.read',
+            orgId,
+          }) !== -1
+        : true)
+  );
+
+  if (!isUserRequestorIdentical && !hasPermission) {
+    throw new AuthorizationError(
+      `User "${
+        request.session.user.username
+      }" does not have sufficient permissions to access this resource`
+    );
+  }
+
+  await next();
 };
 
 const visitRequestedUser = async ({ request, db }, next) => {
@@ -55,9 +89,6 @@ export default compose([
   validateRequest(validationSchema),
   visitRequestedUser,
   visitUserPermissions(),
-  isUserAuthorized({
-    permissions: ['yeep.user.read'],
-    org: (request) => request.session.requestedUser.orgs,
-  }),
+  isUserAuthorized,
   handler,
 ]);

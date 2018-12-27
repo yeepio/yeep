@@ -6,13 +6,17 @@
 
 Deletes the profile picture of the designated user.
 
-***
+---
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with global `yeep.user.write` permission to set the profile picture of another user.
+### A. Deleting the profile picture of another user
 
-Otherwise, users are able to delete their own profile picture.
+Requestor must be authenticated and assigned with `yeep.user.write` permission in _global_ scope to set the profile picture of another user.
+
+### B. Deleting the requestor's own profile picture
+
+Users are able to delete their own profile picture without explicit permissions.
 
 ## Parameters
 
@@ -20,7 +24,7 @@ Otherwise, users are able to delete their own profile picture.
 
 - **id** _(string)_ — user ID (required)
 
-***
+---
 
 ## Returns
 
@@ -30,7 +34,7 @@ Otherwise, users are able to delete their own profile picture.
 - **error** _(Object)_ — contains error details in case of an error
 - **user** _(Object)_ — updated user info
 
-***
+---
 
 ## Example
 
@@ -41,7 +45,7 @@ POST /api/v1/user.deletePicture
 Authorization: `Bearer ${authToken}`
 ```
 
-``` json
+```json
 {
   "id": "507f191e810c19729de860ea"
 }
@@ -51,7 +55,7 @@ Authorization: `Bearer ${authToken}`
 
 `200 OK`
 
-``` json
+```json
 {
   "ok": true,
   "user": {

@@ -6,11 +6,11 @@
 
 Updates the designated role with the specified properties.
 
-***
+---
 
-## Requires auth
+## Auth logic
 
-Requestor must be authenticated and assigned with the `yeep.role.write` permission.
+Requestor must be authenticated and assigned with the `yeep.role.write` permission for the designated role's org scope or the _global_ scope.
 
 ## Parameters
 
@@ -23,7 +23,7 @@ Requestor must be authenticated and assigned with the `yeep.role.write` permissi
 
 _Please note: one of `name`, `description` or `permissions` must be specified, otherwise update makes no sense._
 
-***
+---
 
 ## Returns
 
@@ -33,7 +33,7 @@ _Please note: one of `name`, `description` or `permissions` must be specified, o
 - **error** _(Object)_ — contains error details in case of an error
 - **role** _(Object)_ — role details
 
-***
+---
 
 ## Example
 
@@ -44,13 +44,11 @@ POST /api/v1/role.update
 Authorization: `Bearer ${authToken}`
 ```
 
-``` json
+```json
 {
   "id": "507f1f77bcf86cd799439011",
   "name": "acme:developer",
-  "permissions": [
-    "327f191e810c19729de76232"
-  ]
+  "permissions": ["327f191e810c19729de76232"]
 }
 ```
 
@@ -58,16 +56,14 @@ Authorization: `Bearer ${authToken}`
 
 `200 OK`
 
-``` json
+```json
 {
   "ok": true,
   "role": {
     "id": "507f1f77bcf86cd799439011",
     "name": "acme:developer",
     "description": "Developer role",
-    "permissions": [
-      "327f191e810c19729de76232"
-    ],
+    "permissions": ["327f191e810c19729de76232"],
     "scope": "5b2d649ce248cb779e7f26e2",
     "isSystemRole": false,
     "createdAt": "2017-07-13T05:00:42.145Z",
