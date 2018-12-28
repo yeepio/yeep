@@ -25,6 +25,7 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 | **[user.forgotPassword](methods/user.forgotPassword.md)**     | Initiates the forgot password process for the designated user |
 | **[user.info](methods/user.info.md)**                         | Retrieves details for the designated user                     |
 | **[user.invite](methods/user.invite.md)**                     | Invites user to join org                                      |
+| **[user.join](methods/user.join.md)**                         | Adds user to org by redeeming invitation token                |
 | **[user.list](methods/user.list.md)**                         | Lists all users                                               |
 | **[user.resetPassword](methods/user.resetPassword.md)**       | Resets user password                                          |
 | **[user.revokePermission](methods/user.revokePermission.md)** | Revokes the designated permission assignment                  |
