@@ -247,5 +247,37 @@ describe('api/v1/user.invite', () => {
         },
       });
     });
+
+    describe('isUsernameEnabled = false', () => {
+      beforeAll(async () => {
+        await ctx.settings.set('isUsernameEnabled', false);
+      });
+
+      afterAll(async () => {
+        await ctx.settings.set('isUsernameEnabled', true);
+      });
+
+      test('returns error when userKey is username', async () => {
+        const res = await request(server)
+          .post('/api/v1/user.invite')
+          .set('Authorization', `Bearer ${session.token}`)
+          .send({
+            userKey: 'runner',
+            orgId: org.id,
+          });
+
+        expect(res.status).toBe(200);
+        expect(res.body).toMatchObject({
+          ok: false,
+          error: {
+            code: 400,
+            message: 'Invalid request body',
+            details: expect.any(Array),
+          },
+        });
+        expect(res.body.error.details[0].path).toEqual(['userKey']);
+        expect(res.body.error.details[0].type).toBe('string.email');
+      });
+    });
   });
 });
