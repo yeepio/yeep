@@ -131,7 +131,7 @@ async function handler({ request, response, db, bus }) {
     permissions,
     roles,
     tokenExpiresInSeconds,
-    invitee: request.session.user,
+    inviter: request.session.user,
     ...(isUserKeyEmail
       ? {
           emailAddress: request.body.userKey,
