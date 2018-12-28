@@ -1,6 +1,6 @@
 # Yeep API
 
-The Yeep API provides programmatic access to users, permissions, roles, session, etc on yeep platform.
+The Yeep API provides programmatic access to users, permissions, roles, sessions, etc on yeep platform.
 
 ---
 
