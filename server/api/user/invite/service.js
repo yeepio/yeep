@@ -12,11 +12,11 @@ import {
   InvalidRoleAssignmentError,
 } from '../../../constants/errors';
 
-async function inviteUser(
+const inviteUser = async (
   db,
   bus,
   { username, emailAddress, orgId, permissions, roles, tokenExpiresInSeconds, inviter }
-) {
+) => {
   const OrgModel = db.model('Org');
   const PermissionModel = db.model('Permission');
   const RoleModel = db.model('Role');
@@ -30,7 +30,7 @@ async function inviteUser(
 
   // ensure org exists
   if (!org) {
-    throw new OrgNotFoundError(`Org ${orgId} does not exist`);
+    throw new OrgNotFoundError(`Org "${orgId}" does not exist`);
   }
 
   // ensure permissions exist
@@ -52,9 +52,9 @@ async function inviteUser(
 
   // ensure permissions scope matches org
   permissionRecords.forEach((permission) => {
-    if (permission.scope && !permission.scope.equals(orgId)) {
+    if (!permission.scope || !permission.scope.equals(orgId)) {
       throw new InvalidPermissionAssignmentError(
-        `Permission ${permission._id.toHexString()} cannot be assigned to the designated org`
+        `Permission "${permission._id.toHexString()}" cannot be assigned to the designated org`
       );
     }
   });
@@ -76,9 +76,9 @@ async function inviteUser(
 
   // ensure role scope matches org
   roleRecords.forEach((role) => {
-    if (role.scope && !role.scope.equals(orgId)) {
+    if (!role.scope || !role.scope.equals(orgId)) {
       throw new InvalidRoleAssignmentError(
-        `Role ${role._id.toHexString()} cannot be assigned to the designated org`
+        `Role "${role._id.toHexString()}" cannot be assigned to the designated org`
       );
     }
   });
@@ -131,7 +131,7 @@ async function inviteUser(
       id: inviter._id.toHexString(),
       fullName: inviter.fullName,
       picture: inviter.picture,
-      emailAddress: inviter.findPrimaryEmail(),
+      emailAddress: UserModel.getPrimaryEmailAddress(inviter.emails),
     },
     token: {
       id: token._id.toHexString(),
@@ -143,6 +143,6 @@ async function inviteUser(
   });
 
   return true;
-}
+};
 
 export default inviteUser;
