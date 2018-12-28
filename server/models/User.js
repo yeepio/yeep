@@ -105,6 +105,27 @@ userSchema.statics.normalizeEmailAddress = function(emailAddress) {
 };
 
 /**
+ * Retrieves the primary email address from the supplied emails array.
+ * @param {Array<Object>} emails
+ * @return {string|null} primary email address
+ */
+userSchema.statics.getPrimaryEmailAddress = function(emails) {
+  const primaryEmail = emails.find((email) => email.isPrimary);
+
+  if (primaryEmail) {
+    return primaryEmail.address;
+  }
+
+  const headEmail = emails[0];
+
+  if (headEmail) {
+    return headEmail.address;
+  }
+
+  return null;
+};
+
+/**
  * Finds and returns the user's primary email address.
  * @return {string|null} primary email address
  */
