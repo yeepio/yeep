@@ -43,7 +43,8 @@ const validationSchema = {
       .max(100)
       .single()
       .unique()
-      .required(),
+      .optional()
+      .default([]),
     roles: Joi.array()
       .items(
         Joi.string()
@@ -54,7 +55,8 @@ const validationSchema = {
       .max(100)
       .single()
       .unique()
-      .required(),
+      .optional()
+      .default([]),
     tokenExpiresInSeconds: Joi.number()
       .integer()
       .min(0)
