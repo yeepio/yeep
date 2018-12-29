@@ -74,30 +74,6 @@ Authorization: `Bearer ${authToken}`
       }
     ],
     "orgs": ["5b85b610394ca184fe18076e"],
-    "permissions": [
-      {
-        "id": "5b85b4f7c7451d8448128740",
-        "name": "yeep.org.read",
-        "isSystemPermission": true,
-        "orgId": "5b85b610394ca184fe18076e",
-        "roleId": "5b85b4f7c7451d844812874b"
-      },
-      {
-        "id": "5b85b4f7c7451d844812873f",
-        "name": "yeep.org.write",
-        "isSystemPermission": true,
-        "orgId": "5b85b610394ca184fe18076e",
-        "roleId": "5b85b4f7c7451d844812874b"
-      }
-    ],
-    "roles": [
-      {
-        "id": "5b85b4f7c7451d844812874b",
-        "name": "org_manager",
-        "isSystemRole": false,
-        "orgId": "5b85b610394ca184fe18076e"
-      }
-    ],
     "createdAt": "2017-07-13T05:00:42.145Z",
     "updatedAt": "2017-07-13T05:42:42.222Z"
   }
@@ -144,30 +120,6 @@ POST /api/v1/user.join
       }
     ],
     "orgs": ["5b85b610394ca184fe18076e"],
-    "permissions": [
-      {
-        "id": "5b85b4f7c7451d8448128740",
-        "name": "yeep.org.read",
-        "isSystemPermission": true,
-        "orgId": "5b85b610394ca184fe18076e",
-        "roleId": "5b85b4f7c7451d844812874b"
-      },
-      {
-        "id": "5b85b4f7c7451d844812873f",
-        "name": "yeep.org.write",
-        "isSystemPermission": true,
-        "orgId": "5b85b610394ca184fe18076e",
-        "roleId": "5b85b4f7c7451d844812874b"
-      }
-    ],
-    "roles": [
-      {
-        "id": "5b85b4f7c7451d844812874b",
-        "name": "org_manager",
-        "isSystemRole": false,
-        "orgId": "5b85b610394ca184fe18076e"
-      }
-    ],
     "createdAt": "2017-07-13T05:00:42.145Z",
     "updatedAt": "2017-07-13T05:42:42.222Z"
   }
