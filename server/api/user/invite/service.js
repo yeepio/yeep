@@ -108,8 +108,9 @@ const inviteUser = async (
     type: 'INVITATION',
     payload: {
       orgId,
-      roles: roleRecords.map((e) => e._id),
-      permissions: permissionRecords.map((e) => e._id),
+      roles,
+      permissions,
+      emailAddress: user ? user.findPrimaryEmail() : emailAddress,
     },
     userId: user ? user._id : null,
     expiresAt: addSeconds(new Date(), tokenExpiresInSeconds), // i.e. in 1 hour
