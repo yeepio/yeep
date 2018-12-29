@@ -38,13 +38,14 @@ async function resetPassword(db, bus, { token: secret, password }) {
   const salt = await CredentialsModel.generateSalt();
   const iterationCount = 100000; // ~0.3 secs on Macbook Pro Late 2011
   const digestedPassword = await CredentialsModel.digestPassword(password, salt, iterationCount);
+  const currentDate = new Date();
 
   // init transaction to update password in db
   const session = await db.startSession();
   session.startTransaction();
 
   try {
-    // create password credentials
+    // update password credentials
     await CredentialsModel.updateOne(
       {
         user: token.userId,
@@ -55,35 +56,26 @@ async function resetPassword(db, bus, { token: secret, password }) {
           password: digestedPassword,
           salt,
           iterationCount,
-        },
-      }
-    );
-
-    // bump user.updatedAt timestamp
-    const currentDate = new Date();
-    await CredentialsModel.updateOne(
-      {
-        id: token.userId,
-      },
-      {
-        $set: {
           updatedAt: currentDate,
         },
       }
     );
 
+    // redeem token, i.e. delete from db
+    await TokenModel.deleteOne({
+      _id: token._id,
+    });
+
     await session.commitTransaction();
 
     // emit event
-    setImmediate(() => {
-      bus.emit('password_reset_success', {
-        user: {
-          id: user._id.toHexString(),
-          fullName: user.fullName,
-          picture: user.picture,
-          emailAddress: user.findPrimaryEmail(),
-        },
-      });
+    bus.emit('password_reset_success', {
+      user: {
+        id: user._id.toHexString(),
+        fullName: user.fullName,
+        picture: user.picture,
+        emailAddress: user.findPrimaryEmail(),
+      },
     });
 
     return {
