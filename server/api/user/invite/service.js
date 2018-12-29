@@ -12,10 +12,26 @@ import {
   InvalidRoleAssignmentError,
 } from '../../../constants/errors';
 
+export const defaultPermissions = [];
+export const defaultRoles = [];
+export const defaultTokenExpiresInSeconds = 7 * 24 * 60 * 60; // i.e. 1 week
+
 const inviteUser = async (
   db,
   bus,
-  { username, emailAddress, orgId, permissions, roles, tokenExpiresInSeconds, inviter }
+  {
+    orgId,
+    permissions = defaultPermissions,
+    roles = defaultRoles,
+    tokenExpiresInSeconds = defaultTokenExpiresInSeconds,
+    username, // invitee username
+    emailAddress, // invitee email address
+    inviterId,
+    inviterUsername,
+    inviterFullName,
+    inviterPicture = null,
+    inviterEmailAddress,
+  }
 ) => {
   const OrgModel = db.model('Org');
   const PermissionModel = db.model('Permission');
@@ -129,10 +145,11 @@ const inviteUser = async (
           emailAddress,
         },
     inviter: {
-      id: inviter._id.toHexString(),
-      fullName: inviter.fullName,
-      picture: inviter.picture,
-      emailAddress: UserModel.getPrimaryEmailAddress(inviter.emails),
+      id: inviterId,
+      username: inviterUsername,
+      fullName: inviterFullName,
+      picture: inviterPicture,
+      emailAddress: inviterEmailAddress,
     },
     token: {
       id: token._id.toHexString(),

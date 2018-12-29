@@ -4,7 +4,11 @@ import compose from 'koa-compose';
 import isemail from 'isemail';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
-import inviteUser from './service';
+import inviteUser, {
+  defaultTokenExpiresInSeconds,
+  defaultRoles,
+  defaultPermissions,
+} from './service';
 import {
   findUserPermissionIndex,
   visitUserPermissions,
@@ -44,7 +48,7 @@ const validationSchema = {
       .single()
       .unique()
       .optional()
-      .default([]),
+      .default(defaultPermissions),
     roles: Joi.array()
       .items(
         Joi.string()
@@ -56,13 +60,13 @@ const validationSchema = {
       .single()
       .unique()
       .optional()
-      .default([]),
+      .default(defaultRoles),
     tokenExpiresInSeconds: Joi.number()
       .integer()
       .min(0)
       .max(30 * 24 * 60 * 60) // i.e. 30 days
       .optional()
-      .default(7 * 24 * 60 * 60), // i.e. 1 week
+      .default(defaultTokenExpiresInSeconds), // i.e. 1 week
   },
 };
 
@@ -123,7 +127,8 @@ const isUserAuthorized = async ({ request }, next) => {
 
 async function handler({ request, response, db, bus }) {
   const { tokenExpiresInSeconds, orgId, permissions, roles } = request.body;
-  const { isUserKeyEmail } = request.session;
+  const { user, isUserKeyEmail } = request.session;
+  const UserModel = db.model('User');
 
   // initiate password reset process
   const isUserInvited = await inviteUser(db, bus, {
@@ -131,6 +136,11 @@ async function handler({ request, response, db, bus }) {
     permissions,
     roles,
     tokenExpiresInSeconds,
+    inviterId: user.id,
+    inviterUsername: user.username,
+    inviterFullName: user.fullName,
+    inviterPicture: user.picture,
+    inviterEmailAddress: UserModel.getPrimaryEmailAddress(user.emails),
     inviter: request.session.user,
     ...(isUserKeyEmail
       ? {
