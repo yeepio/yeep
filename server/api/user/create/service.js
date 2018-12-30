@@ -24,6 +24,7 @@ async function createUser(db, { username, password, fullName, picture, emails, o
 
   // attempt to populate missing picture from gravatar
   if (!picture) {
+    // TODO: fetching image from gravatar takes forever; either remove the API call or do this asynchonously using a queue
     picture = await getGravatarUrl(primaryEmails[0].address);
   }
 
