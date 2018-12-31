@@ -223,7 +223,7 @@ describe('api/v1/user.invite', () => {
       });
     });
 
-    test('returns error when a supplied permission does not match org scope', async () => {
+    test('returns error when a supplied role does not match org scope', async () => {
       const RoleModel = ctx.db.model('Role');
       const role = await RoleModel.findOne({
         name: 'admin',
