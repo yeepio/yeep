@@ -1,10 +1,8 @@
 import { ObjectId } from 'mongodb';
 import differenceWith from 'lodash/differenceWith';
 import addSeconds from 'date-fns/add_seconds';
-import isBefore from 'date-fns/is_before';
 import {
   UserNotFoundError,
-  UserDeactivatedError,
   OrgNotFoundError,
   PermissionNotFoundError,
   InvalidPermissionAssignmentError,
@@ -41,11 +39,6 @@ const addMemberToOrg = async (
   // ensure user exists
   if (!user) {
     throw new UserNotFoundError(`User "${userId}" does not exist`);
-  }
-
-  // make sure user is active
-  if (!!user.deactivatedAt && isBefore(user.deactivatedAt, new Date())) {
-    throw new UserDeactivatedError(`User "${userId}" is deactivated`);
   }
 
   // acquire org membership from db
