@@ -42,8 +42,14 @@ const joinOrg = async (db, bus, { token: secret, userId }) => {
     await OrgMembershipModel.create({
       orgId: ObjectId(token.payload.get('orgId')),
       userId: ObjectId(userId),
-      roles: token.payload.get('roles').map((e) => ({ id: ObjectId(e) })),
-      permissions: token.payload.get('roles').map((e) => ({ id: ObjectId(e) })),
+      roles: token.payload.get('roles').map((e) => ({
+        id: ObjectId(e.id),
+        resourceId: e.resourceId,
+      })),
+      permissions: token.payload.get('roles').map((e) => ({
+        id: ObjectId(e.id),
+        resourceId: e.resourceId,
+      })),
     });
 
     // redeem token, i.e. delete from db
