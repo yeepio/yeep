@@ -23,7 +23,11 @@ When `roles` are specified (see body params below) then requestor must be additi
 - **orgId** _(string)_ — the ID of the org to add member to (required)
 - **userId** _(string)_ — the ID of the user to add as member (required)
 - **roles** _(Array\<string>)_ — array of roles to assign the user with (optional)
-- **permissions** _(Array\<string>)_ — array of permissions to assign the user with (optional)
+  - **roles[].id** _(string)_ — role ID (required)
+  - **roles[].resourceId** _(string)_ — optional resource ID to limit the scope of the role assignment (optional)
+- **permissions** _(Array\<Object>)_ — array of permissions to assign the user with (optional)
+  - **permissions[].id** _(string)_ — permission ID (required)
+  - **permissions[].resourceId** _(string)_ — optional resource ID to limit the scope of the permission assignment (optional)
 - **expiresInSeconds** _(number)_ — number of seconds after which the user membership will automatically expire (optional; implies _forever_ if not specified)
 
 ---
@@ -50,7 +54,11 @@ Authorization: `Bearer ${authToken}`
 {
   "orgId": "333a291e810c19729de902ee",
   "userId": "507f191e810c19729de860ea",
-  "permissions": ["402f191e901c19729de720ba"]
+  "permissions": [
+    {
+      "id": "402f191e901c19729de720ba"
+    }
+  ]
 }
 ```
 
