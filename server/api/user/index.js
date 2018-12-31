@@ -13,6 +13,8 @@ import setUserPicture from './setPicture';
 import deleteUserPicture from './deletePicture';
 import forgotPassword from './forgotPassword';
 import resetPassword from './resetPassword';
+import inviteUser from './invite';
+import joinUser from './join';
 
 const router = Router();
 
@@ -30,5 +32,7 @@ router.post('/v1/user.setPicture', setUserPicture);
 router.post('/v1/user.deletePicture', deleteUserPicture);
 router.post('/v1/user.forgotPassword', forgotPassword);
 router.post('/v1/user.resetPassword', resetPassword);
+router.post('/v1/user.invite', inviteUser);
+router.post('/v1/user.join', joinUser);
 
 export default router;

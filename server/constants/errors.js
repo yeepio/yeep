@@ -200,3 +200,10 @@ export class TokenNotFoundError extends Error {
     this.code = 10027;
   }
 }
+
+export class OrgMembershipAlreadyExists extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10028;
+  }
+}
