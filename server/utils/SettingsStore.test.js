@@ -12,6 +12,7 @@ describe('SettingsStore', () => {
   beforeAll(async () => {
     db = await mongoose.createConnection(config.mongo.uri, {
       useNewUrlParser: true,
+      useFindAndModify: false,
       autoIndex: false,
       bufferCommands: false,
     });

@@ -112,6 +112,7 @@ server.setup = async (config) => {
   // connect to mongodb + register models
   const db = await mongoose.createConnection(config.mongo.uri, {
     useNewUrlParser: true,
+    useFindAndModify: false,
     autoIndex: false,
     bufferCommands: false,
     ignoreUndefined: true,
