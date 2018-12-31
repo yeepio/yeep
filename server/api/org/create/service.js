@@ -2,17 +2,20 @@ import { ObjectId } from 'mongodb';
 import memoize from 'lodash/memoize';
 import { DuplicateOrgError } from '../../../constants/errors';
 
-const getAdminRole = memoize((db) => {
-  const RoleModel = db.model('Role');
-  return RoleModel.findOne(
-    {
-      name: 'admin',
-    },
-    {
-      _id: 1,
-    }
-  );
-}, () => 'role');
+const getAdminRole = memoize(
+  (db) => {
+    const RoleModel = db.model('Role');
+    return RoleModel.findOne(
+      {
+        name: 'admin',
+      },
+      {
+        _id: 1,
+      }
+    );
+  },
+  () => 'role'
+);
 
 async function createOrg(db, { name, slug, adminId }) {
   const OrgModel = db.model('Org');
