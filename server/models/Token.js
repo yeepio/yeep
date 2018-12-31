@@ -38,7 +38,7 @@ const tokenSchema = new Schema(
     strict: true, // reject values not specified in schema
     validateBeforeSave: true,
     versionKey: '_v',
-    timestamps: false,
+    timestamps: true,
   }
 );
 
