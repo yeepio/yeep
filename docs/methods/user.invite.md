@@ -20,8 +20,12 @@ Requestor must be authenticated and assigned with the `yeep.user.write` permissi
 
 - **userKey** _(string)_ — username or email address of the invitee (required)
 - **orgId** _(string)_ — the ID of the org that the invitee would join (required)
-- **roles** _(Array\<string>)_ — array of roles to assign the invitee with (optional)
-- **permissions** _(Array\<string>)_ — array of permissions to assign the invitee with (optional)
+- **roles** _(Array\<string>)_ — array of roles to assign the user with (optional)
+  - **roles[].id** _(string)_ — role ID (required)
+  - **roles[].resourceId** _(string)_ — optional resource ID to limit the scope of the role assignment (optional)
+- **permissions** _(Array\<Object>)_ — array of permissions to assign the user with (optional)
+  - **permissions[].id** _(string)_ — permission ID (required)
+  - **permissions[].resourceId** _(string)_ — optional resource ID to limit the scope of the permission assignment (optional)
 - **tokenExpiresInSeconds** _(number)_ — number of seconds after which the _invitation_ token will expire (optional; defaults to 604800 seconds, i.e. 1 week)
 
 ---
@@ -48,7 +52,11 @@ Authorization: `Bearer ${authToken}`
 {
   "userKey": "coyote@acme.com",
   "orgId": "333a291e810c19729de902ee",
-  "permissions": ["402f191e901c19729de720ba"]
+  "permissions": [
+    {
+      "id": "402f191e901c19729de720ba"
+    }
+  ]
 }
 ```
 
