@@ -5,9 +5,9 @@ import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import { TokenNotFoundError, AuthorizationError } from '../../../constants/errors';
 import { visitSession } from '../../../middleware/auth';
-import joinOrg from './service';
 import createUser from '../create/service';
 import getUserInfo from '../info/service';
+import addMemberToOrg from '../../org/addMember/service';
 
 const validationSchema = {
   body: {
@@ -123,10 +123,11 @@ const isUserParamsRequired = async ({ request }, next) => {
 
 async function handler({ request, response, db, bus }) {
   const { invitationToken } = request.session;
-  let user;
+  const TokenModel = db.model('Token');
 
-  // create user if unspecified
+  let user;
   if (!request.session.user) {
+    // create user if unspecified
     user = await createUser(db, {
       username: request.body.username,
       password: request.body.password,
@@ -140,12 +141,27 @@ async function handler({ request, response, db, bus }) {
       ],
     });
   } else {
+    // retrieve user info
     user = await getUserInfo(db, { id: request.session.user.id });
   }
 
-  await joinOrg(db, bus, {
+  // create org membership
+  await addMemberToOrg(db, {
+    orgId: invitationToken.payload.get('orgId'),
     userId: user.id,
-    token: request.body.token,
+    permissions: invitationToken.payload.get('permissions'),
+    roles: invitationToken.payload.get('roles'),
+  });
+
+  // redeem token, i.e. delete from db
+  await TokenModel.deleteOne({
+    _id: invitationToken._id,
+  });
+
+  // emit event
+  bus.emit('join_user', {
+    userId: user.id,
+    orgId: invitationToken.payload.get('orgId'),
   });
 
   response.status = 200; // OK
