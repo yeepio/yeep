@@ -132,6 +132,42 @@ const isUserKeyValid = async ({ request, settings }, next) => {
 };
 
 const isUserAuthorized = async ({ request }, next) => {
+  if (request.body.permissions.length !== 0) {
+    const hasPermission = [request.body.orgId, null].some(
+      (orgId) =>
+        findUserPermissionIndex(request.session.user.permissions, {
+          name: 'yeep.permission.assignment.write',
+          orgId,
+        }) !== -1
+    );
+
+    if (!hasPermission) {
+      throw new AuthorizationError(
+        `User "${
+          request.session.user.username
+        }" does not have sufficient permissions to access this resource`
+      );
+    }
+  }
+
+  if (request.body.roles.length !== 0) {
+    const hasPermission = [request.body.orgId, null].some(
+      (orgId) =>
+        findUserPermissionIndex(request.session.user.permissions, {
+          name: 'yeep.role.assignment.write',
+          orgId,
+        }) !== -1
+    );
+
+    if (!hasPermission) {
+      throw new AuthorizationError(
+        `User "${
+          request.session.user.username
+        }" does not have sufficient permissions to access this resource`
+      );
+    }
+  }
+
   const hasPermission = [request.body.orgId, null].some(
     (orgId) =>
       findUserPermissionIndex(request.session.user.permissions, {

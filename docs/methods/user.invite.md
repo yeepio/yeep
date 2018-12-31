@@ -14,6 +14,10 @@ Invitee must explicitly accept the invitation. If invitee is already a yeep user
 
 Requestor must be authenticated and assigned with the `yeep.user.write` permission in the specified org scope (see body params below) or the _global_ scope.
 
+When `permissions` are specified (see body params below) then requestor must be additionaly assigned with the `yeep.permission.assignment.write` permission for the specified org scope (see body params below) or the _global_ scope.
+
+When `roles` are specified (see body params below) then requestor must be additionaly assigned with the `yeep.role.assignment.write` permission for the specified org scope (see body params below) or the _global_ scope.
+
 ## Parameters
 
 ### Body
