@@ -4,11 +4,7 @@ import compose from 'koa-compose';
 import isemail from 'isemail';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
-import inviteUser, {
-  defaultTokenExpiresInSeconds,
-  defaultRoles,
-  defaultPermissions,
-} from './service';
+import inviteUser, { defaultTokenExpiresInSeconds } from './service';
 import {
   findUserPermissionIndex,
   visitUserPermissions,
@@ -39,28 +35,58 @@ const validationSchema = {
       .required(),
     permissions: Joi.array()
       .items(
-        Joi.string()
-          .length(24)
-          .hex()
+        Joi.object()
+          .unknown(false)
+          .keys({
+            id: Joi.string()
+              .length(24)
+              .hex()
+              .required(),
+            resourceId: Joi.alternatives()
+              .try(
+                Joi.number(),
+                Joi.string()
+                  .trim()
+                  .min(2)
+                  .max(140)
+              )
+              .optional(),
+          })
+          .required()
       )
       .min(1)
       .max(100)
       .single()
       .unique()
       .optional()
-      .default(defaultPermissions),
+      .default([]),
     roles: Joi.array()
       .items(
-        Joi.string()
-          .length(24)
-          .hex()
+        Joi.object()
+          .unknown(false)
+          .keys({
+            id: Joi.string()
+              .length(24)
+              .hex()
+              .required(),
+            resourceId: Joi.alternatives()
+              .try(
+                Joi.number(),
+                Joi.string()
+                  .trim()
+                  .min(2)
+                  .max(140)
+              )
+              .optional(),
+          })
+          .required()
       )
       .min(1)
       .max(100)
       .single()
       .unique()
       .optional()
-      .default(defaultRoles),
+      .default([]),
     tokenExpiresInSeconds: Joi.number()
       .integer()
       .min(0)

@@ -165,7 +165,11 @@ describe('api/v1/user.invite', () => {
         .send({
           userKey: 'beep-beep@acme.com',
           orgId: org.id,
-          permissions: ['507f1f77bcf86cd799439012'], // some random ID
+          permissions: [
+            {
+              id: '507f1f77bcf86cd799439012', // some random ID
+            },
+          ],
         });
 
       expect(res.status).toBe(200);
@@ -190,7 +194,11 @@ describe('api/v1/user.invite', () => {
         .send({
           userKey: 'beep-beep@acme.com',
           orgId: org.id,
-          permissions: [permission._id.toHexString()],
+          permissions: [
+            {
+              id: permission._id.toHexString(),
+            },
+          ],
         });
 
       expect(res.status).toBe(200);
@@ -210,7 +218,11 @@ describe('api/v1/user.invite', () => {
         .send({
           userKey: 'beep-beep@acme.com',
           orgId: org.id,
-          roles: ['507f1f77bcf86cd799439012'], // some random ID
+          roles: [
+            {
+              id: '507f1f77bcf86cd799439012', // some random ID
+            },
+          ],
         });
 
       expect(res.status).toBe(200);
@@ -235,7 +247,11 @@ describe('api/v1/user.invite', () => {
         .send({
           userKey: 'beep-beep@acme.com',
           orgId: org.id,
-          roles: [role._id.toHexString()],
+          roles: [
+            {
+              id: role._id.toHexString(),
+            },
+          ],
         });
 
       expect(res.status).toBe(200);

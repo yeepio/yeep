@@ -12,8 +12,6 @@ import {
   InvalidRoleAssignmentError,
 } from '../../../constants/errors';
 
-export const defaultPermissions = [];
-export const defaultRoles = [];
 export const defaultTokenExpiresInSeconds = 7 * 24 * 60 * 60; // i.e. 1 week
 
 const inviteUser = async (
@@ -21,8 +19,8 @@ const inviteUser = async (
   bus,
   {
     orgId,
-    permissions = defaultPermissions,
-    roles = defaultRoles,
+    permissions = [],
+    roles = [],
     tokenExpiresInSeconds = defaultTokenExpiresInSeconds,
     username, // invitee username
     emailAddress, // invitee email address
@@ -51,13 +49,13 @@ const inviteUser = async (
 
   // ensure permissions exist
   const permissionRecords = await PermissionModel.find({
-    _id: { $in: permissions.map((permissionId) => ObjectId(permissionId)) },
+    _id: { $in: permissions.map((e) => ObjectId(e.id)) },
   });
 
   if (permissionRecords.length !== permissions.length) {
     const diffPermissions = differenceWith(
-      permissions.map((permissionId) => ObjectId(permissionId)),
-      permissionRecords.map((permission) => permission._id),
+      permissions.map((e) => ObjectId(e.id)),
+      permissionRecords.map((e) => e._id),
       (a, b) => a.equals(b)
     );
 
@@ -77,13 +75,13 @@ const inviteUser = async (
 
   // ensure roles exist
   const roleRecords = await RoleModel.find({
-    _id: { $in: roles.map((roleId) => ObjectId(roleId)) },
+    _id: { $in: roles.map((e) => ObjectId(e.id)) },
   });
 
   if (roleRecords.length !== roles.length) {
     const diffPermissions = differenceWith(
-      roles.map((roleId) => ObjectId(roleId)),
-      roleRecords.map((role) => role._id),
+      roles.map((e) => ObjectId(e.id)),
+      roleRecords.map((e) => e._id),
       (a, b) => a.equals(b)
     );
 
