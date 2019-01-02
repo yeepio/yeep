@@ -18,9 +18,4 @@ module.exports = {
     type: 'fs',
     uploadDir: 'uploads/',
   },
-  mail: {
-    transport: 'debug',
-    from: 'admin@yeep.com',
-    templatePath: 'server/views/',
-  },
 };

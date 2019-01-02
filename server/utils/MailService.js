@@ -9,23 +9,13 @@ class MailService extends EventEmitter {
   constructor(props) {
     super();
 
-    if (!isPlainObject(props)) {
-      throw new TypeError(
-        `Invalid "props" argument; expected plain object, received ${typeOf(props)}`
-      );
-    }
-
     const {
-      transport,
+      transport = 'debug',
       from = 'admin@yeep.com',
       templatePath = path.resolve(__dirname, '../views/'),
-      options,
+      options = {},
     } = props;
     const { auth, service, host } = options;
-
-    if (from && !isString(from)) {
-      throw new Error(`Invalid from prop; expected string, received ${typeOf(from)}`);
-    }
 
     if (transport === 'debug') {
       this.transport = {
