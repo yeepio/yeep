@@ -19,21 +19,8 @@ module.exports = {
     uploadDir: 'uploads/',
   },
   mail: {
-    transport: 'smtp',
+    transport: 'debug',
     from: 'admin@yeep.com',
-    // from: "'Custom Name' <myemail@address.com>",
-    templatePath: 'server/views/passwordResetInit.html',
-    options: {
-      // service: 'Mailgun',
-      // service: 'gmail',
-      host: 'smtp.ethereal.email',
-      port: 587,
-      // host: 'YOUR-SES-SERVER-NAME',
-      // port: 465,
-      auth: {
-        user: process.env.MAIL_AUTH_USERNAME,
-        pass: process.env.MAIL_AUTH_PASSWORD,
-      },
-    },
+    templatePath: 'server/views/',
   },
 };

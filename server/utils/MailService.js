@@ -1,15 +1,9 @@
-// import fs from 'fs';
 import nodemailer from 'nodemailer';
-// import { promisify } from 'util';
+import path from 'path';
 import EventEmitter from 'events';
 import isString from 'lodash/isString';
 import isPlainObject from 'lodash/isPlainObject';
 import typeOf from 'typeof';
-
-// const writeFileAsync = promisify(fs.writeFile);
-// const readFileAsync = promisify(fs.readFile);
-// const unlinkAsync = promisify(fs.unlink);
-// const accessAsync = promisify(fs.access);
 
 class MailService extends EventEmitter {
   constructor(props) {
@@ -21,35 +15,16 @@ class MailService extends EventEmitter {
       );
     }
 
-    const { transport, from, templatePath, options } = props;
+    const {
+      transport,
+      from = 'admin@yeep.com',
+      templatePath = path.resolve(__dirname, '../views/'),
+      options,
+    } = props;
     const { auth, service, host } = options;
-
-    if (!isPlainObject(auth)) {
-      throw new TypeError(
-        `Invalid "auth" argument; expected plain object, received ${typeOf(auth)}`
-      );
-    }
-
-    if (service && !isString(service)) {
-      throw new Error(`Invalid service prop; expected string, received ${typeOf(service)}`);
-    }
-
-    if (host && !isString(host)) {
-      throw new Error(`Invalid host prop; expected string, received ${typeOf(host)}`);
-    }
-
-    if (!host && !service) {
-      throw new Error(`Expecting service or a host to be defined in the configuration`);
-    }
 
     if (from && !isString(from)) {
       throw new Error(`Invalid from prop; expected string, received ${typeOf(from)}`);
-    }
-
-    if (templatePath && !isString(templatePath)) {
-      throw new Error(
-        `Invalid templatePath prop; expected string, received ${typeOf(templatePath)}`
-      );
     }
 
     if (transport === 'debug') {
@@ -70,7 +45,31 @@ class MailService extends EventEmitter {
           });
         },
       };
+    } else if (transport === 'sendgrid') {
+      const sgTransport = require('nodemailer-sendgrid-transport');
+      this.transport = nodemailer.createTransport(sgTransport(options));
+    } else if (transport === 'ses') {
+      const aws = require('aws-sdk');
+      this.transport = nodemailer.createTransport({
+        SES: new aws.SES(options),
+      });
+    } else if (transport === 'mailgun') {
+      if (!isPlainObject(auth)) {
+        throw new TypeError(
+          `Invalid "auth" argument; expected plain object, received ${typeOf(auth)}`
+        );
+      }
+      const mgTransport = require('nodemailer-mailgun-transport');
+      this.transport = nodemailer.createTransport(mgTransport(options));
     } else {
+      if (host && !isString(host)) {
+        throw new Error(`Invalid host prop; expected string, received ${typeOf(host)}`);
+      }
+      if (!isPlainObject(auth)) {
+        throw new TypeError(
+          `Invalid "auth" argument; expected plain object, received ${typeOf(auth)}`
+        );
+      }
       // TODO: create reusable transport method (opens pool of SMTP connections)
       this.transport = nodemailer.createTransport(options);
     }
@@ -90,12 +89,11 @@ class MailService extends EventEmitter {
     const mailOptions = {
       from,
       to: message.to,
-      subject: message.subject || 'Hello ✔',
-      text: message.text || 'Hello world ✔',
-      html: message.html || '<b>Hello world ✔</b>',
+      subject: message.subject,
+      text: message.text,
+      html: message.html,
     };
-
-    return await transport.sendMail(mailOptions);
+    transport.sendMail(mailOptions, (err, res) => console.log(err, res));
   }
 
   teardown() {
