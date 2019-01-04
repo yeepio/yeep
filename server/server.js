@@ -89,7 +89,7 @@ api.get('*', async (ctx) => {
 });
 
 server.teardown = async () => {
-  const { db, settings, bus } = app.context;
+  const { db, settings, bus, mail } = app.context;
 
   // stop next app
   if (process.env.NODE_ENV !== 'test') {
@@ -101,6 +101,8 @@ server.teardown = async () => {
 
   // close setting store
   await settings.teardown();
+
+  mail.teardown();
 
   // disconnect from mongodb
   await db.close();

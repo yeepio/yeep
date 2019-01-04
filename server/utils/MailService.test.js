@@ -1,25 +1,28 @@
 /* eslint-env jest */
 import MailService from './MailService';
-import config from '../../yeep.config';
 
 describe('MailService', () => {
   let mailService;
 
   beforeAll(async () => {
     mailService = new MailService({
-      ...config.mail,
+      transport: 'debug',
+      from: 'test@yeep.com',
     });
   });
 
   afterAll(async () => {
-    mailService.disconnect();
+    mailService.teardown();
   });
 
   describe('sendMail', () => {
     test('sends email', async () => {
-      await mailService.sendMail({
-        to: 'spidey_nr@hotmail.com',
-      });
+      expect.assertions(1);
+      return expect(
+        mailService.sendMail({
+          to: 'test@hotmail.com',
+        })
+      ).resolves.toBe(undefined);
     });
   });
 });
