@@ -83,7 +83,7 @@ class MailService extends EventEmitter {
       text: message.text,
       html: message.html,
     };
-    transport.sendMail(mailOptions, (err, res) => console.log(err, res));
+    return await transport.sendMail(mailOptions);
   }
 
   teardown() {

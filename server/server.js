@@ -84,13 +84,15 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 server.teardown = async () => {
-  const { db, settings, bus } = app.context;
+  const { db, settings, bus, mail } = app.context;
 
   // remove event handlers
   bus.removeAllListeners();
 
   // close setting store
   await settings.teardown();
+
+  mail.teardown();
 
   // disconnect from mongodb
   await db.close();

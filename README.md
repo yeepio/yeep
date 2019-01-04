@@ -66,7 +66,7 @@ An example object of the mail configuration as needed in the yeep.config.js file
 
 For development purposes we have included a `debug` option where all the emails will be printed to the console.
 
-An example configuration would be 
+An example configuration would be
 ```js
 {
   transport: 'debug',
@@ -85,8 +85,6 @@ An example configuration for SMTP usage
   options: {
     host: 'smtp.ethereal.email',
     port: 587,
-    secretAccessKey: 'Your-Access-secret-key',
-    region: 'your-region',
     auth: {
       user: process.env.MAIL_AUTH_USERNAME,
       pass: process.env.MAIL_AUTH_PASSWORD,
