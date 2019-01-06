@@ -22,7 +22,7 @@ describe('MailService', () => {
         mailService.sendMail({
           to: 'test@hotmail.com',
         })
-      ).resolves.toBe(undefined);
+      ).resolves.not.toThrow();
     });
   });
 });
