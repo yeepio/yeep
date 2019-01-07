@@ -18,4 +18,9 @@ module.exports = {
     type: 'fs',
     uploadDir: 'uploads/',
   },
+  mail: {
+    templates: {
+      passwordReset: path.resolve(__dirname, 'server/views/passwordResetInit.html'),
+    },
+  },
 };
