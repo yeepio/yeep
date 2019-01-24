@@ -8,21 +8,17 @@
   ],
   "root": true,
   "parserOptions": {
-    "ecmaVersion": 2017,
+    "ecmaVersion": 2018,
     "sourceType": "module",
     "ecmaFeatures": {
-      "jsx": true,
-      "experimentalObjectRestSpread": true
+      "jsx": true
     }
   },
   "env": {
     "es6": true,
     "node": true
   },
-  "plugins": [
-    "import",
-    "prettier"
-  ],
+  "plugins": ["import", "prettier"],
   "settings": {
     "import/resolver": {
       "node": {
@@ -31,9 +27,12 @@
     }
   },
   "rules": {
-    "prettier/prettier": ["error", {
-      "usePrettierrc": true
-    }],
+    "prettier/prettier": [
+      "error",
+      {
+        "usePrettierrc": true
+      }
+    ],
     "no-console": 0
   }
 }
