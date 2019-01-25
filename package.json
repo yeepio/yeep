@@ -5,14 +5,15 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "node --require dotenv/config dist/index.js",
+    "dev:server": "nodemon server/index.js --exec 'node --require @babel/register'",
+    "build:server": "rollup -c",
     "dev:admin": "webpack-dev-server --config=admin_ui/webpack.config.js --env.development",
     "build:admin": "webpack --progress --colors --config=admin_ui/webpack.config.js --env.production",
-    "dev:server": "nodemon server/index.js --exec 'node --require @babel/register'",
+    "build": "npm run build:server && npm run build:admin",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:admin\"",
     "lint": "eslint .",
     "clean": "rimraf dist",
     "prebuild": "rimraf ./dist",
-    "build": "rollup -c",
-    "postbuild": "next build dist/admin_ui",
     "test": "PORT=5002 jest --config=config/jest.json --runInBand",
     "coverage": "jest --config=config/jest.json --coverage",
     "prettier-fix": "prettier --write --config .prettierrc '**/*.js'"
