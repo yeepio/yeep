@@ -98,9 +98,14 @@
           "type": "string",
           "format": "email"
         },
-        "templatePath": {
-          "type": "string",
-          "format": "uri"
+        "templates": {
+          "type": "object",
+          "required": ["passwordReset"],
+          "properties": {
+            "passwordReset": {
+              "type": "string"
+            }
+          }
         }
       },
       "allOf": [
