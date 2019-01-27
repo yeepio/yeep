@@ -6,6 +6,8 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const SizePlugin = require('size-plugin');
+const PurgecssPlugin = require('purgecss-webpack-plugin');
+const glob = require('glob');
 
 module.exports = (env) => ({
   entry: [
@@ -187,6 +189,11 @@ module.exports = (env) => ({
       // both options are optional
       filename: 'style.[contenthash:8].css',
     }),
+    // Remove unused CSS in production mode
+    env.production &&
+      new PurgecssPlugin({
+        paths: glob.sync('admin_ui/!(theme)/*', { nodir: true }),
+      }),
     // Print the gzipped sizes of assets
     new SizePlugin(),
   ].filter(Boolean),
