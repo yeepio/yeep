@@ -3,37 +3,29 @@
     "eslint:recommended",
     "plugin:import/errors",
     "plugin:import/warnings",
+    "plugin:jsx-a11y/recommended",
+    "plugin:react/recommended",
     "prettier",
     "prettier/react"
   ],
   "root": true,
   "parserOptions": {
-    "ecmaVersion": 2017,
+    "ecmaVersion": 2018,
     "sourceType": "module",
-    "ecmaFeatures": {
-      "jsx": true,
-      "experimentalObjectRestSpread": true
-    }
+    "allowImportExportEverywhere": true
   },
   "env": {
+    "browser": true,
     "es6": true,
     "node": true
   },
-  "plugins": [
-    "import",
-    "prettier"
-  ],
+  "plugins": ["import", "jsx-a11y", "react", "prettier"],
   "settings": {
-    "import/resolver": {
-      "node": {
-        "extensions": [".js", ".jsx", ".json"]
-      }
+    "react": {
+      "version": "detect"
     }
   },
   "rules": {
-    "prettier/prettier": ["error", {
-      "usePrettierrc": true
-    }],
     "no-console": 0
   }
 }
