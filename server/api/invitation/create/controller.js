@@ -15,7 +15,7 @@ import { AuthorizationError } from '../../../constants/errors';
 
 const validationSchema = {
   body: {
-    userKey: Joi.alternatives().try([
+    user: Joi.alternatives().try([
       Joi.string()
         .lowercase()
         .trim()
@@ -29,7 +29,7 @@ const validationSchema = {
         .max(100)
         .required(),
     ]),
-    orgId: Joi.string()
+    org: Joi.string()
       .length(24)
       .hex()
       .required(),
@@ -96,32 +96,31 @@ const validationSchema = {
   },
 };
 
-const visitUserKeyType = async ({ request }, next) => {
-  const { userKey } = request.body;
-  const isUserKeyEmail = isemail.validate(userKey);
+const visitUserPropType = async ({ request }, next) => {
+  const { user } = request.body;
+
+  // check if user prop is email
+  const isUserPropEmail = isemail.validate(user);
 
   // visit session object
   request.session = {
     ...request.session,
-    isUserKeyEmail,
+    isUserPropEmail,
   };
 
   await next();
 };
 
-const isUserKeyValid = async ({ request, settings }, next) => {
+const isUserPropValid = async ({ request, settings }, next) => {
   const isUsernameEnabled = await settings.get('isUsernameEnabled');
-  const { userKey } = request.body;
-
-  // check if userKey is email formatted
-  const isUserKeyEmail = isemail.validate(userKey);
+  const { isUserPropEmail } = request.session;
 
   // ensure userKey is email formatted - OR - username is enabled
-  if (!isUserKeyEmail && !isUsernameEnabled) {
+  if (!isUserPropEmail && !isUsernameEnabled) {
     const boom = Boom.badRequest('Invalid request body');
     boom.output.payload.details = [
       {
-        path: ['userKey'],
+        path: ['user'],
         type: 'string.email',
       },
     ];
@@ -133,7 +132,7 @@ const isUserKeyValid = async ({ request, settings }, next) => {
 
 const isUserAuthorized = async ({ request }, next) => {
   if (request.body.permissions.length !== 0) {
-    const hasPermission = [request.body.orgId, null].some(
+    const hasPermission = [request.body.org, null].some(
       (orgId) =>
         findUserPermissionIndex(request.session.user.permissions, {
           name: 'yeep.permission.assignment.write',
@@ -151,7 +150,7 @@ const isUserAuthorized = async ({ request }, next) => {
   }
 
   if (request.body.roles.length !== 0) {
-    const hasPermission = [request.body.orgId, null].some(
+    const hasPermission = [request.body.org, null].some(
       (orgId) =>
         findUserPermissionIndex(request.session.user.permissions, {
           name: 'yeep.role.assignment.write',
@@ -168,7 +167,7 @@ const isUserAuthorized = async ({ request }, next) => {
     }
   }
 
-  const hasPermission = [request.body.orgId, null].some(
+  const hasPermission = [request.body.org, null].some(
     (orgId) =>
       findUserPermissionIndex(request.session.user.permissions, {
         name: 'yeep.user.write',
@@ -188,28 +187,27 @@ const isUserAuthorized = async ({ request }, next) => {
 };
 
 async function handler({ request, response, db, bus }) {
-  const { tokenExpiresInSeconds, orgId, permissions, roles } = request.body;
-  const { user, isUserKeyEmail } = request.session;
+  const { org, user, permissions, roles, tokenExpiresInSeconds } = request.body;
+  const { user: inviter, isUserPropEmail } = request.session;
   const UserModel = db.model('User');
 
   // initiate password reset process
   const isUserInvited = await inviteUser(db, bus, {
-    orgId,
+    org,
     permissions,
     roles,
     tokenExpiresInSeconds,
-    inviterId: user.id,
-    inviterUsername: user.username,
-    inviterFullName: user.fullName,
-    inviterPicture: user.picture,
-    inviterEmailAddress: UserModel.getPrimaryEmailAddress(user.emails),
-    inviter: request.session.user,
-    ...(isUserKeyEmail
+    inviterId: inviter.id,
+    inviterUsername: inviter.username,
+    inviterFullName: inviter.fullName,
+    inviterPicture: inviter.picture,
+    inviterEmailAddress: UserModel.getPrimaryEmailAddress(inviter.emails),
+    ...(isUserPropEmail
       ? {
-          emailAddress: request.body.userKey,
+          emailAddress: user,
         }
       : {
-          username: request.body.userKey,
+          username: user,
         }),
   });
 
@@ -225,8 +223,8 @@ export default compose([
   visitSession(),
   isUserAuthenticated(),
   validateRequest(validationSchema),
-  visitUserKeyType,
-  isUserKeyValid,
+  visitUserPropType,
+  isUserPropValid,
   visitUserPermissions(),
   isUserAuthorized,
   handler,

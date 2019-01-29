@@ -4,16 +4,16 @@ import isWithinRange from 'date-fns/is_within_range';
 import addSeconds from 'date-fns/add_seconds';
 import server from '../../../server';
 import config from '../../../../yeep.config';
-import deleteUser from '../delete/service';
-import createUser from '../create/service';
-import deletePermissionAssignment from '../revokePermission/service';
+import deleteUser from '../../user/delete/service';
+import createUser from '../../user/create/service';
+import deletePermissionAssignment from '../../user/revokePermission/service';
 import destroySessionToken from '../../session/destroy/service';
 import createSessionToken from '../../session/create/service';
-import createPermissionAssignment from '../assignPermission/service';
+import createPermissionAssignment from '../../user/assignPermission/service';
 import createOrg from '../../org/create/service';
 import deleteOrg from '../../org/delete/service';
 
-describe('api/v1/user.invite', () => {
+describe('api/v1/invitation.create', () => {
   let ctx;
 
   beforeAll(async () => {
@@ -28,7 +28,7 @@ describe('api/v1/user.invite', () => {
   describe('unauthorized user', () => {
     test('returns error pretending resource does not exist', async () => {
       const res = await request(server)
-        .post('/api/v1/user.invite')
+        .post('/api/v1/invitation.create')
         .send();
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -97,11 +97,11 @@ describe('api/v1/user.invite', () => {
 
       const startDate = new Date();
       const res = await request(server)
-        .post('/api/v1/user.invite')
+        .post('/api/v1/invitation.create')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userKey: 'beep-beep@acme.com',
-          orgId: org.id,
+          user: 'beep-beep@acme.com',
+          org: org.id,
           tokenExpiresInSeconds: 4 * 60 * 60, // i.e. 4 hours
         });
       const endDate = new Date();
@@ -141,11 +141,11 @@ describe('api/v1/user.invite', () => {
 
     test('returns error when `orgId` is unknown', async () => {
       const res = await request(server)
-        .post('/api/v1/user.invite')
+        .post('/api/v1/invitation.create')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userKey: 'beep-beep@acme.com',
-          orgId: '507f1f77bcf86cd799439012', // i.e. some random ID
+          user: 'beep-beep@acme.com',
+          org: '507f1f77bcf86cd799439012', // i.e. some random ID
         });
 
       expect(res.status).toBe(200);
@@ -160,11 +160,11 @@ describe('api/v1/user.invite', () => {
 
     test('returns error when `permissions` array contains unknown permissionId', async () => {
       const res = await request(server)
-        .post('/api/v1/user.invite')
+        .post('/api/v1/invitation.create')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userKey: 'beep-beep@acme.com',
-          orgId: org.id,
+          user: 'beep-beep@acme.com',
+          org: org.id,
           permissions: [
             {
               id: '507f1f77bcf86cd799439012', // some random ID
@@ -189,11 +189,11 @@ describe('api/v1/user.invite', () => {
       });
 
       const res = await request(server)
-        .post('/api/v1/user.invite')
+        .post('/api/v1/invitation.create')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userKey: 'beep-beep@acme.com',
-          orgId: org.id,
+          user: 'beep-beep@acme.com',
+          org: org.id,
           permissions: [
             {
               id: permission._id.toHexString(),
@@ -213,11 +213,11 @@ describe('api/v1/user.invite', () => {
 
     test('returns error when `roles` array contains unknown roleId', async () => {
       const res = await request(server)
-        .post('/api/v1/user.invite')
+        .post('/api/v1/invitation.create')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userKey: 'beep-beep@acme.com',
-          orgId: org.id,
+          user: 'beep-beep@acme.com',
+          org: org.id,
           roles: [
             {
               id: '507f1f77bcf86cd799439012', // some random ID
@@ -242,11 +242,11 @@ describe('api/v1/user.invite', () => {
       });
 
       const res = await request(server)
-        .post('/api/v1/user.invite')
+        .post('/api/v1/invitation.create')
         .set('Authorization', `Bearer ${session.token}`)
         .send({
-          userKey: 'beep-beep@acme.com',
-          orgId: org.id,
+          user: 'beep-beep@acme.com',
+          org: org.id,
           roles: [
             {
               id: role._id.toHexString(),
@@ -275,11 +275,11 @@ describe('api/v1/user.invite', () => {
 
       test('returns error when userKey is username', async () => {
         const res = await request(server)
-          .post('/api/v1/user.invite')
+          .post('/api/v1/invitation.create')
           .set('Authorization', `Bearer ${session.token}`)
           .send({
-            userKey: 'runner',
-            orgId: org.id,
+            user: 'runner',
+            org: org.id,
           });
 
         expect(res.status).toBe(200);
@@ -291,7 +291,7 @@ describe('api/v1/user.invite', () => {
             details: expect.any(Array),
           },
         });
-        expect(res.body.error.details[0].path).toEqual(['userKey']);
+        expect(res.body.error.details[0].path).toEqual(['user']);
         expect(res.body.error.details[0].type).toBe('string.email');
       });
     });

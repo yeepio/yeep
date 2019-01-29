@@ -18,7 +18,7 @@ const inviteUser = async (
   db,
   bus,
   {
-    orgId,
+    org,
     permissions = [],
     roles = [],
     tokenExpiresInSeconds = defaultTokenExpiresInSeconds,
@@ -38,13 +38,13 @@ const inviteUser = async (
   const TokenModel = db.model('Token');
 
   // acquire org from db
-  const org = await OrgModel.findOne({
-    _id: ObjectId(orgId),
+  const orgRecord = await OrgModel.findOne({
+    _id: ObjectId(org),
   });
 
   // ensure org exists
-  if (!org) {
-    throw new OrgNotFoundError(`Org "${orgId}" does not exist`);
+  if (!orgRecord) {
+    throw new OrgNotFoundError(`Org "${org}" does not exist`);
   }
 
   // ensure permissions exist
@@ -66,7 +66,7 @@ const inviteUser = async (
 
   // ensure permissions scope matches org
   permissionRecords.forEach((permission) => {
-    if (!permission.scope || !permission.scope.equals(orgId)) {
+    if (!permission.scope || !permission.scope.equals(org)) {
       throw new InvalidPermissionAssignmentError(
         `Permission "${permission._id.toHexString()}" cannot be assigned to the designated org`
       );
@@ -90,7 +90,7 @@ const inviteUser = async (
 
   // ensure role scope matches org
   roleRecords.forEach((role) => {
-    if (!role.scope || !role.scope.equals(orgId)) {
+    if (!role.scope || !role.scope.equals(org)) {
       throw new InvalidRoleAssignmentError(
         `Role "${role._id.toHexString()}" cannot be assigned to the designated org`
       );
@@ -98,7 +98,7 @@ const inviteUser = async (
   });
 
   // attempt to acquire user from db
-  const user = await UserModel.findOne(
+  const userRecord = await UserModel.findOne(
     username
       ? { username }
       : {
@@ -107,37 +107,37 @@ const inviteUser = async (
   );
 
   // ensure user exists
-  if (!user && username) {
+  if (!userRecord && username) {
     throw new UserNotFoundError(`User "${username}" does not exist`);
   }
 
   // ensure user is active
-  if (user && !!user.deactivatedAt && isBefore(user.deactivatedAt, new Date())) {
+  if (userRecord && !!userRecord.deactivatedAt && isBefore(userRecord.deactivatedAt, new Date())) {
     throw new UserDeactivatedError(`User "${username || emailAddress}" is deactivated`);
   }
 
   // create invitation token
-  const token = await TokenModel.create({
+  const tokenRecord = await TokenModel.create({
     secret: TokenModel.generateSecret({ length: 24 }),
     type: 'INVITATION',
     payload: {
-      orgId,
+      org,
       roles,
       permissions,
-      emailAddress: user ? user.findPrimaryEmail() : emailAddress,
+      emailAddress: userRecord ? userRecord.findPrimaryEmail() : emailAddress,
     },
-    userId: user ? user._id : null,
+    userId: userRecord ? userRecord._id : null,
     expiresAt: addSeconds(new Date(), tokenExpiresInSeconds), // i.e. in 1 hour
   });
 
   // emit event
   bus.emit('invite_user', {
-    invitee: user
+    invitee: userRecord
       ? {
-          id: user._id.toHexString(),
-          fullName: user.fullName,
-          picture: user.picture,
-          emailAddress: user.findPrimaryEmail(),
+          id: userRecord._id.toHexString(),
+          fullName: userRecord.fullName,
+          picture: userRecord.picture,
+          emailAddress: userRecord.findPrimaryEmail(),
         }
       : {
           emailAddress,
@@ -150,11 +150,11 @@ const inviteUser = async (
       emailAddress: inviterEmailAddress,
     },
     token: {
-      id: token._id.toHexString(),
-      secret: token.secret,
-      type: token.type,
-      createdAt: token.createdAt,
-      expiresAt: token.expiresAt,
+      id: tokenRecord._id.toHexString(),
+      secret: tokenRecord.secret,
+      type: tokenRecord.type,
+      createdAt: tokenRecord.createdAt,
+      expiresAt: tokenRecord.expiresAt,
     },
   });
 
