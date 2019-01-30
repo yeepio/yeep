@@ -3,17 +3,17 @@ import request from 'supertest';
 import { event } from 'awaiting';
 import server from '../../../server';
 import config from '../../../../yeep.config';
-import createUser from '../create/service';
-import deleteUser from '../delete/service';
-import inviteUser from '../invite/service';
+import createUser from '../../user/create/service';
+import deleteUser from '../../user/delete/service';
+import createInvitation from '../create/service';
 import createOrg from '../../org/create/service';
-import createPermissionAssignment from '../assignPermission/service';
-import deletePermissionAssignment from '../revokePermission/service';
+import createPermissionAssignment from '../../user/assignPermission/service';
+import deletePermissionAssignment from '../../user/revokePermission/service';
 import deleteOrg from '../../org/delete/service';
 import createSessionToken from '../../session/create/service';
 import destroySessionToken from '../../session/destroy/service';
 
-describe('api/v1/user.join', () => {
+describe('api/v1/invitation.accept', () => {
   let ctx;
 
   beforeAll(async () => {
@@ -70,7 +70,7 @@ describe('api/v1/user.join', () => {
 
     test('returns error when token contains less than 6 characters', async () => {
       const res = await request(server)
-        .post('/api/v1/user.join')
+        .post('/api/v1/invitation.accept')
         .send({
           token: 'abcde',
         });
@@ -88,7 +88,7 @@ describe('api/v1/user.join', () => {
 
     test('returns error when token is unknown', async () => {
       const res = await request(server)
-        .post('/api/v1/user.join')
+        .post('/api/v1/invitation.accept')
         .send({
           token: 'abcdef',
         });
@@ -110,8 +110,8 @@ describe('api/v1/user.join', () => {
         const UserModel = ctx.db.model('User');
         const eventTrigger = event(ctx.bus, 'invite_user');
 
-        await inviteUser(ctx.db, ctx.bus, {
-          emailAddress: 'beep-beep@acme.com',
+        await createInvitation(ctx.db, ctx.bus, {
+          inviteeEmailAddress: 'beep-beep@acme.com',
           orgId: org.id,
           inviterId: wile.id,
           inviterUsername: wile.username,
@@ -126,7 +126,7 @@ describe('api/v1/user.join', () => {
 
       test('returns error when username is missing', async () => {
         const res = await request(server)
-          .post('/api/v1/user.join')
+          .post('/api/v1/invitation.accept')
           .send({
             token,
           });
@@ -146,7 +146,7 @@ describe('api/v1/user.join', () => {
 
       test('returns error when password is missing', async () => {
         const res = await request(server)
-          .post('/api/v1/user.join')
+          .post('/api/v1/invitation.accept')
           .send({
             token,
             username: 'runner',
@@ -167,7 +167,7 @@ describe('api/v1/user.join', () => {
 
       test('returns error when fullName is missing', async () => {
         const res = await request(server)
-          .post('/api/v1/user.join')
+          .post('/api/v1/invitation.accept')
           .send({
             token,
             username: 'runner',
@@ -192,7 +192,7 @@ describe('api/v1/user.join', () => {
         ctx.bus.once('join_user', f);
 
         const res = await request(server)
-          .post('/api/v1/user.join')
+          .post('/api/v1/invitation.accept')
           .send({
             token,
             username: 'runner',
@@ -214,8 +214,15 @@ describe('api/v1/user.join', () => {
         expect(isUserDeleted).toBe(true);
 
         expect(f).toHaveBeenCalledWith({
-          userId: expect.any(String),
-          orgId: expect.any(String),
+          user: expect.objectContaining({
+            id: expect.any(String),
+            username: expect.any(String),
+            fullName: expect.any(String),
+            emails: expect.any(Array),
+          }),
+          org: expect.objectContaining({
+            id: expect.any(String),
+          }),
         });
       });
     });
@@ -248,8 +255,8 @@ describe('api/v1/user.join', () => {
         const UserModel = ctx.db.model('User');
         const eventTrigger = event(ctx.bus, 'invite_user');
 
-        await inviteUser(ctx.db, ctx.bus, {
-          emailAddress: 'beep-beep@acme.com',
+        await createInvitation(ctx.db, ctx.bus, {
+          inviteeEmailAddress: 'beep-beep@acme.com',
           orgId: org.id,
           inviterId: wile.id,
           inviterUsername: wile.username,
@@ -262,7 +269,7 @@ describe('api/v1/user.join', () => {
         token = data[0].token.secret;
 
         const res = await request(server)
-          .post('/api/v1/user.join')
+          .post('/api/v1/invitation.accept')
           .send({
             token,
           });
@@ -333,8 +340,8 @@ describe('api/v1/user.join', () => {
       const UserModel = ctx.db.model('User');
       const eventTrigger = event(ctx.bus, 'invite_user');
 
-      await inviteUser(ctx.db, ctx.bus, {
-        emailAddress: 'beep-beep@acme.com',
+      await createInvitation(ctx.db, ctx.bus, {
+        inviteeEmailAddress: 'beep-beep@acme.com',
         orgId: org.id,
         inviterId: wile.id,
         inviterUsername: wile.username,
@@ -347,7 +354,7 @@ describe('api/v1/user.join', () => {
       const token = data[0].token.secret;
 
       const res = await request(server)
-        .post('/api/v1/user.join')
+        .post('/api/v1/invitation.accept')
         .set('Authorization', `Bearer ${wileSession.token}`)
         .send({
           token,
@@ -371,8 +378,8 @@ describe('api/v1/user.join', () => {
         const UserModel = ctx.db.model('User');
         const eventTrigger = event(ctx.bus, 'invite_user');
 
-        await inviteUser(ctx.db, ctx.bus, {
-          emailAddress: 'beep-beep@acme.com',
+        await createInvitation(ctx.db, ctx.bus, {
+          inviteeEmailAddress: 'beep-beep@acme.com',
           orgId: org.id,
           inviterId: wile.id,
           inviterUsername: wile.username,
@@ -414,7 +421,7 @@ describe('api/v1/user.join', () => {
         ctx.bus.once('join_user', f);
 
         const res = await request(server)
-          .post('/api/v1/user.join')
+          .post('/api/v1/invitation.accept')
           .set('Authorization', `Bearer ${runnerSession.token}`)
           .send({
             token,
@@ -430,8 +437,15 @@ describe('api/v1/user.join', () => {
         });
 
         expect(f).toHaveBeenCalledWith({
-          userId: expect.any(String),
-          orgId: expect.any(String),
+          user: expect.objectContaining({
+            id: expect.any(String),
+            username: expect.any(String),
+            fullName: expect.any(String),
+            emails: expect.any(Array),
+          }),
+          org: expect.objectContaining({
+            id: expect.any(String),
+          }),
         });
       });
     });
@@ -485,8 +499,8 @@ describe('api/v1/user.join', () => {
           password: "Th-th-th-that's all folks!",
         });
 
-        await inviteUser(ctx.db, ctx.bus, {
-          emailAddress: 'beep-beep@acme.com',
+        await createInvitation(ctx.db, ctx.bus, {
+          inviteeEmailAddress: 'beep-beep@acme.com',
           orgId: org.id,
           inviterId: wile.id,
           inviterUsername: wile.username,
@@ -511,7 +525,7 @@ describe('api/v1/user.join', () => {
         ctx.bus.once('join_user', f);
 
         const res = await request(server)
-          .post('/api/v1/user.join')
+          .post('/api/v1/invitation.accept')
           .set('Authorization', `Bearer ${runnerSession.token}`)
           .send({
             token,
@@ -527,14 +541,21 @@ describe('api/v1/user.join', () => {
         });
 
         expect(f).toHaveBeenCalledWith({
-          userId: expect.any(String),
-          orgId: expect.any(String),
+          user: expect.objectContaining({
+            id: expect.any(String),
+            username: expect.any(String),
+            fullName: expect.any(String),
+            emails: expect.any(Array),
+          }),
+          org: expect.objectContaining({
+            id: expect.any(String),
+          }),
         });
       });
 
       test('pretends token does not exist when requestor does not match the invitee', async () => {
         const res = await request(server)
-          .post('/api/v1/user.join')
+          .post('/api/v1/invitation.accept')
           .set('Authorization', `Bearer ${porkySession.token}`)
           .send({
             token,

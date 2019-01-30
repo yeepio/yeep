@@ -18,12 +18,12 @@ const inviteUser = async (
   db,
   bus,
   {
-    org,
+    orgId,
     permissions = [],
     roles = [],
     tokenExpiresInSeconds = defaultTokenExpiresInSeconds,
-    username, // invitee username
-    emailAddress, // invitee email address
+    inviteeUsername,
+    inviteeEmailAddress,
     inviterId,
     inviterUsername,
     inviterFullName,
@@ -39,12 +39,12 @@ const inviteUser = async (
 
   // acquire org from db
   const orgRecord = await OrgModel.findOne({
-    _id: ObjectId(org),
+    _id: ObjectId(orgId),
   });
 
   // ensure org exists
   if (!orgRecord) {
-    throw new OrgNotFoundError(`Org "${org}" does not exist`);
+    throw new OrgNotFoundError(`Org "${orgId}" does not exist`);
   }
 
   // ensure permissions exist
@@ -66,7 +66,7 @@ const inviteUser = async (
 
   // ensure permissions scope matches org
   permissionRecords.forEach((permission) => {
-    if (!permission.scope || !permission.scope.equals(org)) {
+    if (!permission.scope || !permission.scope.equals(orgId)) {
       throw new InvalidPermissionAssignmentError(
         `Permission "${permission._id.toHexString()}" cannot be assigned to the designated org`
       );
@@ -90,7 +90,7 @@ const inviteUser = async (
 
   // ensure role scope matches org
   roleRecords.forEach((role) => {
-    if (!role.scope || !role.scope.equals(org)) {
+    if (!role.scope || !role.scope.equals(orgId)) {
       throw new InvalidRoleAssignmentError(
         `Role "${role._id.toHexString()}" cannot be assigned to the designated org`
       );
@@ -99,21 +99,23 @@ const inviteUser = async (
 
   // attempt to acquire user from db
   const userRecord = await UserModel.findOne(
-    username
-      ? { username }
+    inviteeUsername
+      ? { username: inviteeUsername }
       : {
-          emails: { $elemMatch: { address: emailAddress } },
+          emails: { $elemMatch: { address: inviteeEmailAddress } },
         }
   );
 
   // ensure user exists
-  if (!userRecord && username) {
-    throw new UserNotFoundError(`User "${username}" does not exist`);
+  if (!userRecord && inviteeUsername) {
+    throw new UserNotFoundError(`User "${inviteeUsername}" does not exist`);
   }
 
   // ensure user is active
   if (userRecord && !!userRecord.deactivatedAt && isBefore(userRecord.deactivatedAt, new Date())) {
-    throw new UserDeactivatedError(`User "${username || emailAddress}" is deactivated`);
+    throw new UserDeactivatedError(
+      `User "${inviteeUsername || inviteeEmailAddress}" is deactivated`
+    );
   }
 
   // create invitation token
@@ -123,10 +125,10 @@ const inviteUser = async (
     payload: {
       roles,
       permissions,
-      emailAddress: userRecord ? userRecord.findPrimaryEmail() : emailAddress,
+      emailAddress: userRecord ? userRecord.findPrimaryEmail() : inviteeEmailAddress,
     },
     user: userRecord ? userRecord._id : null,
-    org,
+    org: orgId,
     expiresAt: addSeconds(new Date(), tokenExpiresInSeconds), // i.e. in 1 hour
   });
 
@@ -140,7 +142,7 @@ const inviteUser = async (
           emailAddress: userRecord.findPrimaryEmail(),
         }
       : {
-          emailAddress,
+          emailAddress: inviteeEmailAddress,
         },
     inviter: {
       id: inviterId,

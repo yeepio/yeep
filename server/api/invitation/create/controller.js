@@ -193,7 +193,7 @@ async function handler({ request, response, db, bus }) {
 
   // initiate password reset process
   const isUserInvited = await inviteUser(db, bus, {
-    org,
+    orgId: org,
     permissions,
     roles,
     tokenExpiresInSeconds,
@@ -204,10 +204,10 @@ async function handler({ request, response, db, bus }) {
     inviterEmailAddress: UserModel.getPrimaryEmailAddress(inviter.emails),
     ...(isUserPropEmail
       ? {
-          emailAddress: user,
+          inviteeEmailAddress: user,
         }
       : {
-          username: user,
+          inviteeUsername: user,
         }),
   });
 

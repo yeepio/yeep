@@ -5,8 +5,8 @@ import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import { TokenNotFoundError, AuthorizationError } from '../../../constants/errors';
 import { visitSession } from '../../../middleware/auth';
-import createUser from '../create/service';
-import getUserInfo from '../info/service';
+import createUser from '../../user/create/service';
+import getUserInfo from '../../user/info/service';
 import addMemberToOrg from '../../org/addMember/service';
 
 const validationSchema = {
@@ -68,7 +68,7 @@ const visitToken = async ({ request, db }, next) => {
 const isUserAuthorized = async ({ request }, next) => {
   const { invitationToken, user } = request.session;
 
-  if (invitationToken.userId) {
+  if (invitationToken.user) {
     if (!user) {
       throw new AuthorizationError(
         `Invitation token "${
@@ -77,7 +77,7 @@ const isUserAuthorized = async ({ request }, next) => {
       );
     }
 
-    if (user.id !== invitationToken.userId.toHexString()) {
+    if (user.id !== invitationToken.user.toHexString()) {
       throw new AuthorizationError(
         `Invitation token "${invitationToken.secret}" cannot be redeemed by user "${user.username}"`
       );
@@ -125,43 +125,38 @@ async function handler({ request, response, db, bus }) {
   const { invitationToken } = request.session;
   const TokenModel = db.model('Token');
 
-  let user;
-  if (!request.session.user) {
-    // create user if unspecified
-    user = await createUser(db, {
-      username: request.body.username,
-      password: request.body.password,
-      fullName: request.body.fullName,
-      emails: [
-        {
-          address: invitationToken.payload.get('emailAddress'),
-          isVerified: true,
-          isPrimary: true,
-        },
-      ],
-    });
-  } else {
-    // retrieve user info
-    user = await getUserInfo(db, { id: request.session.user.id });
-  }
+  const user = await (request.session.user
+    ? getUserInfo(db, { id: request.session.user.id })
+    : createUser(db, {
+        username: request.body.username,
+        password: request.body.password,
+        fullName: request.body.fullName,
+        emails: [
+          {
+            address: invitationToken.payload.get('emailAddress'),
+            isVerified: true,
+            isPrimary: true,
+          },
+        ],
+      }));
 
   // create org membership
   await addMemberToOrg(db, {
-    orgId: invitationToken.payload.get('orgId'),
+    orgId: invitationToken.org.toHexString(),
     userId: user.id,
     permissions: invitationToken.payload.get('permissions'),
     roles: invitationToken.payload.get('roles'),
   });
 
   // redeem token, i.e. delete from db
-  await TokenModel.deleteOne({
-    _id: invitationToken._id,
-  });
+  await TokenModel.deleteOne({ _id: invitationToken._id });
 
   // emit event
   bus.emit('join_user', {
-    userId: user.id,
-    orgId: invitationToken.payload.get('orgId'),
+    user,
+    org: {
+      id: invitationToken.org.toHexString(),
+    },
   });
 
   response.status = 200; // OK
