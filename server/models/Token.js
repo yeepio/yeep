@@ -19,7 +19,11 @@ const tokenSchema = new Schema(
       type: Map,
       required: false,
     },
-    userId: {
+    user: {
+      type: Schema.Types.ObjectId,
+      required: false,
+    },
+    org: {
       type: Schema.Types.ObjectId,
       required: false,
     },
@@ -43,7 +47,8 @@ const tokenSchema = new Schema(
 );
 
 tokenSchema.index({ secret: 'hashed' }, { name: 'secret_idx' });
-tokenSchema.index({ userId: 1 }, { name: 'userId_idx' });
+tokenSchema.index({ user: 1 }, { name: 'user_idx' });
+tokenSchema.index({ org: 1 }, { name: 'org_idx' });
 
 // set auto-expiration index based on `expiresAt`
 tokenSchema.index({ expiresAt: 1 }, { name: 'expiresAt_idx', expireAfterSeconds: 0 });

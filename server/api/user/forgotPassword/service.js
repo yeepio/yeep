@@ -26,11 +26,11 @@ async function initPasswordReset(db, bus, { username, emailAddress, tokenExpires
   }
 
   // create password-reset token
-  const token = await TokenModel.create({
+  const tokenRecord = await TokenModel.create({
     secret: TokenModel.generateSecret({ length: 24 }),
     type: 'PASSWORD_RESET',
     payload: {},
-    userId: user._id,
+    user: user._id,
     expiresAt: addSeconds(new Date(), tokenExpiresInSeconds), // i.e. in 1 hour
   });
 
@@ -43,11 +43,11 @@ async function initPasswordReset(db, bus, { username, emailAddress, tokenExpires
       emailAddress: emailAddress || user.findPrimaryEmail(),
     },
     token: {
-      id: token._id.toHexString(),
-      secret: token.secret,
-      type: token.type,
-      createdAt: token.createdAt,
-      expiresAt: token.expiresAt,
+      id: tokenRecord._id.toHexString(),
+      secret: tokenRecord.secret,
+      type: tokenRecord.type,
+      createdAt: tokenRecord.createdAt,
+      expiresAt: tokenRecord.expiresAt,
     },
   });
 

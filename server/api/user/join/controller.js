@@ -46,20 +46,20 @@ const visitToken = async ({ request, db }, next) => {
   const TokenModel = db.model('Token');
 
   // acquire token from db
-  const token = await TokenModel.findOne({
+  const tokenRecord = await TokenModel.findOne({
     secret: request.body.token,
     type: 'INVITATION',
   });
 
   // ensure token exists
-  if (!token) {
+  if (!tokenRecord) {
     throw new TokenNotFoundError('Token does not exist or has already expired');
   }
 
   // decorate session obj
   request.session = {
     ...request.session,
-    invitationToken: token,
+    invitationToken: tokenRecord,
   };
 
   await next();

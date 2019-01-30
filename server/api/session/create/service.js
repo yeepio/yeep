@@ -85,27 +85,27 @@ async function createSessionToken(db, jwt, { username, emailAddress, password })
 
   // create authentication token
   const TokenModel = db.model('Token');
-  const token = await TokenModel.create({
+  const tokenRecord = await TokenModel.create({
     secret: TokenModel.generateSecret({ length: 24 }),
     type: 'AUTHENTICATION',
     payload: {},
-    userId: user._id,
+    user: user._id,
     expiresAt: addSeconds(new Date(), expiresIn),
   });
 
   // generate JWT token
   const jwtToken = await jwt.sign(
     {
-      userId: user._id.toHexString(),
+      user: user._id.toHexString(),
     },
     {
-      jwtid: token.secret,
+      jwtid: tokenRecord.secret,
       expiresIn,
     }
   );
 
   return {
-    id: token.id, // as hex string
+    id: tokenRecord.id, // as hex string
     token: jwtToken,
     expiresIn: expiresIn * 1000, // convert to milliseconds
   };

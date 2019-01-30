@@ -121,12 +121,12 @@ const inviteUser = async (
     secret: TokenModel.generateSecret({ length: 24 }),
     type: 'INVITATION',
     payload: {
-      org,
       roles,
       permissions,
       emailAddress: userRecord ? userRecord.findPrimaryEmail() : emailAddress,
     },
-    userId: userRecord ? userRecord._id : null,
+    user: userRecord ? userRecord._id : null,
+    org,
     expiresAt: addSeconds(new Date(), tokenExpiresInSeconds), // i.e. in 1 hour
   });
 

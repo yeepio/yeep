@@ -11,18 +11,18 @@ async function resetPassword(db, bus, { token: secret, password }) {
   const CredentialsModel = db.model('Credentials');
 
   // acquire token from db
-  const token = await TokenModel.findOne({
+  const tokenRecord = await TokenModel.findOne({
     secret,
     type: 'PASSWORD_RESET',
   });
 
   // ensure token exists
-  if (!token) {
+  if (!tokenRecord) {
     throw new TokenNotFoundError('Token does not exist or has already expired');
   }
 
   // acquire user from db
-  const user = await UserModel.findOne({ _id: token.userId });
+  const user = await UserModel.findOne({ _id: tokenRecord.userId });
 
   // ensure user exists
   if (!user) {
@@ -31,7 +31,7 @@ async function resetPassword(db, bus, { token: secret, password }) {
 
   // ensure user is active
   if (!!user.deactivatedAt && isBefore(user.deactivatedAt, new Date())) {
-    throw new UserDeactivatedError(`User ${token.userId.toHexString()} is deactivated`);
+    throw new UserDeactivatedError(`User ${tokenRecord.userId.toHexString()} is deactivated`);
   }
 
   // generate salt + digest password
@@ -48,7 +48,7 @@ async function resetPassword(db, bus, { token: secret, password }) {
     // update password credentials
     await CredentialsModel.updateOne(
       {
-        user: token.userId,
+        user: tokenRecord.userId,
         type: 'PASSWORD',
       },
       {
@@ -63,7 +63,7 @@ async function resetPassword(db, bus, { token: secret, password }) {
 
     // redeem token, i.e. delete from db
     await TokenModel.deleteOne({
-      _id: token._id,
+      _id: tokenRecord._id,
     });
 
     await session.commitTransaction();
