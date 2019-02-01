@@ -66,3 +66,4 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 | :---------------------------------------------------- | :--------------------------------------------- |
 | **[invitation.create](methods/invitation.create.md)** | Invites user to join org                       |
 | **[invitation.accept](methods/invitation.accept.md)** | Adds user to org by redeeming invitation token |
+| **[invitation.list](methods/invitation.list.md)**     | Lists pending invitations                      |
