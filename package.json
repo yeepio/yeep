@@ -78,7 +78,6 @@
     "prettier-eslint": "^8.8.2",
     "purgecss-webpack-plugin": "^1.4.0",
     "react-dev-utils": "^7.0.1",
-    "regenerator-runtime": "^0.12.1",
     "rimraf": "^2.6.3",
     "rollup": "^1.1.2",
     "rollup-plugin-babel": "^4.3.2",
