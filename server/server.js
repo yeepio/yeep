@@ -4,7 +4,7 @@ import url from 'url';
 import EventEmitter from 'events';
 import Koa from 'koa';
 import cors from '@koa/cors';
-import enforceHttps from 'koa-sslify';
+import enforceHttps, { xForwardedProtoResolver } from 'koa-sslify';
 import helmet from 'koa-helmet';
 import bodyParser from 'koa-bodyparser';
 import compression from 'compression';
@@ -34,7 +34,7 @@ if (process.env.NODE_ENV === 'production') {
   // enforce HTTPS
   app.use(
     enforceHttps({
-      trustProtoHeader: true, // trust x-forwarded-proto header
+      resolver: xForwardedProtoResolver, // trust x-forwarded-proto header
     })
   );
   // enable gzip compression
