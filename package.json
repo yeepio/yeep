@@ -110,7 +110,7 @@
     "dotenv": "^6.0.0",
     "formidable": "^1.2.1",
     "gravatar": "^1.8.0",
-    "image-size": "^0.6.3",
+    "image-size": "^0.7.1",
     "image-type": "^3.0.0",
     "isemail": "^3.2.0",
     "joi": "^14.3.1",
