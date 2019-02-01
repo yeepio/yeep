@@ -98,7 +98,7 @@
   },
   "dependencies": {
     "@koa/cors": "^2.2.3",
-    "ajv": "^6.5.5",
+    "ajv": "^6.7.0",
     "awaiting": "^3.0.0",
     "aws-sdk": "^2.395.0",
     "axios": "^0.18.0",
