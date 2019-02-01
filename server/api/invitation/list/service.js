@@ -12,32 +12,22 @@ export const parseCursor = (cursorStr) => {
 async function listPendingInvitations(db, { orgId, userId, limit, cursor }) {
   const TokenModel = db.model('Token');
 
-  const invitationRecords = await TokenModel.find(
-    {
-      type: 'INVITATION',
-      ...(orgId
-        ? {
-            org: ObjectId(orgId),
-          }
-        : {}),
-      ...(userId
-        ? {
-            user: ObjectId(userId),
-          }
-        : {}),
-      ...(cursor
-        ? {
-            _id: {
-              $gt: ObjectId(cursor.id),
-            },
-          }
-        : {}),
-    },
-    null,
-    {
-      limit,
-    }
-  );
+  const query = {
+    type: 'INVITATION',
+  };
+  if (orgId) {
+    query.org = ObjectId(orgId);
+  }
+  if (userId) {
+    query.user = ObjectId(userId);
+  }
+  if (cursor) {
+    query._id = {
+      $gt: ObjectId(cursor.id),
+    };
+  }
+
+  const invitationRecords = await TokenModel.find(query, null, { limit });
 
   return invitationRecords.map((e) => {
     return {
