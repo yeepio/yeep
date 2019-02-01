@@ -116,7 +116,7 @@
     "image-type": "^3.0.0",
     "isemail": "^3.2.0",
     "joi": "^14.3.1",
-    "jsonwebtoken": "^8.3.0",
+    "jsonwebtoken": "^8.4.0",
     "juice": "^5.1.0",
     "koa": "^2.7.0",
     "koa-bodyparser": "^4.2.1",
