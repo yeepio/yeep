@@ -26,8 +26,6 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 | **[user.deletePicture](methods/user.deletePicture.md)**       | Deletes the profile picture of the designated user            |
 | **[user.forgotPassword](methods/user.forgotPassword.md)**     | Initiates the forgot password process for the designated user |
 | **[user.info](methods/user.info.md)**                         | Retrieves details for the designated user                     |
-| **[user.invite](methods/user.invite.md)**                     | Invites user to join org                                      |
-| **[user.join](methods/user.join.md)**                         | Adds user to org by redeeming invitation token                |
 | **[user.list](methods/user.list.md)**                         | Lists all users                                               |
 | **[user.resetPassword](methods/user.resetPassword.md)**       | Resets user password                                          |
 | **[user.revokePermission](methods/user.revokePermission.md)** | Revokes the designated permission assignment                  |
@@ -61,3 +59,11 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 | **[role.info](methods/role.info.md)**     | Retrieves information on the designated role |
 | **[role.list](methods/role.list.md)**     | Lists all roles                              |
 | **[role.update](methods/role.update.md)** | Updates the designated role                  |
+
+### Invitation
+
+| Method                                                | Description                                    |
+| :---------------------------------------------------- | :--------------------------------------------- |
+| **[invitation.create](methods/invitation.create.md)** | Invites user to join org                       |
+| **[invitation.accept](methods/invitation.accept.md)** | Adds user to org by redeeming invitation token |
+| **[invitation.list](methods/invitation.list.md)**     | Lists pending invitations                      |

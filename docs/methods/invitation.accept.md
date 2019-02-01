@@ -1,6 +1,6 @@
-# user.join
+# invitation.accept
 
-`POST /api/v1/user.join`
+`POST /api/v1/invitation.accept`
 
 ## Description
 
@@ -44,7 +44,7 @@ Invitation token was sent to an existing yeep user. Please note authentication i
 **Request**
 
 ```
-POST /api/v1/user.join
+POST /api/v1/invitation.accept
 Authorization: `Bearer ${authToken}`
 ```
 
@@ -87,7 +87,7 @@ Invitation token was sent to a non-yeep user. The user will first create a yeep 
 **Request**
 
 ```
-POST /api/v1/user.join
+POST /api/v1/invitation.accept
 ```
 
 ```json

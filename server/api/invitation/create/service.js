@@ -22,8 +22,8 @@ const inviteUser = async (
     permissions = [],
     roles = [],
     tokenExpiresInSeconds = defaultTokenExpiresInSeconds,
-    username, // invitee username
-    emailAddress, // invitee email address
+    inviteeUsername,
+    inviteeEmailAddress,
     inviterId,
     inviterUsername,
     inviterFullName,
@@ -38,12 +38,12 @@ const inviteUser = async (
   const TokenModel = db.model('Token');
 
   // acquire org from db
-  const org = await OrgModel.findOne({
+  const orgRecord = await OrgModel.findOne({
     _id: ObjectId(orgId),
   });
 
   // ensure org exists
-  if (!org) {
+  if (!orgRecord) {
     throw new OrgNotFoundError(`Org "${orgId}" does not exist`);
   }
 
@@ -98,49 +98,51 @@ const inviteUser = async (
   });
 
   // attempt to acquire user from db
-  const user = await UserModel.findOne(
-    username
-      ? { username }
+  const userRecord = await UserModel.findOne(
+    inviteeUsername
+      ? { username: inviteeUsername }
       : {
-          emails: { $elemMatch: { address: emailAddress } },
+          emails: { $elemMatch: { address: inviteeEmailAddress } },
         }
   );
 
   // ensure user exists
-  if (!user && username) {
-    throw new UserNotFoundError(`User "${username}" does not exist`);
+  if (!userRecord && inviteeUsername) {
+    throw new UserNotFoundError(`User "${inviteeUsername}" does not exist`);
   }
 
   // ensure user is active
-  if (user && !!user.deactivatedAt && isBefore(user.deactivatedAt, new Date())) {
-    throw new UserDeactivatedError(`User "${username || emailAddress}" is deactivated`);
+  if (userRecord && !!userRecord.deactivatedAt && isBefore(userRecord.deactivatedAt, new Date())) {
+    throw new UserDeactivatedError(
+      `User "${inviteeUsername || inviteeEmailAddress}" is deactivated`
+    );
   }
 
   // create invitation token
-  const token = await TokenModel.create({
+  const tokenRecord = await TokenModel.create({
     secret: TokenModel.generateSecret({ length: 24 }),
     type: 'INVITATION',
     payload: {
-      orgId,
       roles,
       permissions,
-      emailAddress: user ? user.findPrimaryEmail() : emailAddress,
+      emailAddress: userRecord ? userRecord.findPrimaryEmail() : inviteeEmailAddress,
     },
-    userId: user ? user._id : null,
+    user: userRecord ? userRecord._id : null,
+    org: orgId,
     expiresAt: addSeconds(new Date(), tokenExpiresInSeconds), // i.e. in 1 hour
   });
 
   // emit event
   bus.emit('invite_user', {
-    invitee: user
+    invitee: userRecord
       ? {
-          id: user._id.toHexString(),
-          fullName: user.fullName,
-          picture: user.picture,
-          emailAddress: user.findPrimaryEmail(),
+          id: userRecord._id.toHexString(),
+          fullName: userRecord.fullName,
+          picture: userRecord.picture,
+          emailAddress: userRecord.findPrimaryEmail(),
         }
       : {
-          emailAddress,
+          emailAddress: inviteeEmailAddress,
         },
     inviter: {
       id: inviterId,
@@ -150,11 +152,11 @@ const inviteUser = async (
       emailAddress: inviterEmailAddress,
     },
     token: {
-      id: token._id.toHexString(),
-      secret: token.secret,
-      type: token.type,
-      createdAt: token.createdAt,
-      expiresAt: token.expiresAt,
+      id: tokenRecord._id.toHexString(),
+      secret: tokenRecord.secret,
+      type: tokenRecord.type,
+      createdAt: tokenRecord.createdAt,
+      expiresAt: tokenRecord.expiresAt,
     },
   });
 

@@ -82,10 +82,10 @@ describe('api/v1/user.resetPassword', () => {
       });
 
       const TokenModel = ctx.db.model('Token');
-      const record = await TokenModel.findOne({
+      const tokenRecord = await TokenModel.findOne({
         secret: token,
       });
-      expect(record).toBeNull();
+      expect(tokenRecord).toBeNull();
     });
 
     test('returns error when token contains less than 6 characters', async () => {

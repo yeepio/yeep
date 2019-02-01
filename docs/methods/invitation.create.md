@@ -1,12 +1,12 @@
-# user.invite
+# invitation.create
 
-`POST /api/v1/user.invite`
+`POST /api/v1/invitation.create`
 
 ## Description
 
 Sends an email invitation to the designated user, inviting them to join the specified org with the supplied permissions.
 
-Invitee must explicitly accept the invitation. If invitee is already a yeep user they will simply join the org. If invitee is not already a yeep user, they must create a user account first and then automatically join the org.
+Invitee must explicitly accept the invitation. If invitee is already a yeep user they will simply join the org. If invitee is not a yeep user, they must create a user account first and then automatically join the org.
 
 ---
 
@@ -22,8 +22,8 @@ When `roles` are specified (see body params below) then requestor must be additi
 
 ### Body
 
-- **userKey** _(string)_ — username or email address of the invitee (required)
-- **orgId** _(string)_ — the ID of the org that the invitee would join (required)
+- **user** _(string)_ — username or email address of the invitee (required)
+- **org** _(string)_ — the ID of the org that the invitee would join (required)
 - **roles** _(Array\<string>)_ — array of roles to assign the user with (optional)
   - **roles[].id** _(string)_ — role ID (required)
   - **roles[].resourceId** _(string)_ — optional resource ID to limit the scope of the role assignment (optional)
@@ -48,14 +48,14 @@ When `roles` are specified (see body params below) then requestor must be additi
 **Request**
 
 ```
-POST /api/v1/user.invite
+POST /api/v1/invitation.create
 Authorization: `Bearer ${authToken}`
 ```
 
 ```json
 {
-  "userKey": "coyote@acme.com",
-  "orgId": "333a291e810c19729de902ee",
+  "user": "coyote@acme.com",
+  "org": "333a291e810c19729de902ee",
   "permissions": [
     {
       "id": "402f191e901c19729de720ba"

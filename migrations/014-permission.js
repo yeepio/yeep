@@ -85,6 +85,20 @@ export const up = async (db) => {
       createdAt: now,
       updatedAt: now,
     },
+    {
+      name: 'yeep.invitation.write',
+      description: 'Permission to manage user invitations',
+      isSystemPermission: true,
+      createdAt: now,
+      updatedAt: now,
+    },
+    {
+      name: 'yeep.invitation.read',
+      description: 'Permission to read user invitations',
+      isSystemPermission: true,
+      createdAt: now,
+      updatedAt: now,
+    },
   ]);
 };
 
@@ -104,6 +118,8 @@ export const down = async (db) => {
         'yeep.role.read',
         'yeep.role.assignment.write',
         'yeep.role.assignment.read',
+        'yeep.invitation.write',
+        'yeep.invitation.read',
       ],
     },
   });

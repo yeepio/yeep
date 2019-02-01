@@ -22,8 +22,8 @@ const parseAuthorizationPayload = async ({ request, jwt }) => {
   try {
     const payload = await jwt.verify(token);
     return {
-      tokenSecret: payload.jti,
-      userId: payload.userId,
+      token: payload.jti,
+      user: payload.user,
       issuedAt: new Date(payload.iat * 1000),
       expiresAt: new Date(payload.exp * 1000),
     };
@@ -42,7 +42,7 @@ export const visitSession = () => async ({ request, jwt, db }, next) => {
   }
 
   // parse authorization payload
-  const { tokenSecret, userId, issuedAt, expiresAt } = await parseAuthorizationPayload({
+  const { token, user, issuedAt, expiresAt } = await parseAuthorizationPayload({
     request,
     jwt,
   });
@@ -51,12 +51,12 @@ export const visitSession = () => async ({ request, jwt, db }, next) => {
   const TokenModel = db.model('Token');
   const records = await TokenModel.aggregate([
     {
-      $match: { secret: tokenSecret },
+      $match: { secret: token },
     },
     {
       $lookup: {
         from: 'users',
-        localField: 'userId',
+        localField: 'user',
         foreignField: '_id',
         as: 'user',
       },
@@ -88,7 +88,7 @@ export const visitSession = () => async ({ request, jwt, db }, next) => {
   ]).exec();
 
   // make sure authorization token is active
-  if (records.length === 0 || !records[0].user._id.equals(userId)) {
+  if (records.length === 0 || !records[0].user._id.equals(user)) {
     await next();
     return; // exit
   }
