@@ -170,7 +170,7 @@ const isUserAuthorized = async ({ request }, next) => {
   const hasPermission = [request.body.org, null].some(
     (orgId) =>
       findUserPermissionIndex(request.session.user.permissions, {
-        name: 'yeep.user.write',
+        name: 'yeep.invitation.write',
         orgId,
       }) !== -1
   );

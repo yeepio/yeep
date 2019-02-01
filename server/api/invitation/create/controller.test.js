@@ -70,7 +70,7 @@ describe('api/v1/invitation.create', () => {
 
       const PermissionModel = ctx.db.model('Permission');
       const permission = await PermissionModel.findOne({
-        name: 'yeep.user.write',
+        name: 'yeep.invitation.write',
       });
       permissionAssignment = await createPermissionAssignment(ctx.db, {
         userId: requestor.id,
