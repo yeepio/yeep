@@ -12,23 +12,23 @@ Yeep provides a simple, open-source, privacy-first solution to user management.
 
 ### Features
 
-* Everything you would expect from a basic user management system, i.e. _login_, _logout_, _signup_, **[WIP]** _forgot password_, **[WIP]** _reset password_
-* Multiple authentication strategies, e.g. _username/password_, _Google login_, _GitHub login_, etc
-* **[WIP]** Two-Factor Authentication (2FA)
-* **[WIP]** User invitation flow, to invite new users to your organization
-* Authorization (i.e. _what a user can do_) using roles and permissions
-* Configurable settings, e.g. _enable/disable public signup_, _email templates_, etc.
-* Multi-tenant architecture: your customers can have their own users, isolated permissions, isolated roles, etc.
+- Everything you would expect from a basic user management system, i.e. _login_, _logout_, _signup_, **[WIP]** _forgot password_, **[WIP]** _reset password_
+- Multiple authentication strategies, e.g. _username/password_, _Google login_, _GitHub login_, etc
+- **[WIP]** Two-Factor Authentication (2FA)
+- **[WIP]** User invitation flow, to invite new users to your organization
+- Authorization (i.e. _what a user can do_) using roles and permissions
+- Configurable settings, e.g. _enable/disable public signup_, _email templates_, etc.
+- Multi-tenant architecture: your customers can have their own users, isolated permissions, isolated roles, etc.
 
 ### Requirements
 
-* Node.js v.8+
-* MongoDB v.4+ with Replica Set
+- Node.js v.8+
+- MongoDB v.4+ with Replica Set
 
 ## Docs
 
-* [API Reference](docs/index.md)
-* [Contributing Guide](CONTRIBUTING.md)
+- [API Reference](docs/index.md)
+- [Contributing Guide](CONTRIBUTING.md)
 
 ## License
 

@@ -32,7 +32,7 @@ export const renderMissingConfigParameter = (param, destination, parent) => `
   ${chalk.red('Validation Failed')}
   Configuration File: ${destination}
 
-  Missing property "${param}" ${parent ? `from key "${parent}"` : ''}
+  Missing property "${param}" ${parent ? `from key "${parent.join('.')}"` : ''}
 `;
 
 export const renderWrongFormatForParam = (value, param, message, allowedValues, destination) => `

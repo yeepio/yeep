@@ -11,7 +11,7 @@
     },
     "jwt": {
       "type": "object",
-      "required": ["type","secret"],
+      "required": ["type", "secret"],
       "properties": {
         "type": {
           "type": "string",
@@ -26,9 +26,7 @@
     },
     "mongo": {
       "type": "object",
-      "required": [
-        "uri"
-      ],
+      "required": ["uri"],
       "properties": {
         "uri": {
           "type": "string",
@@ -44,17 +42,155 @@
     },
     "storage": {
       "type": "object",
-      "required": ["type","uploadDir"],
+      "required": ["type", "uploadDir"],
       "properties": {
         "type": {
           "type": "string",
-          "enum": ["fs","s3","gcs"]
+          "enum": ["fs", "s3", "gcs"]
         },
         "uploadDir": {
           "type": "string"
         }
       },
       "description": "Storage configuration object"
+    },
+    "mail": {
+      "type": "object",
+      "properties": {
+        "options": {
+          "type": "object",
+          "properties": {
+            "port": {
+              "type": "number"
+            },
+            "auth": {
+              "type": "object",
+              "properties": {
+                "api_key": {
+                  "type": "string"
+                },
+                "domain": {
+                  "type": "string"
+                },
+                "user": {
+                  "type": "string"
+                },
+                "pass": {
+                  "type": "string"
+                }
+              }
+            },
+            "apiVersion": {
+              "type": "string"
+            },
+            "accessKeyId": {
+              "type": "string"
+            },
+            "secretAccessKey": {
+              "type": "string"
+            },
+            "region": {
+              "type": "string"
+            }
+          }
+        },
+        "from": {
+          "type": "string",
+          "format": "email"
+        },
+        "templates": {
+          "type": "object",
+          "required": ["passwordReset"],
+          "properties": {
+            "passwordReset": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "transport": { "enum": ["smtp", "sendgrid", "mailgun", "ses"] }
+            }
+          },
+          "then": {
+            "required": ["options"]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "transport": { "enum": ["sendgrid"] }
+            }
+          },
+          "then": {
+            "properties": {
+              "options": {
+                "required": ["auth"],
+                "properties": {
+                  "auth": {
+                    "required": ["api_key"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "transport": { "enum": ["smtp"] }
+            }
+          },
+          "then": {
+            "properties": {
+              "options": {
+                "required": ["auth", "host", "port"],
+                "properties": {
+                  "auth": {
+                    "required": ["user", "pass"]
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "transport": { "enum": ["ses"] }
+            }
+          },
+          "then": {
+            "properties": {
+              "options": {
+                "required": ["apiVersion", "accessKeyId", "secretAccessKey", "region"]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "transport": { "enum": ["mailgun"] }
+            }
+          },
+          "then": {
+            "properties": {
+              "options": {
+                "required": ["auth"],
+                "properties": {
+                  "auth": {
+                    "required": ["api_key", "domain"]
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }
