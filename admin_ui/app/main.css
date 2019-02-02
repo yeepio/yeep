@@ -3,5 +3,14 @@
 @tailwind utilities;
 
 body {
-  @apply antialiased;
+  /*@apply antialiased;*/
+}
+
+/* Global default styles for Yeep */
+a {
+    @apply text-blue;
+}
+a:hover {
+    text-decoration:none;
+    @apply text-blue-dark;
 }
