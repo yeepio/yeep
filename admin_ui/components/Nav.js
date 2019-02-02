@@ -7,7 +7,7 @@ import React from 'react';
  */
 const Nav = () => {
   return (
-    <nav className="bg-grey-light w-64 flex-no-shrink">
+    <nav className="bg-grey-light w-64 flex-no-shrink hidden lg:block">
       <ul className="list-reset">
         <li>
           <a href="#top">Dashboard</a>
