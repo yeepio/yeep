@@ -14,3 +14,18 @@ a:hover {
     text-decoration:none;
     @apply text-blue-dark;
 }
+
+/*
+    Adding the Yeep glyph to the logo area
+ */
+.yeep-logo {
+    @apply text-2xl;
+    padding-left:38px;
+    min-height:40px;
+    line-height:40px;
+    display:block;
+    background:url("../public/yeep-logo-white.svg") no-repeat left center;
+}
+/*
+    User avatar / gravatar on header
+ */
