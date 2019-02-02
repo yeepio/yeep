@@ -16,13 +16,18 @@ const Header = () => {
             </a>
           </li>
           <li className="ml-4">
-            <a href="/profile" className="text-white hover:text-grey">
+            <a href="#top" className="text-white hover:text-grey">
               Angelos Chaidas
             </a>
           </li>
           <li className="ml-4 mr-4">
-            <a href="/profile" className="opacity-50 hover:opacity-100">
+            <a href="#to[" className="opacity-50">
               <img src="/yeep-user-profile.svg" alt="View your profile"/>
+            </a>
+          </li>
+          <li className="mr-4 lg:hidden">
+            <a href="#top" className="opacity-50">
+              <img src="/yeep-icon-hamburger.svg" alt="Toggle the menu"/>
             </a>
           </li>
         </ul>
