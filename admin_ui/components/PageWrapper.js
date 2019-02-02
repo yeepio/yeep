@@ -5,7 +5,7 @@ import React from 'react';
  */
 const PageWrapper = () => {
   return (
-    <div className="leading-normal">
+    <div className="leading-normal p-8">
       <h1>Heading</h1>
       <p>
         Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dignissimos doloremque doloribus,
