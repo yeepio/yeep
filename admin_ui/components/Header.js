@@ -10,12 +10,12 @@ const Header = () => {
         <h1 className="yeep-logo ml-4">CompanyName</h1>
         <h2 className="text-xl ml-4 font-light opacity-50 hidden lg:block">headless user management</h2>
         <ul className="list-reset ml-auto flex items-center">
-          <li>
+          <li className="hidden md:block">
             <a href="/feedback" className="text-white hover:text-grey">
               Send feedback
             </a>
           </li>
-          <li className="ml-4">
+          <li className="ml-4 hidden md:block">
             <a href="#top" className="text-white hover:text-grey">
               Angelos Chaidas
             </a>
