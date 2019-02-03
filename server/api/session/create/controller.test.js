@@ -37,7 +37,7 @@ describe('api/v1/session.create', () => {
     const res = await request(server)
       .post('/api/v1/session.create')
       .send({
-        userKey: 'a',
+        user: 'a',
         password: 'password',
       });
 
@@ -56,7 +56,7 @@ describe('api/v1/session.create', () => {
     const res = await request(server)
       .post('/api/v1/session.create')
       .send({
-        userKey: 'unknown@email.com',
+        user: 'unknown@email.com',
         password: 'password',
       });
 
@@ -74,7 +74,7 @@ describe('api/v1/session.create', () => {
     const res = await request(server)
       .post('/api/v1/session.create')
       .send({
-        userKey: 'notuser',
+        user: 'notuser',
         password: 'password',
       });
 
@@ -92,7 +92,7 @@ describe('api/v1/session.create', () => {
     const res = await request(server)
       .post('/api/v1/session.create')
       .send({
-        userKey: 'wile',
+        user: 'wile',
         password: 'invalid-password',
       });
 
@@ -110,7 +110,7 @@ describe('api/v1/session.create', () => {
     const res = await request(server)
       .post('/api/v1/session.create')
       .send({
-        userKey: 'Wile', // this will be automaticaly lower-cased
+        user: 'Wile', // this will be automaticaly lower-cased
         password: 'catch-the-b1rd$',
       });
 
@@ -128,7 +128,7 @@ describe('api/v1/session.create', () => {
     const res = await request(server)
       .post('/api/v1/session.create')
       .send({
-        userKey: 'coyote@acme.com',
+        user: 'coyote@acme.com',
         password: 'catch-the-b1rd$',
       });
 

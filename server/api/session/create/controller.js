@@ -7,7 +7,7 @@ import createSessionToken from './service';
 
 const validationSchema = {
   body: {
-    userKey: Joi.alternatives().try([
+    user: Joi.alternatives().try([
       Joi.string()
         .lowercase()
         .trim()
@@ -30,16 +30,16 @@ const validationSchema = {
 };
 
 async function handler({ request, response, db, jwt }) {
-  const { userKey, password } = request.body;
+  const { user, password } = request.body;
 
   const { token, expiresIn } = await createSessionToken(db, jwt, {
     password,
-    ...(isemail.validate(userKey)
+    ...(isemail.validate(user)
       ? {
-          emailAddress: request.body.userKey,
+          emailAddress: request.body.user,
         }
       : {
-          username: request.body.userKey,
+          username: request.body.user,
         }),
   });
 
