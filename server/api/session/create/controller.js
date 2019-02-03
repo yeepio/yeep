@@ -26,11 +26,14 @@ const validationSchema = {
       .min(8)
       .max(50)
       .required(),
+    includePermissions: Joi.boolean()
+      .optional()
+      .default(false),
   },
 };
 
 async function handler({ request, response, db, jwt }) {
-  const { user, password } = request.body;
+  const { user, password, includePermissions } = request.body;
 
   const { token, expiresIn } = await createSessionToken(db, jwt, {
     password,
@@ -41,6 +44,7 @@ async function handler({ request, response, db, jwt }) {
       : {
           username: request.body.user,
         }),
+    includePermissions,
   });
 
   response.status = 200; // OK

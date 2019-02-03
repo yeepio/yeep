@@ -5,6 +5,7 @@ import {
   InvalidCredentialsError,
   UserDeactivatedError,
 } from '../../../constants/errors';
+import { getUserPermissions } from '../../user/info/service';
 
 const constructMatchQuery = (username, emailAddress) => {
   if (username) {
@@ -16,14 +17,18 @@ const constructMatchQuery = (username, emailAddress) => {
   };
 };
 
-async function createSessionToken(db, jwt, { username, emailAddress, password }) {
+async function createSessionToken(
+  db,
+  jwt,
+  { username, emailAddress, password, includePermissions }
+) {
   const UserModel = db.model('User');
   const CredentialsModel = db.model('Credentials');
 
   const normalizedEmailAddress = emailAddress && UserModel.normalizeEmailAddress(emailAddress);
 
   // retrieve user from db
-  const users = await UserModel.aggregate([
+  const userRecords = await UserModel.aggregate([
     {
       $match: constructMatchQuery(username, normalizedEmailAddress),
     },
@@ -53,16 +58,17 @@ async function createSessionToken(db, jwt, { username, emailAddress, password })
         salt: '$credentials.salt',
         iterationCount: '$credentials.iterationCount',
         deactivatedAt: 1,
+        memberships: 1,
       },
     },
   ]).exec();
 
   // make sure user exists
-  if (users.length === 0) {
+  if (userRecords.length === 0) {
     throw new UserNotFoundError(`User "${username || emailAddress}" not found`);
   }
 
-  const user = users[0];
+  const user = userRecords[0];
 
   // make sure user is active
   if (!!user.deactivatedAt && isBefore(user.deactivatedAt, new Date())) {
@@ -85,7 +91,7 @@ async function createSessionToken(db, jwt, { username, emailAddress, password })
 
   // create authentication token
   const TokenModel = db.model('Token');
-  const tokenRecord = await TokenModel.create({
+  const token = await TokenModel.create({
     secret: TokenModel.generateSecret({ length: 24 }),
     type: 'AUTHENTICATION',
     payload: {},
@@ -94,19 +100,24 @@ async function createSessionToken(db, jwt, { username, emailAddress, password })
   });
 
   // generate JWT token
-  const jwtToken = await jwt.sign(
-    {
-      user: user._id.toHexString(),
-    },
-    {
-      jwtid: tokenRecord.secret,
-      expiresIn,
-    }
-  );
+  const payload = {
+    id: user._id.toHexString(),
+  };
+
+  if (includePermissions) {
+    payload.permissions = await getUserPermissions(db, {
+      userId: payload.id,
+    });
+  }
+
+  const authToken = await jwt.sign(payload, {
+    jwtid: token.secret,
+    expiresIn,
+  });
 
   return {
-    id: tokenRecord.id, // as hex string
-    token: jwtToken,
+    id: token.id, // as hex string
+    token: authToken,
     expiresIn: expiresIn * 1000, // convert to milliseconds
   };
 }

@@ -4,7 +4,7 @@
 
 ## Description
 
-Creates new session, a.k.a. sign-in, for the designated user.
+Creates new session, a.k.a. sign-in, for the designated user. Returns a token that the user should present in subsequent requests to authenticate their identity.
 
 ---
 
@@ -18,6 +18,7 @@ This method is publicly available.
 
 - **user** _(string)_ — username or email address of the user (required)
 - **password** _(string)_ — user password (required)
+- **includePermissions** _(boolean)_ — indicates whether user permissions should be added to the token payload (optional; defaults to `false`)
 
 ---
 
