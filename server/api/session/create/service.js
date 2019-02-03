@@ -9,6 +9,7 @@ import { getUserPermissions } from '../../user/info/service';
 
 export const defaultProjection = {
   permissions: false,
+  profile: false,
 };
 
 const constructMatchQuery = (username, emailAddress) => {
@@ -62,7 +63,6 @@ export default async function createSessionToken(
         salt: '$credentials.salt',
         iterationCount: '$credentials.iterationCount',
         deactivatedAt: 1,
-        memberships: 1,
       },
     },
   ]).exec();
