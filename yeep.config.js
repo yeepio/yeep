@@ -23,4 +23,6 @@ module.exports = {
       passwordReset: path.resolve(__dirname, 'server/views/passwordResetInit.html'),
     },
   },
+  isUsernameEnabled: true,
+  isOrgCreationOpen: true,
 };

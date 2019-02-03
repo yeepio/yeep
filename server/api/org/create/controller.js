@@ -49,8 +49,7 @@ const isUserAuthorized = async ({ request }, next) => {
 const authz = compose([visitUserPermissions(), isUserAuthorized]);
 
 const adaptiveAuthZ = async (ctx, next) => {
-  const { settings } = ctx;
-  const isOrgCreationOpen = await settings.get('isOrgCreationOpen');
+  const { isOrgCreationOpen } = ctx.config;
 
   if (!isOrgCreationOpen) {
     return authz(ctx, next);

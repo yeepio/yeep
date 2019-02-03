@@ -387,11 +387,11 @@ describe('api/v1/user.create', () => {
 
     describe('isUsernameEnabled = false', () => {
       beforeAll(async () => {
-        await ctx.settings.set('isUsernameEnabled', false);
+        ctx.config.isUsernameEnabled = false;
       });
 
       afterAll(async () => {
-        await ctx.settings.set('isUsernameEnabled', true);
+        ctx.config.isUsernameEnabled = true;
       });
 
       test('returns error when `username` is specified', async () => {

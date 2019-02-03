@@ -191,6 +191,12 @@
           }
         }
       ]
+    },
+    "isUsernameEnabled": {
+      "type": "boolean"
+    },
+    "isOrgCreationOpen": {
+      "type": "boolean"
     }
   }
 }
