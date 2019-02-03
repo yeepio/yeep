@@ -105,8 +105,14 @@ async function createSessionToken(
   };
 
   if (includePermissions) {
-    payload.permissions = await getUserPermissions(db, {
+    const permissions = await getUserPermissions(db, {
       userId: payload.id,
+    });
+    payload.permissions = permissions.map((e) => {
+      return {
+        ...e,
+        resourceId: e.resourceId || undefined, // remove resourceId if unspecified to save bandwidth
+      };
     });
   }
 
