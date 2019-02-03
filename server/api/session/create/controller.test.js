@@ -148,6 +148,55 @@ describe('api/v1/session.create', () => {
     );
   });
 
+  test('adds user profile data to token when `projection.profile` is true', async () => {
+    const res = await request(server)
+      .post('/api/v1/session.create')
+      .send({
+        user: 'Wile', // this will be automaticaly lower-cased
+        password: 'catch-the-b1rd$',
+        projection: {
+          profile: true,
+        },
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.ok).toBe(true);
+
+    const tokenPayload = await ctx.jwt.verify(res.body.token);
+    expect(tokenPayload).toEqual(
+      expect.objectContaining({
+        id: expect.any(String),
+        username: 'wile',
+        fullName: 'Wile E. Coyote',
+        picture: 'https://www.acme.com/pictures/coyote.png',
+        primaryEmail: 'coyote@acme.com',
+      })
+    );
+  });
+
+  test('does not add user profile data by default', async () => {
+    const res = await request(server)
+      .post('/api/v1/session.create')
+      .send({
+        user: 'Wile', // this will be automaticaly lower-cased
+        password: 'catch-the-b1rd$',
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.ok).toBe(true);
+
+    const tokenPayload = await ctx.jwt.verify(res.body.token);
+    expect(tokenPayload).toEqual(
+      expect.objectContaining({
+        id: expect.any(String),
+      })
+    );
+    expect(tokenPayload.username).toBeUndefined();
+    expect(tokenPayload.fullName).toBeUndefined();
+    expect(tokenPayload.picture).toBeUndefined();
+    expect(tokenPayload.primaryEmail).toBeUndefined();
+  });
+
   describe('user with explicit permissions', () => {
     let acme;
     let permission;
@@ -179,7 +228,7 @@ describe('api/v1/session.create', () => {
       await deletePermission(ctx.db, permission);
     });
 
-    test('includes permissions when `projection.permissions` is true', async () => {
+    test('adds permissions to token when `projection.permissions` is true', async () => {
       const res = await request(server)
         .post('/api/v1/session.create')
         .send({
@@ -209,7 +258,7 @@ describe('api/v1/session.create', () => {
       );
     });
 
-    test('does not include permissions by default', async () => {
+    test('does not add permissions by default', async () => {
       const res = await request(server)
         .post('/api/v1/session.create')
         .send({

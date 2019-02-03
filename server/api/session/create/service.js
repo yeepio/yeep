@@ -59,6 +59,10 @@ export default async function createSessionToken(
     {
       $project: {
         _id: 1,
+        username: 1,
+        fullName: 1,
+        picture: 1,
+        emails: 1,
         password: '$credentials.password',
         salt: '$credentials.salt',
         iterationCount: '$credentials.iterationCount',
@@ -108,6 +112,15 @@ export default async function createSessionToken(
     id: user._id.toHexString(),
   };
 
+  // visit token payload with user profile data
+  if (projection.profile) {
+    payload.username = user.username;
+    payload.fullName = user.fullName;
+    payload.picture = user.picture || undefined;
+    payload.primaryEmail = UserModel.getPrimaryEmailAddress(user.emails);
+  }
+
+  // visit token payload with user permissions
   if (projection.permissions) {
     const permissions = await getUserPermissions(db, {
       userId: payload.id,
@@ -120,13 +133,14 @@ export default async function createSessionToken(
     });
   }
 
+  // issue JWT token
   const authToken = await jwt.sign(payload, {
     jwtid: token.secret,
     expiresIn,
   });
 
   return {
-    id: token.id, // as hex string
+    id: token._id.toHexString(), // as hex string
     token: authToken,
     expiresIn: expiresIn * 1000, // convert to milliseconds
   };
