@@ -185,7 +185,9 @@ describe('api/v1/session.create', () => {
         .send({
           user: 'Wile', // this will be automaticaly lower-cased
           password: 'catch-the-b1rd$',
-          includePermissions: true,
+          projection: {
+            permissions: true,
+          },
         });
 
       expect(res.status).toBe(200);

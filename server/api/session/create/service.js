@@ -7,6 +7,10 @@ import {
 } from '../../../constants/errors';
 import { getUserPermissions } from '../../user/info/service';
 
+export const defaultProjection = {
+  permissions: false,
+};
+
 const constructMatchQuery = (username, emailAddress) => {
   if (username) {
     return { username };
@@ -17,10 +21,10 @@ const constructMatchQuery = (username, emailAddress) => {
   };
 };
 
-async function createSessionToken(
+export default async function createSessionToken(
   db,
   jwt,
-  { username, emailAddress, password, includePermissions }
+  { username, emailAddress, password, projection = defaultProjection }
 ) {
   const UserModel = db.model('User');
   const CredentialsModel = db.model('Credentials');
@@ -104,7 +108,7 @@ async function createSessionToken(
     id: user._id.toHexString(),
   };
 
-  if (includePermissions) {
+  if (projection.permissions) {
     const permissions = await getUserPermissions(db, {
       userId: payload.id,
     });
@@ -127,5 +131,3 @@ async function createSessionToken(
     expiresIn: expiresIn * 1000, // convert to milliseconds
   };
 }
-
-export default createSessionToken;
