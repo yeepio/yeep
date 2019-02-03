@@ -88,7 +88,7 @@ export const visitSession = () => async ({ request, jwt, db }, next) => {
   ]).exec();
 
   // make sure authorization token is active
-  if (records.length === 0 || !records[0].user._id.equals(user)) {
+  if (records.length === 0 || !records[0].user._id.equals(user.id)) {
     await next();
     return; // exit
   }

@@ -148,7 +148,7 @@ describe('api/v1/session.create', () => {
     );
   });
 
-  test('adds user profile data to token when `projection.profile` is true', async () => {
+  test('adds user profile data to token payload when `projection.profile` is true', async () => {
     const res = await request(server)
       .post('/api/v1/session.create')
       .send({
@@ -165,16 +165,18 @@ describe('api/v1/session.create', () => {
     const tokenPayload = await ctx.jwt.verify(res.body.token);
     expect(tokenPayload).toEqual(
       expect.objectContaining({
-        id: expect.any(String),
-        username: 'wile',
-        fullName: 'Wile E. Coyote',
-        picture: 'https://www.acme.com/pictures/coyote.png',
-        primaryEmail: 'coyote@acme.com',
+        user: expect.objectContaining({
+          id: expect.any(String),
+          username: 'wile',
+          fullName: 'Wile E. Coyote',
+          picture: 'https://www.acme.com/pictures/coyote.png',
+          primaryEmail: 'coyote@acme.com',
+        }),
       })
     );
   });
 
-  test('does not add user profile data by default', async () => {
+  test('does not add user profile data to token payload by default', async () => {
     const res = await request(server)
       .post('/api/v1/session.create')
       .send({
@@ -188,13 +190,15 @@ describe('api/v1/session.create', () => {
     const tokenPayload = await ctx.jwt.verify(res.body.token);
     expect(tokenPayload).toEqual(
       expect.objectContaining({
-        id: expect.any(String),
+        user: expect.objectContaining({
+          id: expect.any(String),
+        }),
       })
     );
-    expect(tokenPayload.username).toBeUndefined();
-    expect(tokenPayload.fullName).toBeUndefined();
-    expect(tokenPayload.picture).toBeUndefined();
-    expect(tokenPayload.primaryEmail).toBeUndefined();
+    expect(tokenPayload.user.username).toBeUndefined();
+    expect(tokenPayload.user.fullName).toBeUndefined();
+    expect(tokenPayload.user.picture).toBeUndefined();
+    expect(tokenPayload.user.primaryEmail).toBeUndefined();
   });
 
   describe('user with explicit permissions', () => {
@@ -228,7 +232,7 @@ describe('api/v1/session.create', () => {
       await deletePermission(ctx.db, permission);
     });
 
-    test('adds permissions to token when `projection.permissions` is true', async () => {
+    test('adds permissions to token payload when `projection.permissions` is true', async () => {
       const res = await request(server)
         .post('/api/v1/session.create')
         .send({
@@ -245,20 +249,22 @@ describe('api/v1/session.create', () => {
       const tokenPayload = await ctx.jwt.verify(res.body.token);
       expect(tokenPayload).toEqual(
         expect.objectContaining({
-          id: expect.any(String),
-          permissions: expect.arrayContaining([
-            expect.objectContaining({
-              id: expect.any(String),
-              name: expect.any(String),
-              isSystemPermission: expect.any(Boolean),
-              orgId: acme.id,
-            }),
-          ]),
+          user: expect.objectContaining({
+            id: expect.any(String),
+            permissions: expect.arrayContaining([
+              expect.objectContaining({
+                id: expect.any(String),
+                name: expect.any(String),
+                isSystemPermission: expect.any(Boolean),
+                orgId: acme.id,
+              }),
+            ]),
+          }),
         })
       );
     });
 
-    test('does not add permissions by default', async () => {
+    test('does not add permissions to token payload by default', async () => {
       const res = await request(server)
         .post('/api/v1/session.create')
         .send({
@@ -272,10 +278,12 @@ describe('api/v1/session.create', () => {
       const tokenPayload = await ctx.jwt.verify(res.body.token);
       expect(tokenPayload).toEqual(
         expect.objectContaining({
-          id: expect.any(String),
+          user: expect.objectContaining({
+            id: expect.any(String),
+          }),
         })
       );
-      expect(tokenPayload.permissions).toBeUndefined();
+      expect(tokenPayload.user.permissions).toBeUndefined();
     });
   });
 });

@@ -109,23 +109,25 @@ export default async function createSessionToken(
 
   // generate JWT token
   const payload = {
-    id: user._id.toHexString(),
+    user: {
+      id: user._id.toHexString(),
+    },
   };
 
   // visit token payload with user profile data
   if (projection.profile) {
-    payload.username = user.username;
-    payload.fullName = user.fullName;
-    payload.picture = user.picture || undefined;
-    payload.primaryEmail = UserModel.getPrimaryEmailAddress(user.emails);
+    payload.user.username = user.username;
+    payload.user.fullName = user.fullName;
+    payload.user.picture = user.picture || undefined;
+    payload.user.primaryEmail = UserModel.getPrimaryEmailAddress(user.emails);
   }
 
   // visit token payload with user permissions
   if (projection.permissions) {
     const permissions = await getUserPermissions(db, {
-      userId: payload.id,
+      userId: payload.user.id,
     });
-    payload.permissions = permissions.map((e) => {
+    payload.user.permissions = permissions.map((e) => {
       return {
         ...e,
         resourceId: e.resourceId || undefined, // remove resourceId if unspecified to save bandwidth
