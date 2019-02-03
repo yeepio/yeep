@@ -179,7 +179,7 @@ describe('api/v1/session.create', () => {
       await deletePermission(ctx.db, permission);
     });
 
-    test('includes permissions when `includePermissions` is true', async () => {
+    test('includes permissions when `projection.permissions` is true', async () => {
       const res = await request(server)
         .post('/api/v1/session.create')
         .send({
