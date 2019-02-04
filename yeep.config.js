@@ -9,6 +9,7 @@ module.exports = {
   jwt: {
     type: 'hmac',
     secret: process.env.JWT_SECRET,
+    expiresIn: 300,
   },
   mongo: {
     uri: process.env.MONGODB_URI,
