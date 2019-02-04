@@ -20,6 +20,10 @@
         "secret": {
           "type": "string",
           "minLength": 8
+        },
+        "expiresIn": {
+          "type": "integer",
+          "minimum": 60
         }
       },
       "description": "JWT configuration object"
