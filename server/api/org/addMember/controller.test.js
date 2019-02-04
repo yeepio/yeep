@@ -91,7 +91,7 @@ describe('api/v1/org.addMember', () => {
         permissionId: permission.id,
       });
 
-      session = await createSessionToken(ctx.db, ctx.jwt, {
+      session = await createSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });

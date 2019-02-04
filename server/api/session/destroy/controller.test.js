@@ -35,7 +35,7 @@ describe('api/v1/session.destroy', () => {
   });
 
   test('destroys session and responds as expected', async () => {
-    const session = await createSession(ctx.db, ctx.jwt, {
+    const session = await createSession(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });

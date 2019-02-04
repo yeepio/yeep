@@ -74,7 +74,7 @@ describe('api/v1/user.deactivate', () => {
         // global org
       });
 
-      wileSession = await createSessionToken(ctx.db, ctx.jwt, {
+      wileSession = await createSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
@@ -99,7 +99,7 @@ describe('api/v1/user.deactivate', () => {
         adminId: runner.id,
       });
 
-      runnerSession = await createSessionToken(ctx.db, ctx.jwt, {
+      runnerSession = await createSessionToken(ctx, {
         username: 'runner',
         password: 'fast+furry-ous',
       });

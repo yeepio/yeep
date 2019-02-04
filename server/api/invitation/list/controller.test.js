@@ -75,7 +75,7 @@ describe('api/v1/invitation.list', () => {
         adminId: wile.id,
       });
 
-      wileSession = await createSessionToken(ctx.db, ctx.jwt, {
+      wileSession = await createSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
@@ -94,7 +94,7 @@ describe('api/v1/invitation.list', () => {
         ],
       });
 
-      runnerSession = await createSessionToken(ctx.db, ctx.jwt, {
+      runnerSession = await createSessionToken(ctx, {
         username: 'runner',
         password: 'fast+furry-ous',
       });

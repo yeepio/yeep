@@ -58,7 +58,7 @@ describe('api/v1/org.delete', () => {
         ],
       });
 
-      session = await createSessionToken(ctx.db, ctx.jwt, {
+      session = await createSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });

@@ -39,10 +39,11 @@ const validationSchema = {
   },
 };
 
-async function handler({ request, response, db, jwt }) {
+async function handler(ctx) {
+  const { request, response } = ctx;
   const { user, password, projection } = request.body;
 
-  const { token, expiresIn } = await createSessionToken(db, jwt, {
+  const { token, expiresIn } = await createSessionToken(ctx, {
     password,
     ...(isemail.validate(user)
       ? {

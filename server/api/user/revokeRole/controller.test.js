@@ -86,7 +86,7 @@ describe('api/v1/user.revokeRole', () => {
         permissionId: requiredPermission.id,
       });
 
-      wileSession = await createSessionToken(ctx.db, ctx.jwt, {
+      wileSession = await createSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
@@ -477,7 +477,7 @@ describe('api/v1/user.revokeRole', () => {
         adminId: wazowski.id,
       });
 
-      wileSession = await createSessionToken(ctx.db, ctx.jwt, {
+      wileSession = await createSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });

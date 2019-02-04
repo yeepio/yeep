@@ -23,8 +23,7 @@ const constructMatchQuery = (username, emailAddress) => {
 };
 
 export default async function createSessionToken(
-  db,
-  jwt,
+  { db, jwt },
   { username, emailAddress, password, projection = defaultProjection }
 ) {
   const UserModel = db.model('User');

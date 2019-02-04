@@ -323,7 +323,7 @@ describe('api/v1/invitation.accept', () => {
         permissionId: permission.id,
       });
 
-      wileSession = await createSessionToken(ctx.db, ctx.jwt, {
+      wileSession = await createSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
@@ -405,7 +405,7 @@ describe('api/v1/invitation.accept', () => {
           ],
         });
 
-        runnerSession = await createSessionToken(ctx.db, ctx.jwt, {
+        runnerSession = await createSessionToken(ctx, {
           username: 'runner',
           password: 'fast+furry-ous',
         });
@@ -475,7 +475,7 @@ describe('api/v1/invitation.accept', () => {
           ],
         });
 
-        runnerSession = await createSessionToken(ctx.db, ctx.jwt, {
+        runnerSession = await createSessionToken(ctx, {
           username: 'runner',
           password: 'fast+furry-ous',
         });
@@ -494,7 +494,7 @@ describe('api/v1/invitation.accept', () => {
           ],
         });
 
-        porkySession = await createSessionToken(ctx.db, ctx.jwt, {
+        porkySession = await createSessionToken(ctx, {
           username: 'porky',
           password: "Th-th-th-that's all folks!",
         });
