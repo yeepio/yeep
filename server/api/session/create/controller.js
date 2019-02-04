@@ -1,13 +1,14 @@
 import Joi from 'joi';
 import isemail from 'isemail';
 import compose from 'koa-compose';
+import mapValues from 'lodash/mapValues';
 import { validateRequest } from '../../../middleware/validation';
 import packJSONRPC from '../../../middleware/packJSONRPC';
-import createSessionToken from './service';
+import createSessionToken, { defaultProjection } from './service';
 
 const validationSchema = {
   body: {
-    userKey: Joi.alternatives().try([
+    user: Joi.alternatives().try([
       Joi.string()
         .lowercase()
         .trim()
@@ -26,21 +27,31 @@ const validationSchema = {
       .min(8)
       .max(50)
       .required(),
+    projection: Joi.object(
+      mapValues(defaultProjection, (value) =>
+        Joi.boolean()
+          .optional()
+          .default(value)
+      )
+    )
+      .optional()
+      .default(defaultProjection),
   },
 };
 
 async function handler({ request, response, db, jwt }) {
-  const { userKey, password } = request.body;
+  const { user, password, projection } = request.body;
 
   const { token, expiresIn } = await createSessionToken(db, jwt, {
     password,
-    ...(isemail.validate(userKey)
+    ...(isemail.validate(user)
       ? {
-          emailAddress: request.body.userKey,
+          emailAddress: request.body.user,
         }
       : {
-          username: request.body.userKey,
+          username: request.body.user,
         }),
+    projection,
   });
 
   response.status = 200; // OK

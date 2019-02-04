@@ -4,9 +4,9 @@
 
 ## Description
 
-Creates new session, a.k.a. sign-in, for the designated user.
+Creates new session, a.k.a. sign-in, for the designated user. Returns a JWT token that the user should present in subsequent requests to authenticate their identity.
 
-***
+---
 
 ## Public method
 
@@ -16,10 +16,12 @@ This method is publicly available.
 
 ### Body
 
-- **userKey** _(string)_ — username or email address of the user (required)
+- **user** _(string)_ — username or email address of the user (required)
 - **password** _(string)_ — user password (required)
+- **projection** _(Object)_ — user props to include in JWT token payload (optional)
+  - **permissions** _(boolean)_ — includes user permissions if true (optional; defaults to `false`)
 
-***
+---
 
 ## Returns
 
@@ -30,7 +32,7 @@ This method is publicly available.
 - **token** _(string)_ — session token
 - **expiresIn** _(string)_ — session expiration time (in seconds)
 
-***
+---
 
 ## Example
 
@@ -40,9 +42,9 @@ This method is publicly available.
 POST /api/v1/session.create
 ```
 
-``` json
+```json
 {
-  "userKey": "coyote@acme.com",
+  "user": "coyote@acme.com",
   "password": "catch-the-b1rd$"
 }
 ```
@@ -51,7 +53,7 @@ POST /api/v1/session.create
 
 `200 OK`
 
-``` json
+```json
 {
   "ok": true,
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ",
