@@ -266,11 +266,11 @@ describe('api/v1/invitation.create', () => {
 
     describe('isUsernameEnabled = false', () => {
       beforeAll(async () => {
-        await ctx.settings.set('isUsernameEnabled', false);
+        ctx.config.isUsernameEnabled = false;
       });
 
       afterAll(async () => {
-        await ctx.settings.set('isUsernameEnabled', true);
+        ctx.config.isUsernameEnabled = true;
       });
 
       test('returns error when userKey is username', async () => {

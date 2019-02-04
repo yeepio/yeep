@@ -12,7 +12,6 @@
 
 const handler = (ctx, props) => {
   console.log(props);
-  // const template = compileTemplate(settings.get('passwordResetInitEmailTemplate'));
   // console.log(template(props));
 };
 

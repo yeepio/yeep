@@ -92,8 +92,8 @@ const isUserAuthorized = async ({ request }, next) => {
   await next();
 };
 
-async function handler({ request, response, db, settings }) {
-  const isUsernameEnabled = await settings.get('isUsernameEnabled');
+async function handler({ request, response, db, config }) {
+  const { isUsernameEnabled } = config;
 
   if (isUsernameEnabled && !request.body.username) {
     const boom = Boom.badRequest('Invalid request body');

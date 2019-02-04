@@ -111,8 +111,8 @@ const visitUserPropType = async ({ request }, next) => {
   await next();
 };
 
-const isUserPropValid = async ({ request, settings }, next) => {
-  const isUsernameEnabled = await settings.get('isUsernameEnabled');
+const isUserPropValid = async ({ request, config }, next) => {
+  const { isUsernameEnabled } = config;
   const { isUserPropEmail } = request.session;
 
   // ensure userKey is email formatted - OR - username is enabled

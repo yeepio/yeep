@@ -15,7 +15,6 @@ import serveStatic from 'koa-static';
 import mount from 'koa-mount';
 import * as models from './models';
 import JsonWebToken from './utils/JsonWebToken';
-import SettingsStore from './utils/SettingsStore';
 import FileStorage from './utils/FileStorage';
 import MailService from './utils/MailService';
 import errorHandler from './middleware/errorHandler';
@@ -84,13 +83,10 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 server.teardown = async () => {
-  const { db, settings, bus, mail } = app.context;
+  const { db, bus, mail } = app.context;
 
   // remove event handlers
   bus.removeAllListeners();
-
-  // close setting store
-  await settings.teardown();
 
   mail.teardown();
 
@@ -133,12 +129,8 @@ server.setup = async (config) => {
     ...config.mail,
   });
 
-  // setup settings store
-  const settings = new SettingsStore(db);
-  await settings.setup();
-
   // populate app context
-  app.context.settings = settings;
+  app.context.config = config;
   app.context.bus = bus;
   app.context.db = db;
   app.context.jwt = jwt;

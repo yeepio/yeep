@@ -31,8 +31,8 @@ const validationSchema = {
   },
 };
 
-async function handler({ request, response, db, bus, settings }) {
-  const isUsernameEnabled = await settings.get('isUsernameEnabled');
+async function handler({ request, response, db, bus, config }) {
+  const { isUsernameEnabled } = config;
   const { userKey, tokenExpiresInSeconds } = request.body;
 
   // check if userKey is email formatted

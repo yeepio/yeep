@@ -260,7 +260,7 @@ describe('api/v1/org.create', () => {
     let session;
 
     beforeAll(async () => {
-      await ctx.settings.set('isOrgCreationOpen', false);
+      ctx.config.isOrgCreationOpen = false;
 
       user = await createUser(ctx.db, {
         username: 'wile',
@@ -283,7 +283,7 @@ describe('api/v1/org.create', () => {
     });
 
     afterAll(async () => {
-      await ctx.settings.set('isOrgCreationOpen', true);
+      ctx.config.isOrgCreationOpen = true;
       await destroySessionToken(ctx.db, session);
       await deleteUser(ctx.db, user);
     });
