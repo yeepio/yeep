@@ -140,7 +140,7 @@ describe('api/v1/user.deactivate', () => {
       res = await request(server)
         .post('/api/v1/session.create')
         .send({
-          userKey: 'runner',
+          user: 'runner',
           password: 'fast+furry-ous',
         });
 
@@ -201,7 +201,7 @@ describe('api/v1/user.deactivate', () => {
       res = await request(server)
         .post('/api/v1/session.create')
         .send({
-          userKey: 'runner',
+          user: 'runner',
           password: 'fast+furry-ous',
         });
 
