@@ -23,7 +23,7 @@ const constructMatchQuery = (username, emailAddress) => {
 };
 
 export default async function createSessionToken(
-  { db, jwt },
+  { db, jwt, config },
   { username, emailAddress, password, projection = defaultProjection }
 ) {
   const UserModel = db.model('User');
@@ -93,8 +93,8 @@ export default async function createSessionToken(
     throw new InvalidCredentialsError('Invalid username or password credentials');
   }
 
-  // set expiration time
-  const expiresIn = 7 * 24 * 60 * 60; // 7 days (in seconds)
+  // extract expiresIn from config
+  const expiresIn = config.jwt.expiresIn;
 
   // create authentication token
   const TokenModel = db.model('Token');
