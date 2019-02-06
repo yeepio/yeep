@@ -34,11 +34,12 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 
 ### Session
 
-| Method                                            | Description                                           |
-| :------------------------------------------------ | :---------------------------------------------------- |
-| **[session.create](methods/session.create.md)**   | Creates new session, a.k.a. sign-in                   |
-| **[session.destroy](methods/session.destroy.md)** | Destroys an existing session, a.k.a sign-out          |
-| **[session.info](methods/session.info.md)**       | Retrieves information on the currently active session |
+| Method                                            | Description                                                                  |
+| :------------------------------------------------ | :--------------------------------------------------------------------------- |
+| **[session.create](methods/session.create.md)**   | Creates new session, a.k.a. sign-in                                          |
+| **[session.destroy](methods/session.destroy.md)** | Destroys an existing session, a.k.a sign-out                                 |
+| **[session.info](methods/session.info.md)**       | Retrieves information on the currently active session                        |
+| **[session.refresh](methods/session.refresh.md)** | Refreshes an existing session that is about to expire or has already expired |
 
 ### Permission
 
@@ -64,6 +65,6 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 
 | Method                                                | Description                                    |
 | :---------------------------------------------------- | :--------------------------------------------- |
-| **[invitation.create](methods/invitation.create.md)** | Invites user to join org                       |
 | **[invitation.accept](methods/invitation.accept.md)** | Adds user to org by redeeming invitation token |
+| **[invitation.create](methods/invitation.create.md)** | Invites user to join org                       |
 | **[invitation.list](methods/invitation.list.md)**     | Lists pending invitations                      |
