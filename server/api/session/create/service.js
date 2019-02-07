@@ -1,5 +1,6 @@
 import addSeconds from 'date-fns/add_seconds';
 import isBefore from 'date-fns/is_before';
+import { ObjectId } from 'mongodb';
 import {
   UserNotFoundError,
   InvalidCredentialsError,
@@ -22,14 +23,9 @@ const constructMatchQuery = (username, emailAddress) => {
   };
 };
 
-export default async function createSessionToken(
-  { db, jwt, config },
-  { username, emailAddress, password, scope = defaultScope }
-) {
+export async function getUserByPasswordCredentials({ db }, { username, emailAddress, password }) {
   const UserModel = db.model('User');
   const CredentialsModel = db.model('Credentials');
-  const TokenModel = db.model('Token');
-
   const normalizedEmailAddress = emailAddress && UserModel.normalizeEmailAddress(emailAddress);
 
   // retrieve user from db
@@ -94,24 +90,39 @@ export default async function createSessionToken(
     throw new InvalidCredentialsError('Invalid username or password credentials');
   }
 
-  // create authentication token
+  return {
+    id: user._id.toHexString(),
+    username: user.username,
+    fullName: user.fullName,
+    picture: user.picture,
+    emails: user.emails,
+  };
+}
+
+export async function issueAccessAndRefreshTokens(
+  { db, jwt, config },
+  { user, scope = defaultScope }
+) {
+  const TokenModel = db.model('Token');
+  const UserModel = db.model('User');
   const now = new Date();
+
   const authToken = await TokenModel.create({
     secret: TokenModel.generateSecret({ length: 24 }),
     type: 'AUTHENTICATION',
     payload: {},
-    user: user._id,
+    user: ObjectId(user.id),
     expiresAt: addSeconds(now, config.accessToken.lifetimeInSeconds),
   });
 
-  // generate JWT token
+  // build accessToken payload
   const payload = {
     user: {
-      id: user._id.toHexString(),
+      id: user.id,
     },
   };
 
-  // visit token payload with user profile data
+  // visit accessToken payload with user profile data
   if (scope.profile) {
     payload.user.username = user.username;
     payload.user.fullName = user.fullName;
@@ -119,11 +130,9 @@ export default async function createSessionToken(
     payload.user.primaryEmail = UserModel.getPrimaryEmailAddress(user.emails);
   }
 
-  // visit token payload with user permissions
+  // visit accessToken payload with user permissions
   if (scope.permissions) {
-    const permissions = await getUserPermissions(db, {
-      userId: payload.user.id,
-    });
+    const permissions = await getUserPermissions(db, { userId: user.id });
     payload.user.permissions = permissions.map((e) => {
       return {
         ...e,
@@ -142,9 +151,9 @@ export default async function createSessionToken(
       secret: TokenModel.generateSecret({ length: 60 }),
       type: 'SESSION_REFRESH',
       payload: {
-        authTokenSecret: authToken.secret,
+        accessTokenSecret: authToken.secret,
       },
-      user: user._id,
+      user: ObjectId(user.id),
       expiresAt: addSeconds(now, config.refreshToken.lifetimeInSeconds),
     }),
   ]);
@@ -153,4 +162,16 @@ export default async function createSessionToken(
     accessToken,
     refreshToken: refreshToken.secret,
   };
+}
+
+export default async function createSessionToken(
+  ctx,
+  { username, emailAddress, password, scope = defaultScope }
+) {
+  const user = await getUserByPasswordCredentials(ctx, {
+    username,
+    emailAddress,
+    password,
+  });
+  return issueAccessAndRefreshTokens(ctx, { user, scope });
 }
