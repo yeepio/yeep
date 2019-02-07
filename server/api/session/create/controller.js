@@ -4,7 +4,7 @@ import compose from 'koa-compose';
 import mapValues from 'lodash/mapValues';
 import { validateRequest } from '../../../middleware/validation';
 import packJSONRPC from '../../../middleware/packJSONRPC';
-import createSessionToken, { defaultProjection } from './service';
+import createSessionToken, { defaultScope } from './service';
 
 const validationSchema = {
   body: {
@@ -27,39 +27,33 @@ const validationSchema = {
       .min(8)
       .max(50)
       .required(),
-    projection: Joi.object(
-      mapValues(defaultProjection, (value) =>
+    scope: Joi.object(
+      mapValues(defaultScope, (value) =>
         Joi.boolean()
           .optional()
           .default(value)
       )
     )
       .optional()
-      .default(defaultProjection),
+      .default(defaultScope),
   },
 };
 
 async function handler(ctx) {
   const { request, response } = ctx;
-  const { user, password, projection } = request.body;
+  const { user, password, scope } = request.body;
 
-  const { token, expiresIn } = await createSessionToken(ctx, {
-    password,
-    ...(isemail.validate(user)
-      ? {
-          emailAddress: request.body.user,
-        }
-      : {
-          username: request.body.user,
-        }),
-    projection,
-  });
+  const props = { password, scope };
+  if (isemail.validate(user)) {
+    props.emailAddress = user;
+  } else {
+    props.username = user;
+  }
+
+  const session = await createSessionToken(ctx, props);
 
   response.status = 200; // OK
-  response.body = {
-    token,
-    expiresIn,
-  };
+  response.body = session;
 }
 
 export default compose([packJSONRPC, validateRequest(validationSchema), handler]);

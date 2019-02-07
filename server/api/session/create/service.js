@@ -7,7 +7,7 @@ import {
 } from '../../../constants/errors';
 import { getUserPermissions } from '../../user/info/service';
 
-export const defaultProjection = {
+export const defaultScope = {
   permissions: false,
   profile: false,
 };
@@ -24,10 +24,11 @@ const constructMatchQuery = (username, emailAddress) => {
 
 export default async function createSessionToken(
   { db, jwt, config },
-  { username, emailAddress, password, projection = defaultProjection }
+  { username, emailAddress, password, scope = defaultScope }
 ) {
   const UserModel = db.model('User');
   const CredentialsModel = db.model('Credentials');
+  const TokenModel = db.model('Token');
 
   const normalizedEmailAddress = emailAddress && UserModel.normalizeEmailAddress(emailAddress);
 
@@ -93,17 +94,14 @@ export default async function createSessionToken(
     throw new InvalidCredentialsError('Invalid username or password credentials');
   }
 
-  // extract expiresIn from config
-  const expiresIn = config.jwt.expiresIn;
-
   // create authentication token
-  const TokenModel = db.model('Token');
-  const token = await TokenModel.create({
+  const now = new Date();
+  const authToken = await TokenModel.create({
     secret: TokenModel.generateSecret({ length: 24 }),
     type: 'AUTHENTICATION',
     payload: {},
     user: user._id,
-    expiresAt: addSeconds(new Date(), expiresIn),
+    expiresAt: addSeconds(now, config.accessToken.lifetimeInSeconds),
   });
 
   // generate JWT token
@@ -114,7 +112,7 @@ export default async function createSessionToken(
   };
 
   // visit token payload with user profile data
-  if (projection.profile) {
+  if (scope.profile) {
     payload.user.username = user.username;
     payload.user.fullName = user.fullName;
     payload.user.picture = user.picture || undefined;
@@ -122,7 +120,7 @@ export default async function createSessionToken(
   }
 
   // visit token payload with user permissions
-  if (projection.permissions) {
+  if (scope.permissions) {
     const permissions = await getUserPermissions(db, {
       userId: payload.user.id,
     });
@@ -134,15 +132,25 @@ export default async function createSessionToken(
     });
   }
 
-  // issue JWT token
-  const authToken = await jwt.sign(payload, {
-    jwtid: token.secret,
-    expiresIn,
-  });
+  // issue access + refresh tokens
+  const [accessToken, refreshToken] = await Promise.all([
+    jwt.sign(payload, {
+      jwtid: authToken.secret,
+      expiresIn: config.accessToken.lifetimeInSeconds,
+    }),
+    TokenModel.create({
+      secret: TokenModel.generateSecret({ length: 60 }),
+      type: 'SESSION_REFRESH',
+      payload: {
+        authTokenSecret: authToken.secret,
+      },
+      user: user._id,
+      expiresAt: addSeconds(now, config.refreshToken.lifetimeInSeconds),
+    }),
+  ]);
 
   return {
-    id: token._id.toHexString(), // as hex string
-    token: authToken,
-    expiresIn: expiresIn * 1000, // convert to milliseconds
+    accessToken,
+    refreshToken: refreshToken.secret,
   };
 }

@@ -6,10 +6,13 @@ require('dotenv').config({
 module.exports = {
   baseUrl: process.env.BASE_URL,
   port: 5000,
-  jwt: {
+  accessToken: {
     type: 'hmac',
     secret: process.env.JWT_SECRET,
-    expiresIn: 300,
+    lifetimeInSeconds: 300, // i.e. 5 mins
+  },
+  refreshToken: {
+    lifetimeInSeconds: 3 * 24 * 60 * 60, // i.e. 3 days
   },
   mongo: {
     uri: process.env.MONGODB_URI,
