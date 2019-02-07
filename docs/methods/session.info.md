@@ -30,7 +30,7 @@ Requestor must be authenticated.
 
 ```
 POST /api/v1/session.info
-Authorization: `Bearer ${authToken}`
+Authorization: `Bearer ${accessToken}`
 ```
 
 **Response**

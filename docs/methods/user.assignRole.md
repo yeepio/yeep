@@ -39,7 +39,7 @@ Requestor must be authenticated and assigned with the `yeep.role.assignment.writ
 
 ```
 POST /api/v1/user.assignRole
-Authorization: `Bearer ${authToken}`
+Authorization: `Bearer ${accessToken}`
 ```
 
 ```json

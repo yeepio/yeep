@@ -50,7 +50,7 @@ Users are able to set their own profile picture without explicit permission.
 
 ```
 POST /api/v1/user.setPicture
-Authorization: `Bearer ${authToken}`
+Authorization: `Bearer ${accessToken}`
 multipart/form-data
 ```
 

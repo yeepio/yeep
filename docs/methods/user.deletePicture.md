@@ -42,7 +42,7 @@ Users are able to delete their own profile picture without explicit permissions.
 
 ```
 POST /api/v1/user.deletePicture
-Authorization: `Bearer ${authToken}`
+Authorization: `Bearer ${accessToken}`
 ```
 
 ```json

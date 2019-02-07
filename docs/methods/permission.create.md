@@ -40,7 +40,7 @@ _Please note: global permissions can be applied to any org._
 
 ```
 POST /api/v1/permission.create
-Authorization: `Bearer ${authToken}`
+Authorization: `Bearer ${accessToken}`
 ```
 
 ```json

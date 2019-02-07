@@ -31,7 +31,7 @@ Requestor must be authenticated.
 
 ```
 POST /api/v1/session.destroy
-Authorization: `Bearer ${authToken}`
+Authorization: `Bearer ${accessToken}`
 ```
 
 **Response**
