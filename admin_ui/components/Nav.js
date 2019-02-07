@@ -27,31 +27,29 @@ const Nav = () => {
           <a href="#top">Sessions</a>
         </li>
       </ul>
-      {
-        <style jsx>{`
-          nav {
-            /* Min height of the nav is the viewport height minus the 4rem of the header */
-            min-height: calc(100vh - 4rem);
-          }
-          nav a {
-            color: #22292f;
-            text-decoration: none;
-            /*
+      <style jsx>{`
+        nav {
+          /* Min height of the nav is the viewport height minus the 4rem of the header */
+          min-height: calc(100vh - 4rem);
+        }
+        nav a {
+          color: #22292f;
+          text-decoration: none;
+          /*
               0.8rem ~= 12.8 px + 18px line height == 43.6px which brings us close to
               the 44px "thumbprint" height we're after
              */
-            padding: 0.8rem 2rem;
-            display: block;
-            border-bottom: 1px solid white;
-          }
-          nav a:hover {
-              background-color:white;
-          }
-          nav a.selected {
-              background-color:white;
-          }
-        `}</style>
-      }
+          padding: 0.8rem 2rem;
+          display: block;
+          border-bottom: 1px solid white;
+        }
+        nav a:hover {
+          background-color: white;
+        }
+        nav a.selected {
+          background-color: white;
+        }
+      `}</style>
     </nav>
   );
 };

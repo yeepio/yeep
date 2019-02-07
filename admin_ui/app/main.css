@@ -29,3 +29,57 @@ a:hover {
         @apply text-2xl;
     }
 }
+
+/* Helper class: Add to any encompassing element and it'll ensure that nested
+p, h1 and h2 have a bottom margin
+ */
+.yeep-text p,
+.yeep-text h1,
+.yeep-text h2 {
+    @apply mb-4;
+}
+
+/* Buttons */
+.btn {
+    @apply border border-blue bg-blue text-white font-bold py-2 px-4 rounded;
+    text-decoration:none;
+    line-height:1.5;
+}
+.btn:hover {
+    @apply bg-blue-dark text-white;
+}
+.btn-secondary {
+    @apply border border-blue text-blue font-bold py-2 px-4 rounded;
+    text-decoration:none;
+    line-height:1.5;
+}
+.btn-secondary:hover {
+    @apply bg-grey-light;
+}
+a.btn,
+a.btn-secondary {
+    display:inline-block;
+}
+
+/* Form elements: fieldset */
+fieldset {
+    @apply border border-grey p-8;
+    position:relative;
+}
+legend {
+    @apply px-3;
+    display:block;
+    position:absolute;
+    background:white;
+    top:-0.8rem;
+    left:1.2rem;
+}
+
+/* input fields */
+input[type="text"],
+input[type="password"] {
+    @apply border border-grey p-2 rounded;
+    line-height:1.5;
+    display:inline-block;
+}
+
