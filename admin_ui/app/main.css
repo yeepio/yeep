@@ -78,8 +78,28 @@ legend {
 /* input fields */
 input[type="text"],
 input[type="password"] {
-    @apply border border-grey p-2 rounded;
+    @apply border border-grey p-2 rounded w-full;
     line-height:1.5;
-    display:inline-block;
+    display:block;
+}
+
+/* Form layout */
+.form-group label {
+    @apply mb-1;
+    display:block;
+}
+@screen sm {
+    .form-group {
+        display:flex;
+        align-items: center;
+    }
+    .form-group label {
+        @apply mb-0 mr-3 w-1/4;
+        display:block;
+    }
+    .form-group input[type="text"] {
+        @apply w-auto;
+        display:inline-block;
+    }
 }
 
