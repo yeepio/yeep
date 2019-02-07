@@ -104,7 +104,7 @@ describe('api/v1/user.revokePermission', () => {
     test('returns error when `userId` contains invalid characters', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokePermission')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           userId: '507f1f77bcf86cd79943901@',
         });
@@ -124,7 +124,7 @@ describe('api/v1/user.revokePermission', () => {
     test('returns error when `userId` contains more than 24 characters', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokePermission')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           userId: '507f1f77bcf86cd7994390112',
         });
@@ -144,7 +144,7 @@ describe('api/v1/user.revokePermission', () => {
     test('returns error when `userId` contains less than 24 characters', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokePermission')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           userId: '507f1f77bcf86cd79943901',
         });
@@ -164,7 +164,7 @@ describe('api/v1/user.revokePermission', () => {
     test('returns error when `userId` is unspecified', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokePermission')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({});
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -182,7 +182,7 @@ describe('api/v1/user.revokePermission', () => {
     test('returns error when `orgId` contains invalid characters', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokePermission')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           userId: wile.id,
           orgId: '507f1f77bcf86cd79943901@',
@@ -203,7 +203,7 @@ describe('api/v1/user.revokePermission', () => {
     test('returns error when `orgId` contains more than 24 characters', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokePermission')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           userId: wile.id,
           orgId: '507f1f77bcf86cd7994390112',
@@ -224,7 +224,7 @@ describe('api/v1/user.revokePermission', () => {
     test('returns error when `orgId` contains less than 24 characters', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokePermission')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           userId: wile.id,
           orgId: '507f1f77bcf86cd79943901',
@@ -245,7 +245,7 @@ describe('api/v1/user.revokePermission', () => {
     test('returns error when `permissionId` contains invalid characters', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokePermission')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           userId: wile.id,
           orgId: '507f1f77bcf86cd799439012', // some random object id
@@ -267,7 +267,7 @@ describe('api/v1/user.revokePermission', () => {
     test('returns error when `permissionId` contains more than 24 characters', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokePermission')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           userId: wile.id,
           orgId: '507f1f77bcf86cd799439012', // some random object id
@@ -289,7 +289,7 @@ describe('api/v1/user.revokePermission', () => {
     test('returns error when `permissionId` contains less than 24 characters', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokePermission')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           userId: wile.id,
           orgId: '507f1f77bcf86cd799439012', // some random object id
@@ -311,7 +311,7 @@ describe('api/v1/user.revokePermission', () => {
     test('returns error when `permissionId` is unspecified', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokePermission')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           userId: wile.id,
         });
@@ -331,7 +331,7 @@ describe('api/v1/user.revokePermission', () => {
     test('returns error when payload contains unknown properties', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokePermission')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           userId: wile.id,
           permissionId: requestedPermission.id,
@@ -353,7 +353,7 @@ describe('api/v1/user.revokePermission', () => {
     test('returns error when user does not exist', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokePermission')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           userId: '507f191e810c19729de860ea', // some random object id
           permissionId: requestedPermission.id,
@@ -373,7 +373,7 @@ describe('api/v1/user.revokePermission', () => {
     test('returns error when permission assignment does not exist', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokePermission')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           userId: wile.id,
           permissionId: '507f191e810c19729de860ea', // some random object id
@@ -399,7 +399,7 @@ describe('api/v1/user.revokePermission', () => {
 
       const res = await request(server)
         .post('/api/v1/user.revokePermission')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           orgId: acme.id,
           userId: wile.id,
@@ -496,7 +496,7 @@ describe('api/v1/user.revokePermission', () => {
     test('returns error when user permission scope does not match the designated permission assignment org', async () => {
       const res = await request(server)
         .post('/api/v1/user.revokePermission')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           orgId: monsters.id,
           userId: wazowski.id,

@@ -77,7 +77,7 @@ describe('api/v1/role.create', () => {
   test('returns error when role already exists', async () => {
     const res = await request(server)
       .post('/api/v1/role.create')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         name: 'admin',
         description: 'This is a test',
@@ -98,7 +98,7 @@ describe('api/v1/role.create', () => {
   test('creates new role and returns expected response', async () => {
     const res = await request(server)
       .post('/api/v1/role.create')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         name: 'acme:manager',
         description: 'This is a test',

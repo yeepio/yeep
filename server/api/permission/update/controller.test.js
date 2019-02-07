@@ -70,7 +70,7 @@ describe('api/v1/permission.update', () => {
   test('returns error when permission does not exist', async () => {
     const res = await request(server)
       .post('/api/v1/permission.update')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: '5b2d5dd0cd86b77258e16d39', // some random objectid
         name: 'acme.tost',
@@ -96,7 +96,7 @@ describe('api/v1/permission.update', () => {
 
     const res = await request(server)
       .post('/api/v1/permission.update')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: permission.id,
         name: 'acme.tost',
@@ -123,7 +123,7 @@ describe('api/v1/permission.update', () => {
 
     const res = await request(server)
       .post('/api/v1/permission.update')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: permission.id,
         name: 'acme.tost',
@@ -159,7 +159,7 @@ describe('api/v1/permission.update', () => {
 
     const res = await request(server)
       .post('/api/v1/permission.update')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: permission.id,
         name: 'acme.tost',

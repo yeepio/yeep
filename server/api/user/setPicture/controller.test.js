@@ -107,7 +107,7 @@ describe('api/v1/user.setPicture', () => {
     test('sets user profile picture', async () => {
       let res = await request(server)
         .post('/api/v1/user.setPicture')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .attach('picture', path.resolve(__dirname, './__tests__/runner.png'))
         .field('id', runner.id);
 
@@ -130,7 +130,7 @@ describe('api/v1/user.setPicture', () => {
     test('returns error when `id` contains invalid characters', async () => {
       const res = await request(server)
         .post('/api/v1/user.setPicture')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .attach('picture', path.resolve(__dirname, './__tests__/coyote.jpg'))
         .field('id', '507f1f77bcf86cd79943901@');
       expect(res.status).toBe(200);
@@ -149,7 +149,7 @@ describe('api/v1/user.setPicture', () => {
     test('returns error when `id` contains more than 24 characters', async () => {
       const res = await request(server)
         .post('/api/v1/user.setPicture')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .attach('picture', path.resolve(__dirname, './__tests__/coyote.jpg'))
         .field('id', '507f1f77bcf86cd7994390112');
       expect(res.status).toBe(200);
@@ -168,7 +168,7 @@ describe('api/v1/user.setPicture', () => {
     test('returns error when `id` contains less than 24 characters', async () => {
       const res = await request(server)
         .post('/api/v1/user.setPicture')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .attach('picture', path.resolve(__dirname, './__tests__/coyote.jpg'))
         .field('id', '507f1f77bcf86cd79943901');
       expect(res.status).toBe(200);
@@ -187,7 +187,7 @@ describe('api/v1/user.setPicture', () => {
     test('returns error when `id` is unspecified', async () => {
       const res = await request(server)
         .post('/api/v1/user.setPicture')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .attach('picture', path.resolve(__dirname, './__tests__/coyote.jpg'));
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -205,7 +205,7 @@ describe('api/v1/user.setPicture', () => {
     test('returns error when payload contains unknown properties', async () => {
       const res = await request(server)
         .post('/api/v1/user.setPicture')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .attach('picture', path.resolve(__dirname, './__tests__/coyote.jpg'))
         .field('id', '507f1f77bcf86cd799439011')
         .field('foo', 'bar');
@@ -225,7 +225,7 @@ describe('api/v1/user.setPicture', () => {
     test('returns error with invalid permission scope', async () => {
       const res = await request(server)
         .post('/api/v1/user.setPicture')
-        .set('Authorization', `Bearer ${runnerSession.token}`)
+        .set('Authorization', `Bearer ${runnerSession.accessToken}`)
         .attach('picture', path.resolve(__dirname, './__tests__/coyote.jpg'))
         .field('id', wile.id);
       expect(res.status).toBe(200);
@@ -241,7 +241,7 @@ describe('api/v1/user.setPicture', () => {
     test('can set their own profile picture', async () => {
       let res = await request(server)
         .post('/api/v1/user.setPicture')
-        .set('Authorization', `Bearer ${runnerSession.token}`)
+        .set('Authorization', `Bearer ${runnerSession.accessToken}`)
         .attach('picture', path.resolve(__dirname, './__tests__/runner.png'))
         .field('id', runner.id);
 

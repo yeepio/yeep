@@ -42,7 +42,7 @@ describe('api/v1/session.destroy', () => {
 
     const res = await request(server)
       .post('/api/v1/session.destroy')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send();
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({

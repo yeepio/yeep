@@ -355,7 +355,7 @@ describe('api/v1/invitation.accept', () => {
 
       const res = await request(server)
         .post('/api/v1/invitation.accept')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           token,
         });
@@ -422,7 +422,7 @@ describe('api/v1/invitation.accept', () => {
 
         const res = await request(server)
           .post('/api/v1/invitation.accept')
-          .set('Authorization', `Bearer ${runnerSession.token}`)
+          .set('Authorization', `Bearer ${runnerSession.accessToken}`)
           .send({
             token,
           });
@@ -526,7 +526,7 @@ describe('api/v1/invitation.accept', () => {
 
         const res = await request(server)
           .post('/api/v1/invitation.accept')
-          .set('Authorization', `Bearer ${runnerSession.token}`)
+          .set('Authorization', `Bearer ${runnerSession.accessToken}`)
           .send({
             token,
           });
@@ -556,7 +556,7 @@ describe('api/v1/invitation.accept', () => {
       test('pretends token does not exist when requestor does not match the invitee', async () => {
         const res = await request(server)
           .post('/api/v1/invitation.accept')
-          .set('Authorization', `Bearer ${porkySession.token}`)
+          .set('Authorization', `Bearer ${porkySession.accessToken}`)
           .send({
             token,
           });

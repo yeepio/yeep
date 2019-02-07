@@ -45,7 +45,7 @@ describe('api/v1/session.info', () => {
   test('returns session info as expected', async () => {
     const res = await request(server)
       .post('/api/v1/session.info')
-      .set('Authorization', `Bearer ${session.token}`);
+      .set('Authorization', `Bearer ${session.accessToken}`);
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual(

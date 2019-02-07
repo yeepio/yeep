@@ -109,7 +109,7 @@ describe('api/v1/org.removeMember', () => {
     test('returns error when `orgId` is unknown', async () => {
       const res = await request(server)
         .post('/api/v1/org.removeMember')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           orgId: '507f1f77bcf86cd799439012', // i.e. some random ID
           userId: runner.id,
@@ -128,7 +128,7 @@ describe('api/v1/org.removeMember', () => {
     test('returns error when `userId` is unknown', async () => {
       const res = await request(server)
         .post('/api/v1/org.removeMember')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           orgId: org.id,
           userId: '507f1f77bcf86cd799439012', // i.e. some random ID
@@ -147,7 +147,7 @@ describe('api/v1/org.removeMember', () => {
     test('returns error when user is NOT a member of org', async () => {
       const res = await request(server)
         .post('/api/v1/org.removeMember')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           orgId: org.id,
           userId: runner.id,
@@ -170,7 +170,7 @@ describe('api/v1/org.removeMember', () => {
 
       const res = await request(server)
         .post('/api/v1/org.removeMember')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           userId: runner.id,
           orgId: org.id,

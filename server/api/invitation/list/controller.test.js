@@ -189,7 +189,7 @@ describe('api/v1/invitation.list', () => {
       test('returns list of invitations', async () => {
         const res = await request(server)
           .post('/api/v1/invitation.list')
-          .set('Authorization', `Bearer ${wileSession.token}`)
+          .set('Authorization', `Bearer ${wileSession.accessToken}`)
           .send();
 
         expect(res.status).toBe(200);
@@ -227,7 +227,7 @@ describe('api/v1/invitation.list', () => {
       test('limits number of invitations using `limit` param', async () => {
         const res = await request(server)
           .post('/api/v1/invitation.list')
-          .set('Authorization', `Bearer ${wileSession.token}`)
+          .set('Authorization', `Bearer ${wileSession.accessToken}`)
           .send({
             limit: 1,
           });
@@ -239,7 +239,7 @@ describe('api/v1/invitation.list', () => {
       test('paginates through invitations using `cursor` param', async () => {
         const res = await request(server)
           .post('/api/v1/invitation.list')
-          .set('Authorization', `Bearer ${wileSession.token}`)
+          .set('Authorization', `Bearer ${wileSession.accessToken}`)
           .send({
             limit: 2,
           });
@@ -250,7 +250,7 @@ describe('api/v1/invitation.list', () => {
 
         const res1 = await request(server)
           .post('/api/v1/invitation.list')
-          .set('Authorization', `Bearer ${wileSession.token}`)
+          .set('Authorization', `Bearer ${wileSession.accessToken}`)
           .send({
             limit: 1,
           });
@@ -263,7 +263,7 @@ describe('api/v1/invitation.list', () => {
 
         const res2 = await request(server)
           .post('/api/v1/invitation.list')
-          .set('Authorization', `Bearer ${wileSession.token}`)
+          .set('Authorization', `Bearer ${wileSession.accessToken}`)
           .send({
             limit: 1,
             cursor: res1.body.nextCursor,
@@ -278,7 +278,7 @@ describe('api/v1/invitation.list', () => {
       test('filters invitations using `user` param', async () => {
         const res = await request(server)
           .post('/api/v1/invitation.list')
-          .set('Authorization', `Bearer ${wileSession.token}`)
+          .set('Authorization', `Bearer ${wileSession.accessToken}`)
           .send({
             user: runner.id,
           });
@@ -300,7 +300,7 @@ describe('api/v1/invitation.list', () => {
       test('filters invitations using `org` param', async () => {
         const res = await request(server)
           .post('/api/v1/invitation.list')
-          .set('Authorization', `Bearer ${wileSession.token}`)
+          .set('Authorization', `Bearer ${wileSession.accessToken}`)
           .send({
             org: acme.id,
           });
@@ -320,7 +320,7 @@ describe('api/v1/invitation.list', () => {
       test('filters invitations using `user` + `org` params', async () => {
         const res = await request(server)
           .post('/api/v1/invitation.list')
-          .set('Authorization', `Bearer ${wileSession.token}`)
+          .set('Authorization', `Bearer ${wileSession.accessToken}`)
           .send({
             user: runner.id,
             org: acme.id,

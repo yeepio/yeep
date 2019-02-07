@@ -67,7 +67,7 @@ describe('api/v1/permission.create', () => {
   test('returns error when permission name is reserved', async () => {
     const res = await request(server)
       .post('/api/v1/permission.create')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         name: 'yeep.permission.test',
         description: 'This is a tost',
@@ -91,7 +91,7 @@ describe('api/v1/permission.create', () => {
 
     const res = await request(server)
       .post('/api/v1/permission.create')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         name: 'acme.test',
         description: 'This is a tost',
@@ -119,7 +119,7 @@ describe('api/v1/permission.create', () => {
 
     const res = await request(server)
       .post('/api/v1/permission.create')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         name: 'acme.test',
         description: 'This is a tost',
@@ -142,7 +142,7 @@ describe('api/v1/permission.create', () => {
   test('creates new permission and returns expected response', async () => {
     const res = await request(server)
       .post('/api/v1/permission.create')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         name: 'acme.test',
         description: 'This is a test',

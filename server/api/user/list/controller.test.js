@@ -144,7 +144,7 @@ describe('api/v1/user.list', () => {
     test('returns list of users the requestor has access to', async () => {
       const res = await request(server)
         .post('/api/v1/user.list')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send();
 
       expect(res.status).toBe(200);
@@ -179,7 +179,7 @@ describe('api/v1/user.list', () => {
     test('limits number of users using `limit` param', async () => {
       const res = await request(server)
         .post('/api/v1/user.list')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           limit: 1,
         });
@@ -213,7 +213,7 @@ describe('api/v1/user.list', () => {
     test('paginates through users using `cursor` param', async () => {
       const res = await request(server)
         .post('/api/v1/user.list')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           limit: 2,
         });
@@ -224,7 +224,7 @@ describe('api/v1/user.list', () => {
 
       const res1 = await request(server)
         .post('/api/v1/user.list')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           limit: 1,
         });
@@ -237,7 +237,7 @@ describe('api/v1/user.list', () => {
 
       const res2 = await request(server)
         .post('/api/v1/user.list')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           limit: 1,
           cursor: res1.body.nextCursor,
@@ -252,7 +252,7 @@ describe('api/v1/user.list', () => {
     test('filters users using `q` param', async () => {
       const res = await request(server)
         .post('/api/v1/user.list')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           q: 'por',
         });
@@ -283,7 +283,7 @@ describe('api/v1/user.list', () => {
     test('projects user props using `projection` param', async () => {
       const res = await request(server)
         .post('/api/v1/user.list')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           projection: {
             emails: false,
@@ -327,7 +327,7 @@ describe('api/v1/user.list', () => {
       test('returns empty list of users', async () => {
         const res = await request(server)
           .post('/api/v1/user.list')
-          .set('Authorization', `Bearer ${otherSession.token}`)
+          .set('Authorization', `Bearer ${otherSession.accessToken}`)
           .send();
 
         expect(res.status).toBe(200);

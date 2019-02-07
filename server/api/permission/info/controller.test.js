@@ -69,7 +69,7 @@ describe('api/v1/permission.info', () => {
   test('returns error when permission does not exist', async () => {
     const res = await request(server)
       .post('/api/v1/permission.info')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: '5b2d5dd0cd86b77258e16d39', // some random objectid
       });
@@ -93,7 +93,7 @@ describe('api/v1/permission.info', () => {
 
     const res = await request(server)
       .post('/api/v1/permission.info')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: permission.id,
       });
@@ -119,7 +119,7 @@ describe('api/v1/permission.info', () => {
 
     const res = await request(server)
       .post('/api/v1/permission.info')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: permission.id,
       });
