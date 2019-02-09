@@ -7,7 +7,7 @@ import deletePermission from '../delete/service';
 import createUser from '../../user/create/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import createOrg from '../../org/create/service';
-import createSessionToken from '../../session/create/service';
+import createSession from '../../session/create/service';
 import destroySessionToken from '../../session/destroy/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 import deleteOrg from '../../org/delete/service';
@@ -52,7 +52,7 @@ describe('api/v1/permission.info', () => {
       permissionId: permission.id,
     });
 
-    session = await createSessionToken(ctx, {
+    session = await createSession(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });

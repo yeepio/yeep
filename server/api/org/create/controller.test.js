@@ -5,7 +5,7 @@ import server from '../../../server';
 import deleteOrg from '../delete/service';
 import createOrg from './service';
 import createUser from '../../user/create/service';
-import createSessionToken from '../../session/create/service';
+import createSession from '../../session/create/service';
 import destroySessionToken from '../../session/destroy/service';
 import deleteUser from '../../user/delete/service';
 import getUserInfo from '../../user/info/service';
@@ -61,7 +61,7 @@ describe('api/v1/org.create', () => {
         ],
       });
 
-      session = await createSessionToken(ctx, {
+      session = await createSession(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
@@ -276,7 +276,7 @@ describe('api/v1/org.create', () => {
         ],
       });
 
-      session = await createSessionToken(ctx, {
+      session = await createSession(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });

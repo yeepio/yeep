@@ -6,7 +6,7 @@ import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
 import createOrg from '../../org/create/service';
-import createSessionToken from '../../session/create/service';
+import createSession from '../../session/create/service';
 import destroySessionToken from '../../session/destroy/service';
 import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
@@ -75,7 +75,7 @@ describe('api/v1/invitation.list', () => {
         adminId: wile.id,
       });
 
-      wileSession = await createSessionToken(ctx, {
+      wileSession = await createSession(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
@@ -94,7 +94,7 @@ describe('api/v1/invitation.list', () => {
         ],
       });
 
-      runnerSession = await createSessionToken(ctx, {
+      runnerSession = await createSession(ctx, {
         username: 'runner',
         password: 'fast+furry-ous',
       });

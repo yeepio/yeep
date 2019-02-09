@@ -5,7 +5,7 @@ import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
 import deleteUser from '../../user/delete/service';
-import createSessionToken from '../create/service';
+import createSession from '../create/service';
 
 describe('api/v1/session.refresh', () => {
   let ctx;
@@ -36,7 +36,7 @@ describe('api/v1/session.refresh', () => {
   });
 
   test('refreshes accessToken and redeems refreshToken', async () => {
-    const { accessToken, refreshToken } = await createSessionToken(ctx, {
+    const { accessToken, refreshToken } = await createSession(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
@@ -80,11 +80,11 @@ describe('api/v1/session.refresh', () => {
   });
 
   test('throws error when refreshToken is not applicable to the supplied accessToken', async () => {
-    const { accessToken } = await createSessionToken(ctx, {
+    const { accessToken } = await createSession(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
-    const { refreshToken } = await createSessionToken(ctx, {
+    const { refreshToken } = await createSession(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });

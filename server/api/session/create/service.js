@@ -190,7 +190,7 @@ export async function issueAccessAndRefreshTokens(ctx, props) {
   };
 }
 
-export default async function createSessionToken(
+export default async function createSession(
   ctx,
   { username, emailAddress, password, scope = defaultScope }
 ) {
