@@ -214,3 +214,10 @@ export class InvalidAccessToken extends Error {
     this.code = 10029;
   }
 }
+
+export class InvalidRefreshToken extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10030;
+  }
+}

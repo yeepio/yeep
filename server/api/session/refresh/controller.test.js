@@ -100,7 +100,7 @@ describe('api/v1/session.refresh', () => {
     expect(res.body).toEqual(
       expect.objectContaining({
         ok: false,
-        error: { code: 10027, message: expect.any(String) },
+        error: { code: 10030, message: expect.any(String) },
       })
     );
   });

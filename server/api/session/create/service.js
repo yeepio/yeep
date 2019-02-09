@@ -23,7 +23,20 @@ const constructMatchQuery = (username, emailAddress) => {
   };
 };
 
-export async function getUserByPasswordCredentials({ db }, { username, emailAddress, password }) {
+/**
+ * Verifies password credentials and returns the designated user.
+ * @param {Object} ctx
+ * @property {Object} ctx.db
+ * @param {Object} props
+ * @property {string} [props.username]
+ * @property {string} [props.emailAddress]
+ * @property {string} props.password
+ * @returns {Promise}
+ */
+export async function getUserByPasswordCredentials(ctx, props) {
+  const { db } = ctx;
+  const { username, emailAddress, password } = props;
+
   const UserModel = db.model('User');
   const CredentialsModel = db.model('Credentials');
   const normalizedEmailAddress = emailAddress && UserModel.normalizeEmailAddress(emailAddress);
@@ -99,14 +112,26 @@ export async function getUserByPasswordCredentials({ db }, { username, emailAddr
   };
 }
 
-export async function issueAccessAndRefreshTokens(
-  { db, jwt, config },
-  { user, scope = defaultScope }
-) {
+/**
+ * Issues access + refresh token pair for the designated user.
+ * @param {Object} ctx
+ * @property {Object} ctx.db
+ * @property {Object} ctx.jwt
+ * @property {Object} ctx.config
+ * @param {Object} props
+ * @property {Object} props.user
+ * @property {Object} [ctx.scope]
+ * @return {Promise}
+ */
+export async function issueAccessAndRefreshTokens(ctx, props) {
+  const { db, jwt, config } = ctx;
+  const { user, scope } = props;
+
   const TokenModel = db.model('Token');
   const UserModel = db.model('User');
   const now = new Date();
 
+  // create authToken in db
   const authToken = await TokenModel.create({
     secret: TokenModel.generateSecret({ length: 24 }),
     type: 'AUTHENTICATION',
@@ -115,14 +140,14 @@ export async function issueAccessAndRefreshTokens(
     expiresAt: addSeconds(now, config.accessToken.lifetimeInSeconds),
   });
 
-  // build accessToken payload
+  // set accessToken payload
   const payload = {
     user: {
       id: user.id,
     },
   };
 
-  // visit accessToken payload with user profile data
+  // decorate accessToken payload with user profile data
   if (scope.profile) {
     payload.user.username = user.username;
     payload.user.fullName = user.fullName;
@@ -130,7 +155,7 @@ export async function issueAccessAndRefreshTokens(
     payload.user.primaryEmail = UserModel.getPrimaryEmailAddress(user.emails);
   }
 
-  // visit accessToken payload with user permissions
+  // decorate accessToken payload with user permissions
   if (scope.permissions) {
     const permissions = await getUserPermissions(db, { userId: user.id });
     payload.user.permissions = permissions.map((e) => {
@@ -141,12 +166,13 @@ export async function issueAccessAndRefreshTokens(
     });
   }
 
-  // issue access + refresh tokens
   const [accessToken, refreshToken] = await Promise.all([
+    // sign accessToken
     jwt.sign(payload, {
       jwtid: authToken.secret,
       expiresIn: config.accessToken.lifetimeInSeconds,
     }),
+    // create refreshToken in db
     TokenModel.create({
       secret: TokenModel.generateSecret({ length: 60 }),
       type: 'SESSION_REFRESH',

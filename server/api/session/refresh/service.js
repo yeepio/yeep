@@ -6,6 +6,7 @@ import {
   UserDeactivatedError,
   TokenNotFoundError,
   InvalidAccessToken,
+  InvalidRefreshToken,
 } from '../../../constants/errors';
 import { issueAccessAndRefreshTokens } from '../create/service';
 
@@ -13,8 +14,8 @@ import { issueAccessAndRefreshTokens } from '../create/service';
  * Refreshes the supplied accessToken.
  * @param {Object} ctx
  * @param {Object} props
- * @param {string} props.accessToken
- * @param {string} props.refreshToken
+ * @property {string} props.accessToken
+ * @property {string} props.refreshToken
  * @returns {Promise}
  */
 export default async function refreshSessionToken(ctx, props) {
@@ -40,25 +41,30 @@ export default async function refreshSessionToken(ctx, props) {
       ignoreExpiration: true,
     });
   } catch (err) {
-    throw new TokenNotFoundError('Access token does not exist or has already expired');
+    throw new InvalidAccessToken('Invalid access token; cannot be verified');
   }
 
   // ensure accessToken contains user.id prop
   if (!has(accessTokenPayload, ['user', 'id'])) {
-    throw new InvalidAccessToken('Invalid access token; expected `user.id` payload but found none');
+    throw new InvalidAccessToken(
+      'Invalid access token; expected `user.id` as payload but found none'
+    );
   }
 
   // ensure refreshToken is applicable to the designated accessToken
   if (refreshToken.payload.get('accessTokenSecret') !== accessTokenPayload.jti) {
-    throw new TokenNotFoundError('Refresh token does not exist or has already expired'); // lie with token not found
+    throw new InvalidRefreshToken(
+      'Invalid refresh token; not applicable to the supplied access token'
+    );
   }
 
-  // redeem tokens
   await Promise.all([
+    // redeem refreshToken - it can only be used once
     TokenModel.deleteOne({
       secret: props.refreshToken,
       type: 'SESSION_REFRESH',
     }),
+    // redeem accessToken - client should use the new accessToken from now on
     TokenModel.deleteOne({
       secret: accessTokenPayload.jti,
       type: 'AUTHENTICATION',
