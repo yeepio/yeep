@@ -47,28 +47,63 @@ const PageWrapper = () => {
           most cases:
         </p>
       </div>
-      <fieldset>
+      <fieldset className="mb-6">
         <legend>legend text here</legend>
-        <p className="mb-3">
-          For the majority of our forms we need a horizontal label+field layout. Copying
-          Bootstrap&rsquo;s approach we&rsquo;ll use a <code>&lt;div.form-group&gt;</code> to wrap
-          all label+field pairs:
+        <p className="mb-4">
+          In almost all of our forms we have a horizontal label + text field layout (which should
+          collapse to a vertical layout in mobile viewports). Taking our cue from Bootstrap, we will
+          wrap each label + field with a <code>.form-group</code> class to facilitate this.
         </p>
-        <div className="form-group mb-3">
+        <div className="form-group mb-4">
           <label htmlFor="tempTextField">The label:</label>
           <input id="tempTextField" type="text" placeholder="The text field" />
-        </div>{' '}
-        <div className="form-group mb-3">
+        </div>
+        <p className="mb-4">
+          For viewports larger than Tailwinds 576px breakpoint the layout is as follows:
+        </p>
+        <ul className="mb-4">
+          <li>The <code>&lt;label&gt;</code> will take 25% of the container width</li>
+          <li>The text field / select element will take 50% of the container width</li>
+          <li>Textareas take the full 75% of the container width</li>
+          <li>Validation / neutral messages will appear underneath the form element</li>
+        </ul>
+        <div className="form-group mb-4">
           <label htmlFor="tempTextField2">Another field:</label>
           <input id="tempTextField2" type="text" placeholder="Another text field" />
+          <div className="invalid">An error occured with this field</div>
         </div>
-        <p>
-          <small className="text-grey-darker">
-            The width of <code>&lt;label&gt;</code> elements is set to 1/4 (25%) of the container.
-            For small screens the layout switches to a vertical one (try by resizing this viewport).
-            Oh and by the way this is a <code>&lt;small&gt;</code> tag.
-          </small>
-        </p>
+        <div className="form-group mb-4">
+          <label htmlFor="tempTextField3">This is good:</label>
+          <input id="tempTextField3" type="text" placeholder="Optional" />
+          <div className="valid">Nice one!</div>
+        </div>
+        <div className="form-group mb-4">
+          <label htmlFor="tempTextField4">Helpful layout:</label>
+          <textarea
+            id="tempTextField4"
+            placeholder="Please write your innermost feelings"
+            rows="10"
+          />
+          <div className="neutral">we are joking, do not do this, just give us a joke</div>
+        </div>
+      </fieldset>
+      <fieldset className="mb-6">
+        <legend>Other form elements</legend>
+        <p className="mb-4">A few different layouts and scenarios:</p>
+        <div className="form-group mb-3">
+          <label htmlFor="tempSelect1">Select / dropdown:</label>
+          <select id="tempSelect1">
+            <option value="0">-- Please choose a super power --</option>
+            <option value="1">Option 1</option>
+            <option value="1">Option 2</option>
+            <option value="1">Option 3</option>
+            <option value="1">Option 4</option>
+          </select>
+        </div>
+        <div className="form-group mb-3">
+          <label htmlFor="tempPassword1">Password:</label>
+          <input type="password" id="textPassword1" placeholder="please enter a strong password" />
+        </div>
       </fieldset>
     </div>
   );

@@ -25,9 +25,9 @@ a:hover {
   background: url('../public/yeep-logo-white.svg') no-repeat left center;
 }
 @screen sm {
-    .yeep-logo {
-        @apply text-2xl;
-    }
+  .yeep-logo {
+    @apply text-2xl;
+  }
 }
 
 /* Helper class: Add to any encompassing element and it'll ensure that nested
@@ -36,70 +36,106 @@ p, h1 and h2 have a bottom margin
 .yeep-text p,
 .yeep-text h1,
 .yeep-text h2 {
-    @apply mb-4;
+  @apply mb-4;
 }
 
 /* Buttons */
 .btn {
-    @apply border border-blue bg-blue text-white font-bold py-2 px-4 rounded;
-    text-decoration:none;
-    line-height:1.5;
+  @apply border border-blue bg-blue text-white font-bold py-2 px-4 rounded;
+  text-decoration: none;
+  line-height: 1.5;
 }
 .btn:hover {
-    @apply bg-blue-dark text-white;
+  @apply bg-blue-dark text-white;
 }
 .btn-secondary {
-    @apply border border-blue text-blue font-bold py-2 px-4 rounded;
-    text-decoration:none;
-    line-height:1.5;
+  @apply border border-blue text-blue font-bold py-2 px-4 rounded;
+  text-decoration: none;
+  line-height: 1.5;
 }
 .btn-secondary:hover {
-    @apply bg-grey-light;
+  @apply bg-grey-light;
 }
 a.btn,
 a.btn-secondary {
-    display:inline-block;
+  display: inline-block;
 }
 
 /* Form elements: fieldset */
 fieldset {
-    @apply border border-grey p-8;
-    position:relative;
+  @apply border border-grey p-8;
+  position: relative;
 }
 legend {
-    @apply px-3;
-    display:block;
-    position:absolute;
-    background:white;
-    top:-0.8rem;
-    left:1.2rem;
+  @apply px-3 font-bold;
+  display: block;
+  position: absolute;
+  background: white;
+  top: -0.8rem;
+  left: 1.2rem;
 }
 
-/* input fields */
-input[type="text"],
-input[type="password"] {
-    @apply border border-grey p-2 rounded w-full;
-    line-height:1.5;
-    display:block;
+/* input eleents */
+input[type='text'],
+input[type='password'],
+textarea,
+select {
+  @apply border border-grey p-2 rounded w-full;
+  line-height: 1.5;
+  display: block;
+}
+select {
+  /* For select elements we need to also change the height to match the textfields */
+  height:42px;
 }
 
 /* Form layout */
 .form-group label {
-    @apply mb-1;
-    display:block;
+  @apply mb-1;
+  display: block;
+}
+.form-group .valid,
+.form-group .invalid,
+.form-group .neutral {
+  @apply text-sm text-grey-dark;
+}
+.form-group .valid {
+  @apply text-green-dark;
+}
+.form-group .invalid {
+  @apply text-red;
 }
 @screen sm {
-    .form-group {
-        display:flex;
-        align-items: center;
-    }
-    .form-group label {
-        @apply mb-0 mr-3 w-1/4;
-        display:block;
-    }
-    .form-group input[type="text"] {
-        @apply w-auto;
-        display:inline-block;
-    }
-}
+  /*
+        From the mobile breakpoint and upwards we'll change the 
+        label+input layout to be side by side.
+    */
+  .form-group {
+    display: flex;
+    flex-wrap:wrap;
+    align-items: flex-start;
 
+  }
+  .form-group label {
+    @apply mb-0;
+    flex:0 0 25%;
+    display: block;
+    /* We need the line height to be the same as the height of a "default" form element,
+    i.e. a text field. That is 42 pixels */
+    line-height:2.6rem;
+  }
+  .form-group input[type='text'],
+  .form-group input[type='password'],
+  .form-group select {
+    width:50%;
+  }
+  .form-group textarea {
+    flex:1 1 75%;
+  }
+  .form-group .valid,
+  .form-group .invalid,
+  .form-group .neutral {
+    flex:1 1 100%;
+    margin-left:25%;
+  }
+}
