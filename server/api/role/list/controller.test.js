@@ -109,6 +109,10 @@ describe('api/v1/role.list', () => {
           permissions: expect.arrayContaining([expect.any(String)]),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
+          org: expect.objectContaining({
+            id: expect.any(String),
+            name: expect.any(String),
+          }),
         }),
       ]),
     });
@@ -135,6 +139,10 @@ describe('api/v1/role.list', () => {
           permissions: expect.arrayContaining([expect.any(String)]),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
+          org: expect.objectContaining({
+            id: expect.any(String),
+            name: expect.any(String),
+          }),
         }),
       ]),
       nextCursor: expect.any(String),
