@@ -62,7 +62,10 @@ const PageWrapper = () => {
           For viewports larger than Tailwinds 576px breakpoint the layout is as follows:
         </p>
         <ul className="mb-4">
-          <li>The <code>&lt;label&gt;</code> will take 25% of the container width</li>
+          <li>
+            The <code>&lt;label&gt;</code> will take 25% of the container width (this needs to be
+            fine-tuned <em>after</em> we implement a few of our forms
+          </li>
           <li>The text field / select element will take 50% of the container width</li>
           <li>Textareas take the full 75% of the container width</li>
           <li>Validation / neutral messages will appear underneath the form element</li>
@@ -86,9 +89,17 @@ const PageWrapper = () => {
           />
           <div className="neutral">we are joking, do not do this, just give us a joke</div>
         </div>
+        <div className="form-submit">
+          <p className="mb-4">
+            Submit / cancel buttons can be wrapped inside a <code>.form-submit</code> helper div
+            which gives the appropriate margin:
+          </p>
+          <button className="btn mr-4">Submit this form!</button>
+          <button className="btn-secondary">Cancel and hide</button>
+        </div>
       </fieldset>
       <fieldset className="mb-6">
-        <legend>Other form elements</legend>
+        <legend>Dropdowns and password fields</legend>
         <p className="mb-4">A few different layouts and scenarios:</p>
         <div className="form-group mb-3">
           <label htmlFor="tempSelect1">Select / dropdown:</label>
@@ -103,6 +114,55 @@ const PageWrapper = () => {
         <div className="form-group mb-3">
           <label htmlFor="tempPassword1">Password:</label>
           <input type="password" id="textPassword1" placeholder="please enter a strong password" />
+        </div>
+      </fieldset>
+      <fieldset className="mb-6">
+        <legend>Radio groups and checkbox groups</legend>
+        <p className="mb-4">
+          Groups of checkboxes or radios need to have multiple <code>&lt;label&gt;</code> elements,
+          one for each checkbox (or radio). In this case <code>.form-group</code> cannot help us and
+          we use Tailwind responsive width and flex classes to achieve the same results
+        </p>
+        <div className="sm:flex mb-3">
+          <div className="sm:w-1/4">A &quot;fake&quot; label (div):</div>
+          <div className="sm:w-3/4">
+            <label htmlFor="tempRadio1_1" className="block">
+              <input type="radio" name="tempRadio1" id="tempRadio1_1" className="mr-2" /> Radio
+              group #1
+            </label>
+            <label htmlFor="tempRadio1_2" className="block">
+              <input type="radio" name="tempRadio1" id="tempRadio1_2" className="mr-2" /> Radio
+              group #2
+            </label>
+            <label htmlFor="tempRadio1_3" className="block">
+              <input type="radio" name="tempRadio1" id="tempRadio1_3" className="mr-2" /> Radio
+              group #3
+            </label>
+            <label htmlFor="tempRadio1_4" className="block">
+              <input type="radio" name="tempRadio1" id="tempRadio1_4" className="mr-2" /> Radio
+              group #4
+            </label>
+          </div>
+        </div>
+        <p className="mb-4">
+          I opted to wrap the checkbox or radio button with the <code>&lt;label&gt;</code> element
+          to ensure that no clicks / tap are lost if made in between the element and the label. This
+          can change easily if it does not suit us.
+        </p>
+        <p className="mb-4">
+          Removing the <code>.block</code> classes from each <code>&lt;label&gt;</code> will give us
+          a horizontal layout:
+        </p>
+        <div className="sm:flex">
+          <div className="sm:w-1/4">Horizontal layout:</div>
+          <div className="sm:w-3/4">
+            <label htmlFor="tempCheckbox1" className="mr-3">
+              <input type="checkbox" id="tempCheckbox1" /> Checkbox #1
+            </label>
+            <label htmlFor="tempCheckbox2">
+              <input type="checkbox" id="tempCheckbox2" /> Checkbox #2
+            </label>
+          </div>
         </div>
       </fieldset>
     </div>
