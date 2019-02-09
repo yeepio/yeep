@@ -1,13 +1,30 @@
+import Joi from 'joi';
 import compose from 'koa-compose';
 import Boom from 'boom';
-import { visitSession, isUserAuthenticated } from '../../../middleware/auth';
+import { validateRequest } from '../../../middleware/validation';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import destroySessionToken from './service';
 
-async function handler({ db, request, response }) {
-  const isSessionDestroyed = await destroySessionToken(db, {
-    id: request.session.token.id,
-  });
+const validationSchema = {
+  body: {
+    accessToken: Joi.string()
+      .trim()
+      .min(100)
+      .max(10000)
+      .required(),
+    refreshToken: Joi.string()
+      .trim()
+      .min(6)
+      .max(100)
+      .regex(/^[A-Za-z0-9]*$/, { name: 'refreshToken' })
+      .optional(),
+  },
+};
+
+async function handler(ctx) {
+  const { request, response } = ctx;
+
+  const isSessionDestroyed = await destroySessionToken(ctx, request.body);
 
   if (!isSessionDestroyed) {
     throw Boom.internal();
@@ -16,4 +33,4 @@ async function handler({ db, request, response }) {
   response.status = 200; // OK
 }
 
-export default compose([packJSONRPC, visitSession(), isUserAuthenticated(), handler]);
+export default compose([packJSONRPC, validateRequest(validationSchema), handler]);

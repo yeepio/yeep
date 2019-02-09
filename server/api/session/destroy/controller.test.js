@@ -35,18 +35,35 @@ describe('api/v1/session.destroy', () => {
   });
 
   test('destroys session and responds as expected', async () => {
-    const session = await createSession(ctx, {
+    const { accessToken, refreshToken } = await createSession(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
+    const payload = await ctx.jwt.verify(accessToken);
 
     const res = await request(server)
       .post('/api/v1/session.destroy')
-      .set('Authorization', `Bearer ${session.accessToken}`)
-      .send();
+      .send({
+        accessToken,
+        refreshToken,
+      });
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
       ok: true,
     });
+
+    const TokenModel = ctx.db.model('Token');
+    expect(
+      TokenModel.countDocuments({
+        secret: payload.jti,
+        type: 'AUTHENTICATION',
+      })
+    ).resolves.toBe(0);
+    expect(
+      TokenModel.countDocuments({
+        secret: refreshToken,
+        type: 'SESSION_REFRESH',
+      })
+    ).resolves.toBe(0);
   });
 });
