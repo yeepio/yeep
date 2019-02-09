@@ -64,8 +64,12 @@ Authorization: `Bearer ${accessToken}`
     "isSystemRole": false,
     "usersCount": 5,
     "permissions": [
-      "5b969dc9901e2af192780a34",
+      "5b969dc9901e2af192780a34"
     ],
+    "org": {
+      "id": "8a9295c9901e7af196785a34",
+      "name": "acme"
+    },
     "createdAt": "2017-07-13T05:00:42.145Z",
     "updatedAt": "2017-07-13T05:42:42.222Z"
   }],
