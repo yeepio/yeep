@@ -10,6 +10,7 @@ import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
 import createPermission from '../../permission/create/service';
 import createRole from '../create/service';
+import assignRole from '../../user/assignRole/service';
 import deleteRole from '../delete/service';
 import deletePermission from '../../permission/delete/service';
 
@@ -20,6 +21,7 @@ describe('api/v1/role.list', () => {
   let monsters;
   let permission;
   let roles;
+  let globalRole;
   let session;
 
   beforeAll(async () => {
@@ -58,6 +60,7 @@ describe('api/v1/role.list', () => {
       name: 'acme.code.write',
       description: 'Permission to edit (write, delete, update) source code',
     });
+
     roles = await Promise.all([
       createRole(ctx.db, {
         name: 'acme:developer',
@@ -73,6 +76,17 @@ describe('api/v1/role.list', () => {
       }),
     ]);
 
+    globalRole = await createRole(ctx.db, {
+      name: 'global:role',
+      description: 'Global test role',
+      permissions: [permission.id],
+    });
+
+    await assignRole(ctx.db, {
+      userId: wile.id,
+      roleId: globalRole.id,
+    });
+
     // user "wile" is logged-in
     session = await createSession(ctx, {
       username: 'wile',
@@ -83,6 +97,7 @@ describe('api/v1/role.list', () => {
   afterAll(async () => {
     await destroySession(ctx, session);
     await Promise.all(roles.map((role) => deleteRole(ctx.db, role)));
+    await deleteRole(ctx.db, globalRole);
     await deletePermission(ctx.db, permission);
     await deleteUser(ctx.db, wile);
     await deleteOrg(ctx.db, acme);
@@ -97,6 +112,7 @@ describe('api/v1/role.list', () => {
       .send();
 
     expect(res.status).toBe(200);
+    expect(res.body.roles.length).toBe(3);
     expect(res.body).toMatchObject({
       ok: true,
       roles: expect.arrayContaining([
