@@ -165,6 +165,30 @@ const PageWrapper = () => {
           </div>
         </div>
       </fieldset>
+      <h2 className="mb-4">Filters bar</h2>
+      <p className="mb-6">
+        A fieldset with <code>.flex</code> and a few tailwind helper classes in the elements inside
+        give us our Filters bar:
+      </p>
+      <fieldset className="mb-4">
+        <legend>Filters and quick search</legend>
+        <div className="sm:flex items-center">
+          <select name="tempFilters1" className="w-100 mb-3 sm:mb-0 sm:mr-3">
+            <option value="0">Organisation: All organisations</option>
+          </select>
+          <select name="tempFilters2" className="w-100 mb-3 sm:mb-0 sm:mr-3">
+            <option value="0">Roles: All roles</option>
+          </select>
+          <a href="/admin" className="block whitespace-no-wrap mb-3 sm:mb-0 sm:mr-3">
+            Toggle profile pics <strong>ON</strong>
+          </a>
+          <input type="text" placeholder="quicksearch" className="w-100" />
+        </div>
+      </fieldset>
+      <p className="italic text-grey-dark text-sm">
+        Note: We probably need to fine tune the breakpoint for the Filters bars above so that it
+        collapses to a vertical layout in the md or lg breakpoint instead of sm. To be discussed.
+      </p>
     </div>
   );
 };
