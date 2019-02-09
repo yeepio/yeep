@@ -157,7 +157,7 @@ describe('api/v1/user.deactivate', () => {
 
       // deactivated user cannot use active session token
       res = await request(server)
-        .post('/api/v1/session.info')
+        .post('/api/v1/user.info')
         .set('Authorization', `Bearer ${runnerSession.accessToken}`);
 
       expect(res.status).toBe(200);
@@ -214,8 +214,11 @@ describe('api/v1/user.deactivate', () => {
 
       // user can use active session token for the next hour
       res = await request(server)
-        .post('/api/v1/session.info')
-        .set('Authorization', `Bearer ${runnerSession.accessToken}`);
+        .post('/api/v1/user.info')
+        .set('Authorization', `Bearer ${runnerSession.accessToken}`)
+        .send({
+          id: runner.id,
+        });
 
       expect(res.status).toBe(200);
       expect(res.body).toEqual(
