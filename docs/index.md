@@ -38,7 +38,6 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 | :------------------------------------------------ | :--------------------------------------------------------------------------- |
 | **[session.create](methods/session.create.md)**   | Creates new session, a.k.a. sign-in                                          |
 | **[session.destroy](methods/session.destroy.md)** | Destroys an existing session, a.k.a sign-out                                 |
-| **[session.info](methods/session.info.md)**       | Retrieves information on the currently active session                        |
 | **[session.refresh](methods/session.refresh.md)** | Refreshes an existing session that is about to expire or has already expired |
 
 ### Permission
