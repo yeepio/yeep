@@ -9,7 +9,7 @@ import createUser from '../../user/create/service';
 import deleteUser from '../../user/delete/service';
 // import deleteOrg from '../../org/delete/service';
 import createSession from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import destroySession from '../../session/destroy/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 
@@ -57,7 +57,7 @@ describe('api/v1/permission.create', () => {
   });
 
   afterAll(async () => {
-    await destroySessionToken(ctx.db, session);
+    await destroySession(ctx, session);
     await deletePermissionAssignment(ctx.db, permissionAssignment);
     // await deleteOrg(ctx.db, ctx.org);
     await deleteUser(ctx.db, user);

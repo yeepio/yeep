@@ -10,7 +10,7 @@ import createOrg from '../../org/create/service';
 import deleteOrg from '../../org/delete/service';
 import deletePermissionAssignment from '../revokePermission/service';
 import createSession from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import destroySession from '../../session/destroy/service';
 
 describe('api/v1/user.assignPermission', () => {
   let ctx;
@@ -84,7 +84,7 @@ describe('api/v1/user.assignPermission', () => {
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx.db, session);
+      await destroySession(ctx, session);
       await deleteOrg(ctx.db, acme);
       await deleteUser(ctx.db, wile);
       await deletePermission(ctx.db, permission);
@@ -449,7 +449,7 @@ describe('api/v1/user.assignPermission', () => {
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx.db, session);
+      await destroySession(ctx, session);
       await deleteOrg(ctx.db, acme);
       await deleteOrg(ctx.db, monsters);
       await deleteUser(ctx.db, wile);

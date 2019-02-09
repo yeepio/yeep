@@ -5,7 +5,7 @@ import config from '../../../../yeep.config';
 import createOrg from '../create/service';
 import createUser from '../../user/create/service';
 import createSession from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import destroySession from '../../session/destroy/service';
 import deleteUser from '../../user/delete/service';
 import getUserInfo from '../../user/info/service';
 
@@ -65,7 +65,7 @@ describe('api/v1/org.delete', () => {
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx.db, session);
+      await destroySession(ctx, session);
       await deleteUser(ctx.db, user);
     });
 

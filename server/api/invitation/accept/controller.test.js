@@ -11,7 +11,7 @@ import createPermissionAssignment from '../../user/assignPermission/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 import deleteOrg from '../../org/delete/service';
 import createSession from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import destroySession from '../../session/destroy/service';
 
 describe('api/v1/invitation.accept', () => {
   let ctx;
@@ -330,7 +330,7 @@ describe('api/v1/invitation.accept', () => {
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx.db, wileSession);
+      await destroySession(ctx, wileSession);
       await deletePermissionAssignment(ctx.db, permissionAssignment);
       await deleteUser(ctx.db, wile);
       await deleteOrg(ctx.db, org);
@@ -412,7 +412,7 @@ describe('api/v1/invitation.accept', () => {
       });
 
       afterAll(async () => {
-        await destroySessionToken(ctx.db, runnerSession);
+        await destroySession(ctx, runnerSession);
         await deleteUser(ctx.db, runner);
       });
 
@@ -514,9 +514,9 @@ describe('api/v1/invitation.accept', () => {
       });
 
       afterAll(async () => {
-        await destroySessionToken(ctx.db, runnerSession);
+        await destroySession(ctx, runnerSession);
         await deleteUser(ctx.db, runner);
-        await destroySessionToken(ctx.db, porkySession);
+        await destroySession(ctx, porkySession);
         await deleteUser(ctx.db, porky);
       });
 

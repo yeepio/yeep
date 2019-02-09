@@ -5,7 +5,7 @@ import config from '../../../../yeep.config';
 import deleteUser from '../../user/delete/service';
 import createUser from '../../user/create/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
-import destroySessionToken from '../../session/destroy/service';
+import destroySession from '../../session/destroy/service';
 import createSession from '../../session/create/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import createOrg from '../create/service';
@@ -98,7 +98,7 @@ describe('api/v1/org.addMember', () => {
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx.db, session);
+      await destroySession(ctx, session);
       await deletePermissionAssignment(ctx.db, permissionAssignment);
       await deleteUser(ctx.db, wile);
       await deleteUser(ctx.db, runner);

@@ -5,7 +5,7 @@ import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
 import createOrg from '../../org/create/service';
 import createSession from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import destroySession from '../../session/destroy/service';
 import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
 import createPermission from '../create/service';
@@ -70,7 +70,7 @@ describe('api/v1/permission.list', () => {
   });
 
   afterAll(async () => {
-    await destroySessionToken(ctx.db, session);
+    await destroySession(ctx, session);
     await Promise.all(permissions.map((permission) => deletePermission(ctx.db, permission)));
     await deleteOrg(ctx.db, acme);
     await deleteOrg(ctx.db, monsters);

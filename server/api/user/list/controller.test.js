@@ -5,7 +5,7 @@ import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
 import createOrg from '../../org/create/service';
 import createSession from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import destroySession from '../../session/destroy/service';
 import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
 // import createPermission from '../../permission/create/service';
@@ -132,7 +132,7 @@ describe('api/v1/user.list', () => {
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx.db, session);
+      await destroySession(ctx, session);
       await deleteUser(ctx.db, wile);
       await deleteUser(ctx.db, porky);
       await deleteUser(ctx.db, wazowski);
@@ -321,7 +321,7 @@ describe('api/v1/user.list', () => {
       });
 
       afterAll(async () => {
-        await destroySessionToken(ctx.db, otherSession);
+        await destroySession(ctx, otherSession);
       });
 
       test('returns empty list of users', async () => {

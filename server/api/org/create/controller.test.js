@@ -6,7 +6,7 @@ import deleteOrg from '../delete/service';
 import createOrg from './service';
 import createUser from '../../user/create/service';
 import createSession from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import destroySession from '../../session/destroy/service';
 import deleteUser from '../../user/delete/service';
 import getUserInfo from '../../user/info/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
@@ -68,7 +68,7 @@ describe('api/v1/org.create', () => {
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx.db, session);
+      await destroySession(ctx, session);
       await deleteUser(ctx.db, wile);
     });
 
@@ -284,7 +284,7 @@ describe('api/v1/org.create', () => {
 
     afterAll(async () => {
       ctx.config.isOrgCreationOpen = true;
-      await destroySessionToken(ctx.db, session);
+      await destroySession(ctx, session);
       await deleteUser(ctx.db, user);
     });
 

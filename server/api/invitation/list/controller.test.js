@@ -7,7 +7,7 @@ import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
 import createOrg from '../../org/create/service';
 import createSession from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import destroySession from '../../session/destroy/service';
 import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
@@ -164,8 +164,8 @@ describe('api/v1/invitation.list', () => {
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx.db, wileSession);
-      await destroySessionToken(ctx.db, runnerSession);
+      await destroySession(ctx, wileSession);
+      await destroySession(ctx, runnerSession);
       await deleteUser(ctx.db, wile);
       await deleteUser(ctx.db, runner);
       await deleteOrg(ctx.db, acme);

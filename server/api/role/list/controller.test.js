@@ -5,7 +5,7 @@ import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
 import createOrg from '../../org/create/service';
 import createSession from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import destroySession from '../../session/destroy/service';
 import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
 import createPermission from '../../permission/create/service';
@@ -81,7 +81,7 @@ describe('api/v1/role.list', () => {
   });
 
   afterAll(async () => {
-    await destroySessionToken(ctx.db, session);
+    await destroySession(ctx, session);
     await Promise.all(roles.map((role) => deleteRole(ctx.db, role)));
     await deletePermission(ctx.db, permission);
     await deleteUser(ctx.db, wile);

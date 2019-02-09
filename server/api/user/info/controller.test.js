@@ -6,7 +6,7 @@ import createOrg from '../../org/create/service';
 import createUser from '../create/service';
 import createPermissionAssignment from '../assignPermission/service';
 import createSession from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import destroySession from '../../session/destroy/service';
 import deletePermissionAssignment from '../revokePermission/service';
 import deleteUser from '../delete/service';
 import deleteOrg from '../../org/delete/service';
@@ -106,7 +106,7 @@ describe('api/v1/user.info', () => {
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx.db, session);
+      await destroySession(ctx, session);
       await deletePermissionAssignment(ctx.db, permissionAssignment);
       await deleteUser(ctx.db, requestor);
       await deleteUser(ctx.db, user);
@@ -369,7 +369,7 @@ describe('api/v1/user.info', () => {
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx.db, session);
+      await destroySession(ctx, session);
       await deletePermissionAssignment(ctx.db, permissionAssignment);
       await deleteUser(ctx.db, requestor);
       await deleteOrg(ctx.db, org);

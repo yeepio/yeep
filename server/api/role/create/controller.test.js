@@ -9,7 +9,7 @@ import createOrg from '../../org/create/service';
 import deleteUser from '../../user/delete/service';
 import deleteOrg from '../../org/delete/service';
 import createSession from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import destroySession from '../../session/destroy/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 import deleteRole from '../delete/service';
@@ -66,7 +66,7 @@ describe('api/v1/role.create', () => {
   });
 
   afterAll(async () => {
-    await destroySessionToken(ctx.db, session);
+    await destroySession(ctx, session);
     await deletePermissionAssignment(ctx.db, permissionAssignment);
     await deletePermission(ctx.db, permission);
     await deleteOrg(ctx.db, org);

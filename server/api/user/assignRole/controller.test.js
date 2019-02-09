@@ -11,7 +11,7 @@ import deleteOrg from '../../org/delete/service';
 import deletePermissionAssignment from '../revokePermission/service';
 import createPermissionAssignment from '../assignPermission/service';
 import createSession from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import destroySession from '../../session/destroy/service';
 import createRole from '../../role/create/service';
 import deleteRole from '../../role/delete/service';
 import deleteRoleAssignment from '../revokeRole/service';
@@ -107,7 +107,7 @@ describe('api/v1/user.assignRole', () => {
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx.db, session);
+      await destroySession(ctx, session);
       await deletePermissionAssignment(ctx.db, permissionAssignment);
       await deletePermission(ctx.db, permission);
       await deleteRole(ctx.db, role);
@@ -494,7 +494,7 @@ describe('api/v1/user.assignRole', () => {
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx.db, session);
+      await destroySession(ctx, session);
       await deletePermissionAssignment(ctx.db, permissionAssignment);
       await deleteRole(ctx.db, role);
       await deletePermission(ctx.db, permission);

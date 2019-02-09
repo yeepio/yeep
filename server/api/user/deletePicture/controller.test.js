@@ -6,7 +6,7 @@ import config from '../../../../yeep.config';
 import createUser from '../create/service';
 import createPermissionAssignment from '../assignPermission/service';
 import createSession from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import destroySession from '../../session/destroy/service';
 import deletePermissionAssignment from '../revokePermission/service';
 import deleteUser from '../delete/service';
 
@@ -96,8 +96,8 @@ describe('api/v1/user.deletePicture', () => {
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx.db, wileSession);
-      await destroySessionToken(ctx.db, runnerSession);
+      await destroySession(ctx, wileSession);
+      await destroySession(ctx, runnerSession);
       await deletePermissionAssignment(ctx.db, permissionAssignment);
       await deleteUser(ctx.db, wile);
       await deleteUser(ctx.db, runner);

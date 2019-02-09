@@ -3,7 +3,7 @@ import compose from 'koa-compose';
 import Boom from 'boom';
 import { validateRequest } from '../../../middleware/validation';
 import packJSONRPC from '../../../middleware/packJSONRPC';
-import destroySessionToken from './service';
+import destroySession from './service';
 
 const validationSchema = {
   body: {
@@ -24,7 +24,7 @@ const validationSchema = {
 async function handler(ctx) {
   const { request, response } = ctx;
 
-  const isSessionDestroyed = await destroySessionToken(ctx, request.body);
+  const isSessionDestroyed = await destroySession(ctx, request.body);
 
   if (!isSessionDestroyed) {
     throw Boom.internal();
