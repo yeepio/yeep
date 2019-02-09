@@ -4,10 +4,16 @@
 
 ## Description
 
-Creates new session, a.k.a. sign-in, for the designated user. Returns...
+Creates new session, a.k.a. sign-in, for the designated user. Returns (1) an `accessToken` and (2) a `refreshToken`.
 
-1. An access token that the user should present in subsequent requests to authenticate their identity;
-2. A refresh token that can be used to refresh the access token after it has expired.
+The `accessToken` is used to authenticate the user identity in API requests that require authentication, e.g.
+
+```
+POST /api/v1/user.info
+Authorization: `Bearer ${accessToken}`
+```
+
+The `refreshToken` can be used to refresh the `accessToken` after the latter has expired or is about to expire. Use this to extend a user's session. See [session.refresh()](./session.refresh.md) for further info.
 
 ---
 
@@ -19,11 +25,11 @@ This method is publicly available.
 
 ### Body
 
-- **user** _(string)_ — username or email address of the user (required)
-- **password** _(string)_ — user password (required)
-- **scope** _(Object)_ — user props to include in the access token payload (optional)
-  - **profile** _(boolean)_ — indicates whether to include user profile information to the access token payload (optional; defaults to `false`)
-  - **permissions** _(boolean)_ — indicates whether to include user permissions to the access token payload (optional; defaults to `false`)
+- **user** _(string)_ — the username or email address of the user (required)
+- **password** _(string)_ — the user password (required)
+- **scope** _(Object)_ — user props to include in the `accessToken` payload (optional)
+  - **profile** _(boolean)_ — indicates whether to include user profile information to the `accessToken` payload (optional; defaults to `false`)
+  - **permissions** _(boolean)_ — indicates whether to include user permissions to the `accessToken` payload (optional; defaults to `false`)
 
 ---
 

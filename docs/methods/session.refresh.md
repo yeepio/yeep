@@ -4,7 +4,7 @@
 
 ## Description
 
-Refreshes an existing session that is about to expire or has already expired.
+Refreshes the designated `accessToken` that is about to expire or has already expired.
 
 ---
 
@@ -16,8 +16,8 @@ This method is publicly available.
 
 ### Body
 
-- **accessToken** _(string)_ — user access token that is about to expire or has already expired, as provided via [session.create()](methods/session.create.md) (required)
-- **refreshToken** _(string)_ — user refresh token, as provided via [session.create()](methods/session.create.md); this token will be redeemed and can never be used again (required)
+- **accessToken** _(string)_ — user `accessToken` that is about to expire or has already expired, as provided via [session.create()](./session.create.md) (required)
+- **refreshToken** _(string)_ — user `refreshToken`, as provided via [session.create()](./session.create.md); this token can only be used once (required)
 
 ---
 
@@ -27,8 +27,8 @@ This method is publicly available.
 
 - **ok** _(boolean)_ — indicates whether the request was successfully completed
 - **error** _(Object)_ — contains error details in case of an error
-- **accessToken** _(string)_ — a refreshed access token
-- **refreshToken** _(string)_ — a new refresh token
+- **accessToken** _(string)_ — a refreshed accessToken
+- **refreshToken** _(string)_ — a new refreshToken
 
 ---
 
