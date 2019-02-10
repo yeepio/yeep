@@ -311,6 +311,19 @@ const PageWrapper = () => {
         a scrolling shadow effect to indicate to the user that they can pan and scroll the grid
         control in their mobile.
       </p>
+      <h2 className="mb-4">Permission / Role pillboxes</h2>
+      <p className="mb-4">
+        These are custom-styled <code>&lt;label&gt;</code> elements with nested checkboxes:
+      </p>
+      <label htmlFor="permission1" className="pillbox mr-2">
+        <input type="checkbox" id="permission1"/> Permission #1
+      </label>
+      <label htmlFor="permission5" className="pillbox pillbox-checked mr-2">
+        <input type="checkbox" id="permission5" checked="true" /> Permission #2
+      </label>
+      <label htmlFor="permission3" className="pillbox mr-2">
+        <input type="checkbox" id="permission3"/> Permission #3
+      </label>
     </div>
   );
 };

@@ -247,3 +247,19 @@ select {
   background: url(data:image/gif;base64,R0lGODlhCwALAJEAAAAAAP///xUVFf///yH5BAEAAAMALAAAAAALAAsAAAIPnI+py+0/hJzz0IruwjsVADs=)
     no-repeat center right;
 }
+
+/* Our pillboxes */
+.pillbox {
+  display:inline-block;
+  @apply rounded border-grey-dark border p-2;
+  cursor:pointer;
+}
+.pillbox:hover {
+  @apply bg-grey-light;
+}
+.pillbox-checked {
+  @apply bg-green-dark border-green-dark text-white;
+}
+.pillbox-checked:hover {
+  @apply bg-green-darker border-green-darker;
+}
