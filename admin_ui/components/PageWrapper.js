@@ -222,8 +222,16 @@ const PageWrapper = () => {
         <table className="grid">
           <thead>
             <tr>
-              <th className="text-left">Organisation name &#9660;</th>
-              <th>Slug / URL key</th>
+              <th className="text-left">
+                <a href="/" className="grid-sorting-desc">
+                  Organisation name
+                </a>
+              </th>
+              <th>
+                <a href="/" className="grid-sorting">
+                  Slug / URL key
+                </a>
+              </th>
               <th>Users</th>
               <th>Roles</th>
               <th>Permissions</th>

@@ -190,37 +190,60 @@ select {
   and on larger viewports we'll revert to the normal layout
 */
 .grid-footer {
-  display:flex;
-  flex-direction:column;
-  text-align:center;
-  align-items:center;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
   @apply py-2;
 }
 .grid-per-page {
-  order:2;
+  order: 2;
 }
 .grid-per-page select {
-  display:inline-block;
+  display: inline-block;
   @apply ml-3;
 }
 .grid-footer select {
-  width:auto;
+  width: auto;
 }
 .grid-footer .grid-pager {
-  order:1;
-  margin-left:0;
+  order: 1;
+  margin-left: 0;
   @apply pb-3;
 }
 @screen sm {
   .grid-footer {
-    flex-direction:row;
+    flex-direction: row;
   }
   .grid-per-page {
-    order:1;
+    order: 1;
   }
   .grid-footer .grid-pager {
-    order:2;
-    margin-left:auto;
+    order: 2;
+    margin-left: auto;
     @apply pb-0;
   }
+}
+
+/* Sorting links for the grid control */
+.grid-sorting,
+.grid-sorting-asc,
+.grid-sorting-desc {
+  text-decoration: none;
+  @apply text-black;
+  display: inline-block;
+  padding-right: 20px;
+  cursor: pointer;
+}
+.grid-sorting {
+  background: url(data:image/gif;base64,R0lGODlhCwALAJEAAAAAAP///xUVFf///yH5BAEAAAMALAAAAAALAAsAAAIUnC2nKLnT4or00PvyrQwrPzUZshQAOw==)
+    no-repeat center right;
+}
+.grid-sorting-asc {
+  background: url(data:image/gif;base64,R0lGODlhCwALAJEAAAAAAP///xUVFf///yH5BAEAAAMALAAAAAALAAsAAAIRnC2nKLnT4or00Puy3rx7VQAAOw==)
+    no-repeat center right;
+}
+.grid-sorting-desc {
+  background: url(data:image/gif;base64,R0lGODlhCwALAJEAAAAAAP///xUVFf///yH5BAEAAAMALAAAAAALAAsAAAIPnI+py+0/hJzz0IruwjsVADs=)
+    no-repeat center right;
 }
