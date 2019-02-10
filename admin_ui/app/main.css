@@ -86,7 +86,7 @@ select {
 }
 select {
   /* For select elements we need to also change the height to match the textfields */
-  height:42px;
+  height: 42px;
 }
 
 /* Form layout */
@@ -112,34 +112,115 @@ select {
     */
   .form-group {
     display: flex;
-    flex-wrap:wrap;
+    flex-wrap: wrap;
     align-items: flex-start;
-
   }
   .form-group label {
     @apply mb-0;
-    flex:0 0 25%;
+    flex: 0 0 25%;
     display: block;
     /* We need the line height to be the same as the height of a "default" form element,
     i.e. a text field. That is 42 pixels */
-    line-height:2.6rem;
+    line-height: 2.6rem;
   }
   .form-group input[type='text'],
   .form-group input[type='password'],
   .form-group select {
-    width:50%;
+    width: 50%;
   }
   .form-group textarea {
-    flex:1 1 75%;
+    flex: 1 1 75%;
   }
   .form-group .valid,
   .form-group .invalid,
   .form-group .neutral {
-    flex:1 1 100%;
-    margin-left:25%;
+    flex: 1 1 100%;
+    margin-left: 25%;
   }
   .form-submit {
-    margin-left:25%;
+    margin-left: 25%;
   }
+}
 
+/* Grid table */
+.grid-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: calc(100vw - 2rem);
+}
+.grid {
+  width: 100%;
+  @apply border-collapse border-b border-grey;
+}
+.grid th {
+  @apply border-grey border-t border-b p-2 font-normal;
+}
+.grid tbody tr:nth-child(odd) {
+  @apply bg-grey-lightest;
+}
+.grid td {
+  @apply p-2;
+}
+/* Grid pagination links */
+.grid-pager {
+  @apply list-reset ml-auto whitespace-no-wrap;
+}
+.grid-pager p {
+  display: block;
+}
+.grid-pager li {
+  @apply px-2;
+  display: inline-block;
+}
+
+/* Grid heading (text and pagination) */
+.grid-header {
+  @apply py-2;
+  text-align: center;
+}
+@screen sm {
+  .grid-header {
+    display: flex;
+    text-align: left;
+  }
+}
+/*
+  Grid footer (per page control and pagination)
+  We'll use flexbox to ensure the pager comes first in mobile viewports
+  and on larger viewports we'll revert to the normal layout
+*/
+.grid-footer {
+  display:flex;
+  flex-direction:column;
+  text-align:center;
+  align-items:center;
+  @apply py-2;
+}
+.grid-per-page {
+  order:2;
+}
+.grid-per-page select {
+  display:inline-block;
+  @apply ml-3;
+}
+.grid-footer select {
+  width:auto;
+}
+.grid-footer .grid-pager {
+  order:1;
+  margin-left:0;
+  @apply pb-3;
+}
+@screen sm {
+  .grid-footer {
+    flex-direction:row;
+  }
+  .grid-per-page {
+    order:1;
+  }
+  .grid-footer .grid-pager {
+    order:2;
+    margin-left:auto;
+    @apply pb-0;
+  }
 }

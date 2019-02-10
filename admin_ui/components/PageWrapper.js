@@ -173,10 +173,10 @@ const PageWrapper = () => {
       <fieldset className="mb-4">
         <legend>Filters and quick search</legend>
         <div className="sm:flex items-center">
-          <select name="tempFilters1" className="w-100 mb-3 sm:mb-0 sm:mr-3">
+          <select name="tempFilters1" className="w-auto mb-3 sm:mb-0 sm:mr-3">
             <option value="0">Organisation: All organisations</option>
           </select>
-          <select name="tempFilters2" className="w-100 mb-3 sm:mb-0 sm:mr-3">
+          <select name="tempFilters2" className="w-auto mb-3 sm:mb-0 sm:mr-3">
             <option value="0">Roles: All roles</option>
           </select>
           <a href="/admin" className="block whitespace-no-wrap mb-3 sm:mb-0 sm:mr-3">
@@ -185,9 +185,123 @@ const PageWrapper = () => {
           <input type="text" placeholder="quicksearch" className="w-100" />
         </div>
       </fieldset>
-      <p className="italic text-grey-dark text-sm">
+      <p className="italic text-grey-dark text-sm mb-4">
         Note: We probably need to fine tune the breakpoint for the Filters bars above so that it
         collapses to a vertical layout in the md or lg breakpoint instead of sm. To be discussed.
+      </p>
+      <h2 className="mb-4">Our grid</h2>
+      <p className="mb-4">
+        We will implement a custom grid control. The &quot;easy way out&quot; is a normal table with
+        a scrolling wrapping pane (auto-sizing of column widths <em>is</em> important here and the
+        biggest benefit we get. Hence the TBD if this will be the final markup).
+      </p>
+      <div className="grid-header">
+        <p>
+          Showing entities <strong>1</strong> or <strong>X</strong> of <strong>TOTAL</strong>:
+        </p>
+        <ul className="grid-pager">
+          <li>
+            <a href="/">&laquo; Previous</a>
+          </li>
+          <li>
+            <a href="/">1</a>
+          </li>
+          <li>
+            <strong>2</strong>
+          </li>
+          <li>...</li>
+          <li>
+            <a href="/">7</a>
+          </li>
+          <li>
+            <a href="/">Next &raquo;</a>
+          </li>
+        </ul>
+      </div>
+      <div className="grid-wrapper">
+        <table className="grid">
+          <thead>
+            <tr>
+              <th className="text-left">Organisation name &#9660;</th>
+              <th>Slug / URL key</th>
+              <th>Users</th>
+              <th>Roles</th>
+              <th>Permissions</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <a href="/">Our Tech Blog</a>
+              </td>
+              <td className="text-center">blog</td>
+              <td className="text-center">
+                <a href="/">5</a>
+              </td>
+              <td className="text-center">
+                <a href="/">4</a>
+              </td>
+              <td className="text-center">
+                <a href="/">10</a>
+              </td>
+              <td className="text-center">
+                <a href="/">Edit</a> <a href="/">Delete</a>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <a href="/">Zoho CRM</a>
+              </td>
+              <td className="text-center">zoho_crm</td>
+              <td className="text-center">
+                <a href="/">40</a>
+              </td>
+              <td className="text-center">
+                <a href="/">5</a>
+              </td>
+              <td className="text-center">
+                <a href="/">11</a>
+              </td>
+              <td className="text-center">
+                <a href="/">Edit</a> <a href="/">Delete</a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div className="grid-footer">
+        <div className="grid-per-page">
+          <label htmlFor="perPage1">Display</label>
+          <select id="perPage1">
+            <option value="10">10 per page</option>
+            <option value="25">25 per page</option>
+            <option value="50">50 per page</option>
+          </select>
+        </div>
+        <ul className="grid-pager">
+          <li>
+            <a href="/">&laquo; Previous</a>
+          </li>
+          <li>
+            <a href="/">1</a>
+          </li>
+          <li>
+            <strong>2</strong>
+          </li>
+          <li>...</li>
+          <li>
+            <a href="/">7</a>
+          </li>
+          <li>
+            <a href="/">Next &raquo;</a>
+          </li>
+        </ul>
+      </div>
+      <p className="italic text-grey-dark text-sm my-4">
+        Note: If we end up using the wrapping canvas for the mobile viewport we probably need to add
+        a scrolling shadow effect to indicate to the user that they can pan and scroll the grid
+        control in their mobile.
       </p>
     </div>
   );
