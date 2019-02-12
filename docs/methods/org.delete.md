@@ -38,7 +38,7 @@ Requestor must be authenticated and assigned with the `yeep.org.write` permissio
 
 ```
 POST /api/v1/org.delete
-Authorization: `Bearer ${authToken}`
+Authorization: `Bearer ${accessToken}`
 ```
 
 ``` json

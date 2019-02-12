@@ -207,3 +207,17 @@ export class OrgMembershipAlreadyExists extends Error {
     this.code = 10028;
   }
 }
+
+export class InvalidAccessToken extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10029;
+  }
+}
+
+export class InvalidRefreshToken extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10030;
+  }
+}

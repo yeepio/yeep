@@ -11,7 +11,7 @@ import { AuthorizationError } from '../constants/errors';
 import { getUserPermissions } from '../api/user/info/service';
 
 const parseAuthorizationPayload = async ({ request, jwt }) => {
-  const [schema, token] = request.headers.authorization.split(' ');
+  const [schema, accessToken] = request.headers.authorization.split(' ');
 
   if (schema !== 'Bearer') {
     throw Boom.unauthorized('Invalid authorization schema', 'Bearer', {
@@ -20,9 +20,9 @@ const parseAuthorizationPayload = async ({ request, jwt }) => {
   }
 
   try {
-    const payload = await jwt.verify(token);
+    const payload = await jwt.verify(accessToken);
     return {
-      token: payload.jti,
+      secret: payload.jti,
       user: payload.user,
       issuedAt: new Date(payload.iat * 1000),
       expiresAt: new Date(payload.exp * 1000),
@@ -42,7 +42,7 @@ export const visitSession = () => async ({ request, jwt, db }, next) => {
   }
 
   // parse authorization payload
-  const { token, user, issuedAt, expiresAt } = await parseAuthorizationPayload({
+  const { secret, user, issuedAt, expiresAt } = await parseAuthorizationPayload({
     request,
     jwt,
   });
@@ -51,7 +51,7 @@ export const visitSession = () => async ({ request, jwt, db }, next) => {
   const TokenModel = db.model('Token');
   const records = await TokenModel.aggregate([
     {
-      $match: { secret: token },
+      $match: { secret },
     },
     {
       $lookup: {

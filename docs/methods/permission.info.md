@@ -36,7 +36,7 @@ Requestor must be authenticated and assigned with the `yeep.permission.read` per
 
 ```
 POST /api/v1/permission.info
-Authorization: `Bearer ${authToken}`
+Authorization: `Bearer ${accessToken}`
 ```
 
 ```json

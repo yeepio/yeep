@@ -7,8 +7,8 @@ import deletePermission from '../../permission/delete/service';
 import createUser from '../../user/create/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import createOrg from '../../org/create/service';
-import createSessionToken from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import createSession from '../../session/create/service';
+import destroySession from '../../session/destroy/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
@@ -61,14 +61,14 @@ describe('api/v1/role.info', () => {
       permissionId: requiredPermission.id,
     });
 
-    session = await createSessionToken(ctx.db, ctx.jwt, {
+    session = await createSession(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
   });
 
   afterAll(async () => {
-    await destroySessionToken(ctx.db, session);
+    await destroySession(ctx, session);
     await deletePermissionAssignment(ctx.db, permissionAssignment);
     await deletePermission(ctx.db, permission);
     await deleteOrg(ctx.db, org);
@@ -79,7 +79,7 @@ describe('api/v1/role.info', () => {
   test('returns error when role does not exist', async () => {
     const res = await request(server)
       .post('/api/v1/role.info')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: '5b2d5dd0cd86b77258e16d39', // some random objectid
       });
@@ -108,7 +108,7 @@ describe('api/v1/role.info', () => {
 
     const res = await request(server)
       .post('/api/v1/role.info')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: role.id,
       });
@@ -139,7 +139,7 @@ describe('api/v1/role.info', () => {
 
     const res = await request(server)
       .post('/api/v1/role.info')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: role.id,
       });

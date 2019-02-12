@@ -1,5 +1,6 @@
 import addSeconds from 'date-fns/add_seconds';
 import isBefore from 'date-fns/is_before';
+import { ObjectId } from 'mongodb';
 import {
   UserNotFoundError,
   InvalidCredentialsError,
@@ -7,7 +8,7 @@ import {
 } from '../../../constants/errors';
 import { getUserPermissions } from '../../user/info/service';
 
-export const defaultProjection = {
+export const defaultScope = {
   permissions: false,
   profile: false,
 };
@@ -22,14 +23,22 @@ const constructMatchQuery = (username, emailAddress) => {
   };
 };
 
-export default async function createSessionToken(
-  db,
-  jwt,
-  { username, emailAddress, password, projection = defaultProjection }
-) {
+/**
+ * Verifies password credentials and returns the designated user.
+ * @param {Object} ctx
+ * @property {Object} ctx.db
+ * @param {Object} props
+ * @property {string} [props.username]
+ * @property {string} [props.emailAddress]
+ * @property {string} props.password
+ * @returns {Promise}
+ */
+export async function getUserByPasswordCredentials(ctx, props) {
+  const { db } = ctx;
+  const { username, emailAddress, password } = props;
+
   const UserModel = db.model('User');
   const CredentialsModel = db.model('Credentials');
-
   const normalizedEmailAddress = emailAddress && UserModel.normalizeEmailAddress(emailAddress);
 
   // retrieve user from db
@@ -94,39 +103,61 @@ export default async function createSessionToken(
     throw new InvalidCredentialsError('Invalid username or password credentials');
   }
 
-  // set expiration time
-  const expiresIn = 7 * 24 * 60 * 60; // 7 days (in seconds)
+  return {
+    id: user._id.toHexString(),
+    username: user.username,
+    fullName: user.fullName,
+    picture: user.picture,
+    emails: user.emails,
+  };
+}
 
-  // create authentication token
+/**
+ * Issues access + refresh token pair for the designated user.
+ * @param {Object} ctx
+ * @property {Object} ctx.db
+ * @property {Object} ctx.jwt
+ * @property {Object} ctx.config
+ * @param {Object} props
+ * @property {Object} props.user
+ * @property {Object} [ctx.scope]
+ * @return {Promise}
+ */
+export async function issueAccessAndRefreshTokens(ctx, props) {
+  const { db, jwt, config } = ctx;
+  const { user, scope } = props;
+
   const TokenModel = db.model('Token');
-  const token = await TokenModel.create({
+  const UserModel = db.model('User');
+  const now = new Date();
+
+  // create authToken in db
+  const authToken = await TokenModel.create({
     secret: TokenModel.generateSecret({ length: 24 }),
     type: 'AUTHENTICATION',
     payload: {},
-    user: user._id,
-    expiresAt: addSeconds(new Date(), expiresIn),
+    user: ObjectId(user.id),
+    expiresAt: addSeconds(now, config.accessToken.lifetimeInSeconds),
   });
 
-  // generate JWT token
+  // set accessToken payload
   const payload = {
     user: {
-      id: user._id.toHexString(),
+      id: user.id,
     },
   };
 
-  // visit token payload with user profile data
-  if (projection.profile) {
+  // decorate accessToken payload with user profile data
+  if (scope.profile) {
     payload.user.username = user.username;
     payload.user.fullName = user.fullName;
     payload.user.picture = user.picture || undefined;
     payload.user.primaryEmail = UserModel.getPrimaryEmailAddress(user.emails);
   }
 
-  // visit token payload with user permissions
-  if (projection.permissions) {
-    const permissions = await getUserPermissions(db, {
-      userId: payload.user.id,
-    });
+  // decorate accessToken payload with user permissions
+  if (scope.permissions) {
+    const permissions = await getUserPermissions(db, { userId: user.id });
     payload.user.permissions = permissions.map((e) => {
       return {
         ...e,
@@ -135,15 +166,38 @@ export default async function createSessionToken(
     });
   }
 
-  // issue JWT token
-  const authToken = await jwt.sign(payload, {
-    jwtid: token.secret,
-    expiresIn,
-  });
+  const [accessToken, refreshToken] = await Promise.all([
+    // sign accessToken
+    jwt.sign(payload, {
+      jwtid: authToken.secret,
+      expiresIn: config.accessToken.lifetimeInSeconds,
+    }),
+    // create refreshToken in db
+    TokenModel.create({
+      secret: TokenModel.generateSecret({ length: 60 }),
+      type: 'SESSION_REFRESH',
+      payload: {
+        accessTokenSecret: authToken.secret,
+      },
+      user: ObjectId(user.id),
+      expiresAt: addSeconds(now, config.refreshToken.lifetimeInSeconds),
+    }),
+  ]);
 
   return {
-    id: token._id.toHexString(), // as hex string
-    token: authToken,
-    expiresIn: expiresIn * 1000, // convert to milliseconds
+    accessToken,
+    refreshToken: refreshToken.secret,
   };
+}
+
+export default async function createSession(
+  ctx,
+  { username, emailAddress, password, scope = defaultScope }
+) {
+  const user = await getUserByPasswordCredentials(ctx, {
+    username,
+    emailAddress,
+    password,
+  });
+  return issueAccessAndRefreshTokens(ctx, { user, scope });
 }

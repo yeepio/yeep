@@ -5,8 +5,8 @@ import config from '../../../../yeep.config';
 import deleteUser from '../delete/service';
 import createUser from './service';
 import deletePermissionAssignment from '../revokePermission/service';
-import destroySessionToken from '../../session/destroy/service';
-import createSessionToken from '../../session/create/service';
+import destroySession from '../../session/destroy/service';
+import createSession from '../../session/create/service';
 import createPermissionAssignment from '../assignPermission/service';
 import createOrg from '../../org/create/service';
 import deleteOrg from '../../org/delete/service';
@@ -76,14 +76,14 @@ describe('api/v1/user.create', () => {
         permissionId: permission.id,
       });
 
-      session = await createSessionToken(ctx.db, ctx.jwt, {
+      session = await createSession(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx.db, session);
+      await destroySession(ctx, session);
       await deletePermissionAssignment(ctx.db, permissionAssignment);
       await deleteUser(ctx.db, requestor);
       await deleteOrg(ctx.db, org);
@@ -93,7 +93,7 @@ describe('api/v1/user.create', () => {
       test('returns error when `username` is unspecified', async () => {
         const res = await request(server)
           .post('/api/v1/user.create')
-          .set('Authorization', `Bearer ${session.token}`)
+          .set('Authorization', `Bearer ${session.accessToken}`)
           .send({
             password: 'fast+furry-ous',
             fullName: 'Road Runner',
@@ -123,7 +123,7 @@ describe('api/v1/user.create', () => {
       test('returns error when `emails` contains duplicate addresses', async () => {
         const res = await request(server)
           .post('/api/v1/user.create')
-          .set('Authorization', `Bearer ${session.token}`)
+          .set('Authorization', `Bearer ${session.accessToken}`)
           .send({
             username: 'runner',
             password: 'fast+furry-ous',
@@ -159,7 +159,7 @@ describe('api/v1/user.create', () => {
       test('returns error when primary email is not specified', async () => {
         const res = await request(server)
           .post('/api/v1/user.create')
-          .set('Authorization', `Bearer ${session.token}`)
+          .set('Authorization', `Bearer ${session.accessToken}`)
           .send({
             username: 'runner',
             password: 'fast+furry-ous',
@@ -192,7 +192,7 @@ describe('api/v1/user.create', () => {
       test('throws error when multiple primary emails are specified', async () => {
         const res = await request(server)
           .post('/api/v1/user.create')
-          .set('Authorization', `Bearer ${session.token}`)
+          .set('Authorization', `Bearer ${session.accessToken}`)
           .send({
             username: 'runner',
             password: 'fast+furry-ous',
@@ -225,7 +225,7 @@ describe('api/v1/user.create', () => {
       test('creates new user and returns expected response', async () => {
         const res = await request(server)
           .post('/api/v1/user.create')
-          .set('Authorization', `Bearer ${session.token}`)
+          .set('Authorization', `Bearer ${session.accessToken}`)
           .send({
             username: 'runner',
             password: 'fast+furry-ous',
@@ -281,7 +281,7 @@ describe('api/v1/user.create', () => {
 
         const res = await request(server)
           .post('/api/v1/user.create')
-          .set('Authorization', `Bearer ${session.token}`)
+          .set('Authorization', `Bearer ${session.accessToken}`)
           .send({
             username: 'runner',
             password: 'fast+furry-ous!!',
@@ -330,7 +330,7 @@ describe('api/v1/user.create', () => {
 
         const res = await request(server)
           .post('/api/v1/user.create')
-          .set('Authorization', `Bearer ${session.token}`)
+          .set('Authorization', `Bearer ${session.accessToken}`)
           .send({
             username: 'roadrunner',
             password: 'fast+furry-ous',
@@ -360,7 +360,7 @@ describe('api/v1/user.create', () => {
       // test('returns error when creating global user without necessary permission', async () => {
       //   const res = await request(server)
       //     .post('/api/v1/user.create')
-      //     .set('Authorization', `Bearer ${session.token}`)
+      //     .set('Authorization', `Bearer ${session.accessToken}`)
       //     .send({
       //       // absense of orgs denotes global user
       //       username: 'roadrunner',
@@ -397,7 +397,7 @@ describe('api/v1/user.create', () => {
       test('returns error when `username` is specified', async () => {
         const res = await request(server)
           .post('/api/v1/user.create')
-          .set('Authorization', `Bearer ${session.token}`)
+          .set('Authorization', `Bearer ${session.accessToken}`)
           .send({
             username: 'runner',
             password: 'fast+furry-ous',
@@ -428,7 +428,7 @@ describe('api/v1/user.create', () => {
       test('creates new user and returns response without username', async () => {
         const res = await request(server)
           .post('/api/v1/user.create')
-          .set('Authorization', `Bearer ${session.token}`)
+          .set('Authorization', `Bearer ${session.accessToken}`)
           .send({
             password: 'fast+furry-ous',
             fullName: 'Road Runner',
@@ -457,7 +457,7 @@ describe('api/v1/user.create', () => {
         const [res1, res2] = await Promise.all([
           request(server)
             .post('/api/v1/user.create')
-            .set('Authorization', `Bearer ${session.token}`)
+            .set('Authorization', `Bearer ${session.accessToken}`)
             .send({
               password: 'fast+furry-ous',
               fullName: 'Road Runner',
@@ -472,7 +472,7 @@ describe('api/v1/user.create', () => {
             }),
           request(server)
             .post('/api/v1/user.create')
-            .set('Authorization', `Bearer ${session.token}`)
+            .set('Authorization', `Bearer ${session.accessToken}`)
             .send({
               password: 'thats-all-folks!',
               fullName: 'Porky Pig',

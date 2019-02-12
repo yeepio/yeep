@@ -10,8 +10,8 @@ import createOrg from '../../org/create/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 import deleteOrg from '../../org/delete/service';
-import createSessionToken from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import createSession from '../../session/create/service';
+import destroySession from '../../session/destroy/service';
 
 describe('api/v1/invitation.accept', () => {
   let ctx;
@@ -323,14 +323,14 @@ describe('api/v1/invitation.accept', () => {
         permissionId: permission.id,
       });
 
-      wileSession = await createSessionToken(ctx.db, ctx.jwt, {
+      wileSession = await createSession(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx.db, wileSession);
+      await destroySession(ctx, wileSession);
       await deletePermissionAssignment(ctx.db, permissionAssignment);
       await deleteUser(ctx.db, wile);
       await deleteOrg(ctx.db, org);
@@ -355,7 +355,7 @@ describe('api/v1/invitation.accept', () => {
 
       const res = await request(server)
         .post('/api/v1/invitation.accept')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           token,
         });
@@ -405,14 +405,14 @@ describe('api/v1/invitation.accept', () => {
           ],
         });
 
-        runnerSession = await createSessionToken(ctx.db, ctx.jwt, {
+        runnerSession = await createSession(ctx, {
           username: 'runner',
           password: 'fast+furry-ous',
         });
       });
 
       afterAll(async () => {
-        await destroySessionToken(ctx.db, runnerSession);
+        await destroySession(ctx, runnerSession);
         await deleteUser(ctx.db, runner);
       });
 
@@ -422,7 +422,7 @@ describe('api/v1/invitation.accept', () => {
 
         const res = await request(server)
           .post('/api/v1/invitation.accept')
-          .set('Authorization', `Bearer ${runnerSession.token}`)
+          .set('Authorization', `Bearer ${runnerSession.accessToken}`)
           .send({
             token,
           });
@@ -475,7 +475,7 @@ describe('api/v1/invitation.accept', () => {
           ],
         });
 
-        runnerSession = await createSessionToken(ctx.db, ctx.jwt, {
+        runnerSession = await createSession(ctx, {
           username: 'runner',
           password: 'fast+furry-ous',
         });
@@ -494,7 +494,7 @@ describe('api/v1/invitation.accept', () => {
           ],
         });
 
-        porkySession = await createSessionToken(ctx.db, ctx.jwt, {
+        porkySession = await createSession(ctx, {
           username: 'porky',
           password: "Th-th-th-that's all folks!",
         });
@@ -514,9 +514,9 @@ describe('api/v1/invitation.accept', () => {
       });
 
       afterAll(async () => {
-        await destroySessionToken(ctx.db, runnerSession);
+        await destroySession(ctx, runnerSession);
         await deleteUser(ctx.db, runner);
-        await destroySessionToken(ctx.db, porkySession);
+        await destroySession(ctx, porkySession);
         await deleteUser(ctx.db, porky);
       });
 
@@ -526,7 +526,7 @@ describe('api/v1/invitation.accept', () => {
 
         const res = await request(server)
           .post('/api/v1/invitation.accept')
-          .set('Authorization', `Bearer ${runnerSession.token}`)
+          .set('Authorization', `Bearer ${runnerSession.accessToken}`)
           .send({
             token,
           });
@@ -556,7 +556,7 @@ describe('api/v1/invitation.accept', () => {
       test('pretends token does not exist when requestor does not match the invitee', async () => {
         const res = await request(server)
           .post('/api/v1/invitation.accept')
-          .set('Authorization', `Bearer ${porkySession.token}`)
+          .set('Authorization', `Bearer ${porkySession.accessToken}`)
           .send({
             token,
           });

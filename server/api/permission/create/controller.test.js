@@ -8,8 +8,8 @@ import createUser from '../../user/create/service';
 // import createOrg from '../../org/create/service';
 import deleteUser from '../../user/delete/service';
 // import deleteOrg from '../../org/delete/service';
-import createSessionToken from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import createSession from '../../session/create/service';
+import destroySession from '../../session/destroy/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 
@@ -50,14 +50,14 @@ describe('api/v1/permission.create', () => {
       permissionId: permission.id,
     });
 
-    session = await createSessionToken(ctx.db, ctx.jwt, {
+    session = await createSession(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
   });
 
   afterAll(async () => {
-    await destroySessionToken(ctx.db, session);
+    await destroySession(ctx, session);
     await deletePermissionAssignment(ctx.db, permissionAssignment);
     // await deleteOrg(ctx.db, ctx.org);
     await deleteUser(ctx.db, user);
@@ -67,7 +67,7 @@ describe('api/v1/permission.create', () => {
   test('returns error when permission name is reserved', async () => {
     const res = await request(server)
       .post('/api/v1/permission.create')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         name: 'yeep.permission.test',
         description: 'This is a tost',
@@ -91,7 +91,7 @@ describe('api/v1/permission.create', () => {
 
     const res = await request(server)
       .post('/api/v1/permission.create')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         name: 'acme.test',
         description: 'This is a tost',
@@ -119,7 +119,7 @@ describe('api/v1/permission.create', () => {
 
     const res = await request(server)
       .post('/api/v1/permission.create')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         name: 'acme.test',
         description: 'This is a tost',
@@ -142,7 +142,7 @@ describe('api/v1/permission.create', () => {
   test('creates new permission and returns expected response', async () => {
     const res = await request(server)
       .post('/api/v1/permission.create')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         name: 'acme.test',
         description: 'This is a test',

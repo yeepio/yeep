@@ -124,8 +124,8 @@ describe('api/v1/session.create', () => {
     expect(res.body).toEqual(
       expect.objectContaining({
         ok: true,
-        token: expect.any(String),
-        expiresIn: expect.any(Number),
+        accessToken: expect.any(String),
+        refreshToken: expect.any(String),
       })
     );
   });
@@ -142,19 +142,19 @@ describe('api/v1/session.create', () => {
     expect(res.body).toEqual(
       expect.objectContaining({
         ok: true,
-        token: expect.any(String),
-        expiresIn: expect.any(Number),
+        accessToken: expect.any(String),
+        refreshToken: expect.any(String),
       })
     );
   });
 
-  test('adds user profile data to token payload when `projection.profile` is true', async () => {
+  test('adds user profile data to accessToken payload when `scope.profile` is true', async () => {
     const res = await request(server)
       .post('/api/v1/session.create')
       .send({
         user: 'Wile', // this will be automaticaly lower-cased
         password: 'catch-the-b1rd$',
-        projection: {
+        scope: {
           profile: true,
         },
       });
@@ -162,7 +162,7 @@ describe('api/v1/session.create', () => {
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
 
-    const tokenPayload = await ctx.jwt.verify(res.body.token);
+    const tokenPayload = await ctx.jwt.verify(res.body.accessToken);
     expect(tokenPayload).toEqual(
       expect.objectContaining({
         user: expect.objectContaining({
@@ -176,7 +176,7 @@ describe('api/v1/session.create', () => {
     );
   });
 
-  test('does not add user profile data to token payload by default', async () => {
+  test('does not add user profile data to accessToken payload by default', async () => {
     const res = await request(server)
       .post('/api/v1/session.create')
       .send({
@@ -187,18 +187,18 @@ describe('api/v1/session.create', () => {
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
 
-    const tokenPayload = await ctx.jwt.verify(res.body.token);
-    expect(tokenPayload).toEqual(
+    const payload = await ctx.jwt.verify(res.body.accessToken);
+    expect(payload).toEqual(
       expect.objectContaining({
         user: expect.objectContaining({
           id: expect.any(String),
         }),
       })
     );
-    expect(tokenPayload.user.username).toBeUndefined();
-    expect(tokenPayload.user.fullName).toBeUndefined();
-    expect(tokenPayload.user.picture).toBeUndefined();
-    expect(tokenPayload.user.primaryEmail).toBeUndefined();
+    expect(payload.user.username).toBeUndefined();
+    expect(payload.user.fullName).toBeUndefined();
+    expect(payload.user.picture).toBeUndefined();
+    expect(payload.user.primaryEmail).toBeUndefined();
   });
 
   describe('user with explicit permissions', () => {
@@ -232,13 +232,13 @@ describe('api/v1/session.create', () => {
       await deletePermission(ctx.db, permission);
     });
 
-    test('adds permissions to token payload when `projection.permissions` is true', async () => {
+    test('adds permissions to accessToken payload when `scope.permissions` is true', async () => {
       const res = await request(server)
         .post('/api/v1/session.create')
         .send({
           user: 'Wile', // this will be automaticaly lower-cased
           password: 'catch-the-b1rd$',
-          projection: {
+          scope: {
             permissions: true,
           },
         });
@@ -246,7 +246,7 @@ describe('api/v1/session.create', () => {
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
 
-      const tokenPayload = await ctx.jwt.verify(res.body.token);
+      const tokenPayload = await ctx.jwt.verify(res.body.accessToken);
       expect(tokenPayload).toEqual(
         expect.objectContaining({
           user: expect.objectContaining({
@@ -275,7 +275,7 @@ describe('api/v1/session.create', () => {
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
 
-      const tokenPayload = await ctx.jwt.verify(res.body.token);
+      const tokenPayload = await ctx.jwt.verify(res.body.accessToken);
       expect(tokenPayload).toEqual(
         expect.objectContaining({
           user: expect.objectContaining({

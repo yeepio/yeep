@@ -4,8 +4,8 @@ import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
 import createOrg from '../../org/create/service';
-import createSessionToken from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import createSession from '../../session/create/service';
+import destroySession from '../../session/destroy/service';
 import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
 import createPermission from '../create/service';
@@ -63,14 +63,14 @@ describe('api/v1/permission.list', () => {
       }),
     ]);
 
-    session = await createSessionToken(ctx.db, ctx.jwt, {
+    session = await createSession(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
   });
 
   afterAll(async () => {
-    await destroySessionToken(ctx.db, session);
+    await destroySession(ctx, session);
     await Promise.all(permissions.map((permission) => deletePermission(ctx.db, permission)));
     await deleteOrg(ctx.db, acme);
     await deleteOrg(ctx.db, monsters);
@@ -81,7 +81,7 @@ describe('api/v1/permission.list', () => {
   test('returns list of permissions the user has access to', async () => {
     const res = await request(server)
       .post('/api/v1/permission.list')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send();
 
     expect(res.status).toBe(200);
@@ -105,7 +105,7 @@ describe('api/v1/permission.list', () => {
   test('limits number of permissions using `limit` param', async () => {
     const res = await request(server)
       .post('/api/v1/permission.list')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         limit: 1,
       });
@@ -133,7 +133,7 @@ describe('api/v1/permission.list', () => {
   test('paginates through permissions using `cursor` param', async () => {
     const res = await request(server)
       .post('/api/v1/permission.list')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         limit: 2,
       });
@@ -144,7 +144,7 @@ describe('api/v1/permission.list', () => {
 
     const res1 = await request(server)
       .post('/api/v1/permission.list')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         limit: 1,
       });
@@ -157,7 +157,7 @@ describe('api/v1/permission.list', () => {
 
     const res2 = await request(server)
       .post('/api/v1/permission.list')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         limit: 1,
         cursor: res1.body.nextCursor,
@@ -172,7 +172,7 @@ describe('api/v1/permission.list', () => {
   test('filters permissions using `q` param', async () => {
     const res = await request(server)
       .post('/api/v1/permission.list')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         q: 'acme',
       });

@@ -49,7 +49,7 @@ When `roles` are specified (see body params below) then requestor must be additi
 
 ```
 POST /api/v1/invitation.create
-Authorization: `Bearer ${authToken}`
+Authorization: `Bearer ${accessToken}`
 ```
 
 ```json

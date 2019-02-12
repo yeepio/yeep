@@ -39,7 +39,7 @@ Requestor must be authenticated. No explicit permissions are required; only retr
 
 ```
 POST /api/v1/role.list
-Authorization: `Bearer ${authToken}`
+Authorization: `Bearer ${accessToken}`
 ```
 
 ``` json

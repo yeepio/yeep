@@ -4,8 +4,8 @@ import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
 import createOrg from '../../org/create/service';
-import createSessionToken from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import createSession from '../../session/create/service';
+import destroySession from '../../session/destroy/service';
 import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
 import createPermission from '../../permission/create/service';
@@ -74,14 +74,14 @@ describe('api/v1/role.list', () => {
     ]);
 
     // user "wile" is logged-in
-    session = await createSessionToken(ctx.db, ctx.jwt, {
+    session = await createSession(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
   });
 
   afterAll(async () => {
-    await destroySessionToken(ctx.db, session);
+    await destroySession(ctx, session);
     await Promise.all(roles.map((role) => deleteRole(ctx.db, role)));
     await deletePermission(ctx.db, permission);
     await deleteUser(ctx.db, wile);
@@ -93,7 +93,7 @@ describe('api/v1/role.list', () => {
   test('returns list of roles the user has access to', async () => {
     const res = await request(server)
       .post('/api/v1/role.list')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send();
 
     expect(res.status).toBe(200);
@@ -117,7 +117,7 @@ describe('api/v1/role.list', () => {
   test('limits number of roles using `limit` param', async () => {
     const res = await request(server)
       .post('/api/v1/role.list')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         limit: 1,
       });
@@ -145,7 +145,7 @@ describe('api/v1/role.list', () => {
   test('paginates through roles using `cursor` param', async () => {
     const res = await request(server)
       .post('/api/v1/role.list')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         limit: 2,
       });
@@ -156,7 +156,7 @@ describe('api/v1/role.list', () => {
 
     const res1 = await request(server)
       .post('/api/v1/role.list')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         limit: 1,
       });
@@ -169,7 +169,7 @@ describe('api/v1/role.list', () => {
 
     const res2 = await request(server)
       .post('/api/v1/role.list')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         limit: 1,
         cursor: res1.body.nextCursor,
@@ -184,7 +184,7 @@ describe('api/v1/role.list', () => {
   test('filters roles using `q` param', async () => {
     const res = await request(server)
       .post('/api/v1/role.list')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         q: 'acme',
       });

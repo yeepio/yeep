@@ -4,8 +4,8 @@ import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
 import createOrg from '../../org/create/service';
-import createSessionToken from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import createSession from '../../session/create/service';
+import destroySession from '../../session/destroy/service';
 import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
 // import createPermission from '../../permission/create/service';
@@ -125,14 +125,14 @@ describe('api/v1/user.list', () => {
       });
 
       // user "wile" is logged-in
-      session = await createSessionToken(ctx.db, ctx.jwt, {
+      session = await createSession(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx.db, session);
+      await destroySession(ctx, session);
       await deleteUser(ctx.db, wile);
       await deleteUser(ctx.db, porky);
       await deleteUser(ctx.db, wazowski);
@@ -144,7 +144,7 @@ describe('api/v1/user.list', () => {
     test('returns list of users the requestor has access to', async () => {
       const res = await request(server)
         .post('/api/v1/user.list')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send();
 
       expect(res.status).toBe(200);
@@ -179,7 +179,7 @@ describe('api/v1/user.list', () => {
     test('limits number of users using `limit` param', async () => {
       const res = await request(server)
         .post('/api/v1/user.list')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           limit: 1,
         });
@@ -213,7 +213,7 @@ describe('api/v1/user.list', () => {
     test('paginates through users using `cursor` param', async () => {
       const res = await request(server)
         .post('/api/v1/user.list')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           limit: 2,
         });
@@ -224,7 +224,7 @@ describe('api/v1/user.list', () => {
 
       const res1 = await request(server)
         .post('/api/v1/user.list')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           limit: 1,
         });
@@ -237,7 +237,7 @@ describe('api/v1/user.list', () => {
 
       const res2 = await request(server)
         .post('/api/v1/user.list')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           limit: 1,
           cursor: res1.body.nextCursor,
@@ -252,7 +252,7 @@ describe('api/v1/user.list', () => {
     test('filters users using `q` param', async () => {
       const res = await request(server)
         .post('/api/v1/user.list')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           q: 'por',
         });
@@ -283,7 +283,7 @@ describe('api/v1/user.list', () => {
     test('projects user props using `projection` param', async () => {
       const res = await request(server)
         .post('/api/v1/user.list')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           projection: {
             emails: false,
@@ -314,20 +314,20 @@ describe('api/v1/user.list', () => {
 
       beforeAll(async () => {
         // user "spongebob" is logged-in
-        otherSession = await createSessionToken(ctx.db, ctx.jwt, {
+        otherSession = await createSession(ctx, {
           username: 'spongebob',
           password: 'weeeeedddd',
         });
       });
 
       afterAll(async () => {
-        await destroySessionToken(ctx.db, otherSession);
+        await destroySession(ctx, otherSession);
       });
 
       test('returns empty list of users', async () => {
         const res = await request(server)
           .post('/api/v1/user.list')
-          .set('Authorization', `Bearer ${otherSession.token}`)
+          .set('Authorization', `Bearer ${otherSession.accessToken}`)
           .send();
 
         expect(res.status).toBe(200);

@@ -4,8 +4,8 @@ import server from '../../../server';
 import config from '../../../../yeep.config';
 import createOrg from '../create/service';
 import createUser from '../../user/create/service';
-import createSessionToken from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import createSession from '../../session/create/service';
+import destroySession from '../../session/destroy/service';
 import deleteUser from '../../user/delete/service';
 import getUserInfo from '../../user/info/service';
 
@@ -58,21 +58,21 @@ describe('api/v1/org.delete', () => {
         ],
       });
 
-      session = await createSessionToken(ctx.db, ctx.jwt, {
+      session = await createSession(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx.db, session);
+      await destroySession(ctx, session);
       await deleteUser(ctx.db, user);
     });
 
     test('returns error when `id` contains invalid characters', async () => {
       const res = await request(server)
         .post('/api/v1/org.delete')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           id: '507f1f77bcf86cd79943901@',
         });
@@ -92,7 +92,7 @@ describe('api/v1/org.delete', () => {
     test('returns error when `id` contains more than 24 characters', async () => {
       const res = await request(server)
         .post('/api/v1/org.delete')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           id: '507f1f77bcf86cd7994390112',
         });
@@ -112,7 +112,7 @@ describe('api/v1/org.delete', () => {
     test('returns error when `id` contains less than 24 characters', async () => {
       const res = await request(server)
         .post('/api/v1/org.delete')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           id: '507f1f77bcf86cd79943901',
         });
@@ -132,7 +132,7 @@ describe('api/v1/org.delete', () => {
     test('returns error when `id` is unspecified', async () => {
       const res = await request(server)
         .post('/api/v1/org.delete')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({});
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -150,7 +150,7 @@ describe('api/v1/org.delete', () => {
     test('returns error when payload contains unknown properties', async () => {
       const res = await request(server)
         .post('/api/v1/org.delete')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           id: '507f1f77bcf86cd799439011',
           foo: 'bar',
@@ -177,7 +177,7 @@ describe('api/v1/org.delete', () => {
 
       const res = await request(server)
         .post('/api/v1/org.delete')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           id: org.id,
         });

@@ -8,8 +8,8 @@ import createUser from '../../user/create/service';
 import createOrg from '../../org/create/service';
 import deleteUser from '../../user/delete/service';
 import deleteOrg from '../../org/delete/service';
-import createSessionToken from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import createSession from '../../session/create/service';
+import destroySession from '../../session/destroy/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 import deleteRole from '../delete/service';
@@ -59,14 +59,14 @@ describe('api/v1/role.create', () => {
       permissionId: requiredPermission.id,
     });
 
-    session = await createSessionToken(ctx.db, ctx.jwt, {
+    session = await createSession(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
   });
 
   afterAll(async () => {
-    await destroySessionToken(ctx.db, session);
+    await destroySession(ctx, session);
     await deletePermissionAssignment(ctx.db, permissionAssignment);
     await deletePermission(ctx.db, permission);
     await deleteOrg(ctx.db, org);
@@ -77,7 +77,7 @@ describe('api/v1/role.create', () => {
   test('returns error when role already exists', async () => {
     const res = await request(server)
       .post('/api/v1/role.create')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         name: 'admin',
         description: 'This is a test',
@@ -98,7 +98,7 @@ describe('api/v1/role.create', () => {
   test('creates new role and returns expected response', async () => {
     const res = await request(server)
       .post('/api/v1/role.create')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         name: 'acme:manager',
         description: 'This is a test',

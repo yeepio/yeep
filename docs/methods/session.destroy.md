@@ -4,17 +4,24 @@
 
 ## Description
 
-Destroys the designated existing session, a.k.a sign-out.
+Destroys the designated `accessToken` and (optionally) `refreshToken`, a.k.a sign-out.
 
-After calling `session.destroy()` the user will not be able to perform auth-required actions against the system until they create a new session token.
+After calling `session.destroy()` the user will not be able to perform authenticated actions against the system until they create a new `accessToken`.
 
-***
+---
 
-## Auth logic
+## Public method
 
-Requestor must be authenticated.
+This method is publicly available.
 
-***
+## Parameters
+
+### Body
+
+- **accessToken** _(string)_ — user `accessToken`, as provided via [session.create()](./session.create.md) (required)
+- **refreshToken** _(string)_ — user `refreshToken`, as provided via [session.create()](./session.create.md) (optional)
+
+---
 
 ## Returns
 
@@ -23,7 +30,7 @@ Requestor must be authenticated.
 - **ok** _(boolean)_ — indicates whether the request was successfully completed
 - **error** _(Object)_ — contains error details in case of an error
 
-***
+---
 
 ## Example
 
@@ -31,14 +38,20 @@ Requestor must be authenticated.
 
 ```
 POST /api/v1/session.destroy
-Authorization: `Bearer ${authToken}`
+```
+
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ",
+  "refreshToken": "frpp2b3fesG3ZS3E9vqa3pm1"
+}
 ```
 
 **Response**
 
 `200 OK`
 
-``` json
+```json
 {
   "ok": true
 }

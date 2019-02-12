@@ -5,8 +5,8 @@ import config from '../../../../yeep.config';
 import createOrg from '../../org/create/service';
 import createUser from '../create/service';
 import createPermissionAssignment from '../assignPermission/service';
-import createSessionToken from '../../session/create/service';
-import destroySessionToken from '../../session/destroy/service';
+import createSession from '../../session/create/service';
+import destroySession from '../../session/destroy/service';
 import deletePermissionAssignment from '../revokePermission/service';
 import deleteUser from '../delete/service';
 import deleteOrg from '../../org/delete/service';
@@ -72,7 +72,7 @@ describe('api/v1/user.activate', () => {
         // global org
       });
 
-      wileSession = await createSessionToken(ctx.db, ctx.jwt, {
+      wileSession = await createSession(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
@@ -97,15 +97,15 @@ describe('api/v1/user.activate', () => {
         adminId: runner.id,
       });
 
-      runnerSession = await createSessionToken(ctx.db, ctx.jwt, {
+      runnerSession = await createSession(ctx, {
         username: 'runner',
         password: 'fast+furry-ous',
       });
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx.db, wileSession);
-      await destroySessionToken(ctx.db, runnerSession);
+      await destroySession(ctx, wileSession);
+      await destroySession(ctx, runnerSession);
       await deletePermissionAssignment(ctx.db, permissionAssignment);
       await deleteUser(ctx.db, wile);
       await deleteUser(ctx.db, runner);
@@ -115,7 +115,7 @@ describe('api/v1/user.activate', () => {
     test('activates user and returns expected response', async () => {
       let res = await request(server)
         .post('/api/v1/user.activate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           id: runner.id,
         });
@@ -134,7 +134,7 @@ describe('api/v1/user.activate', () => {
     test('returns error when `id` contains invalid characters', async () => {
       const res = await request(server)
         .post('/api/v1/user.activate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           id: '507f1f77bcf86cd79943901@',
         });
@@ -154,7 +154,7 @@ describe('api/v1/user.activate', () => {
     test('returns error when `id` contains more than 24 characters', async () => {
       const res = await request(server)
         .post('/api/v1/user.activate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           id: '507f1f77bcf86cd7994390112',
         });
@@ -174,7 +174,7 @@ describe('api/v1/user.activate', () => {
     test('returns error when `id` contains less than 24 characters', async () => {
       const res = await request(server)
         .post('/api/v1/user.activate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           id: '507f1f77bcf86cd79943901',
         });
@@ -194,7 +194,7 @@ describe('api/v1/user.activate', () => {
     test('returns error when `id` is unspecified', async () => {
       const res = await request(server)
         .post('/api/v1/user.activate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({});
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -212,7 +212,7 @@ describe('api/v1/user.activate', () => {
     test('returns error when payload contains unknown properties', async () => {
       const res = await request(server)
         .post('/api/v1/user.activate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           id: '507f1f77bcf86cd799439011',
           foo: 'bar',
@@ -233,7 +233,7 @@ describe('api/v1/user.activate', () => {
     test('returns error with invalid permission scope', async () => {
       const res = await request(server)
         .post('/api/v1/user.activate')
-        .set('Authorization', `Bearer ${runnerSession.token}`)
+        .set('Authorization', `Bearer ${runnerSession.accessToken}`)
         .send({
           id: wile.id,
         });

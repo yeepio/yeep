@@ -121,7 +121,7 @@ server.setup = async (config) => {
 
   // configure JWT
   const jwt = new JsonWebToken({
-    secretKey: config.jwt.secret,
+    secretKey: config.accessToken.secret,
     issuer: 'Yeep',
   });
 
