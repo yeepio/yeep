@@ -1,4 +1,5 @@
 import React from 'react';
+import Button from './Button';
 
 /**
  * Wrapper for all pages, shows on the right of the Nav
@@ -11,7 +12,7 @@ const PageWrapper = () => {
         The aim of this page is to <strong>showcase all the various UI elements</strong> we plan to
         use in our app.
         <br />
-        The default link colour is blue: <a href="/">Example link</a>
+        The default link colour iså blue: <a href="/">Example link</a>
       </p>
       <h2 className="mb-4">The &quot;Thumb&quot; principle</h2>
       <p className="mb-4">
@@ -21,24 +22,13 @@ const PageWrapper = () => {
         that specific height.
       </p>
       <h2 className="mb-4">Button styles (this is an H2 subheading)</h2>
+      <p className="mb-4">Default and secondary / lower priority buttons:</p>
       <p className="mb-4">
-        Default button styling: <code>.btn</code> class applied to a <code>&lt;button&gt;</code>{' '}
-        element:
-      </p>
-      <p className="mb-4">
-        <button className="btn">I&lsquo;m a button</button>
-      </p>
-      <p className="mb-4">
-        <code>.btn</code> can also be applied to <code>&lt;a&gt;</code> tags:
-      </p>
-      <p className="mb-4">
-        <a href="/" className="btn">
-          I am actually a link
-        </a>
+        <Button label="I am the default button" />
       </p>
       <h2 className="mb-4">Secondary buttons</h2>
       <p className="mb-4">
-        <button className="btn-secondary">Secondary button</button>
+        <Button label="Secondary button" isSecondary />
       </p>
       <h2 className="mb-4">Form elements</h2>
       <p className="mb-6">
@@ -90,10 +80,10 @@ const PageWrapper = () => {
         <div className="form-submit">
           <p className="mb-4">
             Submit / cancel buttons can be wrapped inside a <code>.form-submit</code> helper div
-            which gives the appropriate margin:
+            which gives the appropriate left margin:
           </p>
-          <button className="btn mr-4">Submit this form!</button>
-          <button className="btn-secondary">Cancel and hide</button>
+          <Button label="Submit this form!" className="mr-3" />
+          <Button label="Cancel and hide" isSecondary />
         </div>
       </fieldset>
       <fieldset className="mb-6">

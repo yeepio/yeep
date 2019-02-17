@@ -15,28 +15,6 @@ a:hover {
   @apply text-blue-dark;
 }
 
-/* Buttons */
-.btn {
-  @apply border border-blue bg-blue text-white font-bold py-2 px-4 rounded;
-  text-decoration: none;
-  line-height: 1.5;
-}
-.btn:hover {
-  @apply bg-blue-dark text-white;
-}
-.btn-secondary {
-  @apply border border-blue text-blue font-bold py-2 px-4 rounded;
-  text-decoration: none;
-  line-height: 1.5;
-}
-.btn-secondary:hover {
-  @apply bg-grey-light;
-}
-a.btn,
-a.btn-secondary {
-  display: inline-block;
-}
-
 /* Form elements: fieldset */
 fieldset {
   @apply border border-grey p-8;
