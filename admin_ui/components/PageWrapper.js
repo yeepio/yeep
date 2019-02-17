@@ -1,5 +1,6 @@
 import React from 'react';
 import Button from './Button';
+import Input from './Input';
 
 /**
  * Wrapper for all pages, shows on the right of the Nav
@@ -43,8 +44,7 @@ const PageWrapper = () => {
           wrap each label + field with a <code>.form-group</code> class to facilitate this.
         </p>
         <div className="form-group mb-4">
-          <label htmlFor="tempTextField">The label:</label>
-          <input id="tempTextField" type="text" placeholder="The text field" />
+          <Input id="tempTextField" placeholder="The text field" label="The label:" />
         </div>
         <p className="mb-4">
           For viewports larger than Tailwinds 576px breakpoint the layout is as follows:
@@ -59,14 +59,20 @@ const PageWrapper = () => {
           <li>Validation / neutral messages will appear underneath the form element</li>
         </ul>
         <div className="form-group mb-4">
-          <label htmlFor="tempTextField2">Another field:</label>
-          <input id="tempTextField2" type="text" placeholder="Another text field" />
-          <div className="invalid">An error occured with this field</div>
+          <Input
+            id="tempTextField2"
+            label="Another field:"
+            placeholder="Another text field"
+            feedbackInvalid="An error occurred with this field"
+          />
         </div>
         <div className="form-group mb-4">
-          <label htmlFor="tempTextField3">This is good:</label>
-          <input id="tempTextField3" type="text" placeholder="Optional" />
-          <div className="valid">Nice one!</div>
+          <Input
+            id="tempTextField3"
+            label="This is good:"
+            placeholder="placeholder text here"
+            feedbackValid="Nice one!"
+          />
         </div>
         <div className="form-group mb-4">
           <label htmlFor="tempTextField4">Helpful layout:</label>
