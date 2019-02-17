@@ -7,46 +7,44 @@ const PageWrapper = () => {
   return (
     <div className="leading-normal p-4 sm:p-8">
       <h1>Welcome to the Kitchen Sink</h1>
-      <div className="yeep-text">
-        <p>
-          The aim of this page is to <strong>showcase all the various UI elements</strong> we plan
-          to use in our app.
-          <br />
-          The default link colour is blue: <a href="/">Example link</a>
-        </p>
-        <h2>The &quot;Thumb&quot; principle</h2>
-        <p>
-          This will be a responsive app so we try to ensure that (with the possible exception of
-          inline links!) any tappable area has a height of at least 40 pixels. This means that{' '}
-          <code>&lt;input&gt;</code> fields, <code>&lt;select&gt;</code> elements, buttons will have
-          that specific height.
-        </p>
-        <h2>Button styles (this is an H2 subheading)</h2>
-        <p>
-          Default button styling: <code>.btn</code> class applied to a <code>&lt;button&gt;</code>{' '}
-          element:
-        </p>
-        <p>
-          <button className="btn">I&lsquo;m a button</button>
-        </p>
-        <p>
-          <code>.btn</code> can also be applied to <code>&lt;a&gt;</code> tags:
-        </p>
-        <p>
-          <a href="/" className="btn">
-            I am actually a link
-          </a>
-        </p>
-        <h2>Secondary buttons</h2>
-        <p>
-          <button className="btn-secondary">Secondary button</button>
-        </p>
-        <h2>Form elements</h2>
-        <p>
-          A <code>&lt;fieldset&gt;</code> will be used to wrap labels and their form elements in
-          most cases:
-        </p>
-      </div>
+      <p className="mb-4">
+        The aim of this page is to <strong>showcase all the various UI elements</strong> we plan to
+        use in our app.
+        <br />
+        The default link colour is blue: <a href="/">Example link</a>
+      </p>
+      <h2 className="mb-4">The &quot;Thumb&quot; principle</h2>
+      <p className="mb-4">
+        This will be a responsive app so we try to ensure that (with the possible exception of
+        inline links!) any tappable area has a height of at least 40 pixels. This means that{' '}
+        <code>&lt;input&gt;</code> fields, <code>&lt;select&gt;</code> elements, buttons will have
+        that specific height.
+      </p>
+      <h2 className="mb-4">Button styles (this is an H2 subheading)</h2>
+      <p className="mb-4">
+        Default button styling: <code>.btn</code> class applied to a <code>&lt;button&gt;</code>{' '}
+        element:
+      </p>
+      <p className="mb-4">
+        <button className="btn">I&lsquo;m a button</button>
+      </p>
+      <p className="mb-4">
+        <code>.btn</code> can also be applied to <code>&lt;a&gt;</code> tags:
+      </p>
+      <p className="mb-4">
+        <a href="/" className="btn">
+          I am actually a link
+        </a>
+      </p>
+      <h2 className="mb-4">Secondary buttons</h2>
+      <p className="mb-4">
+        <button className="btn-secondary">Secondary button</button>
+      </p>
+      <h2 className="mb-4">Form elements</h2>
+      <p className="mb-6">
+        A <code>&lt;fieldset&gt;</code> will be used to wrap labels and their form elements in most
+        cases:
+      </p>
       <fieldset className="mb-6">
         <legend>legend text here</legend>
         <p className="mb-4">
@@ -316,13 +314,13 @@ const PageWrapper = () => {
         These are custom-styled <code>&lt;label&gt;</code> elements with nested checkboxes:
       </p>
       <label htmlFor="permission1" className="pillbox mr-2">
-        <input type="checkbox" id="permission1"/> Permission #1
+        <input type="checkbox" id="permission1" /> Permission #1
       </label>
       <label htmlFor="permission5" className="pillbox pillbox-checked mr-2">
         <input type="checkbox" id="permission5" checked="true" /> Permission #2
       </label>
       <label htmlFor="permission3" className="pillbox mr-2">
-        <input type="checkbox" id="permission3"/> Permission #3
+        <input type="checkbox" id="permission3" /> Permission #3
       </label>
     </div>
   );

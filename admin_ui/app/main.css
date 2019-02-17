@@ -15,15 +15,6 @@ a:hover {
   @apply text-blue-dark;
 }
 
-/* Helper class: Add to any encompassing element and it'll ensure that nested
-p, h1 and h2 have a bottom margin
- */
-.yeep-text p,
-.yeep-text h1,
-.yeep-text h2 {
-  @apply mb-4;
-}
-
 /* Buttons */
 .btn {
   @apply border border-blue bg-blue text-white font-bold py-2 px-4 rounded;
