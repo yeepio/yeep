@@ -22,7 +22,7 @@ const Input = ({
       <input
         type={type}
         id={id}
-        className={`block border border-grey p-2 rounded w-full leading-normal ${className}`}
+        className={`block border border-grey p-2 rounded leading-normal ${className}`}
         placeholder={placeholder}
       />
       {feedbackInvalid && <div className="invalid">{feedbackInvalid}</div>}

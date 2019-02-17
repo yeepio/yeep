@@ -2,6 +2,7 @@ import React from 'react';
 import Button from './Button';
 import Input from './Input';
 import Textarea from './Textarea';
+import Select from 'react-select';
 
 /**
  * Wrapper for all pages, shows on the right of the Nav
@@ -96,17 +97,20 @@ const PageWrapper = () => {
         <p className="mb-4">A few different layouts and scenarios:</p>
         <div className="form-group mb-3">
           <label htmlFor="tempSelect1">Select / dropdown:</label>
-          <select id="tempSelect1">
-            <option value="0">-- Please choose a super power --</option>
-            <option value="1">Option 1</option>
-            <option value="1">Option 2</option>
-            <option value="1">Option 3</option>
-            <option value="1">Option 4</option>
-          </select>
+          <Select
+            className="flex-auto"
+            placeholder="-- Please choose an option --"
+            options={[
+              { value: 1, label: 'Option 1' },
+              { value: 2, label: 'Option 2' },
+              { value: 3, label: 'Option 3' },
+              { value: 4, label: 'Option 4' },
+            ]}
+            isClearable={true}
+          />
         </div>
         <div className="form-group mb-3">
-          <label htmlFor="tempPassword1">Password:</label>
-          <input type="password" id="textPassword1" placeholder="please enter a strong password" />
+          <Input type="password" label="Password:" placeholder="please enter a strong password" />
         </div>
       </fieldset>
       <fieldset className="mb-6">
@@ -166,16 +170,31 @@ const PageWrapper = () => {
       <fieldset className="mb-4">
         <legend>Filters and quick search</legend>
         <div className="sm:flex items-center">
-          <select name="tempFilters1" className="w-auto mb-3 sm:mb-0 sm:mr-3">
-            <option value="0">Organisation: All organisations</option>
-          </select>
-          <select name="tempFilters2" className="w-auto mb-3 sm:mb-0 sm:mr-3">
-            <option value="0">Roles: All roles</option>
-          </select>
+          <Select
+            className="flex-auto mb-3 sm:mb-0 sm:mr-3"
+            placeholder="All organisations"
+            options={[
+              { value: 1, label: 'Org 1' },
+              { value: 2, label: 'Org 2' },
+              { value: 3, label: 'Org 3' },
+              { value: 4, label: 'Org 4' },
+            ]}
+            isClearable={true}
+          />
+          <Select
+            className="flex-auto mb-3 sm:mb-0 sm:mr-3"
+            placeholder="All roles"
+            options={[
+              { value: 1, label: 'Role 1' },
+              { value: 2, label: 'Role 2' },
+              { value: 3, label: 'Role 3' },
+            ]}
+            isClearable={true}
+          />
           <a href="/admin" className="block whitespace-no-wrap mb-3 sm:mb-0 sm:mr-3">
             Toggle profile pics <strong>ON</strong>
           </a>
-          <input type="text" placeholder="quicksearch" className="w-100" />
+          <Input placeholder="quicksearch" />
         </div>
       </fieldset>
       <p className="italic text-grey-dark text-sm mb-4">
