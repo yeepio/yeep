@@ -4,7 +4,7 @@ import Logo from './Logo.js';
 /**
  * The header
  */
-const Header = () => {
+const TopNav = () => {
   return (
     <header className="bg-grey-dark text-white">
       <div className="max-w-3xl mx-auto h-16 flex items-center">
@@ -37,4 +37,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default TopNav;

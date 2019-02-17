@@ -5,7 +5,7 @@ import React from 'react';
  * TODO: use #top for link hrefs here to avoid eslint's "anchor-is-valid" perstering us,
  *  change this when we have proper routes.
  */
-const Nav = () => {
+const AsideNav = () => {
   return (
     <nav className="bg-grey-light w-64 flex-no-shrink hidden lg:block">
       <ul className="list-reset">
@@ -54,4 +54,4 @@ const Nav = () => {
   );
 };
 
-export default Nav;
+export default AsideNav;

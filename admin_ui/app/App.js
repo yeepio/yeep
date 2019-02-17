@@ -1,7 +1,7 @@
 import React from 'react';
 import './main.css';
-import Header from '../components/Header';
-import Nav from '../components/Nav';
+import TopNav from '../components/TopNav';
+import AsideNav from '../components/AsideNav';
 import PageWrapper from '../components/PageWrapper';
 
 /**
@@ -11,9 +11,9 @@ import PageWrapper from '../components/PageWrapper';
 const App = () => {
   return (
     <React.Fragment>
-      <Header />
+      <TopNav />
       <div className="mx-auto flex max-w-3xl">
-        <Nav />
+        <AsideNav />
         <PageWrapper />
       </div>
     </React.Fragment>
