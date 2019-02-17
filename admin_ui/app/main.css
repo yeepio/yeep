@@ -30,9 +30,6 @@ legend {
 }
 
 /* input eleents */
-input[type='text'],
-input[type='password'],
-textarea,
 select {
   @apply border border-grey p-2 rounded w-full;
   line-height: 1.5;
@@ -205,11 +202,11 @@ select {
 /* Our pillboxes */
 .pillbox {
   @apply rounded border-grey-dark border p-2;
-  display:inline-block;
-  cursor:pointer;
+  display: inline-block;
+  cursor: pointer;
 }
 .pillbox input {
-  cursor:pointer;
+  cursor: pointer;
 }
 .pillbox:hover {
   @apply bg-grey-light;

@@ -1,6 +1,7 @@
 import React from 'react';
 import Button from './Button';
 import Input from './Input';
+import Textarea from './Textarea';
 
 /**
  * Wrapper for all pages, shows on the right of the Nav
@@ -75,13 +76,11 @@ const PageWrapper = () => {
           />
         </div>
         <div className="form-group mb-4">
-          <label htmlFor="tempTextField4">Helpful layout:</label>
-          <textarea
-            id="tempTextField4"
+          <Textarea
+            label="Helpful layout:"
             placeholder="Please write your innermost feelings"
-            rows="10"
+            feedbackNeutral="we are joking, do not do this, just tell us a joke"
           />
-          <div className="neutral">we are joking, do not do this, just give us a joke</div>
         </div>
         <div className="form-submit">
           <p className="mb-4">

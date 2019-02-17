@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const Input = ({
+const Textarea = ({
   id,
   className,
-  type,
+  rows,
   label,
   labelClassName,
   placeholder,
@@ -19,8 +19,8 @@ const Input = ({
           {label}
         </label>
       )}
-      <input
-        type={type}
+      <textarea
+        rows={rows}
         id={id}
         className={`block border border-grey p-2 rounded w-full leading-normal ${className}`}
         placeholder={placeholder}
@@ -32,14 +32,13 @@ const Input = ({
   );
 };
 
-Input.propTypes = {
+Textarea.propTypes = {
   // The id of the input field
   id: PropTypes.string.required,
   // The class that will be applied to the input field
   className: PropTypes.string,
-  // The type of the input field.
-  // TODO: Discuss whether we should relax this and just accept a string
-  type: PropTypes.oneOf(['text', 'password', 'email']),
+  // Height of the element in number of text rows
+  rows: PropTypes.number,
   // The placeholder attribute of the input field
   placeholder: PropTypes.string,
   // If filled we'll display a <label> element with that text
@@ -54,8 +53,8 @@ Input.propTypes = {
   feedbackNeutral: PropTypes.string,
 };
 
-Input.defaultProps = {
-  type: 'text',
+Textarea.defaultProps = {
+  rows: 8,
 };
 
-export default Input;
+export default Textarea;
