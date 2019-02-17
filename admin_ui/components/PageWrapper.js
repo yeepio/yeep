@@ -24,11 +24,11 @@ const PageWrapper = () => {
       <h2 className="mb-4">Button styles (this is an H2 subheading)</h2>
       <p className="mb-4">Default and secondary / lower priority buttons:</p>
       <p className="mb-4">
-        <Button label="I am the default button" />
+        <Button>I am the default button</Button>
       </p>
       <h2 className="mb-4">Secondary buttons</h2>
       <p className="mb-4">
-        <Button label="Secondary button" isSecondary />
+        <Button isSecondary>I am a secondary button</Button>
       </p>
       <h2 className="mb-4">Form elements</h2>
       <p className="mb-6">
@@ -82,8 +82,8 @@ const PageWrapper = () => {
             Submit / cancel buttons can be wrapped inside a <code>.form-submit</code> helper div
             which gives the appropriate left margin:
           </p>
-          <Button label="Submit this form!" className="mr-3" />
-          <Button label="Cancel and hide" isSecondary />
+          <Button className="mr-3">Submit this form!</Button>
+          <Button isSecondary>Cancel and hide</Button>
         </div>
       </fieldset>
       <fieldset className="mb-6">

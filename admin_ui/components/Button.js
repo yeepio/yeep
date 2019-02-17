@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const Button = ({ label, isSecondary, className }) => {
-  return <button className={chooseLookAndFeel(isSecondary, className)}>{label}</button>;
+const Button = ({ children, isSecondary, className }) => {
+  return <button className={chooseLookAndFeel(isSecondary, className)}>{children}</button>;
 };
 
 /**
@@ -38,8 +38,8 @@ const chooseLookAndFeel = (isSecondary, className = '') => {
 };
 
 Button.propTypes = {
-  // The string label of the button
-  label: PropTypes.string.isRequired,
+  // Most frequenly just a string (which will be the button label)
+  children: PropTypes.node.isRequired,
   // If set to true we'll show a secondary / lower priority button
   isSecondary: PropTypes.bool,
   // A custom className
@@ -47,7 +47,7 @@ Button.propTypes = {
 };
 
 Button.defaultProps = {
-  label: 'Submit',
+  children: 'Submit',
   isSecondary: false,
 };
 
