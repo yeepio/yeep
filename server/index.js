@@ -1,9 +1,3 @@
-/* 
-**  @Deprecation notice
-**  
-**  File will be removed in later versions. Starting the yeep
-**  web server will be handled through the CLI explicitly
-*/
 import https from 'https';
 import { format as formatUrl } from 'url';
 import server from './server';

@@ -11,7 +11,7 @@ const loadConfig = (configPath) => {
   }
 
   const configuration = require(path.resolve(configPath));
-  const defaultConfiguration = require(path.resolve(__dirname, '../../yeep.config.sample'));
+  const defaultConfiguration = require(path.resolve(__dirname, './yeep.config.default'));
 
   return merge(defaultConfiguration, configuration);
 }
