@@ -1,31 +1,15 @@
 import React from 'react';
+import GridPager from './GridPager';
 
-// WORK IN PROGRESS
+// WIP
 const Grid = () => {
   return (
     <React.Fragment>
-      <div className="grid-header">
+      <div className="py-2 text-center sm:flex sm:text-left">
         <p>
           Showing entities <strong>1</strong> or <strong>X</strong> of <strong>TOTAL</strong>:
         </p>
-        <ul className="grid-pager">
-          <li>
-            <a href="/">&laquo; Previous</a>
-          </li>
-          <li>
-            <a href="/">1</a>
-          </li>
-          <li>
-            <strong>2</strong>
-          </li>
-          <li>...</li>
-          <li>
-            <a href="/">7</a>
-          </li>
-          <li>
-            <a href="/">Next &raquo;</a>
-          </li>
-        </ul>
+        <GridPager />
       </div>
       <div className="grid-wrapper">
         <table className="grid">
@@ -96,24 +80,7 @@ const Grid = () => {
             <option value="50">50 per page</option>
           </select>
         </div>
-        <ul className="grid-pager">
-          <li>
-            <a href="/">&laquo; Previous</a>
-          </li>
-          <li>
-            <a href="/">1</a>
-          </li>
-          <li>
-            <strong>2</strong>
-          </li>
-          <li>...</li>
-          <li>
-            <a href="/">7</a>
-          </li>
-          <li>
-            <a href="/">Next &raquo;</a>
-          </li>
-        </ul>
+        <GridPager />
       </div>
     </React.Fragment>
   );

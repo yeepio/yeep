@@ -29,17 +29,6 @@ legend {
   left: 1.2rem;
 }
 
-/* input eleents */
-select {
-  @apply border border-grey p-2 rounded w-full;
-  line-height: 1.5;
-  display: block;
-}
-select {
-  /* For select elements we need to also change the height to match the textfields */
-  height: 42px;
-}
-
 /* Form layout */
 .form-group label {
   @apply mb-1;
@@ -111,29 +100,6 @@ select {
 }
 .grid td {
   @apply p-2;
-}
-/* Grid pagination links */
-.grid-pager {
-  @apply list-reset ml-auto whitespace-no-wrap;
-}
-.grid-pager p {
-  display: block;
-}
-.grid-pager li {
-  @apply px-2;
-  display: inline-block;
-}
-
-/* Grid heading (text and pagination) */
-.grid-header {
-  @apply py-2;
-  text-align: center;
-}
-@screen sm {
-  .grid-header {
-    display: flex;
-    text-align: left;
-  }
 }
 /*
   Grid footer (per page control and pagination)
