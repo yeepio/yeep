@@ -47,9 +47,9 @@ legend {
 }
 @screen sm {
   /*
-        From the mobile breakpoint and upwards we'll change the 
-        label+input layout to be side by side.
-    */
+      From the mobile breakpoint and upwards we'll change the
+      label+input layout to be side by side.
+  */
   .form-group {
     display: flex;
     flex-wrap: wrap;
