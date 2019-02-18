@@ -4,6 +4,7 @@ import Input from './Input';
 import Textarea from './Textarea';
 import Select from 'react-select';
 import Grid from './grid/Grid';
+import Pillbox from './Pillbox';
 
 /**
  * Wrapper for all pages, shows on the right of the Nav
@@ -218,15 +219,9 @@ const PageWrapper = () => {
       <p className="mb-4">
         These are custom-styled <code>&lt;label&gt;</code> elements with nested checkboxes:
       </p>
-      <label htmlFor="permission1" className="pillbox mr-2">
-        <input type="checkbox" id="permission1" /> Permission #1
-      </label>
-      <label htmlFor="permission5" className="pillbox pillbox-checked mr-2">
-        <input type="checkbox" id="permission5" checked="true" /> Permission #2
-      </label>
-      <label htmlFor="permission3" className="pillbox mr-2">
-        <input type="checkbox" id="permission3" /> Permission #3
-      </label>
+      <Pillbox id="permission1" label="Permission #1" className="mr-2" />
+      <Pillbox id="permission2" label="Permission #2" className="mr-2" checked={true} />
+      <Pillbox id="permission3" label="Permission #3" className="mr-2" />
     </div>
   );
 };

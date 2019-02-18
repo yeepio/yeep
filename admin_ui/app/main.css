@@ -81,22 +81,3 @@ legend {
     margin-left: 25%;
   }
 }
-
-/* Our pillboxes */
-.pillbox {
-  @apply rounded border-grey-dark border p-2;
-  display: inline-block;
-  cursor: pointer;
-}
-.pillbox input {
-  cursor: pointer;
-}
-.pillbox:hover {
-  @apply bg-grey-light;
-}
-.pillbox-checked {
-  @apply bg-blue-lightest border-blue;
-}
-.pillbox-checked:hover {
-  @apply bg-blue-light;
-}
