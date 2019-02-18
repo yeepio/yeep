@@ -112,6 +112,7 @@ describe('api/v1/role.list', () => {
         }),
       ]),
     });
+    expect(res.body.roles.length).toBe(2);
   });
 
   test('limits number of roles using `limit` param', async () => {
@@ -202,6 +203,44 @@ describe('api/v1/role.list', () => {
           updatedAt: expect.any(String),
         }),
       ]),
+    });
+  });
+
+  test('filters roles using `scope` param', async () => {
+    const res = await request(server)
+      .post('/api/v1/role.list')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .send({
+        scope: acme.id,
+      });
+    expect(res.body).toMatchObject({
+      ok: true,
+      roles: expect.arrayContaining([
+        expect.objectContaining({
+          id: expect.any(String),
+          name: expect.any(String),
+          description: expect.any(String),
+          isSystemRole: expect.any(Boolean),
+          usersCount: expect.any(Number),
+          permissions: expect.arrayContaining([expect.any(String)]),
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+      ]),
+    });
+    expect(res.body.roles.length).toBe(1);
+  });
+
+  test('filters roles using `isSystemRole` param', async () => {
+    const res = await request(server)
+      .post('/api/v1/role.list')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .send({
+        isSystemRole: true,
+      });
+    expect(res.body).toMatchObject({
+      ok: true,
+      roles: expect.arrayContaining([]),
     });
   });
 });
