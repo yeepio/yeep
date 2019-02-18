@@ -16,7 +16,7 @@ const PageWrapper = () => {
         The aim of this page is to <strong>showcase all the various UI elements</strong> we plan to
         use in our app.
         <br />
-        The default link colour iså blue: <a href="/">Example link</a>
+        The default link colour is blue: <a href="/">Example link</a>
       </p>
       <h2 className="mb-4">The &quot;Thumb&quot; principle</h2>
       <p className="mb-4">
