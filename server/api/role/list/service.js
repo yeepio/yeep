@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import get from 'lodash/get';
+import has from 'lodash/has';
 import escapeRegExp from 'lodash/escapeRegExp';
 
 export const stringifyCursor = ({ id }) => {
@@ -72,7 +72,7 @@ async function listRoles(db, { q, limit, cursor, scopes }) {
     {
       $unwind: {
         path: '$org',
-          'preserveNullAndEmptyArrays': true,
+        preserveNullAndEmptyArrays: true,
       },
     },
     {
@@ -83,10 +83,10 @@ async function listRoles(db, { q, limit, cursor, scopes }) {
   return roles.map((role) => ({
     id: role._id.toHexString(),
     name: role.name,
-    org: {
-      id: get(role, 'org._id') && get(role, 'org._id').toHexString(),
-      name: get(role, 'org.name'),
-    },
+    org: has(role, ['org', '_id']) ? {
+      id: role.org._id.toHexString(),
+      name: role.org.name,
+    } : null,
     description: role.description,
     isSystemRole: role.isSystemRole,
     permissions: role.permissions,
