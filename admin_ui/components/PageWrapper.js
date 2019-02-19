@@ -1,7 +1,7 @@
 import React from 'react';
 import Button from './Button';
-import Input from './Input';
-import Textarea from './Textarea';
+import Input from './form_elements/Input';
+import Textarea from './form_elements/Textarea';
 import Select from 'react-select';
 import Grid from './grid/Grid';
 import Pillbox from './Pillbox';
@@ -48,7 +48,8 @@ const PageWrapper = () => {
           wrap each label + field with a <code>.form-group</code> class to facilitate this.
         </p>
         <div className="form-group mb-4">
-          <Input id="tempTextField" placeholder="The text field" label="The label:" />
+          <label htmlFor="tempTextField">The label:</label>
+          <Input id="tempTextField" placeholder="The text field" />
         </div>
         <p className="mb-4">
           For viewports larger than Tailwinds 576px breakpoint the layout is as follows:
@@ -63,27 +64,19 @@ const PageWrapper = () => {
           <li>Validation / neutral messages will appear underneath the form element</li>
         </ul>
         <div className="form-group mb-4">
-          <Input
-            id="tempTextField2"
-            label="Another field:"
-            placeholder="Another text field"
-            feedbackInvalid="An error occurred with this field"
-          />
+          <label htmlFor="tempTextField2">Another field:</label>
+          <Input id="tempTextField2" placeholder="Another text field" />
+          <div className="invalid">An error occurred with this field</div>
         </div>
         <div className="form-group mb-4">
-          <Input
-            id="tempTextField3"
-            label="This is good:"
-            placeholder="placeholder text here"
-            feedbackValid="Nice one!"
-          />
+          <label htmlFor="tempTextField3">This is good:</label>
+          <Input id="tempTextField3" placeholder="Placeholdeer text here" />
+          <div className="valid">Nice one!</div>
         </div>
         <div className="form-group mb-4">
-          <Textarea
-            label="Helpful layout:"
-            placeholder="Please write your innermost feelings"
-            feedbackNeutral="we are joking, do not do this, just tell us a joke"
-          />
+          <label htmlFor="tempTextarea">Helpful layout:</label>
+          <Textarea rows="8" placeholder="Please write your innermost feelings" />
+          <div className="neutral">we are joking, do not do this, just tell us a joke</div>
         </div>
         <div className="form-submit">
           <p className="mb-4">
@@ -112,7 +105,8 @@ const PageWrapper = () => {
           />
         </div>
         <div className="form-group mb-3">
-          <Input type="password" label="Password:" placeholder="please enter a strong password" />
+          <label htmlFor="tempPassword">Password:</label>
+          <Input type="password" placeholder="please enter a strong password" />
         </div>
       </fieldset>
       <fieldset className="mb-6">
