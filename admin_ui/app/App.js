@@ -12,7 +12,7 @@ const App = () => {
   return (
     <React.Fragment>
       <TopNav />
-      <div className="mx-auto flex max-w-3xl">
+      <div className="mx-auto flex">
         <AsideNav />
         <PageWrapper />
       </div>

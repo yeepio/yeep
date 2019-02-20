@@ -1,9 +1,9 @@
 import React from 'react';
 import Button from './Button';
-import Input from './form_elements/Input';
-import Textarea from './form_elements/Textarea';
+import Input from './Input';
+import Textarea from './Textarea';
 import Select from 'react-select';
-import Grid from './grid/Grid';
+import Grid from './Grid';
 import Pillbox from './Pillbox';
 
 /**
@@ -11,7 +11,7 @@ import Pillbox from './Pillbox';
  */
 const PageWrapper = () => {
   return (
-    <div className="leading-normal p-4 sm:p-8">
+    <div className="leading-normal p-4 sm:p-8 max-w-2xl">
       <h1>Welcome to the Kitchen Sink</h1>
       <p className="mb-4">
         The aim of this page is to <strong>showcase all the various UI elements</strong> we plan to
