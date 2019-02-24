@@ -1,10 +1,12 @@
 import React from 'react';
 import GridPager from './GridPager';
 import GridPerPage from './GridPerPage';
-import GridSortingLink from './GridSortingLink';
+// import GridSortingLink from './GridSortingLink';
+import GridHeadingCell from './GridHeadingCell';
+import PropTypes from 'prop-types';
 
 // WIP
-const Grid = () => {
+const Grid = ({ headings, data, renderer }) => {
   return (
     <React.Fragment>
       <div className="py-2 text-center sm:flex sm:text-left">
@@ -22,55 +24,21 @@ const Grid = () => {
         <table className="grid w-full border-collapse border-b border-grey">
           <thead>
             <tr>
-              <th className="text-left border-grey border-t border-b p-2 font-normal">
-                <GridSortingLink direction="asc">Organisation name</GridSortingLink>
-              </th>
-              <th className="border-grey border-t border-b p-2 font-normal">
-                <GridSortingLink>Slug / URL key</GridSortingLink>
-              </th>
-              <th className="border-grey border-t border-b p-2 font-normal">Users</th>
-              <th className="border-grey border-t border-b p-2 font-normal">Roles</th>
-              <th className="border-grey border-t border-b p-2 font-normal">Permissions</th>
-              <th className="border-grey border-t border-b p-2 font-normal">Actions</th>
+              {headings.map((heading) => (
+                <GridHeadingCell
+                  key={heading.label}
+                  label={heading.label}
+                  isSortable={heading.isSortable}
+                  sort={heading.sort}
+                  className={heading.className}
+                />
+              ))}
             </tr>
           </thead>
           <tbody>
-            <tr className="bg-grey-lightest">
-              <td className="p-2">
-                <a href="/">Our Tech Blog</a>
-              </td>
-              <td className="p-2 text-center">blog</td>
-              <td className="p-2 text-center">
-                <a href="/">5</a>
-              </td>
-              <td className="p-2 text-center">
-                <a href="/">4</a>
-              </td>
-              <td className="p-2 text-center">
-                <a href="/">10</a>
-              </td>
-              <td className="p-2 text-center">
-                <a href="/">Edit</a> <a href="/">Delete</a>
-              </td>
-            </tr>
-            <tr>
-              <td className="p-2">
-                <a href="/">Zoho CRM</a>
-              </td>
-              <td className="p-2 text-center">zoho_crm</td>
-              <td className="p-2 text-center">
-                <a href="/">40</a>
-              </td>
-              <td className="p-2 text-center">
-                <a href="/">5</a>
-              </td>
-              <td className="p-2 text-center">
-                <a href="/">11</a>
-              </td>
-              <td className="p-2 text-center">
-                <a href="/">Edit</a> <a href="/">Delete</a>
-              </td>
-            </tr>
+            {data.map((row, i) => {
+              return renderer(row, i);
+            })}
           </tbody>
         </table>
       </div>
@@ -80,6 +48,32 @@ const Grid = () => {
       </div>
     </React.Fragment>
   );
+};
+
+Grid.propTypes = {
+  /*
+    headings is an array of objects that look like this:
+    {
+      label: 'Name',
+      isSortable: true,
+      sort: 'asc',
+      className: 'text-left',
+    }
+    Each element of the array will get passed to <GridHeadingCell />
+   */
+  headings: PropTypes.arrayOf(
+    PropTypes.shape({
+      label: PropTypes.string.isRequired,
+      sort: PropTypes.oneOf(['asc','desc']),
+      isSortable: PropTypes.bool,
+      className: PropTypes.string
+    })
+  ),
+  // The data for the grid
+  data: PropTypes.array.isRequired,
+  // The function resposible for parsing each element of the "data" array above
+  // and returning the apporpriate markup
+  renderer: PropTypes.func,
 };
 
 export default Grid;

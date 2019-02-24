@@ -56,11 +56,11 @@ const AsideNav = () => {
           min-height: calc(100vh - 4rem);
         }
         nav a {
-          padding-left:calc(1rem + 24px);
+          padding-left:calc(1.5rem + 24px);
         }
         :global(.nav-icon) {
           position:absolute;
-          left:0.5rem;
+          left:1rem;
         }
       `}</style>
     </nav>

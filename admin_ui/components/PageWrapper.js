@@ -203,7 +203,71 @@ const PageWrapper = () => {
         a scrolling wrapping pane (auto-sizing of column widths <em>is</em> important here and the
         biggest benefit we get. Hence the TBD if this will be the final markup).
       </p>
-      <Grid />
+      <Grid
+        headings={[
+          {
+            label: 'Name',
+            sort: 'asc',
+            className: 'text-left',
+          },
+          {
+            label: 'Slug / URL key',
+          },
+          {
+            label: 'User count',
+          },
+          {
+            label: 'Role count',
+          },
+          {
+            label: 'Permission count',
+          },
+          {
+            label: 'Actions',
+            isSortable: false,
+          },
+        ]}
+        data={[
+          {
+            orgId: 1,
+            orgLabel: 'Our Tech Blog',
+            slug: 'blog',
+            users: 5,
+            roles: 4,
+            permissions: 10,
+          },
+          {
+            orgId: 2,
+            orgLabel: 'Zoho CRM',
+            slug: 'zoho_crm',
+            users: 40,
+            roles: 5,
+            permissions: 11,
+          },
+        ]}
+        renderer={(rowData, index) => {
+          return (
+            <tr key={`gridRow${index}`} className={index % 2 ? `bg-grey-lightest` : ``}>
+              <td className="p-2">
+                <a href="/">{rowData.orgLabel}</a>
+              </td>
+              <td className="p-2 text-center">{rowData.slug}</td>
+              <td className="p-2 text-center">
+                <a href="/">{rowData.users}</a>
+              </td>
+              <td className="p-2 text-center">
+                <a href="/">{rowData.roles}</a>
+              </td>
+              <td className="p-2 text-center">
+                <a href="/">{rowData.permissions}</a>
+              </td>
+              <td className="p-2 text-center">
+                <a href="/">Edit</a> <a href="/">Delete</a>
+              </td>
+            </tr>
+          );
+        }}
+      />
       <p className="italic text-grey-dark text-sm my-4">
         Note: If we end up using the wrapping canvas for the mobile viewport we probably need to add
         a scrolling shadow effect to indicate to the user that they can pan and scroll the grid
