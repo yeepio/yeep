@@ -7,7 +7,7 @@ import Logo from './Logo.js';
 const TopNav = () => {
   return (
     <header className="bg-grey-dark text-white">
-      <div className="max-w-3xl mx-auto h-16 flex items-center">
+      <div className="mx-auto h-16 flex items-center">
         <Logo/>
         <h2 className="text-xl ml-4 font-light opacity-50 hidden lg:block">headless user management</h2>
         <ul className="list-reset ml-auto flex items-center">
