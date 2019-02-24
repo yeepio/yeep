@@ -10,7 +10,7 @@ export const parseCursor = (cursorStr) => {
   return { id };
 };
 
-async function listPermissions(db, { q, limit, cursor, scopes, isSystemPermission }) {
+async function listPermissions(db, { q, limit, cursor, scopes, role, isSystemPermission }) {
   const PermissionModel = db.model('Permission');
 
   // retrieve permissions
@@ -36,6 +36,11 @@ async function listPermissions(db, { q, limit, cursor, scopes, isSystemPermissio
                 $gt: ObjectId(cursor.id),
               },
             }
+          : {},
+        role
+          ? {
+            _id: { $in: role.permissions.map((permission) => ObjectId(permission)) },
+          }
           : {},
         isSystemPermission
           ? {
