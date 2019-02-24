@@ -18,6 +18,7 @@ describe('api/v1/role.list', () => {
   let wile;
   let acme;
   let monsters;
+  let umbrella;
   let permission;
   let roles;
   let session;
@@ -40,7 +41,7 @@ describe('api/v1/role.list', () => {
         },
       ],
     });
-    [acme, monsters] = await Promise.all([
+    [acme, monsters, umbrella] = await Promise.all([
       createOrg(ctx.db, {
         name: 'Acme Inc',
         slug: 'acme',
@@ -50,6 +51,10 @@ describe('api/v1/role.list', () => {
         name: 'Monsters Inc',
         slug: 'monsters',
         adminId: wile.id,
+      }),
+      createOrg(ctx.db, {
+        name: 'Umbrella Corp',
+        slug: 'umbrella',
       }),
     ]);
 
@@ -87,6 +92,7 @@ describe('api/v1/role.list', () => {
     await deleteUser(ctx.db, wile);
     await deleteOrg(ctx.db, acme);
     await deleteOrg(ctx.db, monsters);
+    await deleteOrg(ctx.db, umbrella);
     await server.teardown();
   });
 
@@ -112,6 +118,7 @@ describe('api/v1/role.list', () => {
         }),
       ]),
     });
+    expect(res.body.roles.length).toBe(2);
   });
 
   test('limits number of roles using `limit` param', async () => {
@@ -202,6 +209,62 @@ describe('api/v1/role.list', () => {
           updatedAt: expect.any(String),
         }),
       ]),
+    });
+  });
+
+  test('filters roles using `scope` param', async () => {
+    const res = await request(server)
+      .post('/api/v1/role.list')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .send({
+        scope: acme.id,
+      });
+    expect(res.body).toMatchObject({
+      ok: true,
+      roles: expect.arrayContaining([
+        expect.objectContaining({
+          id: expect.any(String),
+          name: expect.any(String),
+          description: expect.any(String),
+          isSystemRole: expect.any(Boolean),
+          usersCount: expect.any(Number),
+          permissions: expect.arrayContaining([expect.any(String)]),
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+      ]),
+    });
+    expect(res.body.roles.length).toBe(1);
+  });
+
+  test('throws AuthorisationError when requesting a scope with no access', async () => {
+    const res = await request(server)
+      .post('/api/v1/role.list')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .send({
+        scope: umbrella.id,
+      });
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        // authorisation code
+        code: 10012,
+        message: expect.any(String),
+      },
+    });
+  });
+
+  test('filters roles using `isSystemRole` param', async () => {
+    const res = await request(server)
+      .post('/api/v1/role.list')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .send({
+        isSystemRole: true,
+      });
+    expect(res.body).toMatchObject({
+      ok: true,
+      roles: expect.arrayContaining([]),
     });
   });
 });
