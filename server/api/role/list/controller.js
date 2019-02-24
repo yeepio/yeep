@@ -6,6 +6,7 @@ import { validateRequest } from '../../../middleware/validation';
 import {
   visitSession,
   isUserAuthenticated,
+  isUserAuthorised,
   visitUserPermissions,
   getAuthorizedUniqueOrgIds,
 } from '../../../middleware/auth';
@@ -37,17 +38,11 @@ const validationSchema = {
 async function handler({ request, response, db }) {
   const { q, limit, cursor, isSystemRole, scope } = request.body;
 
-  // double check that the user requesting the scope has access to it
-  let scopes = getAuthorizedUniqueOrgIds(request, 'yeep.role.read');
-  if (scope) {
-    scopes = scopes.filter((s) => s === scope);
-  }
-
   const roles = await listRoles(db, {
     q,
     limit,
     cursor: cursor ? parseCursor(cursor) : null,
-    scopes,
+    scopes: scope ? [scope] : getAuthorizedUniqueOrgIds(request, 'yeep.role.read'),
     isSystemRole,
   });
 
@@ -64,5 +59,6 @@ export default compose([
   isUserAuthenticated(),
   validateRequest(validationSchema),
   visitUserPermissions(),
+  isUserAuthorised,
   handler,
 ]);
