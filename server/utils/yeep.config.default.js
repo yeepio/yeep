@@ -48,7 +48,7 @@ module.exports = {
     options: {},
     // E-mail template paths (optional)
     templates: {
-      passwordResetInit: '~yeep/views/passwordResetInit.html',
+      passwordReset: '~yeep/views/passwordResetInit.html',
     },
   },
   // Example mail configuration for SMTP:
