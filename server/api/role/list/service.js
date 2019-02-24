@@ -11,7 +11,7 @@ export const parseCursor = (cursorStr) => {
   return { id };
 };
 
-async function listRoles(db, { q, limit, cursor, scopes }) {
+async function listRoles(db, { q, limit, cursor, scopes, isSystemRole }) {
   const RoleModel = db.model('Role');
 
   // retrieve roles
@@ -37,7 +37,11 @@ async function listRoles(db, { q, limit, cursor, scopes }) {
                 $gt: ObjectId(cursor.id),
               },
             }
-          : {}
+          : {},
+        isSystemRole
+          ? {
+            isSystemRole: { $eq: isSystemRole },
+          } : {},
       ),
     },
     {

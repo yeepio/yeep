@@ -17,6 +17,8 @@ Requestor must be authenticated. No explicit permissions are required; only retr
 ### Body
 
 - **q** _(string)_ — filters roles by the designated query (optional)
+- **scope** _(string)_ — filters roles by the designated org (optional)
+- **isSystemRole** _(boolean)_ — retrieves only system roles (optional)
 - **limit** _(string)_ — maximum number of roles to return (optional)
 - **cursor** _(string)_ — paginates through roles by setting the `cursor` param (optional)
 
