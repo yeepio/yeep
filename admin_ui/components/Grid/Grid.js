@@ -1,14 +1,15 @@
 import React from 'react';
 import GridPager from './GridPager';
 import GridPerPage from './GridPerPage';
-// import GridSortingLink from './GridSortingLink';
 import GridHeadingCell from './GridHeadingCell';
+import GridLoadingOverlay from './GridLoadingOverlay';
 import PropTypes from 'prop-types';
 
 // WIP
-const Grid = ({ headings, data, renderer }) => {
+const Grid = ({ headings, data, renderer, isLoading }) => {
   return (
-    <React.Fragment>
+    <div className="grid relative">
+      {isLoading && <GridLoadingOverlay />}
       <div className="py-2 text-center sm:flex sm:text-left">
         <p>
           Showing entities <strong>1</strong> to <strong>X</strong> of <strong>TOTAL</strong>:
@@ -46,7 +47,7 @@ const Grid = ({ headings, data, renderer }) => {
         <GridPerPage />
         <GridPager />
       </div>
-    </React.Fragment>
+    </div>
   );
 };
 
@@ -64,9 +65,9 @@ Grid.propTypes = {
   headings: PropTypes.arrayOf(
     PropTypes.shape({
       label: PropTypes.string.isRequired,
-      sort: PropTypes.oneOf(['asc','desc']),
+      sort: PropTypes.oneOf(['asc', 'desc']),
       isSortable: PropTypes.bool,
-      className: PropTypes.string
+      className: PropTypes.string,
     })
   ),
   // The data for the grid
@@ -74,6 +75,12 @@ Grid.propTypes = {
   // The function resposible for parsing each element of the "data" array above
   // and returning the apporpriate markup
   renderer: PropTypes.func,
+  // Shows an overlay (effectively disabling the controls) if we're loading data
+  isLoading: PropTypes.bool,
+};
+
+Grid.defaultProps = {
+  isLoading: false,
 };
 
 export default Grid;

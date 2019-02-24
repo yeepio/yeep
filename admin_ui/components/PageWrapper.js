@@ -273,6 +273,40 @@ const PageWrapper = () => {
         a scrolling shadow effect to indicate to the user that they can pan and scroll the grid
         control in their mobile.
       </p>
+      <h2 className="mb-4">Loading data</h2>
+      <p className="mb-4">
+        Many of the grid actions (chaging part, changing sort direction etc) will probably require
+        async calls to our backend. To this effect a <code>isLoading</code> prop can be passed to
+        the grid to show an overlay that effectively disables the links:
+      </p>
+      <Grid
+        isLoading={true}
+        headings={[
+          {
+            label: 'Simplistic grid',
+            sort: 'asc',
+            className: 'text-left',
+          },
+          {
+            label: 'Actions',
+            isSortable: false,
+            className: 'text-right'
+          },
+        ]}
+        data={["Row #1", "Row #2", "Row #3", "Row #4", "Row #5"]}
+        renderer={(rowData, index) => {
+          return (
+            <tr key={`gridRow${index}`} className={index % 2 ? `bg-grey-lightest` : ``}>
+              <td className="p-2">
+                {rowData}
+              </td>
+              <td className="p-2 text-right">
+                <a href="/">View</a>
+              </td>
+            </tr>
+          );
+        }}
+      />
       <h2 className="mb-4">Permission / Role pillboxes</h2>
       <p className="mb-4">
         These are custom-styled <code>&lt;label&gt;</code> elements with nested checkboxes:
