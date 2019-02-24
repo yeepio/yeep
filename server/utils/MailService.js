@@ -55,7 +55,7 @@ class MailService extends EventEmitter {
         this.transport = nodemailer.createTransport(mgTransport(options));
         break;
       }
-      default: {
+      case 'smtp': {
         if (host && !isString(host)) {
           throw new Error(`Invalid host prop; expected string, received ${typeOf(host)}`);
         }
@@ -67,6 +67,11 @@ class MailService extends EventEmitter {
         // TODO: create reusable transport method (opens pool of SMTP connections)
         this.transport = nodemailer.createTransport(options);
         break;
+      }
+      default: {
+        throw new Error(
+          `Non supported transport provided. Received ${transport}. Currently supported: ['sendgrid, ses, mailgun, smtp']`
+        );
       }
     }
 
