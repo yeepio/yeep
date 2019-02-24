@@ -4,9 +4,11 @@ import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
 import createOrg from '../../org/create/service';
+import createRole from '../../role/create/service';
 import createSession from '../../session/create/service';
 import destroySession from '../../session/destroy/service';
 import deleteOrg from '../../org/delete/service';
+import deleteRole from '../../role/delete/service';
 import deleteUser from '../../user/delete/service';
 import createPermission from '../create/service';
 import deletePermission from '../delete/service';
@@ -16,6 +18,7 @@ describe('api/v1/permission.list', () => {
   let wile;
   let acme;
   let monsters;
+  let role;
   let permissions;
   let session;
 
@@ -63,6 +66,13 @@ describe('api/v1/permission.list', () => {
       }),
     ]);
 
+    role = await createRole(ctx.db, {
+      name: 'monsters:developer',
+      description: 'Developer role',
+      permissions: [permissions[1].id],
+      scope: monsters.id,
+    });
+
     session = await createSession(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
@@ -75,6 +85,7 @@ describe('api/v1/permission.list', () => {
     await deleteOrg(ctx.db, acme);
     await deleteOrg(ctx.db, monsters);
     await deleteUser(ctx.db, wile);
+    await deleteRole(ctx.db, role);
     await server.teardown();
   });
 
@@ -100,6 +111,7 @@ describe('api/v1/permission.list', () => {
         }),
       ]),
     });
+    expect(res.body.permissions.length).toBe(2);
   });
 
   test('limits number of permissions using `limit` param', async () => {
@@ -191,5 +203,73 @@ describe('api/v1/permission.list', () => {
         }),
       ]),
     });
+  });
+
+  test('filters permissions using `scope` param', async () => {
+    const res = await request(server)
+      .post('/api/v1/permission.list')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .send({
+        scope: acme.id,
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: true,
+      permissions: expect.arrayContaining([
+        expect.objectContaining({
+          id: expect.any(String),
+          name: expect.stringMatching(/^acme\./),
+          description: expect.any(String),
+          isSystemPermission: expect.any(Boolean),
+          usersCount: expect.any(Number),
+          rolesCount: expect.any(Number),
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+      ]),
+    });
+    expect(res.body.permissions.length).toBe(1);
+  });
+
+  test('filters permissions using `role` param', async () => {
+    const res = await request(server)
+      .post('/api/v1/permission.list')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .send({
+        role: role.id,
+      });
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: true,
+      permissions: expect.arrayContaining([
+        expect.objectContaining({
+          id: expect.any(String),
+          name: expect.stringMatching(/^monsters\./),
+          description: expect.any(String),
+          isSystemPermission: expect.any(Boolean),
+          usersCount: expect.any(Number),
+          rolesCount: expect.any(Number),
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+      ]),
+    });
+    expect(res.body.permissions.length).toBe(1);
+  });
+  test('filters permissions using `isSystemPermission` param', async () => {
+    const res = await request(server)
+      .post('/api/v1/permission.list')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .send({
+        isSystemPermission: true,
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: true,
+      permissions: expect.arrayContaining([]),
+    });
+    expect(res.body.permissions.length).toBe(0);
   });
 });
