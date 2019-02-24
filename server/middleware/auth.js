@@ -141,26 +141,6 @@ export const visitUserPermissions = () => async ({ request, db }, next) => {
   await next();
 };
 
-export const isUserAuthorised = async ({ request }, next) => {
-  // verify a user has access to the requested org
-  if (request.body.scope) {
-    const isScopeAccessible = findUserPermissionIndex(request.session.user.permissions, {
-      name: 'yeep.role.read',
-      orgId: request.body.scope,
-    }) !== -1;
-
-    if (!isScopeAccessible) {
-      throw new AuthorizationError(
-        `User "${
-          request.session.user.username
-        }" does not have sufficient permissions to list roles under org ${request.body.scope}`
-      );
-    }
-  }
-
-  await next();
-};
-
 /**
  * Finds and returns the index of the user permission object that matches the specified properties.
  * @param {Array<Object>} userPermissions array of user permissions to inspect

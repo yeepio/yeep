@@ -6,10 +6,11 @@ import { validateRequest } from '../../../middleware/validation';
 import {
   visitSession,
   isUserAuthenticated,
-  isUserAuthorised,
   visitUserPermissions,
   getAuthorizedUniqueOrgIds,
+  findUserPermissionIndex,
 } from '../../../middleware/auth';
+import { AuthorizationError } from '../../../constants/errors';
 import listRoles, { parseCursor, stringifyCursor } from './service';
 
 const validationSchema = {
@@ -33,6 +34,26 @@ const validationSchema = {
     isSystemRole: Joi.boolean()
       .optional(),
   },
+};
+
+const isUserAuthorised = async ({ request }, next) => {
+  // verify a user has access to the requested org
+  if (request.body.scope) {
+    const isScopeAccessible = findUserPermissionIndex(request.session.user.permissions, {
+      name: 'yeep.role.read',
+      orgId: request.body.scope,
+    }) !== -1;
+
+    if (!isScopeAccessible) {
+      throw new AuthorizationError(
+        `User "${
+          request.session.user.username
+        }" does not have sufficient permissions to list roles under org ${request.body.scope}`
+      );
+    }
+  }
+
+  await next();
 };
 
 async function handler({ request, response, db }) {
