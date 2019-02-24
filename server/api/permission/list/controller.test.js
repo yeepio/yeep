@@ -19,6 +19,7 @@ describe('api/v1/permission.list', () => {
   let acme;
   let monsters;
   let role;
+  let unauthorisedRole;
   let permissions;
   let session;
 
@@ -54,24 +55,35 @@ describe('api/v1/permission.list', () => {
 
     // create test permission
     permissions = await Promise.all([
-      await createPermission(ctx.db, {
+      createPermission(ctx.db, {
         name: 'acme.code.write',
         description: 'Permission to edit (write, delete, update) source code',
         scope: acme.id,
       }),
-      await createPermission(ctx.db, {
+      createPermission(ctx.db, {
         name: 'monsters.code.write',
         description: 'Permission to edit (write, delete, update) source code',
         scope: monsters.id,
       }),
+      createPermission(ctx.db, {
+        name: 'global.code.write',
+        description: 'Permission to edit (write, delete, update) source code',
+      }),
     ]);
 
-    role = await createRole(ctx.db, {
-      name: 'monsters:developer',
-      description: 'Developer role',
-      permissions: [permissions[1].id],
-      scope: monsters.id,
-    });
+    [role, unauthorisedRole] = await Promise.all([
+      createRole(ctx.db, {
+        name: 'monsters:developer',
+        description: 'Developer role',
+        permissions: [permissions[1].id],
+        scope: monsters.id,
+      }),
+      createRole(ctx.db, {
+        name: 'global:developer',
+        description: 'Developer role',
+        permissions: [permissions[2].id],
+      }),
+    ])
 
     session = await createSession(ctx, {
       username: 'wile',
@@ -86,6 +98,7 @@ describe('api/v1/permission.list', () => {
     await deleteOrg(ctx.db, monsters);
     await deleteUser(ctx.db, wile);
     await deleteRole(ctx.db, role);
+    await deleteRole(ctx.db, unauthorisedRole);
     await server.teardown();
   });
 
@@ -257,6 +270,24 @@ describe('api/v1/permission.list', () => {
     });
     expect(res.body.permissions.length).toBe(1);
   });
+
+  test('throws an error when trying to filter by `role` param when unauthorised', async () => {
+    const res = await request(server)
+      .post('/api/v1/permission.list')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .send({
+        role: unauthorisedRole.id,
+      });
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: expect.objectContaining({
+        code: 10012,
+        message: expect.any(String),
+      }),
+    });
+  });
+
   test('filters permissions using `isSystemPermission` param', async () => {
     const res = await request(server)
       .post('/api/v1/permission.list')
