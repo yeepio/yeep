@@ -55,10 +55,10 @@ const visitRequestedRole = async ({ request, db }, next) => {
 };
 
 const isUserAuthorised = async ({ request }, next) => {
-  // verify a user has access to the requested org
+  // verify user has access to the requested org
   if (request.body.scope) {
     const isScopeAccessible = findUserPermissionIndex(request.session.user.permissions, {
-      name: 'yeep.role.read',
+      name: 'yeep.permission.read',
       orgId: request.body.scope,
     }) !== -1;
 
@@ -66,7 +66,7 @@ const isUserAuthorised = async ({ request }, next) => {
       throw new AuthorizationError(
         `User "${
           request.session.user.username
-        }" does not have sufficient permissions to list permissions under org ${request.body.scope}`
+        }" is not authorized to list permissions under org ${request.body.scope}`
       );
     }
   }
@@ -75,7 +75,7 @@ const isUserAuthorised = async ({ request }, next) => {
     const hasPermission = Array.from(new Set([request.session.role.scope, null])).some(
       (orgId) =>
         findUserPermissionIndex(request.session.user.permissions, {
-          name: 'yeep.role.read',
+          name: 'yeep.permission.read',
           orgId,
         }) !== -1
     );
@@ -84,7 +84,7 @@ const isUserAuthorised = async ({ request }, next) => {
       throw new AuthorizationError(
         `User "${
           request.session.user.username
-        }" does not have sufficient permissions to access this resource`
+        }" is not authorized to list permissions under role ${request.session.role.id}`
       );
     }
   }

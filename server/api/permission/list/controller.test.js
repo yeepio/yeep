@@ -271,7 +271,7 @@ describe('api/v1/permission.list', () => {
     expect(res.body.permissions.length).toBe(1);
   });
 
-  test('throws an error when trying to filter by `role` param when unauthorised', async () => {
+  test('throws error when trying to filter by `role` param when unauthorised', async () => {
     const res = await request(server)
       .post('/api/v1/permission.list')
       .set('Authorization', `Bearer ${session.accessToken}`)

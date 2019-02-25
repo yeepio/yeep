@@ -13,41 +13,45 @@ export const parseCursor = (cursorStr) => {
 async function listPermissions(db, { q, limit, cursor, scopes, role, isSystemPermission }) {
   const PermissionModel = db.model('Permission');
 
+  const matchExpressions = [];
+
+  if (!scopes.includes(null)) {
+    matchExpressions.push({
+      scope: { $in: scopes.map((scope) => ObjectId(scope)) }
+    });
+  }
+
+  if (q) {
+    matchExpressions.push({
+      name: {
+        $regex: `^${escapeRegExp(q)}`,
+        $options: 'i',
+      }
+    });
+  }
+
+  if (cursor) {
+    matchExpressions.push({
+      _id: { $gt: ObjectId(cursor.id) }
+    });
+  }
+
+  if (role) {
+    matchExpressions.push({
+      _id: { $in: role.permissions.map((permission) => ObjectId(permission)) }
+    });
+  }
+
+  if (isSystemPermission) {
+    matchExpressions.push({
+      isSystemPermission: { $eq: isSystemPermission },
+    });
+  }
+
   // retrieve permissions
   const permissions = await PermissionModel.aggregate([
     {
-      $match: Object.assign(
-        scopes.includes(null)
-          ? {}
-          : {
-              scope: { $in: scopes.map((scope) => ObjectId(scope)) },
-            },
-        q
-          ? {
-              name: {
-                $regex: `^${escapeRegExp(q)}`,
-                $options: 'i',
-              },
-            }
-          : {},
-        cursor
-          ? {
-              _id: {
-                $gt: ObjectId(cursor.id),
-              },
-            }
-          : {},
-        role
-          ? {
-            _id: { $in: role.permissions.map((permission) => ObjectId(permission)) },
-          }
-          : {},
-        isSystemPermission
-          ? {
-              isSystemPermission: { $eq: isSystemPermission },
-            }
-          : {},
-      ),
+      $match: { $and: matchExpressions }
     },
     {
       $lookup: {
