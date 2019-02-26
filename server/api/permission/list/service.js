@@ -17,7 +17,7 @@ async function listPermissions(db, { q, limit, cursor, scopes, role, isSystemPer
 
   if (!scopes.includes(null)) {
     matchExpressions.push({
-      scope: { $in: scopes.map((scope) => ObjectId(scope)) }
+      scope: { $in: scopes.map((scope) => ObjectId(scope)) },
     });
   }
 
@@ -26,19 +26,19 @@ async function listPermissions(db, { q, limit, cursor, scopes, role, isSystemPer
       name: {
         $regex: `^${escapeRegExp(q)}`,
         $options: 'i',
-      }
+      },
     });
   }
 
   if (cursor) {
     matchExpressions.push({
-      _id: { $gt: ObjectId(cursor.id) }
+      _id: { $gt: ObjectId(cursor.id) },
     });
   }
 
   if (role) {
     matchExpressions.push({
-      _id: { $in: role.permissions.map((permission) => ObjectId(permission)) }
+      _id: { $in: role.permissions.map((permission) => ObjectId(permission)) },
     });
   }
 
@@ -51,7 +51,7 @@ async function listPermissions(db, { q, limit, cursor, scopes, role, isSystemPer
   // retrieve permissions
   const permissions = await PermissionModel.aggregate([
     {
-      $match: { $and: matchExpressions }
+      $match: { $and: matchExpressions },
     },
     {
       $lookup: {
@@ -93,6 +93,11 @@ async function listPermissions(db, { q, limit, cursor, scopes, role, isSystemPer
           },
         ],
         as: 'roles',
+      },
+    },
+    {
+      $sort: {
+        _id: 1,
       },
     },
     {
