@@ -19,7 +19,9 @@ Requestor must be authenticated. No explicit permissions are required; only retr
 - **q** _(string)_ — filters permissions by the designated query (optional)
 - **limit** _(string)_ — maximum number of permissions to return (optional)
 - **cursor** _(string)_ — paginates through permissions by setting the `cursor` param (optional)
-
+- **scope** _(string)_ — filters permissions by the designated org (optional)
+- **role** _(string)_ — retrieves all permissions under the designated role (optional)
+- **isSystemPermission** _(boolean)_ — retrieves only system permissions (optional)
 ***
 
 ## Returns

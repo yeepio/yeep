@@ -8,7 +8,10 @@ import {
   isUserAuthenticated,
   visitUserPermissions,
   getAuthorizedUniqueOrgIds,
+  findUserPermissionIndex,
 } from '../../../middleware/auth';
+import { AuthorizationError } from '../../../constants/errors';
+import getRoleInfo from '../../role/info/service';
 import listPermissions, { parseCursor, stringifyCursor } from './service';
 
 const validation = validateRequest({
@@ -26,17 +29,79 @@ const validation = validateRequest({
     cursor: Joi.string()
       .base64()
       .optional(),
+    scope: Joi.string()
+      .base64()
+      .optional(),
+    role: Joi.string()
+      .base64()
+      .optional(),
+    isSystemPermission: Joi.boolean()
+      .optional(),
   },
 });
 
+const visitRequestedRole = async ({ request, db }, next) => {
+  const roleId = request.body.role;
+  if (roleId) {
+    const role = await getRoleInfo(db, { id: roleId });
+
+    // visit session with requested role data
+    request.session = {
+      ...request.session,
+      role,
+    };
+  }
+  await next();
+};
+
+const isUserAuthorised = async ({ request }, next) => {
+  // verify user has access to the requested org
+  if (request.body.scope) {
+    const isScopeAccessible = findUserPermissionIndex(request.session.user.permissions, {
+      name: 'yeep.permission.read',
+      orgId: request.body.scope,
+    }) !== -1;
+
+    if (!isScopeAccessible) {
+      throw new AuthorizationError(
+        `User "${
+          request.session.user.username
+        }" is not authorized to list permissions under org ${request.body.scope}`
+      );
+    }
+  }
+
+  if (request.body.role) {
+    const hasPermission = Array.from(new Set([request.session.role.scope, null])).some(
+      (orgId) =>
+        findUserPermissionIndex(request.session.user.permissions, {
+          name: 'yeep.permission.read',
+          orgId,
+        }) !== -1
+    );
+
+    if (!hasPermission) {
+      throw new AuthorizationError(
+        `User "${
+          request.session.user.username
+        }" is not authorized to list permissions under role ${request.session.role.id}`
+      );
+    }
+  }
+
+  await next();
+};
+
 async function handler({ request, response, db }) {
-  const { q, limit, cursor } = request.body;
+  const { q, limit, cursor, scope, isSystemPermission } = request.body;
 
   const permissions = await listPermissions(db, {
     q,
     limit,
     cursor: cursor ? parseCursor(cursor) : null,
-    scopes: getAuthorizedUniqueOrgIds(request, 'yeep.permission.read'),
+    scopes: scope ? [scope] : getAuthorizedUniqueOrgIds(request, 'yeep.permission.read'),
+    role: request.session.role,
+    isSystemPermission,
   });
 
   response.status = 200; // OK
@@ -52,5 +117,7 @@ export default compose([
   isUserAuthenticated(),
   validation,
   visitUserPermissions(),
+  visitRequestedRole,
+  isUserAuthorised,
   handler,
 ]);
