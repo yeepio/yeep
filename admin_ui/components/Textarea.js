@@ -1,11 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
 const Textarea = ({ className, ...otherProps }) => {
   return (
     <textarea
       {...otherProps}
-      className={`block border border-grey p-2 rounded leading-normal ${className}`}
+      className={classNames(
+        'block',
+        'border',
+        'border-grey',
+        'p-2',
+        'rounded',
+        'leading-normal',
+        className
+      )}
     />
   );
 };

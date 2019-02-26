@@ -70,7 +70,7 @@ const PageWrapper = () => {
         </div>
         <div className="form-group mb-4">
           <label htmlFor="tempTextField3">This is good:</label>
-          <Input id="tempTextField3" placeholder="Placeholdeer text here" />
+          <Input id="tempTextField3" placeholder="Placeholder text here" />
           <div className="valid">Nice one!</div>
         </div>
         <div className="form-group mb-4">

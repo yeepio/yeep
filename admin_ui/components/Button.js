@@ -1,40 +1,34 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
 const Button = ({ children, isSecondary, className }) => {
-  return <button className={chooseLookAndFeel(isSecondary, className)}>{children}</button>;
-};
-
-/**
- * UI helper method. Returns a list of Tailwind CSS classes
- * (optionally appended by a custom className if specified)
- * depending on whether we're showing the default
- * or a "secondary priority" button
- * @param {boolean }isSecondary - A flag to indicate if we're showing a secondary priority button
- * @param {string} (className) - If specified it will be appended to the returned value
- * @returns {string} - A space-separated list of CSS classes
- */
-const chooseLookAndFeel = (isSecondary, className = '') => {
-  // Default styles shared between all buttons
-  let buttonStyles = ['border', 'border-blue', 'font-bold', 'py-2', 'px-4', 'rounded'];
-  if (isSecondary) {
-    // We need to show a lower / "secondary" priority  buttton
-    buttonStyles = [...buttonStyles, 'bg-white', 'border-blue', 'text-blue', 'hover:bg-grey-light'];
-  } else {
-    // We're showing the default blue button
-    buttonStyles = [
-      ...buttonStyles,
-      'bg-blue',
-      'text-white',
-      'hover:bg-blue-dark',
-      'hover:text-white',
-    ];
-  }
-  // Have we specified any custom className for this component instance?
-  // If so add it to the array of CSS classes
-  className && buttonStyles.push(className);
-  // Return the space-separated list of CSS classes
-  return buttonStyles.join(' ');
+  return (
+    <button
+      className={classNames(
+        'border',
+        'border-blue',
+        'font-bold',
+        'py-2',
+        'px-4',
+        'rounded',
+        {
+          'bg-white': isSecondary,
+          'text-blue': isSecondary,
+          'hover:bg-grey-light': isSecondary,
+        },
+        {
+          'bg-blue': !isSecondary,
+          'text-white': !isSecondary,
+          'hover:bg-blue-dark': !isSecondary,
+          'hover:text-white': !isSecondary,
+        },
+        className
+      )}
+    >
+      {children}
+    </button>
+  );
 };
 
 Button.propTypes = {
