@@ -68,7 +68,7 @@ const AsideNav = () => {
   );
 };
 
-// Menu item styles
+// Common menu item styles
 const menuStyles = classNames(
   'leading-normal',
   'block',
@@ -81,9 +81,9 @@ const menuStyles = classNames(
   'relative'
 );
 
-// Menu item styles for "normal" state
+// Menu item styles for the default / normal state
 const menuStylesNormal = classNames(menuStyles, 'text-black');
-// Menu item styles for "selected" state
+// Menu item styles for the selected state
 const menuStylesSelected = classNames(menuStyles, 'text-blue', 'bg-white');
 
 export default AsideNav;
