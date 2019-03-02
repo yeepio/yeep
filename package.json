@@ -99,6 +99,7 @@
   },
   "dependencies": {
     "@koa/cors": "^2.2.3",
+    "@reach/router": "^1.2.1",
     "ajv": "^6.9.2",
     "awaiting": "^3.0.0",
     "aws-sdk": "^2.413.0",
