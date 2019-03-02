@@ -138,7 +138,7 @@
     "normalize-email": "^1.1.1",
     "ora": "^3.0.0",
     "randomstring": "^1.1.5",
-    "react": "^16.8.0-alpha.1",
+    "react": "^16.8.3",
     "react-dom": "^16.8.0-alpha.1",
     "react-select": "^2.4.0",
     "read-chunk": "^3.0.0",
