@@ -79,7 +79,7 @@
     "purgecss-webpack-plugin": "^1.4.0",
     "react-dev-utils": "^7.0.1",
     "rimraf": "^2.6.3",
-    "rollup": "^1.1.2",
+    "rollup": "^1.4.0",
     "rollup-plugin-babel": "^4.3.2",
     "rollup-plugin-commonjs": "^9.2.0",
     "rollup-plugin-copy": "^0.2.3",
