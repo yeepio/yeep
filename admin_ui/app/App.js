@@ -1,13 +1,22 @@
 import React from 'react';
 import './main.css';
-import Navbar from '../components/Navbar';
+import TopNav from '../components/TopNav';
+import AsideNav from '../components/AsideNav';
+import PageWrapper from '../components/PageWrapper';
 
+/**
+ * The top level component / wrapper
+ * encompassing the Header, Nav and PageWrapper
+ */
 const App = () => {
   return (
-    <div>
-      <Navbar elevated />
-      <h1 className="text-red">Hello world!</h1>
-    </div>
+    <React.Fragment>
+      <TopNav />
+      <div className="mx-auto flex">
+        <AsideNav />
+        <PageWrapper />
+      </div>
+    </React.Fragment>
   );
 };
 

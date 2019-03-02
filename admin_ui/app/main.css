@@ -5,3 +5,79 @@
 body {
   @apply antialiased;
 }
+
+/* Global default styles for Yeep */
+a {
+  @apply text-blue;
+}
+a:hover {
+  text-decoration: none;
+  @apply text-blue-dark;
+}
+
+/* Form elements: fieldset */
+fieldset {
+  @apply border border-grey p-8;
+  position: relative;
+}
+legend {
+  @apply px-3 font-bold;
+  display: block;
+  position: absolute;
+  background: white;
+  top: -0.8rem;
+  left: 1.2rem;
+}
+
+/* Form layout */
+.form-group label {
+  @apply mb-1;
+  display: block;
+}
+.form-group .valid,
+.form-group .invalid,
+.form-group .neutral {
+  @apply text-sm text-grey-dark;
+}
+.form-group .valid {
+  @apply text-green-dark;
+}
+.form-group .invalid {
+  @apply text-red;
+}
+@screen sm {
+  /*
+      From the mobile breakpoint and upwards we'll change the
+      label+input layout to be side by side.
+  */
+  .form-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .form-group label {
+    @apply mb-0;
+    flex: 0 0 25%;
+    display: block;
+    /* We need the line height to be the same as the height of a "default" form element,
+    i.e. a text field. That is 42 pixels */
+    line-height: 2.6rem;
+  }
+  .form-group input[type='text'],
+  .form-group input[type='password'],
+  .form-group select {
+    width: 50%;
+  }
+  .form-group textarea {
+    flex: 1 1 75%;
+  }
+  .form-group .valid,
+  .form-group .invalid,
+  .form-group .neutral {
+    flex: 1 1 100%;
+    margin-left: 25%;
+  }
+  .form-submit {
+    margin-left: 25%;
+  }
+}
