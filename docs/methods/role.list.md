@@ -17,6 +17,8 @@ Requestor must be authenticated. No explicit permissions are required; only retr
 ### Body
 
 - **q** _(string)_ — filters roles by the designated query (optional)
+- **scope** _(string)_ — filters roles by the designated org (optional)
+- **isSystemRole** _(boolean)_ — retrieves only system roles (optional)
 - **limit** _(string)_ — maximum number of roles to return (optional)
 - **cursor** _(string)_ — paginates through roles by setting the `cursor` param (optional)
 
@@ -64,8 +66,12 @@ Authorization: `Bearer ${accessToken}`
     "isSystemRole": false,
     "usersCount": 5,
     "permissions": [
-      "5b969dc9901e2af192780a34",
+      "5b969dc9901e2af192780a34"
     ],
+    "org": {
+      "id": "8a9295c9901e7af196785a34",
+      "name": "acme"
+    },
     "createdAt": "2017-07-13T05:00:42.145Z",
     "updatedAt": "2017-07-13T05:42:42.222Z"
   }],

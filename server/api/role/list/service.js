@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongodb';
+import has from 'lodash/has';
 import escapeRegExp from 'lodash/escapeRegExp';
 
 export const stringifyCursor = ({ id }) => {
@@ -10,7 +11,7 @@ export const parseCursor = (cursorStr) => {
   return { id };
 };
 
-async function listRoles(db, { q, limit, cursor, scopes }) {
+async function listRoles(db, { q, limit, cursor, scopes, isSystemRole }) {
   const RoleModel = db.model('Role');
 
   // retrieve roles
@@ -36,7 +37,11 @@ async function listRoles(db, { q, limit, cursor, scopes }) {
                 $gt: ObjectId(cursor.id),
               },
             }
-          : {}
+          : {},
+        isSystemRole
+          ? {
+            isSystemRole: { $eq: isSystemRole },
+          } : {},
       ),
     },
     {
@@ -61,6 +66,20 @@ async function listRoles(db, { q, limit, cursor, scopes }) {
       },
     },
     {
+      $lookup: {
+        from: 'orgs',
+        localField: 'scope',
+        foreignField: '_id',
+        as: 'org',
+      },
+    },
+    {
+      $unwind: {
+        path: '$org',
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
       $limit: limit,
     },
   ]);
@@ -68,6 +87,10 @@ async function listRoles(db, { q, limit, cursor, scopes }) {
   return roles.map((role) => ({
     id: role._id.toHexString(),
     name: role.name,
+    org: has(role, ['org', '_id']) ? {
+      id: role.org._id.toHexString(),
+      name: role.org.name,
+    } : null,
     description: role.description,
     isSystemRole: role.isSystemRole,
     permissions: role.permissions,

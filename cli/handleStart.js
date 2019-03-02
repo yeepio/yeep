@@ -1,9 +1,9 @@
-import path from 'path';
 import https from 'https';
 import ora from 'ora';
 import { format as formatUrl } from 'url';
 import { renderMissingConfig, renderNativeError } from './templates';
 import interopDefault from '../server/utils/interopDefault';
+import loadConfig from '../server/utils/loadConfig';
 
 const renderHelp = () => `
   starts the yeep server
@@ -28,10 +28,10 @@ const handleStart = (inputArr, flagsObj) => {
     const spinner = ora();
     spinner.info('Starting yeep server...');
 
-    // load config file from path
     let config;
     try {
-      config = require(path.resolve(flagsObj.config));
+      // ensure all props exist to avoid extra checks further down the line
+      config = loadConfig(flagsObj.config);
     } catch (err) {
       spinner.fail(renderNativeError(err));
     }

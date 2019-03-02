@@ -10,6 +10,7 @@ import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
 import createPermission from '../../permission/create/service';
 import createRole from '../create/service';
+import assignRole from '../../user/assignRole/service';
 import deleteRole from '../delete/service';
 import deletePermission from '../../permission/delete/service';
 
@@ -18,8 +19,10 @@ describe('api/v1/role.list', () => {
   let wile;
   let acme;
   let monsters;
+  let umbrella;
   let permission;
   let roles;
+  let globalRole;
   let session;
 
   beforeAll(async () => {
@@ -40,7 +43,7 @@ describe('api/v1/role.list', () => {
         },
       ],
     });
-    [acme, monsters] = await Promise.all([
+    [acme, monsters, umbrella] = await Promise.all([
       createOrg(ctx.db, {
         name: 'Acme Inc',
         slug: 'acme',
@@ -51,6 +54,10 @@ describe('api/v1/role.list', () => {
         slug: 'monsters',
         adminId: wile.id,
       }),
+      createOrg(ctx.db, {
+        name: 'Umbrella Corp',
+        slug: 'umbrella',
+      }),
     ]);
 
     // create test permission + role(s)
@@ -58,6 +65,7 @@ describe('api/v1/role.list', () => {
       name: 'acme.code.write',
       description: 'Permission to edit (write, delete, update) source code',
     });
+
     roles = await Promise.all([
       createRole(ctx.db, {
         name: 'acme:developer',
@@ -73,6 +81,17 @@ describe('api/v1/role.list', () => {
       }),
     ]);
 
+    globalRole = await createRole(ctx.db, {
+      name: 'global:role',
+      description: 'Global test role',
+      permissions: [permission.id],
+    });
+
+    await assignRole(ctx.db, {
+      userId: wile.id,
+      roleId: globalRole.id,
+    });
+
     // user "wile" is logged-in
     session = await createSession(ctx, {
       username: 'wile',
@@ -83,10 +102,12 @@ describe('api/v1/role.list', () => {
   afterAll(async () => {
     await destroySession(ctx, session);
     await Promise.all(roles.map((role) => deleteRole(ctx.db, role)));
+    await deleteRole(ctx.db, globalRole);
     await deletePermission(ctx.db, permission);
     await deleteUser(ctx.db, wile);
     await deleteOrg(ctx.db, acme);
     await deleteOrg(ctx.db, monsters);
+    await deleteOrg(ctx.db, umbrella);
     await server.teardown();
   });
 
@@ -97,6 +118,9 @@ describe('api/v1/role.list', () => {
       .send();
 
     expect(res.status).toBe(200);
+    // NOTE: global rules are not supposed to be sent back if a user
+    //       has no permissions to read them.
+    expect(res.body.roles.length).toBe(2);
     expect(res.body).toMatchObject({
       ok: true,
       roles: expect.arrayContaining([
@@ -109,9 +133,14 @@ describe('api/v1/role.list', () => {
           permissions: expect.arrayContaining([expect.any(String)]),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
+          org: expect.objectContaining({
+            id: expect.any(String),
+            name: expect.any(String),
+          }),
         }),
       ]),
     });
+    expect(res.body.roles.length).toBe(2);
   });
 
   test('limits number of roles using `limit` param', async () => {
@@ -135,6 +164,10 @@ describe('api/v1/role.list', () => {
           permissions: expect.arrayContaining([expect.any(String)]),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
+          org: expect.objectContaining({
+            id: expect.any(String),
+            name: expect.any(String),
+          }),
         }),
       ]),
       nextCursor: expect.any(String),
@@ -202,6 +235,62 @@ describe('api/v1/role.list', () => {
           updatedAt: expect.any(String),
         }),
       ]),
+    });
+  });
+
+  test('filters roles using `scope` param', async () => {
+    const res = await request(server)
+      .post('/api/v1/role.list')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .send({
+        scope: acme.id,
+      });
+    expect(res.body).toMatchObject({
+      ok: true,
+      roles: expect.arrayContaining([
+        expect.objectContaining({
+          id: expect.any(String),
+          name: expect.any(String),
+          description: expect.any(String),
+          isSystemRole: expect.any(Boolean),
+          usersCount: expect.any(Number),
+          permissions: expect.arrayContaining([expect.any(String)]),
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+      ]),
+    });
+    expect(res.body.roles.length).toBe(1);
+  });
+
+  test('throws AuthorisationError when requesting a scope with no access', async () => {
+    const res = await request(server)
+      .post('/api/v1/role.list')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .send({
+        scope: umbrella.id,
+      });
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        // authorisation code
+        code: 10012,
+        message: expect.any(String),
+      },
+    });
+  });
+
+  test('filters roles using `isSystemRole` param', async () => {
+    const res = await request(server)
+      .post('/api/v1/role.list')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .send({
+        isSystemRole: true,
+      });
+    expect(res.body).toMatchObject({
+      ok: true,
+      roles: expect.arrayContaining([]),
     });
   });
 });
