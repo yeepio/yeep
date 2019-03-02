@@ -143,7 +143,7 @@
     "react-select": "^2.4.1",
     "read-chunk": "^3.0.0",
     "sharp": "^0.21.3",
-    "styled-jsx": "^3.2.0",
+    "styled-jsx": "^3.2.1",
     "tailwindcss": "^0.7.4",
     "typeof": "^1.0.0"
   },
