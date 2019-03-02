@@ -33,7 +33,7 @@ const PageWrapper = () => {
       </p>
       <h2 className="mb-4">Secondary buttons</h2>
       <p className="mb-4">
-        <Button isSecondary>I am a secondary button</Button>
+        <Button secondary>I am a secondary button</Button>
       </p>
       <h2 className="mb-4">Form elements</h2>
       <p className="mb-6">
@@ -84,7 +84,7 @@ const PageWrapper = () => {
             which gives the appropriate left margin:
           </p>
           <Button className="mr-3">Submit this form!</Button>
-          <Button isSecondary>Cancel and hide</Button>
+          <Button secondary>Cancel and hide</Button>
         </div>
       </fieldset>
       <fieldset className="mb-6">
@@ -290,16 +290,14 @@ const PageWrapper = () => {
           {
             label: 'Actions',
             isSortable: false,
-            className: 'text-right'
+            className: 'text-right',
           },
         ]}
-        data={["Row #1", "Row #2", "Row #3", "Row #4", "Row #5"]}
+        data={['Row #1', 'Row #2', 'Row #3', 'Row #4', 'Row #5']}
         renderer={(rowData, index) => {
           return (
             <tr key={`gridRow${index}`} className={index % 2 ? `bg-grey-lightest` : ``}>
-              <td className="p-2">
-                {rowData}
-              </td>
+              <td className="p-2">{rowData}</td>
               <td className="p-2 text-right">
                 <a href="/">View</a>
               </td>
