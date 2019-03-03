@@ -3,6 +3,7 @@ import Loadable from 'react-loadable';
 import { Router } from '@reach/router';
 import './main.css';
 import LoadingIndicator from '../components/LoadingIndicator';
+import Store from './Store';
 
 const AsyncLogin = Loadable({
   loader: () => import(/* webpackChunkName: "login" */ './session/LoginPage'),
@@ -46,7 +47,7 @@ const AsyncUser = Loadable({
  */
 const App = () => {
   return (
-    <React.Fragment>
+    <Store.Provider>
       <Router>
         <AsyncLogin path="/login" />
         <AsyncDashboard path="/" />
@@ -55,7 +56,7 @@ const App = () => {
         <AsyncRole path="/roles/*" />
         <AsyncUser path="/users/*" />
       </Router>
-    </React.Fragment>
+    </Store.Provider>
   );
 };
 
