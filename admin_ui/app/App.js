@@ -5,7 +5,7 @@ import './main.css';
 import LoadingIndicator from '../components/LoadingIndicator';
 
 const AsyncLogin = Loadable({
-  loader: () => import(/* webpackChunkName: "login" */ './auth/LoginPage'),
+  loader: () => import(/* webpackChunkName: "login" */ './session/LoginPage'),
   loading: LoadingIndicator,
   delay: 300, // 0.3 seconds
 });
