@@ -113,7 +113,7 @@
     "formidable": "^1.2.1",
     "gravatar": "^1.8.0",
     "image-size": "^0.7.2",
-    "image-type": "^3.0.0",
+    "image-type": "^4.0.0",
     "isemail": "^3.2.0",
     "joi": "^14.3.1",
     "jsonwebtoken": "^8.5.0",
