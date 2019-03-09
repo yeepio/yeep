@@ -6,7 +6,7 @@ import Store from '../Store';
 
 const LoginPage = () => {
   const store = useContext(Store);
-  const user = useObservable(() => store.session.user$);
+  const user = useObservable(() => store.session.user$, store.session.user$.getValue());
   console.log(user);
   return (
     <React.Fragment>
