@@ -136,6 +136,7 @@ server.setup = async (config) => {
   app.context.jwt = jwt;
   app.context.storage = storage;
   app.context.mail = mail;
+  app.context.router = api; // expose router to enable dynamic API docs
 
   // register event handlers
   Object.entries(events).map(([eventKey, handler]) => {
