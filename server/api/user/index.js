@@ -16,19 +16,19 @@ import resetPassword from './resetPassword';
 
 const router = Router();
 
-router.post('/v1/user.create', createUser);
-router.post('/v1/user.delete', deleteUser);
-router.post('/v1/user.info', getUserInfo);
-router.post('/v1/user.assignPermission', assignPermission);
-router.post('/v1/user.revokePermission', revokePermission);
-router.post('/v1/user.assignRole', assignRole);
-router.post('/v1/user.revokeRole', revokeRole);
-router.post('/v1/user.list', listUsers);
-router.post('/v1/user.deactivate', deactivateUser);
-router.post('/v1/user.activate', activateUser);
-router.post('/v1/user.setPicture', setUserPicture);
-router.post('/v1/user.deletePicture', deleteUserPicture);
-router.post('/v1/user.forgotPassword', forgotPassword);
-router.post('/v1/user.resetPassword', resetPassword);
+router.post('user.create', '/v1/user.create', createUser);
+router.post('user.delete', '/v1/user.delete', deleteUser);
+router.post('user.info', '/v1/user.info', getUserInfo);
+router.post('user.assignPermission', '/v1/user.assignPermission', assignPermission);
+router.post('user.revokePermission', '/v1/user.revokePermission', revokePermission);
+router.post('user.assignRole', '/v1/user.assignRole', assignRole);
+router.post('user.revokeRole', '/v1/user.revokeRole', revokeRole);
+router.post('user.list', '/v1/user.list', listUsers);
+router.post('user.deactivate', '/v1/user.deactivate', deactivateUser);
+router.post('user.activate', '/v1/user.activate', activateUser);
+router.post('user.setPicture', '/v1/user.setPicture', setUserPicture);
+router.post('user.deletePicture', '/v1/user.deletePicture', deleteUserPicture);
+router.post('user.forgotPassword', '/v1/user.forgotPassword', forgotPassword);
+router.post('user.resetPassword', '/v1/user.resetPassword', resetPassword);
 
 export default router;

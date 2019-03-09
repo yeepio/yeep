@@ -6,9 +6,9 @@ import removeMember from './removeMember';
 
 const router = Router();
 
-router.post('/v1/org.create', createOrg);
-router.post('/v1/org.delete', deleteOrg);
-router.post('/v1/org.addMember', addMember);
-router.post('/v1/org.removeMember', removeMember);
+router.post('org.create', '/v1/org.create', createOrg);
+router.post('org.delete', '/v1/org.delete', deleteOrg);
+router.post('org.addMember', '/v1/org.addMember', addMember);
+router.post('org.removeMember', '/v1/org.removeMember', removeMember);
 
 export default router;
