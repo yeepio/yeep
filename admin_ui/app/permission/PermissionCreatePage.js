@@ -1,12 +1,10 @@
 import React from 'react';
-import Head from '../../components/Head';
+import useDocumentTitle from '@rehooks/document-title';
 
 const PermissionCreate = () => {
+  useDocumentTitle('Create permission');
   return (
     <React.Fragment>
-      <Head>
-        <title>Create permission</title>
-      </Head>
       <h3>Permission Create (WIP)</h3>
     </React.Fragment>
   );

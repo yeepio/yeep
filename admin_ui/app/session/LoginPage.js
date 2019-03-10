@@ -1,19 +1,35 @@
 import React, { useContext } from 'react';
 import { Link } from '@reach/router';
 import { useObservable } from 'rxjs-hooks';
-import Head from '../../components/Head';
+import useDocumentTitle from '@rehooks/document-title';
 import Store from '../Store';
 
 const LoginPage = () => {
   const store = useContext(Store);
   const user = useObservable(() => store.session.user$, store.session.user$.getValue());
-  console.log(user);
+  const pendingLogin = useObservable(
+    () => store.session.pendingLogin$,
+    store.session.pendingLogin$.getValue()
+  );
+  useDocumentTitle('Login');
+
+  console.log('render', user, pendingLogin);
   return (
     <React.Fragment>
-      <Head>
-        <title>Login</title>
-      </Head>
       <h1>Login Page (WIP)</h1>
+      {pendingLogin && <span>User logging in...</span>}
+      <button
+        onClick={() => {
+          store.session.login({
+            username: 'Bob',
+            password: 'I-shot-the-$erif',
+          });
+        }}
+      >
+        Login in user
+      </button>
+      <br />
+      <br />
       <Link to="/">Visit dashboard</Link>
     </React.Fragment>
   );

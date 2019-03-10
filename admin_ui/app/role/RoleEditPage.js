@@ -1,13 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import Head from '../../components/Head';
+import useDocumentTitle from '@rehooks/document-title';
 
 const RoleEditPage = ({ roleId }) => {
+  useDocumentTitle(`Edit role#${roleId}`);
   return (
     <React.Fragment>
-      <Head>
-        <title>{`Edit role#${roleId}`}</title>
-      </Head>
       <h3>Role #{roleId} Edit (WIP)</h3>
     </React.Fragment>
   );

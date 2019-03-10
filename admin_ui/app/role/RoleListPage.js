@@ -1,12 +1,10 @@
 import React from 'react';
-import Head from '../../components/Head';
+import useDocumentTitle from '@rehooks/document-title';
 
 const RoleList = () => {
+  useDocumentTitle('Role List');
   return (
     <React.Fragment>
-      <Head>
-        <title>Role List</title>
-      </Head>
       <h3>Role List (WIP)</h3>
     </React.Fragment>
   );

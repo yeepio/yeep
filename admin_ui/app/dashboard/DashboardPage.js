@@ -1,16 +1,14 @@
 import React from 'react';
 import { Link } from '@reach/router';
+import useDocumentTitle from '@rehooks/document-title';
 import TopNav from '../../components/TopNav';
 // import AsideNav from '../../components/AsideNav';
 // import PageWrapper from '../../components/PageWrapper';
-import Head from '../../components/Head';
 
 const DashboardPage = () => {
+  useDocumentTitle('Dashboard');
   return (
     <React.Fragment>
-      <Head>
-        <title>Dashboard</title>
-      </Head>
       <TopNav />
       <ul>
         <li>

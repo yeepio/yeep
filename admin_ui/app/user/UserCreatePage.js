@@ -1,12 +1,10 @@
 import React from 'react';
-import Head from '../../components/Head';
+import useDocumentTitle from '@rehooks/document-title';
 
 const UserCreatePage = () => {
+  useDocumentTitle('Create user');
   return (
     <React.Fragment>
-      <Head>
-        <title>Create user</title>
-      </Head>
       <h3>User Create (WIP)</h3>
     </React.Fragment>
   );
