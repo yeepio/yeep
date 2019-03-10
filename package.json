@@ -143,7 +143,6 @@
     "randomstring": "^1.1.5",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
-    "react-helmet": "^5.2.0",
     "react-select": "^2.4.1",
     "read-chunk": "^3.0.0",
     "rxjs": "^6.4.0",
