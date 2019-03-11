@@ -98,7 +98,7 @@
     "webpack-dev-server": "^3.2.1"
   },
   "dependencies": {
-    "@koa/cors": "^2.2.3",
+    "@koa/cors": "^3.0.0",
     "ajv": "^6.9.2",
     "awaiting": "^3.0.0",
     "aws-sdk": "^2.413.0",
