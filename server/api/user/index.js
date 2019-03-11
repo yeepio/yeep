@@ -16,6 +16,8 @@ import resetPassword from './resetPassword';
 
 const router = Router();
 
+// method signature: name, path, handler
+// omit name if you want to hide this method from the api-docs
 router.post('user.create', '/v1/user.create', createUser);
 router.post('user.delete', '/v1/user.delete', deleteUser);
 router.post('user.info', '/v1/user.info', getUserInfo);

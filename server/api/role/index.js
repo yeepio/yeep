@@ -7,6 +7,8 @@ import listRoles from './list';
 
 const router = Router();
 
+// method signature: name, path, handler
+// omit name if you want to hide this method from the api-docs
 router.post('role.create', '/v1/role.create', createRole);
 router.post('role.info', '/v1/role.info', getRoleInfo);
 router.post('role.delete', '/v1/role.delete', deleteRole);
