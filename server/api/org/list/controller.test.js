@@ -13,6 +13,7 @@ describe('api/v1/org.list', () => {
   let ctx;
   let wile;
   let oswell;
+  let runner;
   let acme;
   let monsters;
   let umbrella;
@@ -69,6 +70,22 @@ describe('api/v1/org.list', () => {
       }),
     ]);
 
+    // we need the org id to make requests about this user
+    runner = await createUser(ctx.db, {
+      username: 'runner',
+      password: 'fast+furry-ous',
+      fullName: 'Road Runner',
+      picture: 'https://www.acme.com/pictures/roadrunner.png',
+      emails: [
+        {
+          address: 'beep-beep@acme.com',
+          isVerified: true,
+          isPrimary: true,
+        },
+      ],
+      orgs: [acme.id],
+    });
+
     // user "wile" is logged-in
     session = await createSession(ctx, {
       username: 'wile',
@@ -80,6 +97,7 @@ describe('api/v1/org.list', () => {
     await destroySession(ctx, session);
     await deleteUser(ctx.db, wile);
     await deleteUser(ctx.db, oswell);
+    await deleteUser(ctx.db, runner);
     await deleteOrg(ctx.db, acme);
     await deleteOrg(ctx.db, monsters);
     await deleteOrg(ctx.db, umbrella);
@@ -197,30 +215,28 @@ describe('api/v1/org.list', () => {
     });
   });
 
-  // test('filters orgs using `user` param', async () => {
-  //   const res = await request(server)
-  //     .post('/api/v1/org.list')
-  //     .set('Authorization', `Bearer ${session.accessToken}`)
-  //     .send({
-  //       user: wile.id,
-  //     });
-  //   expect(res.body).toMatchObject({
-  //     ok: true,
-  //     orgs: expect.arrayContaining([
-  //       expect.objectContaining({
-  //         id: expect.any(String),
-  //         name: expect.any(String),
-  //         description: expect.any(String),
-  //         isSystemRole: expect.any(Boolean),
-  //         usersCount: expect.any(Number),
-  //         permissions: expect.arrayContaining([expect.any(String)]),
-  //         createdAt: expect.any(String),
-  //         updatedAt: expect.any(String),
-  //       }),
-  //     ]),
-  //   });
-  //   expect(res.body.orgs.length).toBe(1);
-  // });
+  test('filters orgs using `user` param', async () => {
+    const res = await request(server)
+      .post('/api/v1/org.list')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .send({
+        user: runner.id,
+      });
+    expect(res.body).toMatchObject({
+      ok: true,
+      orgs: expect.arrayContaining([
+        expect.objectContaining({
+          id: expect.any(String),
+          name: expect.any(String),
+          slug: expect.any(String),
+          usersCount: expect.any(Number),
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        }),
+      ]),
+    });
+    expect(res.body.orgs.length).toBe(1);
+  });
 
   test('throws AuthorisationError when requesting organisations of a user with no access', async () => {
     const res = await request(server)

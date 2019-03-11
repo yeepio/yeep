@@ -38,8 +38,6 @@ async function listOrgs(db, { q, limit, scopes, cursor }) {
     });
   }
 
-  // TODO: also filter by user!
-
   // retrieve orgs
   const orgs = await OrgModel.aggregate([
     {
@@ -66,20 +64,6 @@ async function listOrgs(db, { q, limit, scopes, cursor }) {
         as: 'users',
       },
     },
-    // {
-    //   $lookup: {
-    //     from: 'orgs',
-    //     localField: 'scope',
-    //     foreignField: '_id',
-    //     as: 'org',
-    //   },
-    // },
-    // {
-    //   $unwind: {
-    //     path: '$org',
-    //     preserveNullAndEmptyArrays: true,
-    //   },
-    // },
     {
       $limit: limit,
     },

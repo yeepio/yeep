@@ -1,6 +1,7 @@
 import Joi from 'joi';
 import compose from 'koa-compose';
 import last from 'lodash/last';
+import intersection from 'lodash/intersection';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import {
@@ -44,19 +45,7 @@ const isUserAuthorised = async ({ request }, next) => {
         findUserPermissionIndex(request.session.user.permissions, {
           name: 'yeep.user.read',
           orgId,
-        }) !== -1 &&
-        (request.body.projection.permissions
-          ? findUserPermissionIndex(request.session.user.permissions, {
-              name: 'yeep.permission.assignment.read',
-              orgId,
-            }) !== -1
-          : true) &&
-        (request.body.projection.roles
-          ? findUserPermissionIndex(request.session.user.permissions, {
-              name: 'yeep.role.assignment.read',
-              orgId,
-            }) !== -1
-          : true)
+        }) !== -1
     );
 
     if (!isUserRequestorIdentical && !hasPermission) {
@@ -86,13 +75,13 @@ const visitRequestedUser = async ({ request, db }, next) => {
 };
 
 async function handler({ request, response, db }) {
-  const { q, limit, cursor } = request.body;
-
+  const { q, limit, user, cursor } = request.body;
+  const scopes = getAuthorizedUniqueOrgIds(request, 'yeep.org.read');
   const orgs = await listOrgs(db, {
     q,
     limit,
     cursor: cursor ? parseCursor(cursor) : null,
-    scopes: getAuthorizedUniqueOrgIds(request, 'yeep.org.read'),
+    scopes: user ? intersection(scopes, request.session.requestedUser.orgs) : scopes,
   });
 
   response.status = 200; // OK
