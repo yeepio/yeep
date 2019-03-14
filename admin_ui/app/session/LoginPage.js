@@ -7,17 +7,17 @@ import Store from '../Store';
 const LoginPage = () => {
   const store = useContext(Store);
   const user = useObservable(() => store.session.user$, store.session.user$.getValue());
-  const pendingLogin = useObservable(
-    () => store.session.pendingLogin$,
-    store.session.pendingLogin$.getValue()
+  const isLoginPending = useObservable(
+    () => store.session.isLoginPending$,
+    store.session.isLoginPending$.getValue()
   );
   useDocumentTitle('Login');
 
-  console.log('render', user, pendingLogin);
+  console.log('render', user, isLoginPending);
   return (
     <React.Fragment>
       <h1>Login Page (WIP)</h1>
-      {pendingLogin && <span>User logging in...</span>}
+      {isLoginPending && <span>User logging in...</span>}
       <button
         onClick={() => {
           store.session.login({

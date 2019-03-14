@@ -4,13 +4,13 @@ class SessionStore {
   constructor() {
     const cachedUser = localStorage.getItem('session.user');
     this.user$ = new BehaviorSubject(cachedUser ? JSON.parse(cachedUser) : {});
-    this.pendingLogin$ = new BehaviorSubject(false);
+    this.isLoginPending$ = new BehaviorSubject(false);
   }
 
   login = ({ username, password }) => {
     console.log(`Mock login ${username}:${password}`);
     // show pending login indicator
-    this.pendingLogin$.next(true);
+    this.isLoginPending$.next(true);
     // mock login functionality
     setTimeout(() => {
       const user = {
@@ -21,7 +21,7 @@ class SessionStore {
       };
       // update state
       this.user$.next(user);
-      this.pendingLogin$.next(false);
+      this.isLoginPending$.next(false);
       // cache user in local storage
       localStorage.setItem('session.user', JSON.stringify(user));
     }, 2000);
@@ -30,7 +30,7 @@ class SessionStore {
   logout = () => {
     // clear state
     this.user$.next({});
-    this.pendingLogin$.next(false);
+    this.isLoginPending$.next(false);
     // clear cache
     localStorage.removeItem('session.user');
   };
