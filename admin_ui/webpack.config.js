@@ -145,8 +145,8 @@ module.exports = (env) => ({
   // Customize webpack build process with plugins.
   plugins: [
     // Remove previous contents from build folder
-    new CleanWebpackPlugin(['dist/admin_ui'], {
-      root: process.cwd(),
+    new CleanWebpackPlugin({
+      cleanOnceBeforeBuildPatterns: ['dist/admin_ui'],
       verbose: true,
       dry: false,
     }),
