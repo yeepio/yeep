@@ -5,7 +5,7 @@ import globby from 'globby';
 import joiToSwagger from 'joi-to-swagger';
 import pkg from '../../../../package.json';
 
-export const getOpenApiDocs = memoize(async ({ router }) => {
+export const getOpenApi = memoize(async ({ router }) => {
   // retrieve controllers file path
   const paths = await globby(['server/api/**/controller.js'], {
     expandDirectories: false,
