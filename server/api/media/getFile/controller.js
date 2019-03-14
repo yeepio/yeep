@@ -5,7 +5,7 @@ import mime from 'mime';
 import { validateRequest } from '../../../middleware/validation';
 import { visitSession } from '../../../middleware/auth';
 
-const validationSchema = {
+export const validationSchema = {
   params: {
     filename: Joi.string()
       .trim()

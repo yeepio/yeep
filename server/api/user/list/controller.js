@@ -12,7 +12,7 @@ import {
 } from '../../../middleware/auth';
 import listUsers, { parseCursor, stringifyCursor, defaultProjection } from './service';
 
-const validationSchema = {
+export const validationSchema = {
   body: {
     q: Joi.string()
       .trim()

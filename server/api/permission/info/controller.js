@@ -11,7 +11,7 @@ import {
 import getPermissionInfo from './service';
 import { AuthorizationError } from '../../../constants/errors';
 
-const validationSchema = {
+export const validationSchema = {
   body: {
     id: Joi.string()
       .length(24)

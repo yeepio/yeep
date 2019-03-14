@@ -9,7 +9,7 @@ import createUser from '../../user/create/service';
 import getUserInfo from '../../user/info/service';
 import addMemberToOrg from '../../org/addMember/service';
 
-const validationSchema = {
+export const validationSchema = {
   body: {
     token: Joi.string()
       .trim()
