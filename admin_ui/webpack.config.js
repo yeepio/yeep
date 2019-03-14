@@ -34,7 +34,7 @@ module.exports = (env) => ({
     // when in development mode
     pathinfo: env.development,
     // Specify the public URL of the output directory when referenced in a browser
-    publicPath: '/admin',
+    publicPath: '/',
   },
 
   // specify build mode
@@ -224,7 +224,7 @@ module.exports = (env) => ({
     hot: false,
     // It is important to tell WebpackDevServer to use the same "root" path
     // as we specified in the config. In development, we always serve from /.
-    publicPath: '/admin',
+    publicPath: '/',
     // Reportedly, this avoids CPU overload on some systems.
     // https://github.com/facebookincubator/create-react-app/issues/293
     watchOptions: {
