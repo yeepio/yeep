@@ -1,12 +1,10 @@
 import React from 'react';
-import Head from '../../components/Head';
+import useDocumentTitle from '@rehooks/document-title';
 
 const UserListPage = () => {
+  useDocumentTitle('User List');
   return (
     <React.Fragment>
-      <Head>
-        <title>User List</title>
-      </Head>
       <h3>User List (WIP)</h3>
     </React.Fragment>
   );
