@@ -1,19 +1,23 @@
 import React, { useContext } from 'react';
 import { Link } from '@reach/router';
+import { combineLatest } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import { useObservable } from 'rxjs-hooks';
 import useDocumentTitle from '@rehooks/document-title';
 import Store from '../Store';
 
 const LoginPage = () => {
   const store = useContext(Store);
-  const user = useObservable(() => store.session.user$, store.session.user$.getValue());
-  const isLoginPending = useObservable(
-    () => store.session.isLoginPending$,
-    store.session.isLoginPending$.getValue()
+  const [user, isLoginPending] = useObservable(
+    () =>
+      combineLatest(store.session.user$, store.session.isLoginPending$).pipe(
+        debounceTime(0) // use debounce to ensure all streams have changed before update
+      ),
+    [store.session.user$.getValue(), store.session.isLoginPending$.getValue()]
   );
-  useDocumentTitle('Login');
 
   console.log('render', user, isLoginPending);
+  useDocumentTitle('Login');
   return (
     <React.Fragment>
       <h1>Login Page (WIP)</h1>
