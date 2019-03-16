@@ -15,7 +15,7 @@ import deletePermission from '../../permission/delete/service';
 import createRole from '../create/service';
 import deleteRole from './service';
 
-describe('api/v1/role.delete', () => {
+describe('api/role.delete', () => {
   let ctx;
   let user;
   let org;
@@ -78,7 +78,7 @@ describe('api/v1/role.delete', () => {
 
   test('returns error when role does not exist', async () => {
     const res = await request(server)
-      .post('/api/v1/role.delete')
+      .post('/api/role.delete')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: '5b2d5dd0cd86b77258e16d39', // some random objectid
@@ -108,7 +108,7 @@ describe('api/v1/role.delete', () => {
     });
 
     const res = await request(server)
-      .post('/api/v1/role.delete')
+      .post('/api/role.delete')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: role.id,
@@ -136,7 +136,7 @@ describe('api/v1/role.delete', () => {
     });
 
     const res = await request(server)
-      .post('/api/v1/role.delete')
+      .post('/api/role.delete')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: role.id,
@@ -161,7 +161,7 @@ describe('api/v1/role.delete', () => {
     });
 
     const res = await request(server)
-      .post('/api/v1/role.delete')
+      .post('/api/role.delete')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: role.id,

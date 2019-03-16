@@ -11,7 +11,7 @@ import deletePermissionAssignment from '../revokePermission/service';
 import deleteUser from '../delete/service';
 import deleteOrg from '../../org/delete/service';
 
-describe('api/v1/user.info', () => {
+describe('api/user.info', () => {
   let ctx;
 
   beforeAll(async () => {
@@ -26,7 +26,7 @@ describe('api/v1/user.info', () => {
   describe('unauthorized user', () => {
     test('returns error pretending resource does not exist', async () => {
       const res = await request(server)
-        .post('/api/v1/user.info')
+        .post('/api/user.info')
         .send();
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -116,7 +116,7 @@ describe('api/v1/user.info', () => {
 
     test('retrieves user and returns expected response', async () => {
       const res = await request(server)
-        .post('/api/v1/user.info')
+        .post('/api/user.info')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           id: user.id,
@@ -162,7 +162,7 @@ describe('api/v1/user.info', () => {
 
     test('retrieves user and returns response w/out permissions or roles', async () => {
       const res = await request(server)
-        .post('/api/v1/user.info')
+        .post('/api/user.info')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           id: user.id,
@@ -190,7 +190,7 @@ describe('api/v1/user.info', () => {
 
     test('returns error when `id` contains invalid characters', async () => {
       const res = await request(server)
-        .post('/api/v1/user.info')
+        .post('/api/user.info')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           id: '507f1f77bcf86cd79943901@',
@@ -210,7 +210,7 @@ describe('api/v1/user.info', () => {
 
     test('returns error when `id` contains more than 24 characters', async () => {
       const res = await request(server)
-        .post('/api/v1/user.info')
+        .post('/api/user.info')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           id: '507f1f77bcf86cd7994390112',
@@ -230,7 +230,7 @@ describe('api/v1/user.info', () => {
 
     test('returns error when `id` contains less than 24 characters', async () => {
       const res = await request(server)
-        .post('/api/v1/user.info')
+        .post('/api/user.info')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           id: '507f1f77bcf86cd79943901',
@@ -250,7 +250,7 @@ describe('api/v1/user.info', () => {
 
     test('returns error when `id` is unspecified', async () => {
       const res = await request(server)
-        .post('/api/v1/user.info')
+        .post('/api/user.info')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({});
       expect(res.status).toBe(200);
@@ -268,7 +268,7 @@ describe('api/v1/user.info', () => {
 
     test('returns error when payload contains unknown properties', async () => {
       const res = await request(server)
-        .post('/api/v1/user.info')
+        .post('/api/user.info')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           id: '507f1f77bcf86cd799439011',
@@ -380,7 +380,7 @@ describe('api/v1/user.info', () => {
 
     test('returns error when requested user is member of another org', async () => {
       const res = await request(server)
-        .post('/api/v1/user.info')
+        .post('/api/user.info')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({ id: user.id });
 
@@ -396,7 +396,7 @@ describe('api/v1/user.info', () => {
 
     test('returns error when requested user is NOT member of any orgs (i.e. global user)', async () => {
       const res = await request(server)
-        .post('/api/v1/user.info')
+        .post('/api/user.info')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({ id: globalUser.id });
 

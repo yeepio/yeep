@@ -13,7 +13,7 @@ import deleteOrg from '../../org/delete/service';
 import createSession from '../../session/create/service';
 import destroySession from '../../session/destroy/service';
 
-describe('api/v1/invitation.accept', () => {
+describe('api/invitation.accept', () => {
   let ctx;
 
   beforeAll(async () => {
@@ -70,7 +70,7 @@ describe('api/v1/invitation.accept', () => {
 
     test('returns error when token contains less than 6 characters', async () => {
       const res = await request(server)
-        .post('/api/v1/invitation.accept')
+        .post('/api/invitation.accept')
         .send({
           token: 'abcde',
         });
@@ -88,7 +88,7 @@ describe('api/v1/invitation.accept', () => {
 
     test('returns error when token is unknown', async () => {
       const res = await request(server)
-        .post('/api/v1/invitation.accept')
+        .post('/api/invitation.accept')
         .send({
           token: 'abcdef',
         });
@@ -126,7 +126,7 @@ describe('api/v1/invitation.accept', () => {
 
       test('returns error when username is missing', async () => {
         const res = await request(server)
-          .post('/api/v1/invitation.accept')
+          .post('/api/invitation.accept')
           .send({
             token,
           });
@@ -146,7 +146,7 @@ describe('api/v1/invitation.accept', () => {
 
       test('returns error when password is missing', async () => {
         const res = await request(server)
-          .post('/api/v1/invitation.accept')
+          .post('/api/invitation.accept')
           .send({
             token,
             username: 'runner',
@@ -167,7 +167,7 @@ describe('api/v1/invitation.accept', () => {
 
       test('returns error when fullName is missing', async () => {
         const res = await request(server)
-          .post('/api/v1/invitation.accept')
+          .post('/api/invitation.accept')
           .send({
             token,
             username: 'runner',
@@ -192,7 +192,7 @@ describe('api/v1/invitation.accept', () => {
         ctx.bus.once('join_user', f);
 
         const res = await request(server)
-          .post('/api/v1/invitation.accept')
+          .post('/api/invitation.accept')
           .send({
             token,
             username: 'runner',
@@ -269,7 +269,7 @@ describe('api/v1/invitation.accept', () => {
         token = data[0].token.secret;
 
         const res = await request(server)
-          .post('/api/v1/invitation.accept')
+          .post('/api/invitation.accept')
           .send({
             token,
           });
@@ -354,7 +354,7 @@ describe('api/v1/invitation.accept', () => {
       const token = data[0].token.secret;
 
       const res = await request(server)
-        .post('/api/v1/invitation.accept')
+        .post('/api/invitation.accept')
         .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           token,
@@ -421,7 +421,7 @@ describe('api/v1/invitation.accept', () => {
         ctx.bus.once('join_user', f);
 
         const res = await request(server)
-          .post('/api/v1/invitation.accept')
+          .post('/api/invitation.accept')
           .set('Authorization', `Bearer ${runnerSession.accessToken}`)
           .send({
             token,
@@ -525,7 +525,7 @@ describe('api/v1/invitation.accept', () => {
         ctx.bus.once('join_user', f);
 
         const res = await request(server)
-          .post('/api/v1/invitation.accept')
+          .post('/api/invitation.accept')
           .set('Authorization', `Bearer ${runnerSession.accessToken}`)
           .send({
             token,
@@ -555,7 +555,7 @@ describe('api/v1/invitation.accept', () => {
 
       test('pretends token does not exist when requestor does not match the invitee', async () => {
         const res = await request(server)
-          .post('/api/v1/invitation.accept')
+          .post('/api/invitation.accept')
           .set('Authorization', `Bearer ${porkySession.accessToken}`)
           .send({
             token,

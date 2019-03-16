@@ -13,7 +13,7 @@ import createPermissionAssignment from '../../user/assignPermission/service';
 import createOrg from '../../org/create/service';
 import deleteOrg from '../../org/delete/service';
 
-describe('api/v1/invitation.create', () => {
+describe('api/invitation.create', () => {
   let ctx;
 
   beforeAll(async () => {
@@ -28,7 +28,7 @@ describe('api/v1/invitation.create', () => {
   describe('unauthorized user', () => {
     test('returns error pretending resource does not exist', async () => {
       const res = await request(server)
-        .post('/api/v1/invitation.create')
+        .post('/api/invitation.create')
         .send();
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -97,7 +97,7 @@ describe('api/v1/invitation.create', () => {
 
       const startDate = new Date();
       const res = await request(server)
-        .post('/api/v1/invitation.create')
+        .post('/api/invitation.create')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           user: 'beep-beep@acme.com',
@@ -141,7 +141,7 @@ describe('api/v1/invitation.create', () => {
 
     test('returns error when `orgId` is unknown', async () => {
       const res = await request(server)
-        .post('/api/v1/invitation.create')
+        .post('/api/invitation.create')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           user: 'beep-beep@acme.com',
@@ -160,7 +160,7 @@ describe('api/v1/invitation.create', () => {
 
     test('returns error when `permissions` array contains unknown permissionId', async () => {
       const res = await request(server)
-        .post('/api/v1/invitation.create')
+        .post('/api/invitation.create')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           user: 'beep-beep@acme.com',
@@ -189,7 +189,7 @@ describe('api/v1/invitation.create', () => {
       });
 
       const res = await request(server)
-        .post('/api/v1/invitation.create')
+        .post('/api/invitation.create')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           user: 'beep-beep@acme.com',
@@ -213,7 +213,7 @@ describe('api/v1/invitation.create', () => {
 
     test('returns error when `roles` array contains unknown roleId', async () => {
       const res = await request(server)
-        .post('/api/v1/invitation.create')
+        .post('/api/invitation.create')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           user: 'beep-beep@acme.com',
@@ -242,7 +242,7 @@ describe('api/v1/invitation.create', () => {
       });
 
       const res = await request(server)
-        .post('/api/v1/invitation.create')
+        .post('/api/invitation.create')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           user: 'beep-beep@acme.com',
@@ -275,7 +275,7 @@ describe('api/v1/invitation.create', () => {
 
       test('returns error when userKey is username', async () => {
         const res = await request(server)
-          .post('/api/v1/invitation.create')
+          .post('/api/invitation.create')
           .set('Authorization', `Bearer ${session.accessToken}`)
           .send({
             user: 'runner',

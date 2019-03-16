@@ -4,7 +4,7 @@ import getOpenApi from './openapi';
 
 const router = Router();
 
-router.get('/v1/ping', ping);
-router.get('/v1/openapi', getOpenApi);
+router.get('/ping', ping);
+router.get('/openapi', getOpenApi);
 
 export default router;

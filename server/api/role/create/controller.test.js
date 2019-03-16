@@ -14,7 +14,7 @@ import createPermissionAssignment from '../../user/assignPermission/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 import deleteRole from '../delete/service';
 
-describe('api/v1/role.create', () => {
+describe('api/role.create', () => {
   let ctx;
   let user;
   let org;
@@ -76,7 +76,7 @@ describe('api/v1/role.create', () => {
 
   test('returns error when role already exists', async () => {
     const res = await request(server)
-      .post('/api/v1/role.create')
+      .post('/api/role.create')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         name: 'admin',
@@ -97,7 +97,7 @@ describe('api/v1/role.create', () => {
 
   test('creates new role and returns expected response', async () => {
     const res = await request(server)
-      .post('/api/v1/role.create')
+      .post('/api/role.create')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         name: 'acme:manager',

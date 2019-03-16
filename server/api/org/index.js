@@ -8,9 +8,9 @@ const router = Router();
 
 // method signature: name, path, handler
 // omit name if you want to hide this method from the api-docs
-router.post('org.create', '/v1/org.create', createOrg);
-router.post('org.delete', '/v1/org.delete', deleteOrg);
-router.post('org.addMember', '/v1/org.addMember', addMember);
-router.post('org.removeMember', '/v1/org.removeMember', removeMember);
+router.post('org.create', '/org.create', createOrg);
+router.post('org.delete', '/org.delete', deleteOrg);
+router.post('org.addMember', '/org.addMember', addMember);
+router.post('org.removeMember', '/org.removeMember', removeMember);
 
 export default router;

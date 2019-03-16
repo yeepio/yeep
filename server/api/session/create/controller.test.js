@@ -11,7 +11,7 @@ import createPermission from '../../permission/create/service';
 import deletePermission from '../../permission/delete/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 
-describe('api/v1/session.create', () => {
+describe('api/session.create', () => {
   let ctx;
   let wile;
 
@@ -41,7 +41,7 @@ describe('api/v1/session.create', () => {
 
   test('returns error when username is invalid', async () => {
     const res = await request(server)
-      .post('/api/v1/session.create')
+      .post('/api/session.create')
       .send({
         user: 'a',
         password: 'password',
@@ -60,7 +60,7 @@ describe('api/v1/session.create', () => {
 
   test('returns error when email does not exist', async () => {
     const res = await request(server)
-      .post('/api/v1/session.create')
+      .post('/api/session.create')
       .send({
         user: 'unknown@email.com',
         password: 'password',
@@ -78,7 +78,7 @@ describe('api/v1/session.create', () => {
 
   test('returns error when username does not exist', async () => {
     const res = await request(server)
-      .post('/api/v1/session.create')
+      .post('/api/session.create')
       .send({
         user: 'notuser',
         password: 'password',
@@ -96,7 +96,7 @@ describe('api/v1/session.create', () => {
 
   test('returns error when password is invalid', async () => {
     const res = await request(server)
-      .post('/api/v1/session.create')
+      .post('/api/session.create')
       .send({
         user: 'wile',
         password: 'invalid-password',
@@ -114,7 +114,7 @@ describe('api/v1/session.create', () => {
 
   test('creates new session with username + password', async () => {
     const res = await request(server)
-      .post('/api/v1/session.create')
+      .post('/api/session.create')
       .send({
         user: 'Wile', // this will be automaticaly lower-cased
         password: 'catch-the-b1rd$',
@@ -132,7 +132,7 @@ describe('api/v1/session.create', () => {
 
   test('creates new session with email address + password', async () => {
     const res = await request(server)
-      .post('/api/v1/session.create')
+      .post('/api/session.create')
       .send({
         user: 'coyote@acme.com',
         password: 'catch-the-b1rd$',
@@ -150,7 +150,7 @@ describe('api/v1/session.create', () => {
 
   test('adds user profile data to accessToken payload when `scope.profile` is true', async () => {
     const res = await request(server)
-      .post('/api/v1/session.create')
+      .post('/api/session.create')
       .send({
         user: 'Wile', // this will be automaticaly lower-cased
         password: 'catch-the-b1rd$',
@@ -178,7 +178,7 @@ describe('api/v1/session.create', () => {
 
   test('does not add user profile data to accessToken payload by default', async () => {
     const res = await request(server)
-      .post('/api/v1/session.create')
+      .post('/api/session.create')
       .send({
         user: 'Wile', // this will be automaticaly lower-cased
         password: 'catch-the-b1rd$',
@@ -234,7 +234,7 @@ describe('api/v1/session.create', () => {
 
     test('adds permissions to accessToken payload when `scope.permissions` is true', async () => {
       const res = await request(server)
-        .post('/api/v1/session.create')
+        .post('/api/session.create')
         .send({
           user: 'Wile', // this will be automaticaly lower-cased
           password: 'catch-the-b1rd$',
@@ -266,7 +266,7 @@ describe('api/v1/session.create', () => {
 
     test('does not add permissions to token payload by default', async () => {
       const res = await request(server)
-        .post('/api/v1/session.create')
+        .post('/api/session.create')
         .send({
           user: 'Wile', // this will be automaticaly lower-cased
           password: 'catch-the-b1rd$',

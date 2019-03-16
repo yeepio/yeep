@@ -7,7 +7,7 @@ import createUser from '../create/service';
 import deleteUser from '../delete/service';
 import initPasswordReset from '../forgotPassword/service';
 
-describe('api/v1/user.resetPassword', () => {
+describe('api/user.resetPassword', () => {
   let ctx;
 
   beforeAll(async () => {
@@ -57,7 +57,7 @@ describe('api/v1/user.resetPassword', () => {
       ctx.bus.once('password_reset_success', f);
 
       const res = await request(server)
-        .post('/api/v1/user.resetPassword')
+        .post('/api/user.resetPassword')
         .send({
           token,
           password: 'catch-the-b2rd$',
@@ -90,7 +90,7 @@ describe('api/v1/user.resetPassword', () => {
 
     test('returns error when token contains less than 6 characters', async () => {
       const res = await request(server)
-        .post('/api/v1/user.resetPassword')
+        .post('/api/user.resetPassword')
         .send({
           token: 'abcde',
         });
@@ -108,7 +108,7 @@ describe('api/v1/user.resetPassword', () => {
 
     test('returns error when password is missing', async () => {
       const res = await request(server)
-        .post('/api/v1/user.resetPassword')
+        .post('/api/user.resetPassword')
         .send({
           token: 'abcdef',
         });
@@ -126,7 +126,7 @@ describe('api/v1/user.resetPassword', () => {
 
     test('returns error when password contains less than 8 characters', async () => {
       const res = await request(server)
-        .post('/api/v1/user.resetPassword')
+        .post('/api/user.resetPassword')
         .send({
           token: 'abcdef',
           password: '1234567',
@@ -145,7 +145,7 @@ describe('api/v1/user.resetPassword', () => {
 
     test('returns error when payload contains unknown properties', async () => {
       const res = await request(server)
-        .post('/api/v1/user.resetPassword')
+        .post('/api/user.resetPassword')
         .send({
           token: 'abcdef',
           password: '12345678',

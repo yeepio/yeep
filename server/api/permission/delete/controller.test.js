@@ -13,7 +13,7 @@ import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
 import deletePermission from './service';
 
-describe('api/v1/permission.delete', () => {
+describe('api/permission.delete', () => {
   let ctx;
   let user;
   let org;
@@ -68,7 +68,7 @@ describe('api/v1/permission.delete', () => {
 
   test('returns error when permission does not exist', async () => {
     const res = await request(server)
-      .post('/api/v1/permission.delete')
+      .post('/api/permission.delete')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: '5b2d5dd0cd86b77258e16d39', // some random objectid
@@ -93,7 +93,7 @@ describe('api/v1/permission.delete', () => {
     });
 
     const res = await request(server)
-      .post('/api/v1/permission.delete')
+      .post('/api/permission.delete')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: permission.id,
@@ -119,7 +119,7 @@ describe('api/v1/permission.delete', () => {
     });
 
     const res = await request(server)
-      .post('/api/v1/permission.delete')
+      .post('/api/permission.delete')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: permission.id,
@@ -139,7 +139,7 @@ describe('api/v1/permission.delete', () => {
     });
 
     const res = await request(server)
-      .post('/api/v1/permission.delete')
+      .post('/api/permission.delete')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: permission.id,

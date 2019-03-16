@@ -13,7 +13,7 @@ import destroySession from '../../session/destroy/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 
-describe('api/v1/permission.create', () => {
+describe('api/permission.create', () => {
   let ctx;
   let user;
   let permissionAssignment;
@@ -66,7 +66,7 @@ describe('api/v1/permission.create', () => {
 
   test('returns error when permission name is reserved', async () => {
     const res = await request(server)
-      .post('/api/v1/permission.create')
+      .post('/api/permission.create')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         name: 'yeep.permission.test',
@@ -90,7 +90,7 @@ describe('api/v1/permission.create', () => {
     });
 
     const res = await request(server)
-      .post('/api/v1/permission.create')
+      .post('/api/permission.create')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         name: 'acme.test',
@@ -118,7 +118,7 @@ describe('api/v1/permission.create', () => {
     });
 
     const res = await request(server)
-      .post('/api/v1/permission.create')
+      .post('/api/permission.create')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         name: 'acme.test',
@@ -141,7 +141,7 @@ describe('api/v1/permission.create', () => {
 
   test('creates new permission and returns expected response', async () => {
     const res = await request(server)
-      .post('/api/v1/permission.create')
+      .post('/api/permission.create')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         name: 'acme.test',
