@@ -6,7 +6,7 @@ import { validateRequest } from '../../../middleware/validation';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import createSession, { defaultScope } from './service';
 
-const validationSchema = {
+export const validationSchema = {
   body: {
     user: Joi.alternatives().try([
       Joi.string()

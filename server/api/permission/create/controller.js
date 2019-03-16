@@ -11,7 +11,7 @@ import {
 import createPermission from './service';
 import { AuthorizationError } from '../../../constants/errors';
 
-const validationSchema = {
+export const validationSchema = {
   body: {
     name: Joi.string()
       .lowercase()

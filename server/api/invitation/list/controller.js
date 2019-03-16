@@ -12,7 +12,7 @@ import {
 import listPendingInvitations, { parseCursor, stringifyCursor } from './service';
 import { AuthorizationError } from '../../../constants/errors';
 
-const validationSchema = {
+export const validationSchema = {
   body: {
     org: Joi.string()
       .length(24)
