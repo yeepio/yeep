@@ -1,10 +1,10 @@
 import Router from 'koa-router';
 import ping from './ping';
-import getOpenApi from './openapi';
+import docs from './docs';
 
 const router = Router();
 
 router.get('/ping', ping);
-router.get('/openapi', getOpenApi);
+router.get('/docs', docs);
 
 export default router;
