@@ -1,36 +1,55 @@
 import React from 'react';
-import { Link } from '@reach/router';
+import { Router } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import TopNav from '../../components/TopNav';
-// import AsideNav from '../../components/AsideNav';
-// import PageWrapper from '../../components/PageWrapper';
+import AsideNav from '../../components/AsideNav';
+
+// Use react-loadable to split pages into their own bundles that
+// will be dynamically loaded on runtime
+import Loadable from 'react-loadable';
+
+// The loading indicator that will be shown on the RHS
+// of the main interface while a page component is loading
+import LoadingIndicator from '../../components/LoadingIndicator';
+
+const AsyncOrganization = Loadable({
+  loader: () => import(/* webpackChunkName: "org" */ '../org/OrgPage'),
+  loading: LoadingIndicator,
+  delay: 300, // 0.3 seconds
+});
+
+const AsyncPermission = Loadable({
+  loader: () => import(/* webpackChunkName: "permission" */ '../permission/PermissionPage'),
+  loading: LoadingIndicator,
+  delay: 300, // 0.3 seconds
+});
+
+const AsyncRole = Loadable({
+  loader: () => import(/* webpackChunkName: "role" */ '../role/RolePage'),
+  loading: LoadingIndicator,
+  delay: 300, // 0.3 seconds
+});
+
+const AsyncUser = Loadable({
+  loader: () => import(/* webpackChunkName: "user" */ '../user/UserPage'),
+  loading: LoadingIndicator,
+  delay: 300, // 0.3 seconds
+});
 
 const DashboardPage = () => {
   useDocumentTitle('Dashboard');
   return (
     <React.Fragment>
       <TopNav />
-      <ul>
-        <li>
-          <Link to="/login">Login</Link>
-        </li>
-        <li>
-          <Link to="/organizations">Organizations</Link>
-        </li>
-        <li>
-          <Link to="/permissions">Permissions</Link>
-        </li>
-        <li>
-          <Link to="/roles">Roles</Link>
-        </li>
-        <li>
-          <Link to="/users">Users</Link>
-        </li>
-      </ul>
-      {/* <div className="mx-auto flex">
+      <div className="mx-auto flex">
         <AsideNav />
-        <PageWrapper />
-      </div> */}
+        <Router>
+          <AsyncOrganization path="organizations/*" />
+          <AsyncPermission path="permissions/*" />
+          <AsyncRole path="roles/*" />
+          <AsyncUser path="users/*" />
+        </Router>
+      </div>
     </React.Fragment>
   );
 };

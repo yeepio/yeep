@@ -1,10 +1,11 @@
 import React from 'react';
+import { Link } from '@reach/router';
 import IconHome from '../icons/IconHome';
 import IconOrganisation from '../icons/IconOrganisation';
 import IconUser from '../icons/IconUser';
 import IconRole from '../icons/IconRole';
 import IconPermission from '../icons/IconPermission';
-import IconSession from '../icons/IconSession';
+// import IconSession from '../icons/IconSession';
 import classNames from 'classnames';
 
 /**
@@ -15,49 +16,46 @@ const AsideNav = () => {
     <nav className="bg-grey-light w-64 flex-no-shrink hidden lg:block">
       <ul className="list-reset">
         <li>
-          <a href="#top" className={menuStylesNormal}>
+          <Link to="/" className={menuStylesNormal}>
             <IconHome className="nav-icon" />
             Dashboard
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="#top" className={menuStylesSelected}>
-            <IconOrganisation color="#08a2e3" className="nav-icon" />
-            Organisations
-          </a>
+          <Link to="organisations" className={menuStylesNormal}>
+            <IconOrganisation className="nav-icon" />
+            Organizations
+          </Link>
         </li>
         <li>
-          <a href="#top" className={menuStylesNormal}>
+          <Link to="/users" className={menuStylesNormal}>
             <IconUser height={20} className="nav-icon" />
             Users
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="#top" className={menuStylesNormal}>
+          <Link to="/roles" className={menuStylesNormal}>
             <IconRole className="nav-icon" />
             Roles
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="#top" className={menuStylesNormal}>
+          <Link to="/permissions" className={menuStylesNormal}>
             <IconPermission height={20} className="nav-icon" />
             Permissions
-          </a>
+          </Link>
         </li>
         <li>
-          <a href="#top" className={menuStylesNormal}>
+          {/*<Link to="/sessions" className={menuStylesNormal}>
             <IconSession className="nav-icon" />
             Sessions
-          </a>
+          </Link>*/}
         </li>
       </ul>
       <style jsx>{`
         nav {
           /* Min height of the nav is the viewport height minus the 4rem of the header */
           min-height: calc(100vh - 4rem);
-        }
-        nav a {
-          padding-left: calc(1.5rem + 24px);
         }
         :global(.nav-icon) {
           position: absolute;
@@ -76,7 +74,8 @@ const menuStyles = classNames(
   'border-b',
   'border-white',
   'py-2',
-  'px-8',
+  'pl-16',
+  'pr-8',
   'hover:bg-white',
   'relative'
 );
@@ -84,6 +83,6 @@ const menuStyles = classNames(
 // Menu item styles for the default / normal state
 const menuStylesNormal = classNames(menuStyles, 'text-black');
 // Menu item styles for the selected state
-const menuStylesSelected = classNames(menuStyles, 'text-blue', 'bg-white');
+// const menuStylesSelected = classNames(menuStyles, 'text-blue', 'bg-white');
 
 export default AsideNav;
