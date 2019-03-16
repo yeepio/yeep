@@ -1,7 +1,8 @@
 import React from 'react';
-import { Router, Link } from '@reach/router';
+import useDocumentTitle from '@rehooks/document-title';
 
 const DashboardPage = () => {
+  useDocumentTitle('Dashboard');
   return (
     <React.Fragment>
       <h1>Dashboard</h1>

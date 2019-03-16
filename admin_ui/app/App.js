@@ -11,6 +11,7 @@ import Store from './Store';
  */
 import LoginPage from './session/LoginPage';
 import DashboardSection from './dashboard/DashboardSection';
+import ForgotPasswordPage from './session/ForgotPasswordPage';
 
 
 
@@ -23,6 +24,7 @@ const App = () => {
       <Router>
         <DashboardSection path="/*" />
         <LoginPage path="/login" />
+        <ForgotPasswordPage path="/forgot-password" />
       </Router>
     </Store.Provider>
   );

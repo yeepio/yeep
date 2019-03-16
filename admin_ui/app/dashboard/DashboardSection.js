@@ -1,8 +1,8 @@
 import React from 'react';
 import { Router } from '@reach/router';
-import useDocumentTitle from '@rehooks/document-title';
 import TopNav from '../../components/TopNav';
 import AsideNav from '../../components/AsideNav';
+import DashboardPage from './DashboardPage';
 
 // Use react-loadable to split pages into their own bundles that
 // will be dynamically loaded on runtime
@@ -11,7 +11,7 @@ import Loadable from 'react-loadable';
 // The loading indicator that will be shown on the RHS
 // of the main interface while a page component is loading
 import LoadingIndicator from '../../components/LoadingIndicator';
-import DashboardPage from './DashboardPage';
+
 
 const AsyncOrganization = Loadable({
   loader: () => import(/* webpackChunkName: "org" */ '../org/OrgPage'),
@@ -38,7 +38,6 @@ const AsyncUser = Loadable({
 });
 
 const DashboardSection = () => {
-  useDocumentTitle('Dashboard');
   return (
     <React.Fragment>
       <TopNav />
