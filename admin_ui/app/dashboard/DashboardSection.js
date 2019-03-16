@@ -43,13 +43,15 @@ const DashboardSection = () => {
       <TopNav />
       <div className="mx-auto flex">
         <AsideNav />
-        <Router>
-          <DashboardPage path="/" />
-          <AsyncOrganization path="organizations/*" />
-          <AsyncPermission path="permissions/*" />
-          <AsyncRole path="roles/*" />
-          <AsyncUser path="users/*" />
-        </Router>
+        <div className="leading-normal p-4 sm:p-8 max-w-2xl">
+          <Router>
+            <DashboardPage path="/" />
+            <AsyncOrganization path="organizations/*" />
+            <AsyncPermission path="permissions/*" />
+            <AsyncRole path="roles/*" />
+            <AsyncUser path="users/*" />
+          </Router>
+        </div>
       </div>
     </React.Fragment>
   );
