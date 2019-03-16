@@ -22,7 +22,7 @@ const AsideNav = () => {
           </Link>
         </li>
         <li>
-          <Link to="organisations" className={menuStylesNormal}>
+          <Link to="/organizations" className={menuStylesNormal}>
             <IconOrganisation className="nav-icon" />
             Organizations
           </Link>

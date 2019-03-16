@@ -22,7 +22,6 @@ const OrgMaster = () => {
           <Link to="123/edit">Edit org 123</Link>
         </li>
       </ul>
-
       <Router>
         <OrgListPage path="/" />
         <OrgCreatePage path="/create" />
