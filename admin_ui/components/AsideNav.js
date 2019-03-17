@@ -1,12 +1,11 @@
 import React from 'react';
-import { Link } from '@reach/router';
+import NavLink from './NavLink';
 import IconHome from '../icons/IconHome';
 import IconOrganisation from '../icons/IconOrganisation';
 import IconUser from '../icons/IconUser';
 import IconRole from '../icons/IconRole';
 import IconPermission from '../icons/IconPermission';
 // import IconSession from '../icons/IconSession';
-import classNames from 'classnames';
 
 /**
  * LHS navigation.
@@ -64,35 +63,6 @@ const AsideNav = () => {
       `}</style>
     </nav>
   );
-};
-
-const NavLink = (props) => <Link {...props} getProps={getMenuStyle} />;
-
-// Common menu item styles
-const menuStyles = [
-  'leading-normal',
-  'block',
-  'no-underline',
-  'border-b',
-  'border-white',
-  'py-2',
-  'pl-16',
-  'pr-8',
-  'hover:bg-white',
-  'relative',
-];
-
-/**
- * Style the navigation link as normal or active
- * @param isCurrent - true if the location.pathname is exactly the same as the anchor's href
- * @returns {string} - List of classes to use
- */
-const getMenuStyle = ({ isCurrent }) => {
-  return {
-    className: isCurrent
-      ? classNames(menuStyles, 'text-blue', 'bg-white')
-      : classNames(menuStyles, 'text-black'),
-  };
 };
 
 export default AsideNav;
