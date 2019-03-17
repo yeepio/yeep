@@ -16,34 +16,34 @@ const AsideNav = () => {
     <nav className="bg-grey-light w-64 flex-no-shrink hidden lg:block">
       <ul className="list-reset">
         <li>
-          <Link to="/" className={menuStylesNormal}>
+          <NavLink to="/">
             <IconHome className="nav-icon" />
             Dashboard
-          </Link>
+          </NavLink>
         </li>
         <li>
-          <Link to="/organizations" className={menuStylesNormal}>
+          <NavLink to="/organizations">
             <IconOrganisation className="nav-icon" />
             Organizations
-          </Link>
+          </NavLink>
         </li>
         <li>
-          <Link to="/users" className={menuStylesNormal}>
+          <NavLink to="/users">
             <IconUser height={20} className="nav-icon" />
             Users
-          </Link>
+          </NavLink>
         </li>
         <li>
-          <Link to="/roles" className={menuStylesNormal}>
+          <NavLink to="/roles">
             <IconRole className="nav-icon" />
             Roles
-          </Link>
+          </NavLink>
         </li>
         <li>
-          <Link to="/permissions" className={menuStylesNormal}>
+          <NavLink to="/permissions">
             <IconPermission height={20} className="nav-icon" />
             Permissions
-          </Link>
+          </NavLink>
         </li>
         <li>
           {/*<Link to="/sessions" className={menuStylesNormal}>
@@ -66,8 +66,10 @@ const AsideNav = () => {
   );
 };
 
+const NavLink = (props) => <Link {...props} getProps={getMenuStyle} />;
+
 // Common menu item styles
-const menuStyles = classNames(
+const menuStyles = [
   'leading-normal',
   'block',
   'no-underline',
@@ -77,12 +79,20 @@ const menuStyles = classNames(
   'pl-16',
   'pr-8',
   'hover:bg-white',
-  'relative'
-);
+  'relative',
+];
 
-// Menu item styles for the default / normal state
-const menuStylesNormal = classNames(menuStyles, 'text-black');
-// Menu item styles for the selected state
-// const menuStylesSelected = classNames(menuStyles, 'text-blue', 'bg-white');
+/**
+ * Style the navigation link as normal or active
+ * @param isCurrent - true if the location.pathname is exactly the same as the anchor's href
+ * @returns {string} - List of classes to use
+ */
+const getMenuStyle = ({ isCurrent }) => {
+  return {
+    className: isCurrent
+      ? classNames(menuStyles, 'text-blue', 'bg-white')
+      : classNames(menuStyles, 'text-black'),
+  };
+};
 
 export default AsideNav;

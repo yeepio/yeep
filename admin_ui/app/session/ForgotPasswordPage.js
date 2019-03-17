@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import Input from '../../components/Input';
