@@ -5,18 +5,21 @@ import { Link } from '@reach/router';
 const DashboardPage = () => {
   useDocumentTitle('Dashboard');
   return (
-    <React.Fragment>
+    <div className="leading-normal p-4 sm:p-8 max-w-2xl">
       <h1 className="mb-4">Dashboard</h1>
       <p className="mb-4">
-        Welcome to Yeep <strong>User!</strong>. Here are a few links to get you started:
+        Welcome <strong>USERNAME</strong>, below are a few links to get you started:
       </p>
       <ol>
         <li>
-          <Link to="/organizations" className="font-bold">Create an organisation</Link><br/>
+          <Link to="/organizations" className="font-bold">
+            Create an organisation
+          </Link>
+          <br />
           We need a single sentence here to describe the concept of an org
         </li>
       </ol>
-    </React.Fragment>
+    </div>
   );
 };
 

@@ -10,6 +10,9 @@ import DashboardPage from './dashboard/DashboardPage';
 // of the main interface while a page component is loading asynchronously
 import LoadingIndicator from '../components/LoadingIndicator';
 
+// Our "page not found" / 404 view
+import PageNotFound from '../components/PageNotFound';
+
 /*
   For all the other pages (Orgs, Perms, Roles, Users) we will make use
   of react-loadable to async-load them as needed. The webpack build process
@@ -47,15 +50,14 @@ const AppInnerModule = () => {
       <TopNav />
       <div className="mx-auto flex">
         <AsideNav />
-        <div className="leading-normal p-4 sm:p-8 max-w-2xl">
-          <Router>
-            <DashboardPage path="/" />
-            <AsyncOrganization path="organizations/*" />
-            <AsyncPermission path="permissions/*" />
-            <AsyncRole path="roles/*" />
-            <AsyncUser path="users/*" />
-          </Router>
-        </div>
+        <Router className="w-full">
+          <DashboardPage path="/" />
+          <AsyncOrganization path="organizations/*" />
+          <AsyncPermission path="permissions/*" />
+          <AsyncRole path="roles/*" />
+          <AsyncUser path="users/*" />
+          <PageNotFound default />
+        </Router>
       </div>
     </React.Fragment>
   );
