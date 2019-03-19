@@ -4,7 +4,7 @@ import { validateRequest } from '../../../middleware/validation';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import refreshSessionToken from './service';
 
-const validationSchema = {
+export const validationSchema = {
   body: {
     accessToken: Joi.string()
       .trim()

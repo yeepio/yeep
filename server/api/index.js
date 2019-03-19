@@ -1,5 +1,5 @@
 import Router from 'koa-router';
-import health from './health';
+import service from './service';
 import org from './org';
 import user from './user';
 import session from './session';
@@ -19,7 +19,7 @@ router.use(async (ctx, next) => {
   await next();
 });
 
-router.use('/api', health.routes(), health.allowedMethods());
+router.use('/api', service.routes(), service.allowedMethods());
 router.use('/api', org.routes(), org.allowedMethods());
 router.use('/api', user.routes(), user.allowedMethods());
 router.use('/api', session.routes(), session.allowedMethods());
