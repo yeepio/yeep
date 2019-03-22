@@ -30,22 +30,24 @@ const DashboardOrgCard = (props) => {
       </h2>
       <IconOrganisation className="absolute pin-t pin-r mt-4 mr-4" height={28} />
       <table className="w-full">
-        <tr>
-          <td>Total users:</td>
-          <td className="text-right">
-            <Link to="/users">{props.users}</Link>
-          </td>
-        </tr>
-        <tr>
-          <td>Active sessions:</td>
-          <td className="text-right">{props.activeSessions}</td>
-        </tr>
-        <tr>
-          <td>Org-specific roles:</td>
-          <td className="text-right">
-            <Link to="/roles">{props.roles}</Link>
-          </td>
-        </tr>
+        <tbody>
+          <tr>
+            <td>Total users:</td>
+            <td className="text-right">
+              <Link to="/users">{props.users}</Link>
+            </td>
+          </tr>
+          <tr>
+            <td>Active sessions:</td>
+            <td className="text-right">{props.activeSessions}</td>
+          </tr>
+          <tr>
+            <td>Org-specific roles:</td>
+            <td className="text-right">
+              <Link to="/roles">{props.roles}</Link>
+            </td>
+          </tr>
+        </tbody>
       </table>
     </div>
   );
@@ -72,8 +74,8 @@ const DashboardPage = () => {
         <DashboardOrgCard {...dummyOrgs[1]} />
       </div>
       <div className="bg-yellow-lighter rounded p-4">
-        <strong>Tip:</strong> Visit the <Link to="/sessions">Sessions</Link> page to see
-        all the currently active users across your oganisations
+        <strong>Tip:</strong> Visit the <Link to="/sessions">Sessions</Link> page to see all the
+        currently active users across your oganisations
       </div>
     </div>
   );
