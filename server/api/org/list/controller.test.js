@@ -4,6 +4,9 @@ import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
 import createOrg from '../../org/create/service';
+import addMemberToOrg from '../../org/addMember/service';
+import listPermissions from '../../permission/list/service';
+import assignPermission from '../../user/assignPermission/service';
 import createSession from '../../session/create/service';
 import destroySession from '../../session/destroy/service';
 import deleteOrg from '../../org/delete/service';
@@ -13,18 +16,20 @@ describe('api/v1/org.list', () => {
   let ctx;
   let wile;
   let oswell;
+  let professor;
   let runner;
   let acme;
   let monsters;
   let umbrella;
   let session;
+  let professorSession;
 
   beforeAll(async () => {
     await server.setup(config);
     ctx = server.getAppContext();
 
     // user "wile" is admin in acme + monsters org
-    [wile, oswell] = await Promise.all([
+    [wile, oswell, professor] = await Promise.all([
       createUser(ctx.db, {
         username: 'wile',
         password: 'catch-the-b1rd$',
@@ -50,7 +55,20 @@ describe('api/v1/org.list', () => {
             isPrimary: true,
           },
         ],
-      })
+      }),
+      createUser(ctx.db, {
+        username: 'tyrant',
+        password: 't-103MrX',
+        fullName: 'Shinji Mikami',
+        picture: 'https://www.umbrella.com/pictures/mrx.png',
+        emails: [
+          {
+            address: 'misterx@umbrella.com',
+            isVerified: true,
+            isPrimary: true,
+          },
+        ],
+      }),
     ]);
 
     [acme, monsters, umbrella] = await Promise.all([
@@ -91,13 +109,40 @@ describe('api/v1/org.list', () => {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
+
+    const userReadPermissions = await listPermissions(ctx.db, {
+      q: 'yeep.user.read',
+      scopes: [null],
+      limit: 1,
+    });
+
+    // user professor is logged-in
+    professorSession = await createSession(ctx, {
+      username: 'tyrant',
+      password: 't-103MrX',
+    });
+
+    // we add professor to acme organisation
+    await addMemberToOrg(ctx.db, {
+      orgId: acme.id,
+      userId: professor.id,
+    });
+
+    // and we give him the global yeep.user.read permission
+    await assignPermission(ctx.db, {
+      userId: professor.id,
+      orgId: acme.id,
+      permissionId: userReadPermissions[0].id,
+    });
   });
 
   afterAll(async () => {
     await destroySession(ctx, session);
+    await destroySession(ctx, professorSession);
     await deleteUser(ctx.db, wile);
     await deleteUser(ctx.db, oswell);
     await deleteUser(ctx.db, runner);
+    await deleteUser(ctx.db, professor);
     await deleteOrg(ctx.db, acme);
     await deleteOrg(ctx.db, monsters);
     await deleteOrg(ctx.db, umbrella);
@@ -244,6 +289,24 @@ describe('api/v1/org.list', () => {
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         user: oswell.id,
+      });
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        // authorisation code
+        code: 10012,
+        message: expect.any(String),
+      },
+    });
+  });
+
+  test('throws AuthorisationError when requesting organisations of a user with yeep.user.read access but not assignment access', async () => {
+    const res = await request(server)
+      .post('/api/v1/org.list')
+      .set('Authorization', `Bearer ${professorSession.accessToken}`)
+      .send({
+        user: runner.id,
       });
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
