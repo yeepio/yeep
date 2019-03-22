@@ -21,7 +21,7 @@ import PageNotFound from '../components/PageNotFound';
 import Loadable from 'react-loadable';
 
 const AsyncOrganization = Loadable({
-  loader: () => import(/* webpackChunkName: "org" */ './org/OrgPage'),
+  loader: () => import(/* webpackChunkName: "org" */ './org/OrgSection'),
   loading: LoadingIndicator,
   delay: 300, // 0.3 seconds
 });
