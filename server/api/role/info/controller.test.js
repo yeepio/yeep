@@ -15,7 +15,7 @@ import deleteUser from '../../user/delete/service';
 import createRole from '../create/service';
 import deleteRole from '../delete/service';
 
-describe('api/v1/role.info', () => {
+describe('api/role.info', () => {
   let ctx;
   let user;
   let org;
@@ -78,7 +78,7 @@ describe('api/v1/role.info', () => {
 
   test('returns error when role does not exist', async () => {
     const res = await request(server)
-      .post('/api/v1/role.info')
+      .post('/api/role.info')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: '5b2d5dd0cd86b77258e16d39', // some random objectid
@@ -107,7 +107,7 @@ describe('api/v1/role.info', () => {
     });
 
     const res = await request(server)
-      .post('/api/v1/role.info')
+      .post('/api/role.info')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: role.id,
@@ -138,7 +138,7 @@ describe('api/v1/role.info', () => {
     });
 
     const res = await request(server)
-      .post('/api/v1/role.info')
+      .post('/api/role.info')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: role.id,

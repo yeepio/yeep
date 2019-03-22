@@ -12,7 +12,7 @@ import createOrg from '../create/service';
 import deleteOrg from '../delete/service';
 import addMemberToOrg from '../addMember/service';
 
-describe('api/v1/org.removeMember', () => {
+describe('api/org.removeMember', () => {
   let ctx;
 
   beforeAll(async () => {
@@ -27,7 +27,7 @@ describe('api/v1/org.removeMember', () => {
   describe('unauthorized user', () => {
     test('returns error pretending resource does not exist', async () => {
       const res = await request(server)
-        .post('/api/v1/org.removeMember')
+        .post('/api/org.removeMember')
         .send();
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -108,7 +108,7 @@ describe('api/v1/org.removeMember', () => {
 
     test('returns error when `orgId` is unknown', async () => {
       const res = await request(server)
-        .post('/api/v1/org.removeMember')
+        .post('/api/org.removeMember')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           orgId: '507f1f77bcf86cd799439012', // i.e. some random ID
@@ -127,7 +127,7 @@ describe('api/v1/org.removeMember', () => {
 
     test('returns error when `userId` is unknown', async () => {
       const res = await request(server)
-        .post('/api/v1/org.removeMember')
+        .post('/api/org.removeMember')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           orgId: org.id,
@@ -146,7 +146,7 @@ describe('api/v1/org.removeMember', () => {
 
     test('returns error when user is NOT a member of org', async () => {
       const res = await request(server)
-        .post('/api/v1/org.removeMember')
+        .post('/api/org.removeMember')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           orgId: org.id,
@@ -169,7 +169,7 @@ describe('api/v1/org.removeMember', () => {
       });
 
       const res = await request(server)
-        .post('/api/v1/org.removeMember')
+        .post('/api/org.removeMember')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           userId: runner.id,

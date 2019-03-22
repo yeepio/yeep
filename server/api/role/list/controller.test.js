@@ -14,7 +14,7 @@ import assignRole from '../../user/assignRole/service';
 import deleteRole from '../delete/service';
 import deletePermission from '../../permission/delete/service';
 
-describe('api/v1/role.list', () => {
+describe('api/role.list', () => {
   let ctx;
   let wile;
   let acme;
@@ -113,7 +113,7 @@ describe('api/v1/role.list', () => {
 
   test('returns list of roles the user has access to', async () => {
     const res = await request(server)
-      .post('/api/v1/role.list')
+      .post('/api/role.list')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send();
 
@@ -145,7 +145,7 @@ describe('api/v1/role.list', () => {
 
   test('limits number of roles using `limit` param', async () => {
     const res = await request(server)
-      .post('/api/v1/role.list')
+      .post('/api/role.list')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         limit: 1,
@@ -177,7 +177,7 @@ describe('api/v1/role.list', () => {
 
   test('paginates through roles using `cursor` param', async () => {
     const res = await request(server)
-      .post('/api/v1/role.list')
+      .post('/api/role.list')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         limit: 2,
@@ -188,7 +188,7 @@ describe('api/v1/role.list', () => {
     expect(res.body.roles.length).toBe(2);
 
     const res1 = await request(server)
-      .post('/api/v1/role.list')
+      .post('/api/role.list')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         limit: 1,
@@ -201,7 +201,7 @@ describe('api/v1/role.list', () => {
     expect(res1.body.roles[0]).toEqual(res.body.roles[0]);
 
     const res2 = await request(server)
-      .post('/api/v1/role.list')
+      .post('/api/role.list')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         limit: 1,
@@ -216,7 +216,7 @@ describe('api/v1/role.list', () => {
 
   test('filters roles using `q` param', async () => {
     const res = await request(server)
-      .post('/api/v1/role.list')
+      .post('/api/role.list')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         q: 'acme',
@@ -240,7 +240,7 @@ describe('api/v1/role.list', () => {
 
   test('filters roles using `scope` param', async () => {
     const res = await request(server)
-      .post('/api/v1/role.list')
+      .post('/api/role.list')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         scope: acme.id,
@@ -265,7 +265,7 @@ describe('api/v1/role.list', () => {
 
   test('throws AuthorisationError when requesting a scope with no access', async () => {
     const res = await request(server)
-      .post('/api/v1/role.list')
+      .post('/api/role.list')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         scope: umbrella.id,
@@ -283,7 +283,7 @@ describe('api/v1/role.list', () => {
 
   test('filters roles using `isSystemRole` param', async () => {
     const res = await request(server)
-      .post('/api/v1/role.list')
+      .post('/api/role.list')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         isSystemRole: true,

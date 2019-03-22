@@ -17,7 +17,7 @@ import createRoleAssignment from '../assignRole/service';
 import deleteRole from '../../role/delete/service';
 import deleteRoleAssignment from './service';
 
-describe('api/v1/user.revokeRole', () => {
+describe('api/user.revokeRole', () => {
   let ctx;
 
   beforeAll(async () => {
@@ -32,7 +32,7 @@ describe('api/v1/user.revokeRole', () => {
   describe('unauthorized user', () => {
     test('returns error pretending resource does not exist', async () => {
       const res = await request(server)
-        .post('/api/v1/user.revokeRole')
+        .post('/api/user.revokeRole')
         .send({
           id: '507f191e810c19729de860ea', // some random object id
         });
@@ -116,7 +116,7 @@ describe('api/v1/user.revokeRole', () => {
 
     test('returns error when `userId` contains invalid characters', async () => {
       const res = await request(server)
-        .post('/api/v1/user.revokeRole')
+        .post('/api/user.revokeRole')
         .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           userId: '507f1f77bcf86cd79943901@',
@@ -136,7 +136,7 @@ describe('api/v1/user.revokeRole', () => {
 
     test('returns error when `userId` contains more than 24 characters', async () => {
       const res = await request(server)
-        .post('/api/v1/user.revokeRole')
+        .post('/api/user.revokeRole')
         .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           userId: '507f1f77bcf86cd7994390112',
@@ -156,7 +156,7 @@ describe('api/v1/user.revokeRole', () => {
 
     test('returns error when `userId` contains less than 24 characters', async () => {
       const res = await request(server)
-        .post('/api/v1/user.revokeRole')
+        .post('/api/user.revokeRole')
         .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           userId: '507f1f77bcf86cd79943901',
@@ -176,7 +176,7 @@ describe('api/v1/user.revokeRole', () => {
 
     test('returns error when `userId` is unspecified', async () => {
       const res = await request(server)
-        .post('/api/v1/user.revokeRole')
+        .post('/api/user.revokeRole')
         .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({});
       expect(res.status).toBe(200);
@@ -194,7 +194,7 @@ describe('api/v1/user.revokeRole', () => {
 
     test('returns error when `orgId` contains invalid characters', async () => {
       const res = await request(server)
-        .post('/api/v1/user.revokeRole')
+        .post('/api/user.revokeRole')
         .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           userId: wile.id,
@@ -215,7 +215,7 @@ describe('api/v1/user.revokeRole', () => {
 
     test('returns error when `orgId` contains more than 24 characters', async () => {
       const res = await request(server)
-        .post('/api/v1/user.revokeRole')
+        .post('/api/user.revokeRole')
         .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           userId: wile.id,
@@ -236,7 +236,7 @@ describe('api/v1/user.revokeRole', () => {
 
     test('returns error when `orgId` contains less than 24 characters', async () => {
       const res = await request(server)
-        .post('/api/v1/user.revokeRole')
+        .post('/api/user.revokeRole')
         .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           userId: wile.id,
@@ -257,7 +257,7 @@ describe('api/v1/user.revokeRole', () => {
 
     test('returns error when `roleId` contains invalid characters', async () => {
       const res = await request(server)
-        .post('/api/v1/user.revokeRole')
+        .post('/api/user.revokeRole')
         .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           userId: wile.id,
@@ -279,7 +279,7 @@ describe('api/v1/user.revokeRole', () => {
 
     test('returns error when `roleId` contains more than 24 characters', async () => {
       const res = await request(server)
-        .post('/api/v1/user.revokeRole')
+        .post('/api/user.revokeRole')
         .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           userId: wile.id,
@@ -301,7 +301,7 @@ describe('api/v1/user.revokeRole', () => {
 
     test('returns error when `roleId` contains less than 24 characters', async () => {
       const res = await request(server)
-        .post('/api/v1/user.revokeRole')
+        .post('/api/user.revokeRole')
         .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           userId: wile.id,
@@ -323,7 +323,7 @@ describe('api/v1/user.revokeRole', () => {
 
     test('returns error when `roleId` is unspecified', async () => {
       const res = await request(server)
-        .post('/api/v1/user.revokeRole')
+        .post('/api/user.revokeRole')
         .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           userId: wile.id,
@@ -343,7 +343,7 @@ describe('api/v1/user.revokeRole', () => {
 
     test('returns error when payload contains unknown properties', async () => {
       const res = await request(server)
-        .post('/api/v1/user.revokeRole')
+        .post('/api/user.revokeRole')
         .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           userId: wile.id,
@@ -365,7 +365,7 @@ describe('api/v1/user.revokeRole', () => {
 
     test('returns error when user does not exist', async () => {
       const res = await request(server)
-        .post('/api/v1/user.revokeRole')
+        .post('/api/user.revokeRole')
         .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           userId: '507f191e810c19729de860ea', // some random object id
@@ -385,7 +385,7 @@ describe('api/v1/user.revokeRole', () => {
 
     test('returns error when role does not exist', async () => {
       const res = await request(server)
-        .post('/api/v1/user.revokeRole')
+        .post('/api/user.revokeRole')
         .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           userId: wile.id,
@@ -411,7 +411,7 @@ describe('api/v1/user.revokeRole', () => {
       });
 
       const res = await request(server)
-        .post('/api/v1/user.revokeRole')
+        .post('/api/user.revokeRole')
         .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           userId: wile.id,
@@ -513,7 +513,7 @@ describe('api/v1/user.revokeRole', () => {
 
     test('returns error when user permission scope does not match the roleAssignment org context', async () => {
       const res = await request(server)
-        .post('/api/v1/user.revokeRole')
+        .post('/api/user.revokeRole')
         .set('Authorization', `Bearer ${wileSession.accessToken}`)
         .send({
           userId: wazowski.id,

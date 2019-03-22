@@ -7,7 +7,7 @@ import config from '../../../../yeep.config';
 import createUser from '../create/service';
 import deleteUser from '../delete/service';
 
-describe('api/v1/user.forgotPassword', () => {
+describe('api/user.forgotPassword', () => {
   let ctx;
 
   beforeAll(async () => {
@@ -48,7 +48,7 @@ describe('api/v1/user.forgotPassword', () => {
 
       const startDate = new Date();
       let res = await request(server)
-        .post('/api/v1/user.forgotPassword')
+        .post('/api/user.forgotPassword')
         .send({
           userKey: 'wile',
           tokenExpiresInSeconds: 4 * 60 * 60, // i.e. 4 hours
@@ -87,7 +87,7 @@ describe('api/v1/user.forgotPassword', () => {
 
     test('returns error when username is invalid', async () => {
       const res = await request(server)
-        .post('/api/v1/user.forgotPassword')
+        .post('/api/user.forgotPassword')
         .send({
           userKey: 'a',
         });
@@ -105,7 +105,7 @@ describe('api/v1/user.forgotPassword', () => {
 
     test('returns error when email does not exist', async () => {
       const res = await request(server)
-        .post('/api/v1/user.forgotPassword')
+        .post('/api/user.forgotPassword')
         .send({
           userKey: 'unknown@email.com',
         });
@@ -122,7 +122,7 @@ describe('api/v1/user.forgotPassword', () => {
 
     test('returns error when username does not exist', async () => {
       const res = await request(server)
-        .post('/api/v1/user.forgotPassword')
+        .post('/api/user.forgotPassword')
         .send({
           userKey: 'notuser',
         });
@@ -139,7 +139,7 @@ describe('api/v1/user.forgotPassword', () => {
 
     test('returns error when tokenExpiresInSeconds is invalid', async () => {
       const res = await request(server)
-        .post('/api/v1/user.forgotPassword')
+        .post('/api/user.forgotPassword')
         .send({
           tokenExpiresInSeconds: 'NaN',
         });
