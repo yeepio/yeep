@@ -27,8 +27,8 @@
     }
   },
   "rules": {
-    "no-console": 0,
-    "no-unused-vars": 1,
+    "no-console": "off",
+    "no-unused-vars": "warn",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn"
   }
