@@ -26,7 +26,7 @@ IconHome.propTypes = {
   width: PropTypes.number,
   height: PropTypes.number,
   color: PropTypes.string,
-  className: PropTypes.string,
+  className: PropTypes.string
 };
 
 IconHome.defaultProps = {

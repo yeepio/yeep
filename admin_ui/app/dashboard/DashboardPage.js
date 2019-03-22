@@ -1,37 +1,25 @@
 import React from 'react';
-import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
-import TopNav from '../../components/TopNav';
-// import AsideNav from '../../components/AsideNav';
-// import PageWrapper from '../../components/PageWrapper';
+import { Link } from '@reach/router';
 
 const DashboardPage = () => {
   useDocumentTitle('Dashboard');
   return (
-    <React.Fragment>
-      <TopNav />
-      <ul>
+    <div className="leading-normal p-4 sm:p-8 max-w-2xl">
+      <h1 className="mb-4">Dashboard</h1>
+      <p className="mb-4">
+        Welcome <strong>USERNAME</strong>, below are a few links to get you started:
+      </p>
+      <ol>
         <li>
-          <Link to="/login">Login</Link>
+          <Link to="/organizations" className="font-bold">
+            Create an organisation
+          </Link>
+          <br />
+          We need a single sentence here to describe the concept of an org
         </li>
-        <li>
-          <Link to="/organizations">Organizations</Link>
-        </li>
-        <li>
-          <Link to="/permissions">Permissions</Link>
-        </li>
-        <li>
-          <Link to="/roles">Roles</Link>
-        </li>
-        <li>
-          <Link to="/users">Users</Link>
-        </li>
-      </ul>
-      {/* <div className="mx-auto flex">
-        <AsideNav />
-        <PageWrapper />
-      </div> */}
-    </React.Fragment>
+      </ol>
+    </div>
   );
 };
 
