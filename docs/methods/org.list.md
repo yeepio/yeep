@@ -19,7 +19,7 @@ Requestor must be authenticated. No explicit permissions are required; only retr
 - **q** _(string)_ — filters organisations by the designated query (optional)
 - **limit** _(string)_ — maximum number of organisations to return (optional)
 - **cursor** _(string)_ — paginates through organisations by setting the `cursor` param (optional)
-- **user** _(string)_ — retrieves all organisations a user is designated at (optional)
+- **user** _(string)_ — when specified returns organizations that the designated user is member of (optional)
 
 ***
 
@@ -45,9 +45,7 @@ Authorization: `Bearer ${accessToken}`
 
 ``` json
 {
-  "q": "yeep.perm",
-  "limit": 1,
-  "cursor": "IjViN2QwZGIyMzg1YzcyNWY5ZjNkODkwOSI="
+  "q": "acme",
 }
 ```
 
