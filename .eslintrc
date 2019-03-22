@@ -20,7 +20,7 @@
     "es6": true,
     "node": true
   },
-  "plugins": ["import", "jsx-a11y", "react", "prettier"],
+  "plugins": ["import", "jsx-a11y", "react", "prettier", "react-hooks"],
   "settings": {
     "react": {
       "version": "detect"
@@ -28,6 +28,8 @@
   },
   "rules": {
     "no-console": 0,
-    "no-unused-vars": 1
+    "no-unused-vars": 1,
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
   }
 }
