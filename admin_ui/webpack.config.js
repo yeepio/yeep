@@ -76,7 +76,12 @@ module.exports = (env) => ({
       // Process JS with Babel.
       {
         test: /\.(js|jsx)$/,
-        exclude: [path.join(__dirname, '../node_modules')],
+        include: (pathname) => {
+          return (
+            pathname.indexOf('node_modules') === -1 ||
+            pathname.indexOf('node_modules/@rehooks') !== -1
+          );
+        },
         use: [
           {
             loader: 'babel-loader',
@@ -85,6 +90,8 @@ module.exports = (env) => ({
               // It enables caching results in ./node_modules/.cache/babel-loader/
               // directory for faster rebuilds.
               cacheDirectory: true,
+              // Prevent npm modules from using their own babel config
+              configFile: path.resolve(__dirname, './.babelrc.js'),
             },
           },
         ],
