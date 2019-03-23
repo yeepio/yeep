@@ -1,14 +1,16 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import classNames from 'classnames';
+
+// Grid child components
 import GridPager from './GridPager';
 import GridPerPage from './GridPerPage';
 import GridHeadingCell from './GridHeadingCell';
 import GridLoadingOverlay from './GridLoadingOverlay';
-import PropTypes from 'prop-types';
 
-// WIP
-const Grid = ({ headings, data, renderer, isLoading }) => {
+const Grid = ({ headings, data, renderer, isLoading, className }) => {
   return (
-    <div className="grid relative">
+    <div className={classNames("grid relative",className)}>
       {isLoading && <GridLoadingOverlay />}
       <div className="py-2 text-center sm:flex sm:text-left">
         <p>
@@ -77,6 +79,8 @@ Grid.propTypes = {
   renderer: PropTypes.func,
   // Shows an overlay (effectively disabling the controls) if we're loading data
   isLoading: PropTypes.bool,
+  // A custom className
+  className: PropTypes.string,
 };
 
 Grid.defaultProps = {

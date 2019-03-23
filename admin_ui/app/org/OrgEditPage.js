@@ -1,12 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 
 const OrgEditPage = ({ orgId }) => {
-  useDocumentTitle(`Edit org #${orgId}`);
+  useDocumentTitle(`Edit organization #${orgId}`);
   return (
     <React.Fragment>
-      <h3>Organization #{orgId} Edit (WIP)</h3>
+      <h1>Edit organization #{orgId}</h1>
+      <p>Return to the <Link to="/organizations">list of organizations</Link></p>
     </React.Fragment>
   );
 };
