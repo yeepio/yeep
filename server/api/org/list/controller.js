@@ -75,9 +75,9 @@ const isUserAuthorised = async ({ request }, next) => {
 
     if (!isUserRequestorIdentical && !hasPermission) {
       throw new AuthorizationError(
-        `User "${
-          request.session.user.username
-        }" does not have sufficient permissions to list orgs under user ${request.body.user}`
+        `User "${request.session.user.id}" is not allowed to list orgs that user "${
+          request.body.user
+        }" is member of`
       );
     }
   }
