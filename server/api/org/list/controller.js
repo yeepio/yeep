@@ -47,7 +47,6 @@ const isRequestorAllowedToReadUsers = (requestorPermissions, orgId) => {
       name: 'yeep.permission.assignment.read',
       orgId,
     }) !== -1;
-
   const hasRoleAssignmentRead =
     findUserPermissionIndex(requestorPermissions, {
       name: 'yeep.role.assignment.read',
@@ -57,7 +56,7 @@ const isRequestorAllowedToReadUsers = (requestorPermissions, orgId) => {
   return hasUserReadPermissions && (hasPermissionsAssignmentRead || hasRoleAssignmentRead);
 };
 
-// if a requestor contains the null org (superuser)  then they can access all of the users scopes.
+// if requestor contains the null org (superuser) then they can access all of the users scopes.
 const getIntersectingScopes = (requestorScope, userScope) => {
   if (requestorScope.includes(null)) {
     return userScope;
@@ -101,19 +100,19 @@ const visitRequestedUser = async ({ request, db }, next) => {
 };
 
 /*
- **  Authorisation Logic
- **  1. User param is not specified
- **    i. Retrieve all orgs requestor has yeep.org.read permission.
- **       Please note null implies all orgs (superuser),
- **    ii. Returns orgs
- **
- **  2. User param is specified
- **    i. Retrieve user orgs by user body param.
- **    ii. Check if requestor has yeep.user.read AND
- **        (yeep.permission.assignment.read OR yeep.role.assignment.read)
- *         in global scope (null) or at least 1 org from the user's orgs.
- *         Otherwise return error since the requestor cannot access the specified user.
- **    iii. Return orgs that are the intersection between requestor orgs and user orgs.
+ * Authorisation Logic:
+ *
+ * When `user` body param is NOT specified.
+ * 1.1. Retrieve orgs for which requestor has `yeep.org.read` permission.
+ *      Please note null implies all orgs (superuser).
+ * 1.2. Return orgs.
+ *
+ * When `user` body param is specified.
+ * 2.1. Retrieve orgs that the designated user is member of.
+ * 2.2. Check if requestor has`yeep.user.read AND (yeep.permission.assignment.read OR yeep.role.assignment.read)`
+ *      in global scope (null) or at least 1 org from the user's orgs.
+ *      Otherwise return error since the requestor cannot access the specified user.
+ * 2.3. Return orgs that are the intersection between requestor orgs and user orgs.
  */
 async function handler(ctx) {
   const { request, response } = ctx;
