@@ -4,9 +4,9 @@ import OrgListPage from './OrgListPage';
 import OrgCreatePage from './OrgCreatePage';
 import OrgEditPage from './OrgEditPage';
 
-const OrgSection = () => {
+const OrgMaster = () => {
   return (
-    <Router>
+    <Router className="leading-normal p-4 sm:p-8 max-w-2xl sm:h-full">
       <OrgListPage path="/" />
       <OrgCreatePage path="/create" />
       <OrgEditPage path="/:orgId/edit" />
@@ -14,4 +14,4 @@ const OrgSection = () => {
   );
 };
 
-export default OrgSection;
+export default OrgMaster;

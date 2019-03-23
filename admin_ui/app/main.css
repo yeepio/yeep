@@ -17,7 +17,7 @@ a:hover {
 
 /* Form elements: fieldset */
 fieldset {
-  @apply border border-grey p-8;
+  @apply border border-grey p-6;
   position: relative;
 }
 legend {
