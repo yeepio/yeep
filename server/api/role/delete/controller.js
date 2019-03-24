@@ -4,9 +4,9 @@ import compose from 'koa-compose';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import {
-  visitSession,
+  decorateSession,
   isUserAuthenticated,
-  visitUserPermissions,
+  decorateUserPermissions,
   findUserPermissionIndex,
 } from '../../../middleware/auth';
 import deleteRole from './service';
@@ -22,10 +22,10 @@ export const validationSchema = {
   },
 };
 
-const visitRequestedRole = async ({ request, db }, next) => {
+const decorateRequestedRole = async ({ request, db }, next) => {
   const role = await getRoleInfo(db, request.body);
 
-  // visit session with requested role data
+  // decorate session with requested role data
   request.session = {
     ...request.session,
     role,
@@ -66,11 +66,11 @@ async function handler({ request, response, db }) {
 
 export default compose([
   packJSONRPC,
-  visitSession(),
+  decorateSession(),
   isUserAuthenticated(),
   validateRequest(validationSchema),
-  visitRequestedRole,
-  visitUserPermissions(),
+  decorateRequestedRole,
+  decorateUserPermissions(),
   isUserAuthorized,
   handler,
 ]);

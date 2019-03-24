@@ -5,8 +5,8 @@ import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import {
   findUserPermissionIndex,
-  visitUserPermissions,
-  visitSession,
+  decorateUserPermissions,
+  decorateSession,
   isUserAuthenticated,
 } from '../../../middleware/auth';
 import { AuthorizationError } from '../../../constants/errors';
@@ -152,10 +152,10 @@ async function handler({ request, response, db }) {
 
 export default compose([
   packJSONRPC,
-  visitSession(),
+  decorateSession(),
   isUserAuthenticated(),
   validateRequest(validationSchema),
-  visitUserPermissions(),
+  decorateUserPermissions(),
   isUserAuthorized,
   handler,
 ]);

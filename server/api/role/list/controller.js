@@ -4,9 +4,9 @@ import last from 'lodash/last';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import {
-  visitSession,
+  decorateSession,
   isUserAuthenticated,
-  visitUserPermissions,
+  decorateUserPermissions,
   getAuthorizedUniqueOrgIds,
   findUserPermissionIndex,
 } from '../../../middleware/auth';
@@ -76,10 +76,10 @@ async function handler({ request, response, db }) {
 
 export default compose([
   packJSONRPC,
-  visitSession(),
+  decorateSession(),
   isUserAuthenticated(),
   validateRequest(validationSchema),
-  visitUserPermissions(),
+  decorateUserPermissions(),
   isUserAuthorised,
   handler,
 ]);

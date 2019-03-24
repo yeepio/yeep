@@ -4,9 +4,9 @@ import mapValues from 'lodash/mapValues';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import {
-  visitSession,
+  decorateSession,
   isUserAuthenticated,
-  visitUserPermissions,
+  decorateUserPermissions,
   findUserPermissionIndex,
 } from '../../../middleware/auth';
 import getUserInfo, { defaultProjection } from './service';
@@ -63,10 +63,10 @@ const isUserAuthorized = async ({ request }, next) => {
   await next();
 };
 
-const visitRequestedUser = async ({ request, db }, next) => {
+const decorateRequestedUser = async ({ request, db }, next) => {
   const user = await getUserInfo(db, request.body);
 
-  // visit session object with requested user data
+  // decorate session object with requested user data
   request.session = {
     ...request.session,
     requestedUser: user,
@@ -84,11 +84,11 @@ async function handler({ request, response }) {
 
 export default compose([
   packJSONRPC,
-  visitSession(),
+  decorateSession(),
   isUserAuthenticated(),
   validateRequest(validationSchema),
-  visitRequestedUser,
-  visitUserPermissions(),
+  decorateRequestedUser,
+  decorateUserPermissions(),
   isUserAuthorized,
   handler,
 ]);

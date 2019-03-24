@@ -3,9 +3,9 @@ import compose from 'koa-compose';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import {
-  visitSession,
+  decorateSession,
   isUserAuthenticated,
-  visitUserPermissions,
+  decorateUserPermissions,
   findUserPermissionIndex,
 } from '../../../middleware/auth';
 import createOrg from './service';
@@ -46,7 +46,7 @@ const isUserAuthorized = async ({ request }, next) => {
   await next();
 };
 
-const authz = compose([visitUserPermissions(), isUserAuthorized]);
+const authz = compose([decorateUserPermissions(), isUserAuthorized]);
 
 const adaptiveAuthZ = async (ctx, next) => {
   const { isOrgCreationOpen } = ctx.config;
@@ -72,7 +72,7 @@ async function handler({ request, response, db }) {
 
 export default compose([
   packJSONRPC,
-  visitSession(),
+  decorateSession(),
   isUserAuthenticated(),
   validateRequest(validationSchema),
   adaptiveAuthZ,

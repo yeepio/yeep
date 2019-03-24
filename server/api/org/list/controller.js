@@ -5,9 +5,9 @@ import intersection from 'lodash/intersection';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import {
-  visitSession,
+  decorateSession,
   isUserAuthenticated,
-  visitUserPermissions,
+  decorateUserPermissions,
   getAuthorizedUniqueOrgIds,
   findUserPermissionIndex,
 } from '../../../middleware/auth';
@@ -85,11 +85,11 @@ const isUserAuthorised = async ({ request }, next) => {
   await next();
 };
 
-const visitRequestedUser = async ({ request, db }, next) => {
+const decorateRequestedUser = async ({ request, db }, next) => {
   if (request.body.user) {
     const user = await getUserInfo(db, { id: request.body.user });
 
-    // visit session object with requested user data
+    // decorate session object with requested user data
     request.session = {
       ...request.session,
       requestedUser: user,
@@ -134,11 +134,11 @@ async function handler(ctx) {
 
 export default compose([
   packJSONRPC,
-  visitSession(),
+  decorateSession(),
   isUserAuthenticated(),
   validateRequest(validationSchema),
-  visitUserPermissions(),
-  visitRequestedUser,
+  decorateUserPermissions(),
+  decorateRequestedUser,
   isUserAuthorised,
   handler,
 ]);

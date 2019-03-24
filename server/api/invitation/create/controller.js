@@ -7,8 +7,8 @@ import { validateRequest } from '../../../middleware/validation';
 import inviteUser, { defaultTokenExpiresInSeconds } from './service';
 import {
   findUserPermissionIndex,
-  visitUserPermissions,
-  visitSession,
+  decorateUserPermissions,
+  decorateSession,
   isUserAuthenticated,
 } from '../../../middleware/auth';
 import { AuthorizationError } from '../../../constants/errors';
@@ -96,13 +96,13 @@ export const validationSchema = {
   },
 };
 
-const visitUserPropType = async ({ request }, next) => {
+const decorateUserPropType = async ({ request }, next) => {
   const { user } = request.body;
 
   // check if user prop is email
   const isUserPropEmail = isemail.validate(user);
 
-  // visit session object
+  // decorate session object
   request.session = {
     ...request.session,
     isUserPropEmail,
@@ -220,12 +220,12 @@ async function handler({ request, response, db, bus }) {
 
 export default compose([
   packJSONRPC,
-  visitSession(),
+  decorateSession(),
   isUserAuthenticated(),
   validateRequest(validationSchema),
-  visitUserPropType,
+  decorateUserPropType,
   isUserPropValid,
-  visitUserPermissions(),
+  decorateUserPermissions(),
   isUserAuthorized,
   handler,
 ]);
