@@ -35,8 +35,7 @@ const validation = validateRequest({
     role: Joi.string()
       .base64()
       .optional(),
-    isSystemPermission: Joi.boolean()
-      .optional(),
+    isSystemPermission: Joi.boolean().optional(),
   },
 });
 
@@ -57,16 +56,17 @@ const decorateRequestedRole = async ({ request, db }, next) => {
 const isUserAuthorised = async ({ request }, next) => {
   // verify user has access to the requested org
   if (request.body.scope) {
-    const isScopeAccessible = findUserPermissionIndex(request.session.user.permissions, {
-      name: 'yeep.permission.read',
-      orgId: request.body.scope,
-    }) !== -1;
+    const isScopeAccessible =
+      findUserPermissionIndex(request.session.user.permissions, {
+        name: 'yeep.permission.read',
+        orgId: request.body.scope,
+      }) !== -1;
 
     if (!isScopeAccessible) {
       throw new AuthorizationError(
-        `User "${
-          request.session.user.username
-        }" is not authorized to list permissions under org ${request.body.scope}`
+        `User ${request.session.user.id} is not authorized to list permissions under org ${
+          request.body.scope
+        }`
       );
     }
   }
@@ -82,9 +82,9 @@ const isUserAuthorised = async ({ request }, next) => {
 
     if (!hasPermission) {
       throw new AuthorizationError(
-        `User "${
-          request.session.user.username
-        }" is not authorized to list permissions under role ${request.session.role.id}`
+        `User ${request.session.user.id} is not authorized to list permissions under role ${
+          request.session.role.id
+        }`
       );
     }
   }
