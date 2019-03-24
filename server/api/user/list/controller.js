@@ -5,9 +5,9 @@ import mapValues from 'lodash/mapValues';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import {
-  visitSession,
+  decorateSession,
   isUserAuthenticated,
-  visitUserPermissions,
+  decorateUserPermissions,
   getAuthorizedUniqueOrgIds,
 } from '../../../middleware/auth';
 import listUsers, { parseCursor, stringifyCursor, defaultProjection } from './service';
@@ -59,9 +59,9 @@ async function handler({ request, response, db }) {
 
 export default compose([
   packJSONRPC,
-  visitSession(),
+  decorateSession(),
   isUserAuthenticated(),
   validateRequest(validationSchema),
-  visitUserPermissions(),
+  decorateUserPermissions(),
   handler,
 ]);

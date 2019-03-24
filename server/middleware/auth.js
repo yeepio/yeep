@@ -34,7 +34,7 @@ const parseAuthorizationPayload = async ({ request, jwt }) => {
   }
 };
 
-export const visitSession = () => async ({ request, jwt, db }, next) => {
+export const decorateSession = () => async ({ request, jwt, db }, next) => {
   // check if authentication header exists
   if (!request.headers.authorization) {
     await next();
@@ -93,7 +93,7 @@ export const visitSession = () => async ({ request, jwt, db }, next) => {
     return; // exit
   }
 
-  // visit request with session data
+  // decorate request with session data
   request.session = {
     token: {
       id: records[0]._id.toHexString(),
@@ -117,7 +117,7 @@ export const isUserAuthenticated = () => async ({ request }, next) => {
   await next();
 };
 
-export const visitUserPermissions = () => async ({ request, db }, next) => {
+export const decorateUserPermissions = () => async ({ request, db }, next) => {
   // ensure user is authenticated
   if (!has(request, ['session', 'user'])) {
     throw new AuthorizationError('Unable to authorize non-authenticated user');
@@ -129,7 +129,7 @@ export const visitUserPermissions = () => async ({ request, db }, next) => {
   // retrieve user permissions
   const userPermissions = await getUserPermissions(db, { userId });
 
-  // visit request with user permissions
+  // decorate request with user permissions
   request.session = {
     ...request.session,
     user: {

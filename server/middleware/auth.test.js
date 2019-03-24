@@ -1,7 +1,7 @@
 /* eslint-env jest */
 import server from '../server';
 import config from '../../yeep.config';
-import { visitUserPermissions } from './auth';
+import { decorateUserPermissions } from './auth';
 
 describe('auth middleware', () => {
   let ctx;
@@ -15,9 +15,9 @@ describe('auth middleware', () => {
     await server.teardown();
   });
 
-  describe('visitUserPermissions', () => {
+  describe('decorateUserPermissions', () => {
     test('throws authorization error when user is not authorized', async () => {
-      const authz = visitUserPermissions();
+      const authz = decorateUserPermissions();
 
       const next = jest.fn(() => Promise.resolve());
       const request = {};

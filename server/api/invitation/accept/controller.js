@@ -4,7 +4,7 @@ import compose from 'koa-compose';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import { TokenNotFoundError, AuthorizationError } from '../../../constants/errors';
-import { visitSession } from '../../../middleware/auth';
+import { decorateSession } from '../../../middleware/auth';
 import createUser from '../../user/create/service';
 import getUserInfo from '../../user/info/service';
 import addMemberToOrg from '../../org/addMember/service';
@@ -42,7 +42,7 @@ export const validationSchema = {
   },
 };
 
-const visitToken = async ({ request, db }, next) => {
+const decorateToken = async ({ request, db }, next) => {
   const TokenModel = db.model('Token');
 
   // acquire token from db
@@ -170,9 +170,9 @@ async function handler({ request, response, db, bus }) {
 
 export default compose([
   packJSONRPC,
-  visitSession(),
+  decorateSession(),
   validateRequest(validationSchema),
-  visitToken,
+  decorateToken,
   isUserAuthorized,
   isUserParamsRequired,
   handler,

@@ -3,7 +3,7 @@ import Boom from 'boom';
 import compose from 'koa-compose';
 import mime from 'mime';
 import { validateRequest } from '../../../middleware/validation';
-import { visitSession } from '../../../middleware/auth';
+import { decorateSession } from '../../../middleware/auth';
 
 export const validationSchema = {
   params: {
@@ -32,4 +32,4 @@ async function handler({ request, response, storage }) {
   response.body = file;
 }
 
-export default compose([visitSession(), validateRequest(validationSchema), handler]);
+export default compose([decorateSession(), validateRequest(validationSchema), handler]);

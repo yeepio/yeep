@@ -3,9 +3,9 @@ import compose from 'koa-compose';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import {
-  visitSession,
+  decorateSession,
   isUserAuthenticated,
-  visitUserPermissions,
+  decorateUserPermissions,
   findUserPermissionIndex,
 } from '../../../middleware/auth';
 import { parseMultipartForm } from '../../../middleware/multipartForm';
@@ -66,11 +66,11 @@ async function handler({ request, response, db, storage }) {
 
 export default compose([
   packJSONRPC,
-  visitSession(),
+  decorateSession(),
   isUserAuthenticated(),
   parseMultipartForm(),
   validateRequest(validationSchema),
-  visitUserPermissions(),
+  decorateUserPermissions(),
   isUserAuthorized,
   handler,
 ]);

@@ -4,9 +4,9 @@ import last from 'lodash/last';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import {
-  visitSession,
+  decorateSession,
   isUserAuthenticated,
-  visitUserPermissions,
+  decorateUserPermissions,
   getAuthorizedUniqueOrgIds,
   findUserPermissionIndex,
 } from '../../../middleware/auth';
@@ -40,12 +40,12 @@ const validation = validateRequest({
   },
 });
 
-const visitRequestedRole = async ({ request, db }, next) => {
+const decorateRequestedRole = async ({ request, db }, next) => {
   const roleId = request.body.role;
   if (roleId) {
     const role = await getRoleInfo(db, { id: roleId });
 
-    // visit session with requested role data
+    // decorate session with requested role data
     request.session = {
       ...request.session,
       role,
@@ -113,11 +113,11 @@ async function handler({ request, response, db }) {
 
 export default compose([
   packJSONRPC,
-  visitSession(),
+  decorateSession(),
   isUserAuthenticated(),
   validation,
-  visitUserPermissions(),
-  visitRequestedRole,
+  decorateUserPermissions(),
+  decorateRequestedRole,
   isUserAuthorised,
   handler,
 ]);
