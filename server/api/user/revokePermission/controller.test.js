@@ -508,9 +508,7 @@ describe('api/user.revokePermission', () => {
         ok: false,
         error: {
           code: 10012,
-          message: `User "${
-            wile.username
-          }" does not have sufficient permissions to access this resource`,
+          message: `User ${wile.id} does not have sufficient permissions to access this resource`,
         },
       });
     });

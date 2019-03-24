@@ -243,7 +243,7 @@ describe('api/user.activate', () => {
         ok: false,
         error: {
           code: 10012,
-          message: 'User "runner" does not have sufficient permissions to access this resource',
+          message: `User ${runner.id} does not have sufficient permissions to access this resource`,
         },
       });
     });
