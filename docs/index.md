@@ -11,6 +11,7 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 | **[org.addMember](methods/org.addMember.md)**       | Adds the designated user to org      |
 | **[org.create](methods/org.create.md)**             | Creates new org                      |
 | **[org.delete](methods/org.delete.md)**             | Deletes the designated org           |
+| **[org.list](methods/org.list.md)**                 | Lists all orgs                       |
 | **[org.removeMember](methods/org.removeMember.md)** | Removes the designated user from org |
 
 ### User
