@@ -1,12 +1,12 @@
 # org.list
 
-`POST /api/v1/org.list`
+`POST /api/org.list`
 
 ## Description
 
 Retrieves list of organisations that the requestor has access to.
 
-***
+---
 
 ## Auth logic
 
@@ -21,7 +21,7 @@ Requestor must be authenticated. No explicit permissions are required; only retr
 - **cursor** _(string)_ — paginates through organisations by setting the `cursor` param (optional)
 - **user** _(string)_ — when specified returns organizations that the designated user is member of (optional)
 
-***
+---
 
 ## Returns
 
@@ -32,20 +32,20 @@ Requestor must be authenticated. No explicit permissions are required; only retr
 - **orgs** _(Array\<Object>)_ — array of organisations
 - **nextCursor** _(string)_ — use this `cursor` to facilitate pagination
 
-***
+---
 
 ## Example
 
 **Request**
 
 ```
-POST /api/v1/org.list
+POST /api/org.list
 Authorization: `Bearer ${accessToken}`
 ```
 
-``` json
+```json
 {
-  "q": "acme",
+  "q": "acme"
 }
 ```
 
@@ -53,17 +53,19 @@ Authorization: `Bearer ${accessToken}`
 
 `200 OK`
 
-``` json
+```json
 {
   "ok": true,
-  "orgs": [{
-    "_id": "5c86b03771ac98675a2f8e30",
-    "name": "Acme Inc",
-    "slug": "acme",
-    "createdAt": "2019-03-11T19:00:07.282Z",
-    "updatedAt": "2019-03-11T19:00:07.282Z",
-    "usersCount": 5
-  }],
+  "orgs": [
+    {
+      "_id": "5c86b03771ac98675a2f8e30",
+      "name": "Acme Inc",
+      "slug": "acme",
+      "createdAt": "2019-03-11T19:00:07.282Z",
+      "updatedAt": "2019-03-11T19:00:07.282Z",
+      "usersCount": 5
+    }
+  ],
   "nextCursor": "IjViN2QwZGIyMzg1YzcyNWY5ZjNkODkwYSI="
 }
 ```
