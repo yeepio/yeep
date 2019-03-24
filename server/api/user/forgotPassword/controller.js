@@ -6,7 +6,7 @@ import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import initPasswordReset from './service';
 
-const validationSchema = {
+export const validationSchema = {
   body: {
     userKey: Joi.alternatives().try([
       Joi.string()

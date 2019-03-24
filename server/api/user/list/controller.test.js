@@ -13,7 +13,7 @@ import deleteUser from '../../user/delete/service';
 // import deleteRole from '../delete/service';
 // import deletePermission from '../../permission/delete/service';
 
-describe('api/v1/user.list', () => {
+describe('api/user.list', () => {
   let ctx;
 
   beforeAll(async () => {
@@ -28,7 +28,7 @@ describe('api/v1/user.list', () => {
   describe('unauthorized user', () => {
     test('returns error pretending resource does not exist', async () => {
       const res = await request(server)
-        .post('/api/v1/user.list')
+        .post('/api/user.list')
         .send();
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -143,7 +143,7 @@ describe('api/v1/user.list', () => {
 
     test('returns list of users the requestor has access to', async () => {
       const res = await request(server)
-        .post('/api/v1/user.list')
+        .post('/api/user.list')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send();
 
@@ -178,7 +178,7 @@ describe('api/v1/user.list', () => {
 
     test('limits number of users using `limit` param', async () => {
       const res = await request(server)
-        .post('/api/v1/user.list')
+        .post('/api/user.list')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           limit: 1,
@@ -212,7 +212,7 @@ describe('api/v1/user.list', () => {
 
     test('paginates through users using `cursor` param', async () => {
       const res = await request(server)
-        .post('/api/v1/user.list')
+        .post('/api/user.list')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           limit: 2,
@@ -223,7 +223,7 @@ describe('api/v1/user.list', () => {
       expect(res.body.users.length).toBe(2);
 
       const res1 = await request(server)
-        .post('/api/v1/user.list')
+        .post('/api/user.list')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           limit: 1,
@@ -236,7 +236,7 @@ describe('api/v1/user.list', () => {
       expect(res1.body.users[0]).toEqual(res.body.users[0]);
 
       const res2 = await request(server)
-        .post('/api/v1/user.list')
+        .post('/api/user.list')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           limit: 1,
@@ -251,7 +251,7 @@ describe('api/v1/user.list', () => {
 
     test('filters users using `q` param', async () => {
       const res = await request(server)
-        .post('/api/v1/user.list')
+        .post('/api/user.list')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           q: 'por',
@@ -282,7 +282,7 @@ describe('api/v1/user.list', () => {
 
     test('projects user props using `projection` param', async () => {
       const res = await request(server)
-        .post('/api/v1/user.list')
+        .post('/api/user.list')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           projection: {
@@ -326,7 +326,7 @@ describe('api/v1/user.list', () => {
 
       test('returns empty list of users', async () => {
         const res = await request(server)
-          .post('/api/v1/user.list')
+          .post('/api/user.list')
           .set('Authorization', `Bearer ${otherSession.accessToken}`)
           .send();
 

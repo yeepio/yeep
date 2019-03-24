@@ -13,7 +13,7 @@ import {
 } from '../../../middleware/auth';
 import { AuthorizationError } from '../../../constants/errors';
 
-const validationSchema = {
+export const validationSchema = {
   body: {
     user: Joi.alternatives().try([
       Joi.string()

@@ -1,22 +1,21 @@
 import React from 'react';
+import { Router } from '@reach/router';
 import './main.css';
-import TopNav from '../components/TopNav';
-import AsideNav from '../components/AsideNav';
-import PageWrapper from '../components/PageWrapper';
+import Store from './Store';
 
-/**
- * The top level component / wrapper
- * encompassing the Header, Nav and PageWrapper
- */
+import LoginPage from './session/LoginPage';
+import ForgotPasswordPage from './session/ForgotPasswordPage';
+import AppInnerModule from './AppInnerModule';
+
 const App = () => {
   return (
-    <React.Fragment>
-      <TopNav />
-      <div className="mx-auto flex">
-        <AsideNav />
-        <PageWrapper />
-      </div>
-    </React.Fragment>
+    <Store.Provider>
+      <Router>
+        <AppInnerModule path="/*" />
+        <LoginPage path="/login" />
+        <ForgotPasswordPage path="/forgot-password" />
+      </Router>
+    </Store.Provider>
   );
 };
 

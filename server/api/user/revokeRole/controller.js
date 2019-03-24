@@ -12,7 +12,7 @@ import {
 import deleteRoleAssignment from './service';
 import { AuthorizationError } from '../../../constants/errors';
 
-const validationSchema = {
+export const validationSchema = {
   body: {
     userId: Joi.string()
       .length(24)

@@ -13,7 +13,7 @@ import deleteUser from '../../user/delete/service';
 import createPermission from '../create/service';
 import deletePermission from '../delete/service';
 
-describe('api/v1/permission.list', () => {
+describe('api/permission.list', () => {
   let ctx;
   let wile;
   let acme;
@@ -104,7 +104,7 @@ describe('api/v1/permission.list', () => {
 
   test('returns list of permissions the user has access to', async () => {
     const res = await request(server)
-      .post('/api/v1/permission.list')
+      .post('/api/permission.list')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send();
 
@@ -129,7 +129,7 @@ describe('api/v1/permission.list', () => {
 
   test('limits number of permissions using `limit` param', async () => {
     const res = await request(server)
-      .post('/api/v1/permission.list')
+      .post('/api/permission.list')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         limit: 1,
@@ -157,7 +157,7 @@ describe('api/v1/permission.list', () => {
 
   test('paginates through permissions using `cursor` param', async () => {
     const res = await request(server)
-      .post('/api/v1/permission.list')
+      .post('/api/permission.list')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         limit: 2,
@@ -168,7 +168,7 @@ describe('api/v1/permission.list', () => {
     expect(res.body.permissions.length).toBe(2);
 
     const res1 = await request(server)
-      .post('/api/v1/permission.list')
+      .post('/api/permission.list')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         limit: 1,
@@ -181,7 +181,7 @@ describe('api/v1/permission.list', () => {
     expect(res1.body.permissions[0]).toEqual(res.body.permissions[0]);
 
     const res2 = await request(server)
-      .post('/api/v1/permission.list')
+      .post('/api/permission.list')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         limit: 1,
@@ -196,7 +196,7 @@ describe('api/v1/permission.list', () => {
 
   test('filters permissions using `q` param', async () => {
     const res = await request(server)
-      .post('/api/v1/permission.list')
+      .post('/api/permission.list')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         q: 'acme',
@@ -220,7 +220,7 @@ describe('api/v1/permission.list', () => {
 
   test('filters permissions using `scope` param', async () => {
     const res = await request(server)
-      .post('/api/v1/permission.list')
+      .post('/api/permission.list')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         scope: acme.id,
@@ -247,7 +247,7 @@ describe('api/v1/permission.list', () => {
 
   test('filters permissions using `role` param', async () => {
     const res = await request(server)
-      .post('/api/v1/permission.list')
+      .post('/api/permission.list')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         role: role.id,
@@ -273,7 +273,7 @@ describe('api/v1/permission.list', () => {
 
   test('throws error when trying to filter by `role` param when unauthorised', async () => {
     const res = await request(server)
-      .post('/api/v1/permission.list')
+      .post('/api/permission.list')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         role: unauthorisedRole.id,
@@ -290,7 +290,7 @@ describe('api/v1/permission.list', () => {
 
   test('filters permissions using `isSystemPermission` param', async () => {
     const res = await request(server)
-      .post('/api/v1/permission.list')
+      .post('/api/permission.list')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         isSystemPermission: true,

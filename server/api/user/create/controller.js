@@ -12,7 +12,7 @@ import {
 import createUser from './service';
 import { AuthorizationError } from '../../../constants/errors';
 
-const validationSchema = {
+export const validationSchema = {
   body: {
     username: Joi.string()
       .lowercase()

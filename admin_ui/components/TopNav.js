@@ -1,5 +1,6 @@
 import React from 'react';
 import Logo from './Logo.js';
+import { Link } from '@reach/router';
 
 /**
  * The header
@@ -12,24 +13,24 @@ const TopNav = () => {
         <h2 className="text-xl ml-4 font-light opacity-50 hidden lg:block">headless user management</h2>
         <ul className="list-reset ml-auto flex items-center">
           <li className="hidden md:block">
-            <a href="/feedback" className="text-white hover:text-grey">
+            <Link to="/feedback" className="text-white hover:text-grey ">
               Send feedback
-            </a>
+            </Link>
           </li>
           <li className="ml-4 hidden md:block">
-            <a href="#top" className="text-white hover:text-grey">
+            <Link to="/login" className="text-white hover:text-grey ">
               Angelos Chaidas
-            </a>
+            </Link>
           </li>
           <li className="ml-4 mr-4">
-            <a href="#to[" className="opacity-50">
+            <Link to="/login" className="opacity-50">
               <img src="/yeep-user-profile.svg" alt="View your profile"/>
-            </a>
+            </Link>
           </li>
           <li className="mr-4 lg:hidden">
-            <a href="#top" className="opacity-50">
+            <button className="opacity-50">
               <img src="/yeep-icon-hamburger.svg" alt="Toggle the menu"/>
-            </a>
+            </button>
           </li>
         </ul>
       </div>

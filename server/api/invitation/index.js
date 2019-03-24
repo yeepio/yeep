@@ -5,8 +5,10 @@ import listInvitations from './list';
 
 const router = Router();
 
-router.post('/v1/invitation.create', createInvitation);
-router.post('/v1/invitation.accept', acceptInvitation);
-router.post('/v1/invitation.list', listInvitations);
+// method signature: name, path, handler
+// omit name if you want to hide this method from the api-docs
+router.post('invitation.create', '/invitation.create', createInvitation);
+router.post('invitation.accept', '/invitation.accept', acceptInvitation);
+router.post('invitation.list', '/invitation.list', listInvitations);
 
 export default router;

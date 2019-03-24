@@ -7,10 +7,12 @@ import listRoles from './list';
 
 const router = Router();
 
-router.post('/v1/role.create', createRole);
-router.post('/v1/role.info', getRoleInfo);
-router.post('/v1/role.delete', deleteRole);
-router.post('/v1/role.update', updateRole);
-router.post('/v1/role.list', listRoles);
+// method signature: name, path, handler
+// omit name if you want to hide this method from the api-docs
+router.post('role.create', '/role.create', createRole);
+router.post('role.info', '/role.info', getRoleInfo);
+router.post('role.delete', '/role.delete', deleteRole);
+router.post('role.update', '/role.update', updateRole);
+router.post('role.list', '/role.list', listRoles);
 
 export default router;

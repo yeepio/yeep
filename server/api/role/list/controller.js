@@ -13,7 +13,7 @@ import {
 import { AuthorizationError } from '../../../constants/errors';
 import listRoles, { parseCursor, stringifyCursor } from './service';
 
-const validationSchema = {
+export const validationSchema = {
   body: {
     q: Joi.string()
       .trim()

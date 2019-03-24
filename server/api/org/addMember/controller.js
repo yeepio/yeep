@@ -12,7 +12,7 @@ import {
 import { AuthorizationError } from '../../../constants/errors';
 import addMemberToOrg from './service';
 
-const validationSchema = {
+export const validationSchema = {
   body: {
     userId: Joi.string()
       .length(24)

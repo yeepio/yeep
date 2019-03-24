@@ -6,7 +6,7 @@ import createUser from '../../user/create/service';
 import createSession from '../create/service';
 import deleteUser from '../../user/delete/service';
 
-describe('api/v1/session.destroy', () => {
+describe('api/session.destroy', () => {
   let ctx;
   let user;
 
@@ -42,7 +42,7 @@ describe('api/v1/session.destroy', () => {
     const payload = await ctx.jwt.verify(accessToken);
 
     const res = await request(server)
-      .post('/api/v1/session.destroy')
+      .post('/api/session.destroy')
       .send({
         accessToken,
         refreshToken,

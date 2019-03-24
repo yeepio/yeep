@@ -12,7 +12,7 @@ import getUserInfo from '../../user/info/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 
-describe('api/v1/org.create', () => {
+describe('api/org.create', () => {
   let ctx;
 
   beforeAll(async () => {
@@ -27,7 +27,7 @@ describe('api/v1/org.create', () => {
   describe('unauthorized user', () => {
     test('returns error pretending resource does not exist', async () => {
       const res = await request(server)
-        .post('/api/v1/org.create')
+        .post('/api/org.create')
         .send({
           id: '507f191e810c19729de860ea', // some random object id
         });
@@ -74,7 +74,7 @@ describe('api/v1/org.create', () => {
 
     test('returns error when `slug` contains invalid characters', async () => {
       const res = await request(server)
-        .post('/api/v1/org.create')
+        .post('/api/org.create')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           name: 'ACME Inc.',
@@ -96,7 +96,7 @@ describe('api/v1/org.create', () => {
 
     test('returns error when `slug` contains more than 30 characters', async () => {
       const res = await request(server)
-        .post('/api/v1/org.create')
+        .post('/api/org.create')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           name: 'ACME Inc.',
@@ -118,7 +118,7 @@ describe('api/v1/org.create', () => {
 
     test('returns error when `slug` contains less than 2 characters', async () => {
       const res = await request(server)
-        .post('/api/v1/org.create')
+        .post('/api/org.create')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           name: 'ACME Inc.',
@@ -140,7 +140,7 @@ describe('api/v1/org.create', () => {
 
     test('returns error when `name` is unspecified', async () => {
       const res = await request(server)
-        .post('/api/v1/org.create')
+        .post('/api/org.create')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({});
 
@@ -159,7 +159,7 @@ describe('api/v1/org.create', () => {
 
     test('returns error when `slug` is unspecified', async () => {
       const res = await request(server)
-        .post('/api/v1/org.create')
+        .post('/api/org.create')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({ name: 'ACME Inc.' });
 
@@ -178,7 +178,7 @@ describe('api/v1/org.create', () => {
 
     test('returns error when payload contains unknown properties', async () => {
       const res = await request(server)
-        .post('/api/v1/org.create')
+        .post('/api/org.create')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           name: 'ACME Inc.',
@@ -201,7 +201,7 @@ describe('api/v1/org.create', () => {
 
     test('creates new org and returns expected response', async () => {
       const res = await request(server)
-        .post('/api/v1/org.create')
+        .post('/api/org.create')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           name: 'ACME Inc.',
@@ -236,7 +236,7 @@ describe('api/v1/org.create', () => {
       });
 
       const res = await request(server)
-        .post('/api/v1/org.create')
+        .post('/api/org.create')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           name: 'ACME S.A.',
@@ -291,7 +291,7 @@ describe('api/v1/org.create', () => {
     describe('user does not have required permission', () => {
       test('returns authorization error', async () => {
         const res = await request(server)
-          .post('/api/v1/org.create')
+          .post('/api/org.create')
           .set('Authorization', `Bearer ${session.accessToken}`)
           .send({
             name: 'ACME Inc.',
@@ -329,7 +329,7 @@ describe('api/v1/org.create', () => {
 
       test('creates new org and returns expected response', async () => {
         const res = await request(server)
-          .post('/api/v1/org.create')
+          .post('/api/org.create')
           .set('Authorization', `Bearer ${session.accessToken}`)
           .send({
             name: 'ACME Inc.',

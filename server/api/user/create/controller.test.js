@@ -11,7 +11,7 @@ import createPermissionAssignment from '../assignPermission/service';
 import createOrg from '../../org/create/service';
 import deleteOrg from '../../org/delete/service';
 
-describe('api/v1/user.create', () => {
+describe('api/user.create', () => {
   let ctx;
 
   beforeAll(async () => {
@@ -26,7 +26,7 @@ describe('api/v1/user.create', () => {
   describe('unauthorized user', () => {
     test('returns error pretending resource does not exist', async () => {
       const res = await request(server)
-        .post('/api/v1/user.create')
+        .post('/api/user.create')
         .send();
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -92,7 +92,7 @@ describe('api/v1/user.create', () => {
     describe('isUsernameEnabled = true', () => {
       test('returns error when `username` is unspecified', async () => {
         const res = await request(server)
-          .post('/api/v1/user.create')
+          .post('/api/user.create')
           .set('Authorization', `Bearer ${session.accessToken}`)
           .send({
             password: 'fast+furry-ous',
@@ -122,7 +122,7 @@ describe('api/v1/user.create', () => {
 
       test('returns error when `emails` contains duplicate addresses', async () => {
         const res = await request(server)
-          .post('/api/v1/user.create')
+          .post('/api/user.create')
           .set('Authorization', `Bearer ${session.accessToken}`)
           .send({
             username: 'runner',
@@ -158,7 +158,7 @@ describe('api/v1/user.create', () => {
 
       test('returns error when primary email is not specified', async () => {
         const res = await request(server)
-          .post('/api/v1/user.create')
+          .post('/api/user.create')
           .set('Authorization', `Bearer ${session.accessToken}`)
           .send({
             username: 'runner',
@@ -191,7 +191,7 @@ describe('api/v1/user.create', () => {
 
       test('throws error when multiple primary emails are specified', async () => {
         const res = await request(server)
-          .post('/api/v1/user.create')
+          .post('/api/user.create')
           .set('Authorization', `Bearer ${session.accessToken}`)
           .send({
             username: 'runner',
@@ -224,7 +224,7 @@ describe('api/v1/user.create', () => {
 
       test('creates new user and returns expected response', async () => {
         const res = await request(server)
-          .post('/api/v1/user.create')
+          .post('/api/user.create')
           .set('Authorization', `Bearer ${session.accessToken}`)
           .send({
             username: 'runner',
@@ -280,7 +280,7 @@ describe('api/v1/user.create', () => {
         });
 
         const res = await request(server)
-          .post('/api/v1/user.create')
+          .post('/api/user.create')
           .set('Authorization', `Bearer ${session.accessToken}`)
           .send({
             username: 'runner',
@@ -329,7 +329,7 @@ describe('api/v1/user.create', () => {
         });
 
         const res = await request(server)
-          .post('/api/v1/user.create')
+          .post('/api/user.create')
           .set('Authorization', `Bearer ${session.accessToken}`)
           .send({
             username: 'roadrunner',
@@ -359,7 +359,7 @@ describe('api/v1/user.create', () => {
 
       // test('returns error when creating global user without necessary permission', async () => {
       //   const res = await request(server)
-      //     .post('/api/v1/user.create')
+      //     .post('/api/user.create')
       //     .set('Authorization', `Bearer ${session.accessToken}`)
       //     .send({
       //       // absense of orgs denotes global user
@@ -396,7 +396,7 @@ describe('api/v1/user.create', () => {
 
       test('returns error when `username` is specified', async () => {
         const res = await request(server)
-          .post('/api/v1/user.create')
+          .post('/api/user.create')
           .set('Authorization', `Bearer ${session.accessToken}`)
           .send({
             username: 'runner',
@@ -427,7 +427,7 @@ describe('api/v1/user.create', () => {
 
       test('creates new user and returns response without username', async () => {
         const res = await request(server)
-          .post('/api/v1/user.create')
+          .post('/api/user.create')
           .set('Authorization', `Bearer ${session.accessToken}`)
           .send({
             password: 'fast+furry-ous',
@@ -456,7 +456,7 @@ describe('api/v1/user.create', () => {
       test('accepts multiple users without username_uidx complaining', async () => {
         const [res1, res2] = await Promise.all([
           request(server)
-            .post('/api/v1/user.create')
+            .post('/api/user.create')
             .set('Authorization', `Bearer ${session.accessToken}`)
             .send({
               password: 'fast+furry-ous',
@@ -471,7 +471,7 @@ describe('api/v1/user.create', () => {
               orgs: [org.id],
             }),
           request(server)
-            .post('/api/v1/user.create')
+            .post('/api/user.create')
             .set('Authorization', `Bearer ${session.accessToken}`)
             .send({
               password: 'thats-all-folks!',

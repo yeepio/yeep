@@ -7,7 +7,7 @@ import createUser from '../../user/create/service';
 import deleteUser from '../../user/delete/service';
 import createSession from '../create/service';
 
-describe('api/v1/session.refresh', () => {
+describe('api/session.refresh', () => {
   let ctx;
   let wile;
 
@@ -45,7 +45,7 @@ describe('api/v1/session.refresh', () => {
     await delay(1000); // let at least one second pass
 
     const res = await request(server)
-      .post('/api/v1/session.refresh')
+      .post('/api/session.refresh')
       .send({
         accessToken,
         refreshToken,
@@ -90,7 +90,7 @@ describe('api/v1/session.refresh', () => {
     });
 
     const res = await request(server)
-      .post('/api/v1/session.refresh')
+      .post('/api/session.refresh')
       .send({
         accessToken,
         refreshToken,

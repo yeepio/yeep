@@ -17,7 +17,7 @@ import deletePermissionAssignment from '../../user/revokePermission/service';
 // import deleteRole from '../delete/service';
 // import deletePermission from '../../permission/delete/service';
 
-describe('api/v1/invitation.list', () => {
+describe('api/invitation.list', () => {
   let ctx;
 
   beforeAll(async () => {
@@ -32,7 +32,7 @@ describe('api/v1/invitation.list', () => {
   describe('unauthorized user', () => {
     test('returns error pretending resource does not exist', async () => {
       const res = await request(server)
-        .post('/api/v1/invitation.list')
+        .post('/api/invitation.list')
         .send();
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -188,7 +188,7 @@ describe('api/v1/invitation.list', () => {
 
       test('returns list of invitations', async () => {
         const res = await request(server)
-          .post('/api/v1/invitation.list')
+          .post('/api/invitation.list')
           .set('Authorization', `Bearer ${wileSession.accessToken}`)
           .send();
 
@@ -226,7 +226,7 @@ describe('api/v1/invitation.list', () => {
 
       test('limits number of invitations using `limit` param', async () => {
         const res = await request(server)
-          .post('/api/v1/invitation.list')
+          .post('/api/invitation.list')
           .set('Authorization', `Bearer ${wileSession.accessToken}`)
           .send({
             limit: 1,
@@ -238,7 +238,7 @@ describe('api/v1/invitation.list', () => {
 
       test('paginates through invitations using `cursor` param', async () => {
         const res = await request(server)
-          .post('/api/v1/invitation.list')
+          .post('/api/invitation.list')
           .set('Authorization', `Bearer ${wileSession.accessToken}`)
           .send({
             limit: 2,
@@ -249,7 +249,7 @@ describe('api/v1/invitation.list', () => {
         expect(res.body.invitations.length).toBe(2);
 
         const res1 = await request(server)
-          .post('/api/v1/invitation.list')
+          .post('/api/invitation.list')
           .set('Authorization', `Bearer ${wileSession.accessToken}`)
           .send({
             limit: 1,
@@ -262,7 +262,7 @@ describe('api/v1/invitation.list', () => {
         expect(res1.body.invitations[0]).toEqual(res.body.invitations[0]);
 
         const res2 = await request(server)
-          .post('/api/v1/invitation.list')
+          .post('/api/invitation.list')
           .set('Authorization', `Bearer ${wileSession.accessToken}`)
           .send({
             limit: 1,
@@ -277,7 +277,7 @@ describe('api/v1/invitation.list', () => {
 
       test('filters invitations using `user` param', async () => {
         const res = await request(server)
-          .post('/api/v1/invitation.list')
+          .post('/api/invitation.list')
           .set('Authorization', `Bearer ${wileSession.accessToken}`)
           .send({
             user: runner.id,
@@ -299,7 +299,7 @@ describe('api/v1/invitation.list', () => {
     describe('with org scoped `yeep.invitation.list` permission', () => {
       test('filters invitations using `org` param', async () => {
         const res = await request(server)
-          .post('/api/v1/invitation.list')
+          .post('/api/invitation.list')
           .set('Authorization', `Bearer ${wileSession.accessToken}`)
           .send({
             org: acme.id,
@@ -319,7 +319,7 @@ describe('api/v1/invitation.list', () => {
 
       test('filters invitations using `user` + `org` params', async () => {
         const res = await request(server)
-          .post('/api/v1/invitation.list')
+          .post('/api/invitation.list')
           .set('Authorization', `Bearer ${wileSession.accessToken}`)
           .send({
             user: runner.id,

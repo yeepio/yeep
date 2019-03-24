@@ -34,7 +34,7 @@ module.exports = (env) => ({
     // when in development mode
     pathinfo: env.development,
     // Specify the public URL of the output directory when referenced in a browser
-    publicPath: '/admin',
+    publicPath: '/',
   },
 
   // specify build mode
@@ -76,7 +76,12 @@ module.exports = (env) => ({
       // Process JS with Babel.
       {
         test: /\.(js|jsx)$/,
-        exclude: [path.join(__dirname, '../node_modules')],
+        include: (pathname) => {
+          return (
+            pathname.indexOf('node_modules') === -1 ||
+            pathname.indexOf('node_modules/@rehooks') !== -1
+          );
+        },
         use: [
           {
             loader: 'babel-loader',
@@ -85,6 +90,8 @@ module.exports = (env) => ({
               // It enables caching results in ./node_modules/.cache/babel-loader/
               // directory for faster rebuilds.
               cacheDirectory: true,
+              // Prevent npm modules from using their own babel config
+              configFile: path.resolve(__dirname, './.babelrc.js'),
             },
           },
         ],
@@ -145,8 +152,8 @@ module.exports = (env) => ({
   // Customize webpack build process with plugins.
   plugins: [
     // Remove previous contents from build folder
-    new CleanWebpackPlugin(['dist/admin_ui'], {
-      root: process.cwd(),
+    new CleanWebpackPlugin({
+      cleanOnceBeforeBuildPatterns: ['dist/admin_ui'],
       verbose: true,
       dry: false,
     }),
@@ -224,7 +231,7 @@ module.exports = (env) => ({
     hot: false,
     // It is important to tell WebpackDevServer to use the same "root" path
     // as we specified in the config. In development, we always serve from /.
-    publicPath: '/admin',
+    publicPath: '/',
     // Reportedly, this avoids CPU overload on some systems.
     // https://github.com/facebookincubator/create-react-app/issues/293
     watchOptions: {

@@ -7,10 +7,12 @@ import removeMember from './removeMember';
 
 const router = Router();
 
-router.post('/v1/org.create', createOrg);
-router.post('/v1/org.delete', deleteOrg);
-router.post('/v1/org.list', listOrgs);
-router.post('/v1/org.addMember', addMember);
-router.post('/v1/org.removeMember', removeMember);
+// method signature: name, path, handler
+// omit name if you want to hide this method from the api-docs
+router.post('org.create', '/org.create', createOrg);
+router.post('org.delete', '/org.delete', deleteOrg);
+router.post('org.list', '/org.list', listOrgs);
+router.post('org.addMember', '/org.addMember', addMember);
+router.post('org.removeMember', '/org.removeMember', removeMember);
 
 export default router;
