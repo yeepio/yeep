@@ -11,7 +11,7 @@ export const parseCursor = (cursorStr) => {
   return { id };
 };
 
-async function listOrgs(db, { q, limit, scopes, cursor }) {
+async function listOrgs({ db }, { q, limit, scopes, cursor }) {
   const OrgModel = db.model('Org');
 
   const matchExpressions = [];
