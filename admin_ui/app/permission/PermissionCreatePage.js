@@ -1,13 +1,17 @@
 import React from 'react';
+import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 
-const PermissionCreate = () => {
+const PermissionCreatePage = () => {
   useDocumentTitle('Create permission');
   return (
     <React.Fragment>
-      <h3>Permission Create (WIP)</h3>
+      <h1>Create new permission</h1>
+      <p>
+         <Link to="/permissions">Return to the list of permissions</Link>
+      </p>
     </React.Fragment>
   );
 };
 
-export default PermissionCreate;
+export default PermissionCreatePage;

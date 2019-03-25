@@ -1,13 +1,19 @@
 import React from 'react';
+import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
+import ButtonLink from '../../components/ButtonLink';
 
-const RoleList = () => {
-  useDocumentTitle('Role List');
+const RoleListPage = () => {
+  useDocumentTitle('Roles');
   return (
     <React.Fragment>
-      <h3>Role List (WIP)</h3>
+      <ButtonLink to="create" className="float-right">Create new</ButtonLink>
+      <h1 className="mb-6">Roles</h1>
+      <p>
+        <Link to="..">Return to the dashboard</Link>
+      </p>
     </React.Fragment>
   );
 };
 
-export default RoleList;
+export default RoleListPage;

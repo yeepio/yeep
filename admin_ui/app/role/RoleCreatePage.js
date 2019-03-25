@@ -1,13 +1,17 @@
 import React from 'react';
+import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 
-const RoleCreate = () => {
+const RoleCreatePage = () => {
   useDocumentTitle('Create role');
   return (
     <React.Fragment>
-      <h3>Role Create (WIP)</h3>
+      <h1>Create new role</h1>
+      <p>
+        <Link to="/roles">Return to the list of roles</Link>
+      </p>
     </React.Fragment>
   );
 };
 
-export default RoleCreate;
+export default RoleCreatePage;

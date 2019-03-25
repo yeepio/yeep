@@ -27,19 +27,19 @@ const AsyncOrganization = Loadable({
 });
 
 const AsyncPermission = Loadable({
-  loader: () => import(/* webpackChunkName: "permission" */ './permission/PermissionPage'),
+  loader: () => import(/* webpackChunkName: "permission" */ './permission/PermissionMaster'),
   loading: LoadingIndicator,
   delay: 300, // 0.3 seconds
 });
 
 const AsyncRole = Loadable({
-  loader: () => import(/* webpackChunkName: "role" */ './role/RolePage'),
+  loader: () => import(/* webpackChunkName: "role" */ './role/RoleMaster'),
   loading: LoadingIndicator,
   delay: 300, // 0.3 seconds
 });
 
 const AsyncUser = Loadable({
-  loader: () => import(/* webpackChunkName: "user" */ './user/UserPage'),
+  loader: () => import(/* webpackChunkName: "user" */ './user/UserMaster'),
   loading: LoadingIndicator,
   delay: 300, // 0.3 seconds
 });
