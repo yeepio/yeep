@@ -12,7 +12,7 @@ const existsPermissionAssignment = (permissionAssignments, { id, resourceId }) =
   });
 };
 
-async function deletePermissionAssignment(db, { userId, orgId, permissionId, resourceId }) {
+async function deletePermissionAssignment({ db }, { userId, orgId, permissionId, resourceId }) {
   const UserModel = db.model('User');
   const OrgModel = db.model('Org');
   const OrgMembershipModel = db.model('OrgMembership');

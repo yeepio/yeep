@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { UserNotFoundError } from '../../../constants/errors';
 
-async function deleteUserPicture(db, storage, { id }) {
+async function deleteUserPicture({ db, storage }, { id }) {
   const UserModel = db.model('User');
   const currentDate = new Date();
 

@@ -24,7 +24,7 @@ describe('api/permission.info', () => {
     await server.setup(config);
     ctx = server.getAppContext();
 
-    user = await createUser(ctx.db, {
+    user = await createUser(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
       fullName: 'Wile E. Coyote',
@@ -38,7 +38,7 @@ describe('api/permission.info', () => {
       ],
     });
 
-    org = await createOrg(ctx.db, {
+    org = await createOrg(ctx, {
       name: 'Acme Inc',
       slug: 'acme',
       adminId: user.id,
@@ -46,7 +46,7 @@ describe('api/permission.info', () => {
 
     const PermissionModel = ctx.db.model('Permission');
     const permission = await PermissionModel.findOne({ name: 'yeep.permission.read' });
-    permissionAssignment = await createPermissionAssignment(ctx.db, {
+    permissionAssignment = await createPermissionAssignment(ctx, {
       userId: user.id,
       orgId: org.id,
       permissionId: permission.id,
@@ -60,9 +60,9 @@ describe('api/permission.info', () => {
 
   afterAll(async () => {
     await destroySession(ctx, session);
-    await deletePermissionAssignment(ctx.db, permissionAssignment);
-    await deleteOrg(ctx.db, org);
-    await deleteUser(ctx.db, user);
+    await deletePermissionAssignment(ctx, permissionAssignment);
+    await deleteOrg(ctx, org);
+    await deleteUser(ctx, user);
     await server.teardown();
   });
 
@@ -85,7 +85,7 @@ describe('api/permission.info', () => {
   });
 
   test('retrieves permission info', async () => {
-    const permission = await createPermission(ctx.db, {
+    const permission = await createPermission(ctx, {
       name: 'acme.test',
       description: 'This is a test',
       scope: org.id,
@@ -106,12 +106,12 @@ describe('api/permission.info', () => {
       },
     });
 
-    const isPermissionDeleted = await deletePermission(ctx.db, permission);
+    const isPermissionDeleted = await deletePermission(ctx, permission);
     expect(isPermissionDeleted).toBe(true);
   });
 
   test('returns error when permission is out of scope', async () => {
-    const permission = await createPermission(ctx.db, {
+    const permission = await createPermission(ctx, {
       // note the absence of scope to denote global permission
       name: 'acme.test',
       description: 'This is a test',
@@ -133,7 +133,7 @@ describe('api/permission.info', () => {
       },
     });
 
-    const isPermissionDeleted = await deletePermission(ctx.db, permission);
+    const isPermissionDeleted = await deletePermission(ctx, permission);
     expect(isPermissionDeleted).toBe(true);
   });
 });

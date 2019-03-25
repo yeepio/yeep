@@ -5,7 +5,7 @@ import {
   OrgMembershipNotFoundError,
 } from '../../../constants/errors';
 
-const removeMemberFromOrg = async (db, { orgId, userId }) => {
+const removeMemberFromOrg = async ({ db }, { orgId, userId }) => {
   const OrgModel = db.model('Org');
   const UserModel = db.model('User');
   const OrgMembershipModel = db.model('OrgMembership');

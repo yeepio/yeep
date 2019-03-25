@@ -44,7 +44,7 @@ describe('api/org.delete', () => {
     let session;
 
     beforeAll(async () => {
-      user = await createUser(ctx.db, {
+      user = await createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -66,7 +66,7 @@ describe('api/org.delete', () => {
 
     afterAll(async () => {
       await destroySession(ctx, session);
-      await deleteUser(ctx.db, user);
+      await deleteUser(ctx, user);
     });
 
     test('returns error when `id` contains invalid characters', async () => {
@@ -169,7 +169,7 @@ describe('api/org.delete', () => {
     });
 
     test('deletes org and returns expected response', async () => {
-      const org = await createOrg(ctx.db, {
+      const org = await createOrg(ctx, {
         name: 'ACME Inc.',
         slug: 'acme',
         adminId: user.id,
@@ -188,7 +188,7 @@ describe('api/org.delete', () => {
         })
       );
 
-      const admin = await getUserInfo(ctx.db, user);
+      const admin = await getUserInfo(ctx, user);
       expect(admin.orgs).toHaveLength(0);
     });
   });

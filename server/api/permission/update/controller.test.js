@@ -25,7 +25,7 @@ describe('api/permission.update', () => {
     await server.setup(config);
     ctx = server.getAppContext();
 
-    user = await createUser(ctx.db, {
+    user = await createUser(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
       fullName: 'Wile E. Coyote',
@@ -39,7 +39,7 @@ describe('api/permission.update', () => {
       ],
     });
 
-    org = await createOrg(ctx.db, {
+    org = await createOrg(ctx, {
       name: 'Acme Inc',
       slug: 'acme',
       adminId: user.id,
@@ -47,7 +47,7 @@ describe('api/permission.update', () => {
 
     const PermissionModel = ctx.db.model('Permission');
     const permission = await PermissionModel.findOne({ name: 'yeep.permission.write' });
-    permissionAssignment = await createPermissionAssignment(ctx.db, {
+    permissionAssignment = await createPermissionAssignment(ctx, {
       userId: user.id,
       orgId: org.id,
       permissionId: permission.id,
@@ -61,9 +61,9 @@ describe('api/permission.update', () => {
 
   afterAll(async () => {
     await destroySession(ctx, session);
-    await deletePermissionAssignment(ctx.db, permissionAssignment);
-    await deleteOrg(ctx.db, org);
-    await deleteUser(ctx.db, user);
+    await deletePermissionAssignment(ctx, permissionAssignment);
+    await deleteOrg(ctx, org);
+    await deleteUser(ctx, user);
     await server.teardown();
   });
 
@@ -89,7 +89,7 @@ describe('api/permission.update', () => {
   test('returns error when permission is system-defined', async () => {
     const PermissionModel = ctx.db.model('Permission');
     const permission = await PermissionModel.findOne({ name: 'yeep.permission.write' });
-    const permissionAssignment = await createPermissionAssignment(ctx.db, {
+    const permissionAssignment = await createPermissionAssignment(ctx, {
       userId: user.id,
       permissionId: permission.id,
     });
@@ -111,11 +111,11 @@ describe('api/permission.update', () => {
       },
     });
 
-    await deletePermissionAssignment(ctx.db, permissionAssignment);
+    await deletePermissionAssignment(ctx, permissionAssignment);
   });
 
   test('updates permission and returns expected response', async () => {
-    const permission = await createPermission(ctx.db, {
+    const permission = await createPermission(ctx, {
       name: 'acme.test',
       description: 'This is a test',
       scope: org.id,
@@ -144,14 +144,14 @@ describe('api/permission.update', () => {
     expect(compareDesc(permission.createdAt, res.body.permission.createdAt)).toBe(0);
     expect(compareDesc(permission.updatedAt, res.body.permission.updatedAt)).toBe(1);
 
-    const isPermissionDeleted = await deletePermission(ctx.db, {
+    const isPermissionDeleted = await deletePermission(ctx, {
       id: res.body.permission.id,
     });
     expect(isPermissionDeleted).toBe(true);
   });
 
   test('returns error when permission is out of scope', async () => {
-    const permission = await createPermission(ctx.db, {
+    const permission = await createPermission(ctx, {
       // note the absence of scope to denote global permission
       name: 'acme.test',
       description: 'This is a test',
@@ -174,7 +174,7 @@ describe('api/permission.update', () => {
       },
     });
 
-    const isPermissionDeleted = await deletePermission(ctx.db, permission);
+    const isPermissionDeleted = await deletePermission(ctx, permission);
     expect(isPermissionDeleted).toBe(true);
   });
 });

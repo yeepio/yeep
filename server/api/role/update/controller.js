@@ -44,8 +44,9 @@ export const validationSchema = {
   },
 };
 
-const decorateRequestedRole = async ({ request, db }, next) => {
-  const role = await getRoleInfo(db, request.body);
+const decorateRequestedRole = async (ctx, next) => {
+  const { request } = ctx;
+  const role = await getRoleInfo(ctx, request.body);
 
   // decorate session object with requested role data
   request.session = {
@@ -74,7 +75,8 @@ const isUserAuthorized = async ({ request }, next) => {
   await next();
 };
 
-async function handler({ request, response, db }) {
+async function handler(ctx) {
+  const { request, response } = ctx;
   const { name, description, permissions } = request.body;
 
   // ensure name or description have been specified
@@ -89,7 +91,7 @@ async function handler({ request, response, db }) {
     throw boom;
   }
 
-  const role = await updateRole(db, request.session.role, {
+  const role = await updateRole(ctx, request.session.role, {
     name,
     description,
     permissions,

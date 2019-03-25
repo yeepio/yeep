@@ -23,7 +23,7 @@ describe('api/user.forgotPassword', () => {
     let wile;
 
     beforeAll(async () => {
-      wile = await createUser(ctx.db, {
+      wile = await createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -39,7 +39,7 @@ describe('api/user.forgotPassword', () => {
     });
 
     afterAll(async () => {
-      await deleteUser(ctx.db, wile);
+      await deleteUser(ctx, wile);
     });
 
     test('initiates forgot-password process and returns expected response', async () => {

@@ -184,13 +184,14 @@ const isUserAuthorized = async ({ request }, next) => {
   await next();
 };
 
-async function handler({ request, response, db, bus }) {
+async function handler(ctx) {
+  const { request, response, db } = ctx;
   const { org, user, permissions, roles, tokenExpiresInSeconds } = request.body;
   const { user: inviter, isUserPropEmail } = request.session;
   const UserModel = db.model('User');
 
   // initiate password reset process
-  const isUserInvited = await inviteUser(db, bus, {
+  const isUserInvited = await inviteUser(ctx, {
     orgId: org,
     permissions,
     roles,

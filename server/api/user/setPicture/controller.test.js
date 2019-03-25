@@ -47,7 +47,7 @@ describe('api/user.setPicture', () => {
     let runnerSession;
 
     beforeAll(async () => {
-      wile = await createUser(ctx.db, {
+      wile = await createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -65,7 +65,7 @@ describe('api/user.setPicture', () => {
       const permission = await PermissionModel.findOne({
         name: 'yeep.user.write',
       });
-      permissionAssignment = await createPermissionAssignment(ctx.db, {
+      permissionAssignment = await createPermissionAssignment(ctx, {
         userId: wile.id,
         permissionId: permission.id,
         // global org
@@ -76,7 +76,7 @@ describe('api/user.setPicture', () => {
         password: 'catch-the-b1rd$',
       });
 
-      runner = await createUser(ctx.db, {
+      runner = await createUser(ctx, {
         username: 'runner',
         password: 'fast+furry-ous',
         fullName: 'Road Runner',
@@ -99,9 +99,9 @@ describe('api/user.setPicture', () => {
     afterAll(async () => {
       await destroySession(ctx, wileSession);
       await destroySession(ctx, runnerSession);
-      await deletePermissionAssignment(ctx.db, permissionAssignment);
-      await deleteUser(ctx.db, wile);
-      await deleteUser(ctx.db, runner);
+      await deletePermissionAssignment(ctx, permissionAssignment);
+      await deleteUser(ctx, wile);
+      await deleteUser(ctx, runner);
     });
 
     test('sets user profile picture', async () => {
@@ -124,7 +124,7 @@ describe('api/user.setPicture', () => {
       const filename = ctx.storage.relative(res.body.user.picture);
       await expect(ctx.storage.existsFile(filename)).resolves.toBe(true);
 
-      await deleteUserPicture(ctx.db, ctx.storage, res.body.user);
+      await deleteUserPicture(ctx, res.body.user);
     });
 
     test('returns error when `id` contains invalid characters', async () => {
@@ -258,7 +258,7 @@ describe('api/user.setPicture', () => {
       const filename = ctx.storage.relative(res.body.user.picture);
       await expect(ctx.storage.existsFile(filename)).resolves.toBe(true);
 
-      await deleteUserPicture(ctx.db, ctx.storage, res.body.user);
+      await deleteUserPicture(ctx, res.body.user);
     });
   });
 });

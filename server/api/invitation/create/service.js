@@ -15,8 +15,7 @@ import {
 export const defaultTokenExpiresInSeconds = 7 * 24 * 60 * 60; // i.e. 1 week
 
 const inviteUser = async (
-  db,
-  bus,
+  { db, bus },
   {
     orgId,
     permissions = [],

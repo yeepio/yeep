@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { UserNotFoundError } from '../../../constants/errors';
 
-async function activateUser(db, { id }) {
+async function activateUser({ db }, { id }) {
   const UserModel = db.model('User');
   const currentDate = new Date();
 

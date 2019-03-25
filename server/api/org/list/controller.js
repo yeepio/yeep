@@ -85,9 +85,10 @@ const isUserAuthorised = async ({ request }, next) => {
   await next();
 };
 
-const decorateRequestedUser = async ({ request, db }, next) => {
+const decorateRequestedUser = async (ctx, next) => {
+  const { request } = ctx;
   if (request.body.user) {
-    const user = await getUserInfo(db, { id: request.body.user });
+    const user = await getUserInfo(ctx, { id: request.body.user });
 
     // decorate session object with requested user data
     request.session = {

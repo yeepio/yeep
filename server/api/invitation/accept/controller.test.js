@@ -31,7 +31,7 @@ describe('api/invitation.accept', () => {
     let permissionAssignment;
 
     beforeAll(async () => {
-      wile = await createUser(ctx.db, {
+      wile = await createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -45,7 +45,7 @@ describe('api/invitation.accept', () => {
         ],
       });
 
-      org = await createOrg(ctx.db, {
+      org = await createOrg(ctx, {
         name: 'Acme Inc',
         slug: 'acme',
         adminId: wile.id,
@@ -55,7 +55,7 @@ describe('api/invitation.accept', () => {
       const permission = await PermissionModel.findOne({
         name: 'yeep.user.write',
       });
-      permissionAssignment = await createPermissionAssignment(ctx.db, {
+      permissionAssignment = await createPermissionAssignment(ctx, {
         userId: wile.id,
         orgId: null, // global scope
         permissionId: permission.id,
@@ -63,9 +63,9 @@ describe('api/invitation.accept', () => {
     });
 
     afterAll(async () => {
-      await deletePermissionAssignment(ctx.db, permissionAssignment);
-      await deleteUser(ctx.db, wile);
-      await deleteOrg(ctx.db, org);
+      await deletePermissionAssignment(ctx, permissionAssignment);
+      await deleteUser(ctx, wile);
+      await deleteOrg(ctx, org);
     });
 
     test('returns error when token contains less than 6 characters', async () => {
@@ -110,7 +110,7 @@ describe('api/invitation.accept', () => {
         const UserModel = ctx.db.model('User');
         const eventTrigger = event(ctx.bus, 'invite_user');
 
-        await createInvitation(ctx.db, ctx.bus, {
+        await createInvitation(ctx, {
           inviteeEmailAddress: 'beep-beep@acme.com',
           orgId: org.id,
           inviterId: wile.id,
@@ -210,7 +210,7 @@ describe('api/invitation.accept', () => {
           },
         });
 
-        const isUserDeleted = await deleteUser(ctx.db, res.body.user);
+        const isUserDeleted = await deleteUser(ctx, res.body.user);
         expect(isUserDeleted).toBe(true);
 
         expect(f).toHaveBeenCalledWith({
@@ -232,7 +232,7 @@ describe('api/invitation.accept', () => {
       let runner;
 
       beforeAll(async () => {
-        runner = await createUser(ctx.db, {
+        runner = await createUser(ctx, {
           username: 'runner',
           password: 'fast+furry-ous',
           fullName: 'Road Runner',
@@ -248,14 +248,14 @@ describe('api/invitation.accept', () => {
       });
 
       afterAll(async () => {
-        await deleteUser(ctx.db, runner);
+        await deleteUser(ctx, runner);
       });
 
       test('returns authorization error', async () => {
         const UserModel = ctx.db.model('User');
         const eventTrigger = event(ctx.bus, 'invite_user');
 
-        await createInvitation(ctx.db, ctx.bus, {
+        await createInvitation(ctx, {
           inviteeEmailAddress: 'beep-beep@acme.com',
           orgId: org.id,
           inviterId: wile.id,
@@ -293,7 +293,7 @@ describe('api/invitation.accept', () => {
     let wileSession;
 
     beforeAll(async () => {
-      wile = await createUser(ctx.db, {
+      wile = await createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -307,7 +307,7 @@ describe('api/invitation.accept', () => {
         ],
       });
 
-      org = await createOrg(ctx.db, {
+      org = await createOrg(ctx, {
         name: 'Acme Inc',
         slug: 'acme',
         adminId: wile.id,
@@ -317,7 +317,7 @@ describe('api/invitation.accept', () => {
       const permission = await PermissionModel.findOne({
         name: 'yeep.user.write',
       });
-      permissionAssignment = await createPermissionAssignment(ctx.db, {
+      permissionAssignment = await createPermissionAssignment(ctx, {
         userId: wile.id,
         orgId: null, // global scope
         permissionId: permission.id,
@@ -331,16 +331,16 @@ describe('api/invitation.accept', () => {
 
     afterAll(async () => {
       await destroySession(ctx, wileSession);
-      await deletePermissionAssignment(ctx.db, permissionAssignment);
-      await deleteUser(ctx.db, wile);
-      await deleteOrg(ctx.db, org);
+      await deletePermissionAssignment(ctx, permissionAssignment);
+      await deleteUser(ctx, wile);
+      await deleteOrg(ctx, org);
     });
 
     test('returns error when authenticated user is already an org member', async () => {
       const UserModel = ctx.db.model('User');
       const eventTrigger = event(ctx.bus, 'invite_user');
 
-      await createInvitation(ctx.db, ctx.bus, {
+      await createInvitation(ctx, {
         inviteeEmailAddress: 'beep-beep@acme.com',
         orgId: org.id,
         inviterId: wile.id,
@@ -378,7 +378,7 @@ describe('api/invitation.accept', () => {
         const UserModel = ctx.db.model('User');
         const eventTrigger = event(ctx.bus, 'invite_user');
 
-        await createInvitation(ctx.db, ctx.bus, {
+        await createInvitation(ctx, {
           inviteeEmailAddress: 'beep-beep@acme.com',
           orgId: org.id,
           inviterId: wile.id,
@@ -391,7 +391,7 @@ describe('api/invitation.accept', () => {
         const data = await eventTrigger;
         token = data[0].token.secret;
 
-        runner = await createUser(ctx.db, {
+        runner = await createUser(ctx, {
           username: 'runner',
           password: 'fast+furry-ous',
           fullName: 'Road Runner',
@@ -413,7 +413,7 @@ describe('api/invitation.accept', () => {
 
       afterAll(async () => {
         await destroySession(ctx, runnerSession);
-        await deleteUser(ctx.db, runner);
+        await deleteUser(ctx, runner);
       });
 
       test('joins org with currently authenticated user and returns expected response', async () => {
@@ -461,7 +461,7 @@ describe('api/invitation.accept', () => {
         const UserModel = ctx.db.model('User');
         const eventTrigger = event(ctx.bus, 'invite_user');
 
-        runner = await createUser(ctx.db, {
+        runner = await createUser(ctx, {
           username: 'runner',
           password: 'fast+furry-ous',
           fullName: 'Road Runner',
@@ -480,7 +480,7 @@ describe('api/invitation.accept', () => {
           password: 'fast+furry-ous',
         });
 
-        porky = await createUser(ctx.db, {
+        porky = await createUser(ctx, {
           username: 'porky',
           password: "Th-th-th-that's all folks!",
           fullName: 'Porky Pig',
@@ -499,7 +499,7 @@ describe('api/invitation.accept', () => {
           password: "Th-th-th-that's all folks!",
         });
 
-        await createInvitation(ctx.db, ctx.bus, {
+        await createInvitation(ctx, {
           inviteeEmailAddress: 'beep-beep@acme.com',
           orgId: org.id,
           inviterId: wile.id,
@@ -515,9 +515,9 @@ describe('api/invitation.accept', () => {
 
       afterAll(async () => {
         await destroySession(ctx, runnerSession);
-        await deleteUser(ctx.db, runner);
+        await deleteUser(ctx, runner);
         await destroySession(ctx, porkySession);
-        await deleteUser(ctx.db, porky);
+        await deleteUser(ctx, porky);
       });
 
       test('joins org with currently authenticated user and returns expected response', async () => {

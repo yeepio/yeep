@@ -10,7 +10,7 @@ import {
   isUserAuthenticated,
 } from '../../../middleware/auth';
 import { AuthorizationError } from '../../../constants/errors';
-import addMemberToOrg from './service';
+import removeMemberFromOrg from './service';
 
 export const validationSchema = {
   body: {
@@ -43,8 +43,9 @@ const isUserAuthorized = async ({ request }, next) => {
   await next();
 };
 
-async function handler({ request, response, db }) {
-  const isMemberAdded = await addMemberToOrg(db, request.body);
+async function handler(ctx) {
+  const { request, response } = ctx;
+  const isMemberAdded = await removeMemberFromOrg(ctx, request.body);
 
   if (!isMemberAdded) {
     throw Boom.internal();

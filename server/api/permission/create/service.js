@@ -1,6 +1,6 @@
 import { DuplicatePermissionError, InvalidPermissionError } from '../../../constants/errors';
 
-async function createPermission(db, { name, description, scope }) {
+async function createPermission({ db }, { name, description, scope }) {
   const PermissionModel = db.model('Permission');
 
   if (name.startsWith('yeep.')) {

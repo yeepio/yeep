@@ -48,7 +48,7 @@ describe('api/user.info', () => {
     let otherOrg;
 
     beforeAll(async () => {
-      requestor = await createUser(ctx.db, {
+      requestor = await createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -62,7 +62,7 @@ describe('api/user.info', () => {
         ],
       });
 
-      org = await createOrg(ctx.db, {
+      org = await createOrg(ctx, {
         name: 'Acme Inc',
         slug: 'acme',
         adminId: requestor.id,
@@ -72,7 +72,7 @@ describe('api/user.info', () => {
       const permission = await PermissionModel.findOne({
         name: 'yeep.user.read',
       });
-      permissionAssignment = await createPermissionAssignment(ctx.db, {
+      permissionAssignment = await createPermissionAssignment(ctx, {
         userId: requestor.id,
         orgId: org.id,
         permissionId: permission.id,
@@ -83,7 +83,7 @@ describe('api/user.info', () => {
         password: 'catch-the-b1rd$',
       });
 
-      user = await createUser(ctx.db, {
+      user = await createUser(ctx, {
         username: 'runner',
         password: 'fast+furry-ous',
         fullName: 'Road Runner',
@@ -98,7 +98,7 @@ describe('api/user.info', () => {
         orgs: [org.id],
       });
 
-      otherOrg = await createOrg(ctx.db, {
+      otherOrg = await createOrg(ctx, {
         name: 'Monsters Inc',
         slug: 'monsters',
         adminId: user.id,
@@ -107,11 +107,11 @@ describe('api/user.info', () => {
 
     afterAll(async () => {
       await destroySession(ctx, session);
-      await deletePermissionAssignment(ctx.db, permissionAssignment);
-      await deleteUser(ctx.db, requestor);
-      await deleteUser(ctx.db, user);
-      await deleteOrg(ctx.db, org);
-      await deleteOrg(ctx.db, otherOrg);
+      await deletePermissionAssignment(ctx, permissionAssignment);
+      await deleteUser(ctx, requestor);
+      await deleteUser(ctx, user);
+      await deleteOrg(ctx, org);
+      await deleteOrg(ctx, otherOrg);
     });
 
     test('retrieves user and returns expected response', async () => {
@@ -298,7 +298,7 @@ describe('api/user.info', () => {
     let globalUser;
 
     beforeAll(async () => {
-      requestor = await createUser(ctx.db, {
+      requestor = await createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -312,7 +312,7 @@ describe('api/user.info', () => {
         ],
       });
 
-      org = await createOrg(ctx.db, {
+      org = await createOrg(ctx, {
         name: 'Acme Inc',
         slug: 'acme',
         adminId: requestor.id,
@@ -322,7 +322,7 @@ describe('api/user.info', () => {
       const permission = await PermissionModel.findOne({
         name: 'yeep.user.read',
       });
-      permissionAssignment = await createPermissionAssignment(ctx.db, {
+      permissionAssignment = await createPermissionAssignment(ctx, {
         userId: requestor.id,
         orgId: org.id,
         permissionId: permission.id,
@@ -333,7 +333,7 @@ describe('api/user.info', () => {
         password: 'catch-the-b1rd$',
       });
 
-      user = await createUser(ctx.db, {
+      user = await createUser(ctx, {
         username: 'runner',
         password: 'fast+furry-ous',
         fullName: 'Road Runner',
@@ -347,13 +347,13 @@ describe('api/user.info', () => {
         ],
       });
 
-      otherOrg = await createOrg(ctx.db, {
+      otherOrg = await createOrg(ctx, {
         name: 'Monsters Inc',
         slug: 'monsters',
         adminId: user.id,
       });
 
-      globalUser = await createUser(ctx.db, {
+      globalUser = await createUser(ctx, {
         username: 'porky',
         password: "Th-th-th-that's all folks!",
         fullName: 'Porky Pig',
@@ -370,12 +370,12 @@ describe('api/user.info', () => {
 
     afterAll(async () => {
       await destroySession(ctx, session);
-      await deletePermissionAssignment(ctx.db, permissionAssignment);
-      await deleteUser(ctx.db, requestor);
-      await deleteOrg(ctx.db, org);
-      await deleteOrg(ctx.db, otherOrg);
-      await deleteUser(ctx.db, user);
-      await deleteUser(ctx.db, globalUser);
+      await deletePermissionAssignment(ctx, permissionAssignment);
+      await deleteUser(ctx, requestor);
+      await deleteOrg(ctx, org);
+      await deleteOrg(ctx, otherOrg);
+      await deleteUser(ctx, user);
+      await deleteUser(ctx, globalUser);
     });
 
     test('returns error when requested user is member of another org', async () => {

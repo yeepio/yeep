@@ -8,7 +8,7 @@ import {
 } from '../../../constants/errors';
 import commonNames from '../../../utils/commonNames';
 
-async function createUser(db, { username, password, fullName, picture, emails, orgs = [] }) {
+async function createUser({ db }, { username, password, fullName, picture, emails, orgs = [] }) {
   const UserModel = db.model('User');
   const CredentialsModel = db.model('Credentials');
   const OrgMembershipModel = db.model('OrgMembership');

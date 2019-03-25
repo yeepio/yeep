@@ -51,7 +51,7 @@ describe('api/user.assignPermission', () => {
     let session;
 
     beforeAll(async () => {
-      wile = await createUser(ctx.db, {
+      wile = await createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -65,13 +65,13 @@ describe('api/user.assignPermission', () => {
         ],
       });
 
-      acme = await createOrg(ctx.db, {
+      acme = await createOrg(ctx, {
         name: 'Acme Inc',
         slug: 'acme',
         adminId: wile.id,
       });
 
-      permission = await createPermission(ctx.db, {
+      permission = await createPermission(ctx, {
         name: 'acme.permission.test',
         description: 'Test permission',
         scope: acme.id,
@@ -85,9 +85,9 @@ describe('api/user.assignPermission', () => {
 
     afterAll(async () => {
       await destroySession(ctx, session);
-      await deleteOrg(ctx.db, acme);
-      await deleteUser(ctx.db, wile);
-      await deletePermission(ctx.db, permission);
+      await deleteOrg(ctx, acme);
+      await deleteUser(ctx, wile);
+      await deletePermission(ctx, permission);
     });
 
     test('returns error when `userId` contains invalid characters', async () => {
@@ -395,7 +395,7 @@ describe('api/user.assignPermission', () => {
       });
 
       const isPermissionAssignmentDeleted = await deletePermissionAssignment(
-        ctx.db,
+        ctx,
         res.body.permissionAssignment
       );
       expect(isPermissionAssignmentDeleted).toBe(true);
@@ -410,7 +410,7 @@ describe('api/user.assignPermission', () => {
     let session;
 
     beforeAll(async () => {
-      wile = await createUser(ctx.db, {
+      wile = await createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -424,19 +424,19 @@ describe('api/user.assignPermission', () => {
         ],
       });
 
-      acme = await createOrg(ctx.db, {
+      acme = await createOrg(ctx, {
         name: 'Acme Inc',
         slug: 'acme',
         adminId: wile.id,
       });
 
-      monsters = await createOrg(ctx.db, {
+      monsters = await createOrg(ctx, {
         name: 'Monsters Inc',
         slug: 'monsters',
         adminId: wile.id,
       });
 
-      permission = await createPermission(ctx.db, {
+      permission = await createPermission(ctx, {
         name: 'acme.permission.test',
         description: 'Test permission',
         scope: monsters.id,
@@ -450,10 +450,10 @@ describe('api/user.assignPermission', () => {
 
     afterAll(async () => {
       await destroySession(ctx, session);
-      await deleteOrg(ctx.db, acme);
-      await deleteOrg(ctx.db, monsters);
-      await deleteUser(ctx.db, wile);
-      await deletePermission(ctx.db, permission);
+      await deleteOrg(ctx, acme);
+      await deleteOrg(ctx, monsters);
+      await deleteUser(ctx, wile);
+      await deletePermission(ctx, permission);
     });
 
     test('returns error when permission scope does not match the designated org', async () => {

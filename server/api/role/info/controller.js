@@ -20,8 +20,9 @@ export const validationSchema = {
   },
 };
 
-const decorateRequestedRole = async ({ request, db }, next) => {
-  const role = await getRoleInfo(db, request.body);
+const decorateRequestedRole = async (ctx, next) => {
+  const { request } = ctx;
+  const role = await getRoleInfo(ctx, request.body);
 
   // decorate session with requested role data
   request.session = {

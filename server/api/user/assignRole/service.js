@@ -14,7 +14,7 @@ const existsRoleAssignment = (roleAssignments, { id, resourceId }) => {
   });
 };
 
-async function createRoleAssignment(db, { userId, orgId, roleId, resourceId }) {
+async function createRoleAssignment({ db }, { userId, orgId, roleId, resourceId }) {
   const UserModel = db.model('User');
   const OrgModel = db.model('Org');
   const RoleModel = db.model('Role');

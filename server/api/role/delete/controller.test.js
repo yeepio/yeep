@@ -27,7 +27,7 @@ describe('api/role.delete', () => {
     await server.setup(config);
     ctx = server.getAppContext();
 
-    user = await createUser(ctx.db, {
+    user = await createUser(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
       fullName: 'Wile E. Coyote',
@@ -41,13 +41,13 @@ describe('api/role.delete', () => {
       ],
     });
 
-    org = await createOrg(ctx.db, {
+    org = await createOrg(ctx, {
       name: 'Acme Inc',
       slug: 'acme',
       adminId: user.id,
     });
 
-    permission = await createPermission(ctx.db, {
+    permission = await createPermission(ctx, {
       name: 'acme.test',
       description: 'you know, for testing',
       scope: org.id,
@@ -55,7 +55,7 @@ describe('api/role.delete', () => {
 
     const PermissionModel = ctx.db.model('Permission');
     const requiredPermission = await PermissionModel.findOne({ name: 'yeep.role.write' });
-    permissionAssignment = await createPermissionAssignment(ctx.db, {
+    permissionAssignment = await createPermissionAssignment(ctx, {
       userId: user.id,
       orgId: org.id,
       permissionId: requiredPermission.id,
@@ -69,10 +69,10 @@ describe('api/role.delete', () => {
 
   afterAll(async () => {
     await destroySession(ctx, session);
-    await deletePermissionAssignment(ctx.db, permissionAssignment);
-    await deletePermission(ctx.db, permission);
-    await deleteOrg(ctx.db, org);
-    await deleteUser(ctx.db, user);
+    await deletePermissionAssignment(ctx, permissionAssignment);
+    await deletePermission(ctx, permission);
+    await deleteOrg(ctx, org);
+    await deleteUser(ctx, user);
     await server.teardown();
   });
 
@@ -102,7 +102,7 @@ describe('api/role.delete', () => {
     const requiredPermission = await ctx.db
       .model('Permission')
       .findOne({ name: 'yeep.role.write' });
-    const globalPermissionAssignment = await createPermissionAssignment(ctx.db, {
+    const globalPermissionAssignment = await createPermissionAssignment(ctx, {
       userId: user.id,
       permissionId: requiredPermission.id,
     });
@@ -124,11 +124,11 @@ describe('api/role.delete', () => {
     });
 
     // revert global permission assignment
-    await deletePermissionAssignment(ctx.db, globalPermissionAssignment);
+    await deletePermissionAssignment(ctx, globalPermissionAssignment);
   });
 
   test('deletes role and returns expected response', async () => {
-    const role = await createRole(ctx.db, {
+    const role = await createRole(ctx, {
       name: 'acme:manager',
       description: 'This is a test',
       permissions: [permission.id],
@@ -153,7 +153,7 @@ describe('api/role.delete', () => {
       .model('Permission')
       .findOne({ name: 'yeep.permission.read' });
 
-    const role = await createRole(ctx.db, {
+    const role = await createRole(ctx, {
       // note the absence of scope to denote global role
       name: 'manager',
       description: 'This is a test',
@@ -176,7 +176,7 @@ describe('api/role.delete', () => {
       },
     });
 
-    const isRoleDeleted = await deleteRole(ctx.db, role);
+    const isRoleDeleted = await deleteRole(ctx, role);
     expect(isRoleDeleted).toBe(true);
   });
 });

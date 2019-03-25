@@ -157,7 +157,7 @@ export async function issueAccessAndRefreshTokens(ctx, props) {
 
   // decorate accessToken payload with user permissions
   if (scope.permissions) {
-    const permissions = await getUserPermissions(db, { userId: user.id });
+    const permissions = await getUserPermissions(ctx, { userId: user.id });
     payload.user.permissions = permissions.map((e) => {
       return {
         ...e,

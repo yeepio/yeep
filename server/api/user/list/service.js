@@ -22,7 +22,7 @@ export const defaultProjection = {
   updatedAt: true,
 };
 
-async function listUsers(db, { q, limit, cursor, scopes, projection = defaultProjection }) {
+async function listUsers({ db }, { q, limit, cursor, scopes, projection = defaultProjection }) {
   const UserModel = db.model('User');
 
   const users = await UserModel.aggregate([

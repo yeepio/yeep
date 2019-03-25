@@ -34,7 +34,7 @@ const formatUserPermissions = flow(
   )
 );
 
-async function getUserPermissions(db, { userId }) {
+async function getUserPermissions({ db }, { userId }) {
   const OrgMembershipModel = db.model('OrgMembership');
 
   const [permissionsDirect, permissionsViaRole] = await Promise.all([
@@ -157,7 +157,7 @@ const formatRoles = flow(
   sortBy(['name', 'orgId', 'resourceId'])
 );
 
-async function getUserRoles(db, { userId }) {
+async function getUserRoles({ db }, { userId }) {
   const OrgMembershipModel = db.model('OrgMembership');
 
   const roles = await OrgMembershipModel.aggregate([
@@ -214,7 +214,7 @@ async function getUserRoles(db, { userId }) {
   return formatRoles(roles);
 }
 
-async function getUserOrgs(db, { userId }) {
+async function getUserOrgs({ db }, { userId }) {
   const OrgMembershipModel = db.model('OrgMembership');
 
   const records = await OrgMembershipModel.find(
@@ -230,7 +230,7 @@ async function getUserOrgs(db, { userId }) {
   return records.map((record) => record.orgId.toHexString());
 }
 
-async function getUserInfo(db, { id, projection = defaultProjection }) {
+async function getUserInfo({ db }, { id, projection = defaultProjection }) {
   const UserModel = db.model('User');
 
   // retrieve user details
@@ -245,21 +245,21 @@ async function getUserInfo(db, { id, projection = defaultProjection }) {
   let orgs;
 
   if (projection.orgs) {
-    orgs = await getUserOrgs(db, { userId: id });
+    orgs = await getUserOrgs({ db }, { userId: id });
   }
 
   // retrieve user permissions
   let permissions;
 
   if (projection.permissions) {
-    permissions = await getUserPermissions(db, { userId: id });
+    permissions = await getUserPermissions({ db }, { userId: id });
   }
 
   // retrieve user roles
   let roles;
 
   if (projection.roles) {
-    roles = await getUserRoles(db, { userId: id });
+    roles = await getUserRoles({ db }, { userId: id });
   }
 
   // determine projection fields

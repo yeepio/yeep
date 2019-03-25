@@ -5,7 +5,7 @@ import {
   TokenNotFoundError,
 } from '../../../constants/errors';
 
-async function resetPassword(db, bus, { token: secret, password }) {
+async function resetPassword({ db, bus }, { token: secret, password }) {
   const TokenModel = db.model('Token');
   const UserModel = db.model('User');
   const CredentialsModel = db.model('Credentials');

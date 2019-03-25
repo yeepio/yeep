@@ -22,8 +22,9 @@ export const validationSchema = {
   },
 };
 
-const decorateRequestedUser = async ({ request, db }, next) => {
-  const user = await getUserInfo(db, request.body);
+const decorateRequestedUser = async (ctx, next) => {
+  const { request } = ctx;
+  const user = await getUserInfo(ctx, request.body);
 
   // decorate session object with requested user data
   request.session = {
@@ -57,8 +58,9 @@ const isUserAuthorized = async ({ request }, next) => {
   await next();
 };
 
-async function handler({ request, response, db }) {
-  const isUserDeleted = await deleteUser(db, request.session.requestedUser);
+async function handler(ctx) {
+  const { request, response } = ctx;
+  const isUserDeleted = await deleteUser(ctx, request.session.requestedUser);
 
   if (!isUserDeleted) {
     throw Boom.internal();

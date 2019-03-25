@@ -31,7 +31,8 @@ export const validationSchema = {
   },
 };
 
-async function handler({ request, response, db, bus, config }) {
+async function handler(ctx) {
+  const { request, response, config } = ctx;
   const { isUsernameEnabled } = config;
   const { userKey, tokenExpiresInSeconds } = request.body;
 
@@ -51,7 +52,7 @@ async function handler({ request, response, db, bus, config }) {
   }
 
   // initiate password reset process
-  const isPasswordResetInitiated = await initPasswordReset(db, bus, {
+  const isPasswordResetInitiated = await initPasswordReset(ctx, {
     tokenExpiresInSeconds,
     ...(isUserKeyEmail
       ? {

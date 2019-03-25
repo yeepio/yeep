@@ -56,10 +56,11 @@ const isUserAuthorised = async ({ request }, next) => {
   await next();
 };
 
-async function handler({ request, response, db }) {
+async function handler(ctx) {
+  const { request, response } = ctx;
   const { q, limit, cursor, isSystemRole, scope } = request.body;
 
-  const roles = await listRoles(db, {
+  const roles = await listRoles(ctx, {
     q,
     limit,
     cursor: cursor ? parseCursor(cursor) : null,

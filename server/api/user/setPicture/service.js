@@ -19,7 +19,7 @@ const acceptedTypes = new Set(['png', 'jpg', 'webp']);
 export const minImageSize = 200; // px
 export const maxImageSize = 10000; // px
 
-async function setUserPicture(db, storage, { id, picture, cropSize, cropX, cropY }) {
+async function setUserPicture({ db, storage }, { id, picture, cropSize, cropX, cropY }) {
   const UserModel = db.model('User');
   const currentDate = new Date();
 

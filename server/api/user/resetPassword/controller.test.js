@@ -23,7 +23,7 @@ describe('api/user.resetPassword', () => {
     let wile;
 
     beforeAll(async () => {
-      wile = await createUser(ctx.db, {
+      wile = await createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -39,13 +39,13 @@ describe('api/user.resetPassword', () => {
     });
 
     afterAll(async () => {
-      await deleteUser(ctx.db, wile);
+      await deleteUser(ctx, wile);
     });
 
     test('resets password and returns expected response', async () => {
       const eventTrigger = event(ctx.bus, 'password_reset_init');
 
-      await initPasswordReset(ctx.db, ctx.bus, {
+      await initPasswordReset(ctx, {
         username: 'wile',
         tokenExpiresInSeconds: 60,
       });

@@ -37,8 +37,9 @@ const isUserAuthorized = async ({ request }, next) => {
   await next();
 };
 
-async function handler({ request, response, db, storage }) {
-  const user = await deleteUserPicture(db, storage, request.body);
+async function handler(ctx) {
+  const { request, response } = ctx;
+  const user = await deleteUserPicture(ctx, request.body);
   response.status = 200; // OK
   response.body = {
     user,

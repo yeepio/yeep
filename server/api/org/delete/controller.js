@@ -39,8 +39,9 @@ const isUserAuthorized = async ({ request }, next) => {
   await next();
 };
 
-async function handler({ request, response, db }) {
-  const isOrgDeleted = await deleteOrg(db, request.body);
+async function handler(ctx) {
+  const { request, response } = ctx;
+  const isOrgDeleted = await deleteOrg(ctx, request.body);
 
   if (!isOrgDeleted) {
     throw Boom.internal();

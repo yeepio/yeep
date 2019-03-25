@@ -27,7 +27,7 @@ describe('api/permission.list', () => {
     await server.setup(config);
     ctx = server.getAppContext();
 
-    wile = await createUser(ctx.db, {
+    wile = await createUser(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
       fullName: 'Wile E. Coyote',
@@ -41,12 +41,12 @@ describe('api/permission.list', () => {
       ],
     });
     [acme, monsters] = await Promise.all([
-      createOrg(ctx.db, {
+      createOrg(ctx, {
         name: 'Acme Inc',
         slug: 'acme',
         adminId: wile.id,
       }),
-      createOrg(ctx.db, {
+      createOrg(ctx, {
         name: 'Monsters Inc',
         slug: 'monsters',
         adminId: wile.id,
@@ -55,35 +55,35 @@ describe('api/permission.list', () => {
 
     // create test permission
     permissions = await Promise.all([
-      createPermission(ctx.db, {
+      createPermission(ctx, {
         name: 'acme.code.write',
         description: 'Permission to edit (write, delete, update) source code',
         scope: acme.id,
       }),
-      createPermission(ctx.db, {
+      createPermission(ctx, {
         name: 'monsters.code.write',
         description: 'Permission to edit (write, delete, update) source code',
         scope: monsters.id,
       }),
-      createPermission(ctx.db, {
+      createPermission(ctx, {
         name: 'global.code.write',
         description: 'Permission to edit (write, delete, update) source code',
       }),
     ]);
 
     [role, unauthorisedRole] = await Promise.all([
-      createRole(ctx.db, {
+      createRole(ctx, {
         name: 'monsters:developer',
         description: 'Developer role',
         permissions: [permissions[1].id],
         scope: monsters.id,
       }),
-      createRole(ctx.db, {
+      createRole(ctx, {
         name: 'global:developer',
         description: 'Developer role',
         permissions: [permissions[2].id],
       }),
-    ])
+    ]);
 
     session = await createSession(ctx, {
       username: 'wile',
@@ -93,12 +93,12 @@ describe('api/permission.list', () => {
 
   afterAll(async () => {
     await destroySession(ctx, session);
-    await Promise.all(permissions.map((permission) => deletePermission(ctx.db, permission)));
-    await deleteOrg(ctx.db, acme);
-    await deleteOrg(ctx.db, monsters);
-    await deleteUser(ctx.db, wile);
-    await deleteRole(ctx.db, role);
-    await deleteRole(ctx.db, unauthorisedRole);
+    await Promise.all(permissions.map((permission) => deletePermission(ctx, permission)));
+    await deleteOrg(ctx, acme);
+    await deleteOrg(ctx, monsters);
+    await deleteUser(ctx, wile);
+    await deleteRole(ctx, role);
+    await deleteRole(ctx, unauthorisedRole);
     await server.teardown();
   });
 

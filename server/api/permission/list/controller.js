@@ -39,10 +39,11 @@ const validation = validateRequest({
   },
 });
 
-const decorateRequestedRole = async ({ request, db }, next) => {
+const decorateRequestedRole = async (ctx, next) => {
+  const { request } = ctx;
   const roleId = request.body.role;
   if (roleId) {
-    const role = await getRoleInfo(db, { id: roleId });
+    const role = await getRoleInfo(ctx, { id: roleId });
 
     // decorate session with requested role data
     request.session = {
@@ -92,10 +93,11 @@ const isUserAuthorised = async ({ request }, next) => {
   await next();
 };
 
-async function handler({ request, response, db }) {
+async function handler(ctx) {
+  const { request, response } = ctx;
   const { q, limit, cursor, scope, isSystemPermission } = request.body;
 
-  const permissions = await listPermissions(db, {
+  const permissions = await listPermissions(ctx, {
     q,
     limit,
     cursor: cursor ? parseCursor(cursor) : null,

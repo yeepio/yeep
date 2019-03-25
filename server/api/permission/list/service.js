@@ -10,7 +10,7 @@ export const parseCursor = (cursorStr) => {
   return { id };
 };
 
-async function listPermissions(db, { q, limit, cursor, scopes, role, isSystemPermission }) {
+async function listPermissions({ db }, { q, limit, cursor, scopes, role, isSystemPermission }) {
   const PermissionModel = db.model('Permission');
 
   const matchExpressions = [];

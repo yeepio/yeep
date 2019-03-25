@@ -2,7 +2,7 @@ import addSeconds from 'date-fns/add_seconds';
 import isBefore from 'date-fns/is_before';
 import { UserNotFoundError, UserDeactivatedError } from '../../../constants/errors';
 
-async function initPasswordReset(db, bus, { username, emailAddress, tokenExpiresInSeconds }) {
+async function initPasswordReset({ db, bus }, { username, emailAddress, tokenExpiresInSeconds }) {
   const UserModel = db.model('User');
   const TokenModel = db.model('Token');
 

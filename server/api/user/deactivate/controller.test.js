@@ -50,7 +50,7 @@ describe('api/user.deactivate', () => {
     let runnerSession;
 
     beforeAll(async () => {
-      wile = await createUser(ctx.db, {
+      wile = await createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -68,7 +68,7 @@ describe('api/user.deactivate', () => {
       const permission = await PermissionModel.findOne({
         name: 'yeep.user.write',
       });
-      permissionAssignment = await createPermissionAssignment(ctx.db, {
+      permissionAssignment = await createPermissionAssignment(ctx, {
         userId: wile.id,
         permissionId: permission.id,
         // global org
@@ -79,7 +79,7 @@ describe('api/user.deactivate', () => {
         password: 'catch-the-b1rd$',
       });
 
-      runner = await createUser(ctx.db, {
+      runner = await createUser(ctx, {
         username: 'runner',
         password: 'fast+furry-ous',
         fullName: 'Road Runner',
@@ -93,7 +93,7 @@ describe('api/user.deactivate', () => {
         ],
       });
 
-      acme = await createOrg(ctx.db, {
+      acme = await createOrg(ctx, {
         name: 'Acme Inc',
         slug: 'acme',
         adminId: runner.id,
@@ -108,10 +108,10 @@ describe('api/user.deactivate', () => {
     afterAll(async () => {
       await destroySession(ctx, wileSession);
       await destroySession(ctx, runnerSession);
-      await deletePermissionAssignment(ctx.db, permissionAssignment);
-      await deleteUser(ctx.db, wile);
-      await deleteUser(ctx.db, runner);
-      await deleteOrg(ctx.db, acme);
+      await deletePermissionAssignment(ctx, permissionAssignment);
+      await deleteUser(ctx, wile);
+      await deleteUser(ctx, runner);
+      await deleteOrg(ctx, acme);
     });
 
     test('deactivates user and returns expected response', async () => {

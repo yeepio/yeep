@@ -4,7 +4,7 @@ import {
   DuplicatePermissionError,
 } from '../../../constants/errors';
 
-async function updatePermission(db, permission, nextProps) {
+async function updatePermission({ db }, permission, nextProps) {
   const PermissionModel = db.model('Permission');
 
   // make sure permission is not system-defined

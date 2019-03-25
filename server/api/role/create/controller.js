@@ -60,8 +60,9 @@ const isUserAuthorized = async ({ request }, next) => {
   await next();
 };
 
-async function handler({ request, response, db }) {
-  const role = await createRole(db, request.body);
+async function handler(ctx) {
+  const { request, response } = ctx;
+  const role = await createRole(ctx, request.body);
 
   response.status = 200; // OK
   response.body = {

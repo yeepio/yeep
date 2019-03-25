@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb';
 import differenceWith from 'lodash/differenceWith';
 import { PermissionNotFoundError, DuplicateRoleError } from '../../../constants/errors';
 
-async function createRole(db, { name, description, permissions, scope }) {
+async function createRole({ db }, { name, description, permissions, scope }) {
   const PermissionModel = db.model('Permission');
   const RoleModel = db.model('Role');
 
