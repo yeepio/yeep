@@ -1,13 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Link } from '@reach/router';
 import classNames from 'classnames';
 
-const Button = ({ children, secondary, className }) => {
+const ButtonLink = ({ to, children, secondary, className }) => {
   return (
-    <button
+    <Link to={to}
       className={classNames(
-        'border',
+        'inline-block',
+        'no-underline',
         'leading-tight',
+        'border',
         'border-blue',
         'font-bold',
         'py-2',
@@ -32,11 +35,13 @@ const Button = ({ children, secondary, className }) => {
       )}
     >
       {children}
-    </button>
+    </Link>
   );
 };
 
-Button.propTypes = {
+ButtonLink.propTypes = {
+  // The string URI to pass on to @reach/router's <Link/>
+  to: PropTypes.string.isRequired,
   // Most frequenly just a string (which will be the button label)
   children: PropTypes.node.isRequired,
   // If set to true we'll show a secondary / lower priority button
@@ -45,9 +50,10 @@ Button.propTypes = {
   className: PropTypes.string,
 };
 
-Button.defaultProps = {
+ButtonLink.defaultProps = {
+  to: '#',
   children: 'Submit',
   secondary: false,
 };
 
-export default Button;
+export default ButtonLink;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
-import Button from '../../components/Button';
+import ButtonLink from '../../components/ButtonLink';
 import Input from '../../components/Input';
 import Grid from '../../components/Grid';
 
@@ -37,7 +37,7 @@ const OrgList = () => {
   useDocumentTitle('Organization List');
   return (
     <React.Fragment>
-      <Button className="float-right">Create new</Button>
+      <ButtonLink to="create" className="float-right">Create new organization</ButtonLink>
       <h1 className="mb-6">Organizations</h1>
       <fieldset className="mb-6">
         <legend>Quick search</legend>
@@ -51,7 +51,7 @@ const OrgList = () => {
           return (
             <tr key={`gridRow${index}`} className={index % 2 ? `bg-grey-lightest` : ``}>
               <td className="p-2">
-                <a href="/">{rowData.orgLabel}</a>
+                <Link to={`${rowData.orgId}/edit`}>{rowData.orgLabel}</Link>
               </td>
               <td className="p-2 text-center">{rowData.slug}</td>
               <td className="p-2 text-center">
