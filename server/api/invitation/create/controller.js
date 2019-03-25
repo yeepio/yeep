@@ -142,9 +142,9 @@ const isUserAuthorized = async ({ request }, next) => {
 
     if (!hasPermission) {
       throw new AuthorizationError(
-        `User "${
-          request.session.user.username
-        }" does not have sufficient permissions to access this resource`
+        `User ${
+          request.session.user.id
+        } does not have sufficient permissions to access this resource`
       );
     }
   }
@@ -160,9 +160,9 @@ const isUserAuthorized = async ({ request }, next) => {
 
     if (!hasPermission) {
       throw new AuthorizationError(
-        `User "${
-          request.session.user.username
-        }" does not have sufficient permissions to access this resource`
+        `User ${
+          request.session.user.id
+        } does not have sufficient permissions to access this resource`
       );
     }
   }
@@ -177,9 +177,7 @@ const isUserAuthorized = async ({ request }, next) => {
 
   if (!hasPermission) {
     throw new AuthorizationError(
-      `User "${
-        request.session.user.username
-      }" does not have sufficient permissions to access this resource`
+      `User ${request.session.user.id} does not have sufficient permissions to access this resource`
     );
   }
 
