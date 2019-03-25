@@ -37,7 +37,7 @@ const OrgList = () => {
   useDocumentTitle('Organization List');
   return (
     <React.Fragment>
-      <ButtonLink to="create" className="float-right">Create new organization</ButtonLink>
+      <ButtonLink to="create" className="float-right">Create new</ButtonLink>
       <h1 className="mb-6">Organizations</h1>
       <fieldset className="mb-6">
         <legend>Quick search</legend>
@@ -71,7 +71,7 @@ const OrgList = () => {
         }}
       />
       <p>
-        <Link to="/organizations">Return to the dashboard</Link>
+        <Link to="..">Return to the dashboard</Link>
       </p>
     </React.Fragment>
   );
