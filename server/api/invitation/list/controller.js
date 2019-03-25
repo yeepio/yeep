@@ -54,10 +54,11 @@ const isUserAuthorized = async ({ request }, next) => {
   await next();
 };
 
-async function handler({ request, response, db }) {
+async function handler(ctx) {
+  const { request, response } = ctx;
   const { user, org, limit, cursor } = request.body;
 
-  const invitations = await listPendingInvitations(db, {
+  const invitations = await listPendingInvitations(ctx, {
     userId: user,
     orgId: org,
     limit,

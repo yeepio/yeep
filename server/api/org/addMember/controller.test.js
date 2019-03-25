@@ -47,7 +47,7 @@ describe('api/org.addMember', () => {
     let session;
 
     beforeAll(async () => {
-      wile = await createUser(ctx.db, {
+      wile = await createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -61,13 +61,13 @@ describe('api/org.addMember', () => {
         ],
       });
 
-      org = await createOrg(ctx.db, {
+      org = await createOrg(ctx, {
         name: 'Acme Inc',
         slug: 'acme',
         adminId: wile.id,
       });
 
-      runner = await createUser(ctx.db, {
+      runner = await createUser(ctx, {
         username: 'runner',
         password: 'fast+furry-ous',
         fullName: 'Road Runner',
@@ -85,7 +85,7 @@ describe('api/org.addMember', () => {
       const permission = await PermissionModel.findOne({
         name: 'yeep.user.write',
       });
-      permissionAssignment = await createPermissionAssignment(ctx.db, {
+      permissionAssignment = await createPermissionAssignment(ctx, {
         userId: wile.id,
         orgId: null, // global scope
         permissionId: permission.id,
@@ -99,10 +99,10 @@ describe('api/org.addMember', () => {
 
     afterAll(async () => {
       await destroySession(ctx, session);
-      await deletePermissionAssignment(ctx.db, permissionAssignment);
-      await deleteUser(ctx.db, wile);
-      await deleteUser(ctx.db, runner);
-      await deleteOrg(ctx.db, org);
+      await deletePermissionAssignment(ctx, permissionAssignment);
+      await deleteUser(ctx, wile);
+      await deleteUser(ctx, runner);
+      await deleteOrg(ctx, org);
     });
 
     test('returns error when `orgId` is unknown', async () => {

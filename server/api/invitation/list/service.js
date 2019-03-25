@@ -9,7 +9,7 @@ export const parseCursor = (cursorStr) => {
   return { id };
 };
 
-async function listPendingInvitations(db, { orgId, userId, limit, cursor }) {
+async function listPendingInvitations({ db }, { orgId, userId, limit, cursor }) {
   const TokenModel = db.model('Token');
 
   const query = {

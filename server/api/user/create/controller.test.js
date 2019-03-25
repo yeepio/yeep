@@ -46,7 +46,7 @@ describe('api/user.create', () => {
     let session;
 
     beforeAll(async () => {
-      requestor = await createUser(ctx.db, {
+      requestor = await createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -60,7 +60,7 @@ describe('api/user.create', () => {
         ],
       });
 
-      org = await createOrg(ctx.db, {
+      org = await createOrg(ctx, {
         name: 'Acme Inc',
         slug: 'acme',
         adminId: requestor.id,
@@ -70,7 +70,7 @@ describe('api/user.create', () => {
       const permission = await PermissionModel.findOne({
         name: 'yeep.user.write',
       });
-      permissionAssignment = await createPermissionAssignment(ctx.db, {
+      permissionAssignment = await createPermissionAssignment(ctx, {
         userId: requestor.id,
         orgId: null, // global scope
         permissionId: permission.id,
@@ -84,9 +84,9 @@ describe('api/user.create', () => {
 
     afterAll(async () => {
       await destroySession(ctx, session);
-      await deletePermissionAssignment(ctx.db, permissionAssignment);
-      await deleteUser(ctx.db, requestor);
-      await deleteOrg(ctx.db, org);
+      await deletePermissionAssignment(ctx, permissionAssignment);
+      await deleteUser(ctx, requestor);
+      await deleteOrg(ctx, org);
     });
 
     describe('isUsernameEnabled = true', () => {
@@ -260,12 +260,12 @@ describe('api/user.create', () => {
           }),
         });
 
-        const isUserDeleted = await deleteUser(ctx.db, res.body.user);
+        const isUserDeleted = await deleteUser(ctx, res.body.user);
         expect(isUserDeleted).toBe(true);
       });
 
       test('returns error on duplicate username', async () => {
-        const user = await createUser(ctx.db, {
+        const user = await createUser(ctx, {
           username: 'runner',
           password: 'fast+furry-ous',
           fullName: 'Road Runner',
@@ -304,12 +304,12 @@ describe('api/user.create', () => {
           },
         });
 
-        const isUserDeleted = await deleteUser(ctx.db, user);
+        const isUserDeleted = await deleteUser(ctx, user);
         expect(isUserDeleted).toBe(true);
       });
 
       test('returns error on duplicate email address', async () => {
-        const user = await createUser(ctx.db, {
+        const user = await createUser(ctx, {
           username: 'runner',
           password: 'fast+furry-ous',
           fullName: 'Road Runner',
@@ -353,7 +353,7 @@ describe('api/user.create', () => {
           },
         });
 
-        const isUserDeleted = await deleteUser(ctx.db, user);
+        const isUserDeleted = await deleteUser(ctx, user);
         expect(isUserDeleted).toBe(true);
       });
 
@@ -449,7 +449,7 @@ describe('api/user.create', () => {
           }),
         });
 
-        const isUserDeleted = await deleteUser(ctx.db, res.body.user);
+        const isUserDeleted = await deleteUser(ctx, res.body.user);
         expect(isUserDeleted).toBe(true);
       });
 
@@ -496,8 +496,8 @@ describe('api/user.create', () => {
         });
 
         const [isUser1Deleted, isUser2Deleted] = await Promise.all([
-          deleteUser(ctx.db, res1.body.user),
-          deleteUser(ctx.db, res2.body.user),
+          deleteUser(ctx, res1.body.user),
+          deleteUser(ctx, res2.body.user),
         ]);
         expect(isUser1Deleted).toBe(true);
         expect(isUser2Deleted).toBe(true);

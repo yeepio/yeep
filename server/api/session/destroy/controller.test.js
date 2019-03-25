@@ -14,7 +14,7 @@ describe('api/session.destroy', () => {
     await server.setup(config);
     ctx = server.getAppContext();
 
-    user = await createUser(ctx.db, {
+    user = await createUser(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
       fullName: 'Wile E. Coyote',
@@ -30,7 +30,7 @@ describe('api/session.destroy', () => {
   });
 
   afterAll(async () => {
-    await deleteUser(ctx.db, user);
+    await deleteUser(ctx, user);
     await server.teardown();
   });
 

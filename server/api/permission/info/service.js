@@ -1,6 +1,6 @@
 import { PermissionNotFoundError } from '../../../constants/errors';
 
-async function getPermissionInfo(db, { id }) {
+async function getPermissionInfo({ db }, { id }) {
   const PermissionModel = db.model('Permission');
 
   // retrieve permission from db

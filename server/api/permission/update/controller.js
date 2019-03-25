@@ -33,8 +33,9 @@ export const validationSchema = {
   },
 };
 
-const decorateRequestedPermission = async ({ request, db }, next) => {
-  const permission = await getPermissionInfo(db, request.body);
+const decorateRequestedPermission = async (ctx, next) => {
+  const { request } = ctx;
+  const permission = await getPermissionInfo(ctx, request.body);
 
   // decorate session with permission data
   request.session = {
@@ -63,7 +64,8 @@ const isUserAuthorized = async ({ request }, next) => {
   await next();
 };
 
-async function handler({ request, response, db }) {
+async function handler(ctx) {
+  const { request, response } = ctx;
   const { name, description } = request.body;
 
   // ensure name or description have been specified
@@ -78,7 +80,7 @@ async function handler({ request, response, db }) {
     throw boom;
   }
 
-  const permission = await updatePermission(db, request.session.permission, {
+  const permission = await updatePermission(ctx, request.session.permission, {
     name,
     description,
   });

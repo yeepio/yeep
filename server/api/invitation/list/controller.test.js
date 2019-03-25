@@ -55,7 +55,7 @@ describe('api/invitation.list', () => {
     let role;
 
     beforeAll(async () => {
-      wile = await createUser(ctx.db, {
+      wile = await createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -69,7 +69,7 @@ describe('api/invitation.list', () => {
         ],
       });
 
-      acme = await createOrg(ctx.db, {
+      acme = await createOrg(ctx, {
         name: 'Acme Inc',
         slug: 'acme',
         adminId: wile.id,
@@ -80,7 +80,7 @@ describe('api/invitation.list', () => {
         password: 'catch-the-b1rd$',
       });
 
-      runner = await createUser(ctx.db, {
+      runner = await createUser(ctx, {
         username: 'runner',
         password: 'fast+furry-ous',
         fullName: 'Road Runner',
@@ -166,16 +166,16 @@ describe('api/invitation.list', () => {
     afterAll(async () => {
       await destroySession(ctx, wileSession);
       await destroySession(ctx, runnerSession);
-      await deleteUser(ctx.db, wile);
-      await deleteUser(ctx.db, runner);
-      await deleteOrg(ctx.db, acme);
+      await deleteUser(ctx, wile);
+      await deleteUser(ctx, runner);
+      await deleteOrg(ctx, acme);
     });
 
     describe('with global `yeep.invitation.list` permission', () => {
       let permissionAssignment;
 
       beforeAll(async () => {
-        permissionAssignment = await createPermissionAssignment(ctx.db, {
+        permissionAssignment = await createPermissionAssignment(ctx, {
           userId: wile.id,
           orgId: null, // global scope
           permissionId: permission.id,
@@ -183,7 +183,7 @@ describe('api/invitation.list', () => {
       });
 
       afterAll(async () => {
-        await deletePermissionAssignment(ctx.db, permissionAssignment);
+        await deletePermissionAssignment(ctx, permissionAssignment);
       });
 
       test('returns list of invitations', async () => {

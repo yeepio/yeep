@@ -36,8 +36,9 @@ const isUserAuthorized = async ({ request }, next) => {
   await next();
 };
 
-async function handler({ request, response, db }) {
-  const user = await activateUser(db, request.body);
+async function handler(ctx) {
+  const { request, response } = ctx;
+  const user = await activateUser(ctx, request.body);
 
   response.status = 200; // OK
   response.body = {

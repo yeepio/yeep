@@ -22,8 +22,9 @@ export const validationSchema = {
   },
 };
 
-const decorateRequestedRole = async ({ request, db }, next) => {
-  const role = await getRoleInfo(db, request.body);
+const decorateRequestedRole = async (ctx, next) => {
+  const { request } = ctx;
+  const role = await getRoleInfo(ctx, request.body);
 
   // decorate session with requested role data
   request.session = {
@@ -52,8 +53,9 @@ const isUserAuthorized = async ({ request }, next) => {
   await next();
 };
 
-async function handler({ request, response, db }) {
-  const isRoleDeleted = await deleteRole(db, request.session.role);
+async function handler(ctx) {
+  const { request, response } = ctx;
+  const isRoleDeleted = await deleteRole(ctx, request.session.role);
 
   if (!isRoleDeleted) {
     throw Boom.internal();

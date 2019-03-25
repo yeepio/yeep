@@ -30,7 +30,7 @@ describe('api/role.list', () => {
     ctx = server.getAppContext();
 
     // user "wile" is admin in acme + monsters org
-    wile = await createUser(ctx.db, {
+    wile = await createUser(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
       fullName: 'Wile E. Coyote',
@@ -44,36 +44,36 @@ describe('api/role.list', () => {
       ],
     });
     [acme, monsters, umbrella] = await Promise.all([
-      createOrg(ctx.db, {
+      createOrg(ctx, {
         name: 'Acme Inc',
         slug: 'acme',
         adminId: wile.id,
       }),
-      createOrg(ctx.db, {
+      createOrg(ctx, {
         name: 'Monsters Inc',
         slug: 'monsters',
         adminId: wile.id,
       }),
-      createOrg(ctx.db, {
+      createOrg(ctx, {
         name: 'Umbrella Corp',
         slug: 'umbrella',
       }),
     ]);
 
     // create test permission + role(s)
-    permission = await createPermission(ctx.db, {
+    permission = await createPermission(ctx, {
       name: 'acme.code.write',
       description: 'Permission to edit (write, delete, update) source code',
     });
 
     roles = await Promise.all([
-      createRole(ctx.db, {
+      createRole(ctx, {
         name: 'acme:developer',
         description: 'Developer role',
         permissions: [permission.id],
         scope: acme.id,
       }),
-      createRole(ctx.db, {
+      createRole(ctx, {
         name: 'monsters:developer',
         description: 'Developer role',
         permissions: [permission.id],
@@ -81,13 +81,13 @@ describe('api/role.list', () => {
       }),
     ]);
 
-    globalRole = await createRole(ctx.db, {
+    globalRole = await createRole(ctx, {
       name: 'global:role',
       description: 'Global test role',
       permissions: [permission.id],
     });
 
-    await assignRole(ctx.db, {
+    await assignRole(ctx, {
       userId: wile.id,
       roleId: globalRole.id,
     });
@@ -101,13 +101,13 @@ describe('api/role.list', () => {
 
   afterAll(async () => {
     await destroySession(ctx, session);
-    await Promise.all(roles.map((role) => deleteRole(ctx.db, role)));
-    await deleteRole(ctx.db, globalRole);
-    await deletePermission(ctx.db, permission);
-    await deleteUser(ctx.db, wile);
-    await deleteOrg(ctx.db, acme);
-    await deleteOrg(ctx.db, monsters);
-    await deleteOrg(ctx.db, umbrella);
+    await Promise.all(roles.map((role) => deleteRole(ctx, role)));
+    await deleteRole(ctx, globalRole);
+    await deletePermission(ctx, permission);
+    await deleteUser(ctx, wile);
+    await deleteOrg(ctx, acme);
+    await deleteOrg(ctx, monsters);
+    await deleteOrg(ctx, umbrella);
     await server.teardown();
   });
 

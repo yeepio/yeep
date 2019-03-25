@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { ImmutableRoleError } from '../../../constants/errors';
 
-async function deleteRole(db, role) {
+async function deleteRole({ db }, role) {
   const RoleModel = db.model('Role');
 
   // make sure role is not system-defined

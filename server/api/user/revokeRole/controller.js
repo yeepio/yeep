@@ -54,8 +54,9 @@ const isUserAuthorized = async ({ request }, next) => {
   await next();
 };
 
-async function handler({ request, response, db }) {
-  const isRoleAssignmentDeleted = await deleteRoleAssignment(db, request.body);
+async function handler(ctx) {
+  const { request, response } = ctx;
+  const isRoleAssignmentDeleted = await deleteRoleAssignment(ctx, request.body);
 
   if (!isRoleAssignmentDeleted) {
     throw Boom.internal();

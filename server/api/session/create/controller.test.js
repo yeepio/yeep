@@ -19,7 +19,7 @@ describe('api/session.create', () => {
     await server.setup(config);
     ctx = server.getAppContext();
 
-    wile = await createUser(ctx.db, {
+    wile = await createUser(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
       fullName: 'Wile E. Coyote',
@@ -35,7 +35,7 @@ describe('api/session.create', () => {
   });
 
   afterAll(async () => {
-    await deleteUser(ctx.db, wile);
+    await deleteUser(ctx, wile);
     await server.teardown();
   });
 
@@ -207,19 +207,19 @@ describe('api/session.create', () => {
     let permissionAssignment;
 
     beforeAll(async () => {
-      acme = await createOrg(ctx.db, {
+      acme = await createOrg(ctx, {
         name: 'Acme Inc',
         slug: 'acme',
         adminId: wile.id,
       });
 
-      permission = await createPermission(ctx.db, {
+      permission = await createPermission(ctx, {
         name: 'acme.test',
         description: 'Test permission',
         scope: acme.id,
       });
 
-      permissionAssignment = await createPermissionAssignment(ctx.db, {
+      permissionAssignment = await createPermissionAssignment(ctx, {
         userId: wile.id,
         orgId: acme.id,
         permissionId: permission.id,
@@ -227,9 +227,9 @@ describe('api/session.create', () => {
     });
 
     afterAll(async () => {
-      await deletePermissionAssignment(ctx.db, permissionAssignment);
-      await deleteOrg(ctx.db, acme);
-      await deletePermission(ctx.db, permission);
+      await deletePermissionAssignment(ctx, permissionAssignment);
+      await deleteOrg(ctx, acme);
+      await deletePermission(ctx, permission);
     });
 
     test('adds permissions to accessToken payload when `scope.permissions` is true', async () => {

@@ -117,7 +117,8 @@ export const isUserAuthenticated = () => async ({ request }, next) => {
   await next();
 };
 
-export const decorateUserPermissions = () => async ({ request, db }, next) => {
+export const decorateUserPermissions = () => async (ctx, next) => {
+  const { request } = ctx;
   // ensure user is authenticated
   if (!has(request, ['session', 'user'])) {
     throw new AuthorizationError('Unable to authorize non-authenticated user');
@@ -127,7 +128,7 @@ export const decorateUserPermissions = () => async ({ request, db }, next) => {
   const userId = request.session.user.id;
 
   // retrieve user permissions
-  const userPermissions = await getUserPermissions(db, { userId });
+  const userPermissions = await getUserPermissions(ctx, { userId });
 
   // decorate request with user permissions
   request.session = {

@@ -121,13 +121,14 @@ const isUserParamsRequired = async ({ request }, next) => {
   await next();
 };
 
-async function handler({ request, response, db, bus }) {
+async function handler(ctx) {
+  const { request, response, db, bus } = ctx;
   const { invitationToken } = request.session;
   const TokenModel = db.model('Token');
 
   const user = await (request.session.user
-    ? getUserInfo(db, { id: request.session.user.id })
-    : createUser(db, {
+    ? getUserInfo(ctx, { id: request.session.user.id })
+    : createUser(ctx, {
         username: request.body.username,
         password: request.body.password,
         fullName: request.body.fullName,
@@ -141,7 +142,7 @@ async function handler({ request, response, db, bus }) {
       }));
 
   // create org membership
-  await addMemberToOrg(db, {
+  await addMemberToOrg(ctx, {
     orgId: invitationToken.org.toHexString(),
     userId: user.id,
     permissions: invitationToken.payload.get('permissions'),

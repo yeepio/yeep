@@ -51,7 +51,7 @@ describe('api/user.list', () => {
     let session;
 
     beforeAll(async () => {
-      wile = await createUser(ctx.db, {
+      wile = await createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -66,12 +66,12 @@ describe('api/user.list', () => {
       });
 
       [acme, monsters] = await Promise.all([
-        createOrg(ctx.db, {
+        createOrg(ctx, {
           name: 'Acme Inc',
           slug: 'acme',
           adminId: wile.id,
         }),
-        createOrg(ctx.db, {
+        createOrg(ctx, {
           name: 'Monsters Inc',
           slug: 'monsters',
           adminId: wile.id,
@@ -79,7 +79,7 @@ describe('api/user.list', () => {
       ]);
 
       // create test users
-      porky = await createUser(ctx.db, {
+      porky = await createUser(ctx, {
         username: 'porky',
         password: "Th-th-th-that's all folks!",
         fullName: 'Porky Pig',
@@ -94,7 +94,7 @@ describe('api/user.list', () => {
         orgs: [acme.id],
       });
 
-      wazowski = await createUser(ctx.db, {
+      wazowski = await createUser(ctx, {
         username: 'wazowski',
         password: 'grrrrrrrrrrr',
         fullName: 'Mike Wazowski',
@@ -109,7 +109,7 @@ describe('api/user.list', () => {
         orgs: [monsters.id],
       });
 
-      spongebob = await createUser(ctx.db, {
+      spongebob = await createUser(ctx, {
         username: 'spongebob',
         password: 'weeeeedddd',
         fullName: 'SpongeBob SquarePants',
@@ -133,12 +133,12 @@ describe('api/user.list', () => {
 
     afterAll(async () => {
       await destroySession(ctx, session);
-      await deleteUser(ctx.db, wile);
-      await deleteUser(ctx.db, porky);
-      await deleteUser(ctx.db, wazowski);
-      await deleteUser(ctx.db, spongebob);
-      await deleteOrg(ctx.db, acme);
-      await deleteOrg(ctx.db, monsters);
+      await deleteUser(ctx, wile);
+      await deleteUser(ctx, porky);
+      await deleteUser(ctx, wazowski);
+      await deleteUser(ctx, spongebob);
+      await deleteOrg(ctx, acme);
+      await deleteOrg(ctx, monsters);
     });
 
     test('returns list of users the requestor has access to', async () => {

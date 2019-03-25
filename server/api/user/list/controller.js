@@ -39,10 +39,11 @@ export const validationSchema = {
   },
 };
 
-async function handler({ request, response, db }) {
+async function handler(ctx) {
+  const { request, response } = ctx;
   const { q, limit, cursor, projection } = request.body;
 
-  const users = await listUsers(db, {
+  const users = await listUsers(ctx, {
     q,
     limit,
     cursor: cursor ? parseCursor(cursor) : null,

@@ -11,7 +11,7 @@ export const parseCursor = (cursorStr) => {
   return { id };
 };
 
-async function listRoles(db, { q, limit, cursor, scopes, isSystemRole }) {
+async function listRoles({ db }, { q, limit, cursor, scopes, isSystemRole }) {
   const RoleModel = db.model('Role');
 
   // retrieve roles
@@ -40,8 +40,9 @@ async function listRoles(db, { q, limit, cursor, scopes, isSystemRole }) {
           : {},
         isSystemRole
           ? {
-            isSystemRole: { $eq: isSystemRole },
-          } : {},
+              isSystemRole: { $eq: isSystemRole },
+            }
+          : {}
       ),
     },
     {
@@ -87,10 +88,12 @@ async function listRoles(db, { q, limit, cursor, scopes, isSystemRole }) {
   return roles.map((role) => ({
     id: role._id.toHexString(),
     name: role.name,
-    org: has(role, ['org', '_id']) ? {
-      id: role.org._id.toHexString(),
-      name: role.org.name,
-    } : null,
+    org: has(role, ['org', '_id'])
+      ? {
+          id: role.org._id.toHexString(),
+          name: role.org.name,
+        }
+      : null,
     description: role.description,
     isSystemRole: role.isSystemRole,
     permissions: role.permissions,

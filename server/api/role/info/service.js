@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { RoleNotFoundError } from '../../../constants/errors';
 
-async function getRoleInfo(db, { id }) {
+async function getRoleInfo({ db }, { id }) {
   const RoleModel = db.model('Role');
 
   // retrieve role from db

@@ -138,8 +138,9 @@ const isUserAuthorized = async ({ request }, next) => {
   await next();
 };
 
-async function handler({ request, response, db }) {
-  const isMemberAdded = await addMemberToOrg(db, request.body);
+async function handler(ctx) {
+  const { request, response } = ctx;
+  const isMemberAdded = await addMemberToOrg(ctx, request.body);
 
   if (!isMemberAdded) {
     throw Boom.internal();

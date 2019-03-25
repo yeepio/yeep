@@ -46,7 +46,7 @@ describe('api/user.deletePicture', () => {
     let runnerSession;
 
     beforeAll(async () => {
-      wile = await createUser(ctx.db, {
+      wile = await createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -64,7 +64,7 @@ describe('api/user.deletePicture', () => {
       const permission = await PermissionModel.findOne({
         name: 'yeep.user.write',
       });
-      permissionAssignment = await createPermissionAssignment(ctx.db, {
+      permissionAssignment = await createPermissionAssignment(ctx, {
         userId: wile.id,
         permissionId: permission.id,
         // global org
@@ -75,7 +75,7 @@ describe('api/user.deletePicture', () => {
         password: 'catch-the-b1rd$',
       });
 
-      runner = await createUser(ctx.db, {
+      runner = await createUser(ctx, {
         username: 'runner',
         password: 'fast+furry-ous',
         fullName: 'Road Runner',
@@ -98,9 +98,9 @@ describe('api/user.deletePicture', () => {
     afterAll(async () => {
       await destroySession(ctx, wileSession);
       await destroySession(ctx, runnerSession);
-      await deletePermissionAssignment(ctx.db, permissionAssignment);
-      await deleteUser(ctx.db, wile);
-      await deleteUser(ctx.db, runner);
+      await deletePermissionAssignment(ctx, permissionAssignment);
+      await deleteUser(ctx, wile);
+      await deleteUser(ctx, runner);
     });
 
     test('deletes user profile picture', async () => {

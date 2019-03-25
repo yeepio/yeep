@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 
-async function deleteUser(db, { id }) {
+async function deleteUser({ db }, { id }) {
   const UserModel = db.model('User');
   const CredentialsModel = db.model('Credentials');
   const OrgMembershipModel = db.model('OrgMembership');

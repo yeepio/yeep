@@ -17,7 +17,7 @@ const getAdminRole = memoize(
   () => 'role'
 );
 
-async function createOrg(db, { name, slug, adminId }) {
+async function createOrg({ db }, { name, slug, adminId }) {
   const OrgModel = db.model('Org');
   const OrgMembershipModel = db.model('OrgMembership');
 

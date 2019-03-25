@@ -6,7 +6,7 @@ import {
   DuplicateRoleError,
 } from '../../../constants/errors';
 
-async function updateRole(db, role, nextProps) {
+async function updateRole({ db }, role, nextProps) {
   const PermissionModel = db.model('Permission');
   const RoleModel = db.model('Role');
 

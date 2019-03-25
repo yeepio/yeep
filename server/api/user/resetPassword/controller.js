@@ -21,8 +21,9 @@ export const validationSchema = {
   },
 };
 
-async function handler({ request, response, db, bus }) {
-  const user = await resetPassword(db, bus, request.body);
+async function handler(ctx) {
+  const { request, response } = ctx;
+  const user = await resetPassword(ctx, request.body);
 
   response.status = 200; // OK
   response.body = {

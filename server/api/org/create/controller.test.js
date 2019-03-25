@@ -47,7 +47,7 @@ describe('api/org.create', () => {
     let session;
 
     beforeAll(async () => {
-      wile = await createUser(ctx.db, {
+      wile = await createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -69,7 +69,7 @@ describe('api/org.create', () => {
 
     afterAll(async () => {
       await destroySession(ctx, session);
-      await deleteUser(ctx.db, wile);
+      await deleteUser(ctx, wile);
     });
 
     test('returns error when `slug` contains invalid characters', async () => {
@@ -221,15 +221,15 @@ describe('api/org.create', () => {
         }),
       });
 
-      const admin = await getUserInfo(ctx.db, wile);
+      const admin = await getUserInfo(ctx, wile);
       expect(admin.orgs).toEqual(expect.arrayContaining([res.body.org.id]));
 
-      const isOrgDeleted = await deleteOrg(ctx.db, res.body.org);
+      const isOrgDeleted = await deleteOrg(ctx, res.body.org);
       expect(isOrgDeleted).toBe(true);
     });
 
     test('returns error on duplicate org slug', async () => {
-      const org = await createOrg(ctx.db, {
+      const org = await createOrg(ctx, {
         name: 'ACME Inc.',
         slug: 'acme',
         adminId: wile.id,
@@ -250,7 +250,7 @@ describe('api/org.create', () => {
         },
       });
 
-      const isOrgDeleted = await deleteOrg(ctx.db, org);
+      const isOrgDeleted = await deleteOrg(ctx, org);
       expect(isOrgDeleted).toBe(true);
     });
   });
@@ -262,7 +262,7 @@ describe('api/org.create', () => {
     beforeAll(async () => {
       ctx.config.isOrgCreationOpen = false;
 
-      user = await createUser(ctx.db, {
+      user = await createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -285,7 +285,7 @@ describe('api/org.create', () => {
     afterAll(async () => {
       ctx.config.isOrgCreationOpen = true;
       await destroySession(ctx, session);
-      await deleteUser(ctx.db, user);
+      await deleteUser(ctx, user);
     });
 
     describe('user does not have required permission', () => {
@@ -316,7 +316,7 @@ describe('api/org.create', () => {
       beforeAll(async () => {
         const PermissionModel = ctx.db.model('Permission');
         const permission = await PermissionModel.findOne({ name: 'yeep.org.write' });
-        permissionAssignment = await createPermissionAssignment(ctx.db, {
+        permissionAssignment = await createPermissionAssignment(ctx, {
           userId: user.id,
           permissionId: permission.id,
           // global org
@@ -324,7 +324,7 @@ describe('api/org.create', () => {
       });
 
       afterAll(async () => {
-        await deletePermissionAssignment(ctx.db, permissionAssignment);
+        await deletePermissionAssignment(ctx, permissionAssignment);
       });
 
       test('creates new org and returns expected response', async () => {
@@ -349,10 +349,10 @@ describe('api/org.create', () => {
           }),
         });
 
-        const admin = await getUserInfo(ctx.db, user);
+        const admin = await getUserInfo(ctx, user);
         expect(admin.orgs).toEqual(expect.arrayContaining([res.body.org.id]));
 
-        const isOrgDeleted = await deleteOrg(ctx.db, res.body.org);
+        const isOrgDeleted = await deleteOrg(ctx, res.body.org);
         expect(isOrgDeleted).toBe(true);
       });
     });

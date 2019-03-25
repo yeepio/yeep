@@ -12,7 +12,7 @@ import {
 } from '../../../constants/errors';
 
 const addMemberToOrg = async (
-  db,
+  { db },
   { orgId, userId, permissions = [], roles = [], expiresInSeconds }
 ) => {
   const OrgModel = db.model('Org');

@@ -1,7 +1,7 @@
 import { ObjectId } from 'mongodb';
 import { ImmutablePermissionError } from '../../../constants/errors';
 
-async function deletePermission(db, permission) {
+async function deletePermission({ db }, permission) {
   const PermissionModel = db.model('Permission');
 
   // make sure permission is not system-defined

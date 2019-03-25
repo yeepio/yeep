@@ -56,8 +56,9 @@ const adaptiveAuthZ = async (ctx, next) => {
   await next();
 };
 
-async function handler({ request, response, db }) {
-  const org = await createOrg(db, {
+async function handler(ctx) {
+  const { request, response } = ctx;
+  const org = await createOrg(ctx, {
     ...request.body,
     adminId: request.session.user.id,
   });

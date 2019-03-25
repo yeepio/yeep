@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb';
 import addSeconds from 'date-fns/add_seconds';
 import { UserNotFoundError } from '../../../constants/errors';
 
-async function deactivateUser(db, { id, deactivateAfterSeconds = 0 }) {
+async function deactivateUser({ db }, { id, deactivateAfterSeconds = 0 }) {
   const UserModel = db.model('User');
   const currentDate = new Date();
   const deactivatedAt = addSeconds(currentDate, deactivateAfterSeconds);

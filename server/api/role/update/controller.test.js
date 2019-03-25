@@ -28,7 +28,7 @@ describe('api/role.update', () => {
     await server.setup(config);
     ctx = server.getAppContext();
 
-    user = await createUser(ctx.db, {
+    user = await createUser(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
       fullName: 'Wile E. Coyote',
@@ -42,13 +42,13 @@ describe('api/role.update', () => {
       ],
     });
 
-    org = await createOrg(ctx.db, {
+    org = await createOrg(ctx, {
       name: 'Acme Inc',
       slug: 'acme',
       adminId: user.id,
     });
 
-    permission = await createPermission(ctx.db, {
+    permission = await createPermission(ctx, {
       name: 'acme.test',
       description: 'you know, for testing',
       scope: org.id,
@@ -56,7 +56,7 @@ describe('api/role.update', () => {
 
     const PermissionModel = ctx.db.model('Permission');
     const requiredPermission = await PermissionModel.findOne({ name: 'yeep.role.write' });
-    permissionAssignment = await createPermissionAssignment(ctx.db, {
+    permissionAssignment = await createPermissionAssignment(ctx, {
       userId: user.id,
       orgId: org.id,
       permissionId: requiredPermission.id,
@@ -70,10 +70,10 @@ describe('api/role.update', () => {
 
   afterAll(async () => {
     await destroySession(ctx, session);
-    await deletePermissionAssignment(ctx.db, permissionAssignment);
-    await deletePermission(ctx.db, permission);
-    await deleteOrg(ctx.db, org);
-    await deleteUser(ctx.db, user);
+    await deletePermissionAssignment(ctx, permissionAssignment);
+    await deletePermission(ctx, permission);
+    await deleteOrg(ctx, org);
+    await deleteUser(ctx, user);
     await server.teardown();
   });
 
@@ -99,7 +99,7 @@ describe('api/role.update', () => {
   test('returns error when role is system-defined', async () => {
     // explicitely assign permission to global scope
     const globalPermission = await ctx.db.model('Permission').findOne({ name: 'yeep.role.write' });
-    const globalPermissionAssignment = await createPermissionAssignment(ctx.db, {
+    const globalPermissionAssignment = await createPermissionAssignment(ctx, {
       userId: user.id,
       permissionId: globalPermission.id,
     });
@@ -124,11 +124,11 @@ describe('api/role.update', () => {
       },
     });
 
-    await deletePermissionAssignment(ctx.db, globalPermissionAssignment);
+    await deletePermissionAssignment(ctx, globalPermissionAssignment);
   });
 
   test('returns error when specified permission does not exist', async () => {
-    const role = await createRole(ctx.db, {
+    const role = await createRole(ctx, {
       name: 'acme:manager',
       description: 'This is a test',
       permissions: [permission.id],
@@ -155,14 +155,14 @@ describe('api/role.update', () => {
       },
     });
 
-    const isRoleDeleted = await deleteRole(ctx.db, {
+    const isRoleDeleted = await deleteRole(ctx, {
       id: role.id,
     });
     expect(isRoleDeleted).toBe(true);
   });
 
   test('updates role and returns expected response', async () => {
-    const role = await createRole(ctx.db, {
+    const role = await createRole(ctx, {
       name: 'acme:manager',
       description: 'This is a test',
       permissions: [permission.id],
@@ -194,7 +194,7 @@ describe('api/role.update', () => {
     expect(compareDesc(role.createdAt, res.body.role.createdAt)).toBe(0);
     expect(compareDesc(role.updatedAt, res.body.role.updatedAt)).toBe(1);
 
-    const isRoleDeleted = await deleteRole(ctx.db, {
+    const isRoleDeleted = await deleteRole(ctx, {
       id: role.id,
     });
     expect(isRoleDeleted).toBe(true);
@@ -202,7 +202,7 @@ describe('api/role.update', () => {
 
   test('returns error when role is out of scope', async () => {
     const globalPermission = await ctx.db.model('Permission').findOne({ name: 'yeep.role.write' });
-    const role = await createRole(ctx.db, {
+    const role = await createRole(ctx, {
       // note the absence of scope to denote global permission
       name: 'developer',
       description: 'This is a test',
@@ -226,7 +226,7 @@ describe('api/role.update', () => {
       },
     });
 
-    const isRoleDeleted = await deleteRole(ctx.db, {
+    const isRoleDeleted = await deleteRole(ctx, {
       id: role.id,
     });
     expect(isRoleDeleted).toBe(true);

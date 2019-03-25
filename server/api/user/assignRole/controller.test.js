@@ -57,7 +57,7 @@ describe('api/user.assignRole', () => {
     let session;
 
     beforeAll(async () => {
-      wile = await createUser(ctx.db, {
+      wile = await createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -71,7 +71,7 @@ describe('api/user.assignRole', () => {
         ],
       });
 
-      acme = await createOrg(ctx.db, {
+      acme = await createOrg(ctx, {
         name: 'Acme Inc',
         slug: 'acme',
         adminId: wile.id,
@@ -81,19 +81,19 @@ describe('api/user.assignRole', () => {
       const requiredPermission = await PermissionModel.findOne({
         name: 'yeep.role.assignment.write',
       });
-      permissionAssignment = await createPermissionAssignment(ctx.db, {
+      permissionAssignment = await createPermissionAssignment(ctx, {
         userId: wile.id,
         orgId: acme.id,
         permissionId: requiredPermission.id,
       });
 
-      permission = await createPermission(ctx.db, {
+      permission = await createPermission(ctx, {
         name: 'acme.code.write',
         description: 'Permission to edit (write, delete, update) source code',
         scope: acme.id,
       });
 
-      role = await createRole(ctx.db, {
+      role = await createRole(ctx, {
         name: 'acme:developer',
         description: 'Developer role',
         permissions: [permission.id],
@@ -108,11 +108,11 @@ describe('api/user.assignRole', () => {
 
     afterAll(async () => {
       await destroySession(ctx, session);
-      await deletePermissionAssignment(ctx.db, permissionAssignment);
-      await deletePermission(ctx.db, permission);
-      await deleteRole(ctx.db, role);
-      await deleteOrg(ctx.db, acme);
-      await deleteUser(ctx.db, wile);
+      await deletePermissionAssignment(ctx, permissionAssignment);
+      await deletePermission(ctx, permission);
+      await deleteRole(ctx, role);
+      await deleteOrg(ctx, acme);
+      await deleteUser(ctx, wile);
     });
 
     test('returns error when `userId` contains invalid characters', async () => {
@@ -424,7 +424,7 @@ describe('api/user.assignRole', () => {
         },
       });
 
-      const isRoleAssignmentDeleted = await deleteRoleAssignment(ctx.db, res.body.roleAssignment);
+      const isRoleAssignmentDeleted = await deleteRoleAssignment(ctx, res.body.roleAssignment);
       expect(isRoleAssignmentDeleted).toBe(true);
     });
   });
@@ -439,7 +439,7 @@ describe('api/user.assignRole', () => {
     let session;
 
     beforeAll(async () => {
-      user = await createUser(ctx.db, {
+      user = await createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -453,25 +453,25 @@ describe('api/user.assignRole', () => {
         ],
       });
 
-      org = await createOrg(ctx.db, {
+      org = await createOrg(ctx, {
         name: 'Acme Inc',
         slug: 'acme',
         adminId: user.id,
       });
 
-      otherOrg = await createOrg(ctx.db, {
+      otherOrg = await createOrg(ctx, {
         name: 'Monsters Inc',
         slug: 'monsters',
         adminId: user.id,
       });
 
-      permission = await createPermission(ctx.db, {
+      permission = await createPermission(ctx, {
         name: 'acme.code.write',
         description: 'Permission to edit (write, delete, update) source code',
         scope: otherOrg.id,
       });
 
-      role = await createRole(ctx.db, {
+      role = await createRole(ctx, {
         name: 'acme:developer',
         description: 'Developer role',
         permissions: [permission.id],
@@ -482,7 +482,7 @@ describe('api/user.assignRole', () => {
       const requiredpermission = await PermissionModel.findOne({
         name: 'yeep.role.assignment.write',
       });
-      permissionAssignment = await createPermissionAssignment(ctx.db, {
+      permissionAssignment = await createPermissionAssignment(ctx, {
         userId: user.id,
         permissionId: requiredpermission.id,
       });
@@ -495,12 +495,12 @@ describe('api/user.assignRole', () => {
 
     afterAll(async () => {
       await destroySession(ctx, session);
-      await deletePermissionAssignment(ctx.db, permissionAssignment);
-      await deleteRole(ctx.db, role);
-      await deletePermission(ctx.db, permission);
-      await deleteUser(ctx.db, user);
-      await deleteOrg(ctx.db, org);
-      await deleteOrg(ctx.db, otherOrg);
+      await deletePermissionAssignment(ctx, permissionAssignment);
+      await deleteRole(ctx, role);
+      await deletePermission(ctx, permission);
+      await deleteUser(ctx, user);
+      await deleteOrg(ctx, org);
+      await deleteOrg(ctx, otherOrg);
     });
 
     test('returns error when role scope does not match the designated org', async () => {

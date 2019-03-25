@@ -115,7 +115,7 @@ async function handler({ request, response, db, config }) {
     throw boom;
   }
 
-  const user = await createUser(db, request.body);
+  const user = await createUser({ db }, request.body);
 
   response.status = 200; // OK
   response.body = {

@@ -48,7 +48,7 @@ describe('api/invitation.create', () => {
     let session;
 
     beforeAll(async () => {
-      requestor = await createUser(ctx.db, {
+      requestor = await createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -62,7 +62,7 @@ describe('api/invitation.create', () => {
         ],
       });
 
-      org = await createOrg(ctx.db, {
+      org = await createOrg(ctx, {
         name: 'Acme Inc',
         slug: 'acme',
         adminId: requestor.id,
@@ -72,7 +72,7 @@ describe('api/invitation.create', () => {
       const permission = await PermissionModel.findOne({
         name: 'yeep.invitation.write',
       });
-      permissionAssignment = await createPermissionAssignment(ctx.db, {
+      permissionAssignment = await createPermissionAssignment(ctx, {
         userId: requestor.id,
         orgId: null, // global scope
         permissionId: permission.id,
@@ -86,9 +86,9 @@ describe('api/invitation.create', () => {
 
     afterAll(async () => {
       await destroySession(ctx, session);
-      await deletePermissionAssignment(ctx.db, permissionAssignment);
-      await deleteUser(ctx.db, requestor);
-      await deleteOrg(ctx.db, org);
+      await deletePermissionAssignment(ctx, permissionAssignment);
+      await deleteUser(ctx, requestor);
+      await deleteOrg(ctx, org);
     });
 
     test('invites user via email', async () => {

@@ -30,7 +30,7 @@ describe('api/org.list', () => {
 
     // user "wile" is admin in acme + monsters org
     [wile, oswell, professor] = await Promise.all([
-      createUser(ctx.db, {
+      createUser(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
         fullName: 'Wile E. Coyote',
@@ -43,7 +43,7 @@ describe('api/org.list', () => {
           },
         ],
       }),
-      createUser(ctx.db, {
+      createUser(ctx, {
         username: 'oswell',
         password: 'our-business-$s-l1f3-1ts3lf',
         fullName: 'Oswell E. Spencer',
@@ -56,7 +56,7 @@ describe('api/org.list', () => {
           },
         ],
       }),
-      createUser(ctx.db, {
+      createUser(ctx, {
         username: 'tyrant',
         password: 't-103MrX',
         fullName: 'Shinji Mikami',
@@ -72,24 +72,24 @@ describe('api/org.list', () => {
     ]);
 
     [acme, monsters, umbrella] = await Promise.all([
-      createOrg(ctx.db, {
+      createOrg(ctx, {
         name: 'Acme Inc',
         slug: 'acme',
         adminId: wile.id,
       }),
-      createOrg(ctx.db, {
+      createOrg(ctx, {
         name: 'Monsters Inc',
         slug: 'monsters',
         adminId: wile.id,
       }),
-      createOrg(ctx.db, {
+      createOrg(ctx, {
         name: 'Umbrella Corp',
         slug: 'umbrella',
       }),
     ]);
 
     // we need the org id to make requests about this user
-    runner = await createUser(ctx.db, {
+    runner = await createUser(ctx, {
       username: 'runner',
       password: 'fast+furry-ous',
       fullName: 'Road Runner',
@@ -110,7 +110,7 @@ describe('api/org.list', () => {
       password: 'catch-the-b1rd$',
     });
 
-    const userReadPermissions = await listPermissions(ctx.db, {
+    const userReadPermissions = await listPermissions(ctx, {
       q: 'yeep.user.read',
       scopes: [null],
       limit: 1,
@@ -123,13 +123,13 @@ describe('api/org.list', () => {
     });
 
     // we add professor to acme organisation
-    await addMemberToOrg(ctx.db, {
+    await addMemberToOrg(ctx, {
       orgId: acme.id,
       userId: professor.id,
     });
 
     // and we give him the global yeep.user.read permission
-    await assignPermission(ctx.db, {
+    await assignPermission(ctx, {
       userId: professor.id,
       orgId: acme.id,
       permissionId: userReadPermissions[0].id,
@@ -139,13 +139,13 @@ describe('api/org.list', () => {
   afterAll(async () => {
     await destroySession(ctx, session);
     await destroySession(ctx, professorSession);
-    await deleteUser(ctx.db, wile);
-    await deleteUser(ctx.db, oswell);
-    await deleteUser(ctx.db, runner);
-    await deleteUser(ctx.db, professor);
-    await deleteOrg(ctx.db, acme);
-    await deleteOrg(ctx.db, monsters);
-    await deleteOrg(ctx.db, umbrella);
+    await deleteUser(ctx, wile);
+    await deleteUser(ctx, oswell);
+    await deleteUser(ctx, runner);
+    await deleteUser(ctx, professor);
+    await deleteOrg(ctx, acme);
+    await deleteOrg(ctx, monsters);
+    await deleteOrg(ctx, umbrella);
     await server.teardown();
   });
 

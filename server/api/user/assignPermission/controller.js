@@ -53,8 +53,9 @@ const isUserAuthorized = async ({ request }, next) => {
   await next();
 };
 
-async function handler({ request, response, db }) {
-  const permissionAssignment = await createPermissionAssignment(db, request.body);
+async function handler(ctx) {
+  const { request, response } = ctx;
+  const permissionAssignment = await createPermissionAssignment(ctx, request.body);
 
   response.status = 200; // OK
   response.body = {
