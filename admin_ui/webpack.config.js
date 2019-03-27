@@ -130,7 +130,7 @@ module.exports = (env) => ({
         test: /\.html$/,
         use: [
           {
-            loader:                                                                             'html-loader',
+            loader: 'html-loader',
           },
         ],
       },
