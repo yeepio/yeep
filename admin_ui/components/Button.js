@@ -2,38 +2,48 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-const Button = ({ children, secondary, className }) => {
-  return (
-    <button
-      className={classNames(
-        'border',
-        'leading-tight',
-        'border-blue',
-        'font-bold',
-        'py-2',
-        'px-4',
-        'rounded',
-        {
-          'bg-white': secondary,
-          'text-blue': secondary,
-          'hover:bg-grey-light': secondary,
-          'active:bg-grey': secondary
-        },
-        {
-          'bg-blue': !secondary,
-          'text-white': !secondary,
-          'hover:bg-blue-dark': !secondary,
-          'hover:text-white': !secondary,
-          'hover:border-blue-dark': !secondary,
-          'active:bg-blue-darker': !secondary,
-          'active:border-blue-darker': !secondary,
-        },
-        className
-      )}
-    >
-      {children}
-    </button>
-  );
+const Button = ({ children, secondary, danger, className }) => {
+  // Common classes for all buttons
+  let styles = classNames('border', 'leading-tight', 'font-bold', 'py-2', 'px-4', 'rounded');
+  if (secondary) {
+    // "Secondary priority" buttons
+    styles = classNames(
+      styles,
+      'border-blue',
+      'bg-white',
+      'text-blue',
+      'hover:bg-grey-light',
+      'active:bg-grey'
+    );
+  } else if (danger) {
+    // Red "Danger" buttons
+    styles = classNames(
+      styles,
+      'bg-red',
+      'text-white',
+      'border-red',
+      'hover:bg-red-dark',
+      'hover:border-red-dark',
+      'active:bg-red-darker',
+      'active:border-red-darker'
+    );
+  } else {
+    // Normal buttons
+    styles = classNames(
+      styles,
+      'border-blue',
+      'bg-blue',
+      'text-white',
+      'hover:bg-blue-dark',
+      'hover:text-white',
+      'hover:border-blue-dark',
+      'active:bg-blue-darker',
+      'active:border-blue-darker'
+    );
+  }
+  // Add any custom classes that come from the props
+  styles = classNames(className, styles);
+  return <button className={styles}>{children}</button>;
 };
 
 Button.propTypes = {
@@ -41,6 +51,8 @@ Button.propTypes = {
   children: PropTypes.node.isRequired,
   // If set to true we'll show a secondary / lower priority button
   secondary: PropTypes.bool,
+  // IF set to true we'll show a red "Danger" button
+  danger: PropTypes.bool,
   // A custom className
   className: PropTypes.string,
 };
@@ -48,6 +60,7 @@ Button.propTypes = {
 Button.defaultProps = {
   children: 'Submit',
   secondary: false,
+  danger: false,
 };
 
 export default Button;

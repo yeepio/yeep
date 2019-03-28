@@ -4,6 +4,7 @@
 
 body {
   @apply antialiased;
+  @apply text-black;
 }
 
 /* Global default styles for Yeep */
