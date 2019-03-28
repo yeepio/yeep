@@ -25,8 +25,7 @@ const tabStyles = [
   'bg-white',
   'py-2',
   'px-4',
-  'no-underline',
-  'text-black'
+  'no-underline'
 ];
 
 /**
@@ -37,7 +36,7 @@ const tabStyles = [
 const getTabStyle = ({ isCurrent }) => {
   return {
     className: isCurrent
-      ? classNames(tabStyles, 'font-semibold -mb-px border-l border-t border-r border-grey')
+      ? classNames(tabStyles, 'text-black font-semibold -mb-px border-l border-t border-r border-grey')
       : classNames(tabStyles),
   };
 };
