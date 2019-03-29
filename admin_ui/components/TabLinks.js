@@ -20,13 +20,7 @@ const TabLinks = ({ links, className }) => {
 };
 
 // Common tab styles
-const tabStyles = [
-  'inline-block',
-  'bg-white',
-  'py-2',
-  'px-4',
-  'no-underline'
-];
+const tabStyles = ['inline-block', 'bg-white', 'py-2', 'px-4', 'no-underline'];
 
 /**
  * Style the <a> tab elements as normal or active
@@ -36,7 +30,16 @@ const tabStyles = [
 const getTabStyle = ({ isCurrent }) => {
   return {
     className: isCurrent
-      ? classNames(tabStyles, 'text-black font-semibold -mb-px border-l border-t border-r border-grey')
+      ? classNames(
+          tabStyles,
+          'text-black',
+          'font-semibold',
+          '-mb-px',
+          'border-l',
+          'border-t',
+          'border-r',
+          'border-grey'
+        )
       : classNames(tabStyles),
   };
 };
