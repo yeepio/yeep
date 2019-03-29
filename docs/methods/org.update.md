@@ -17,8 +17,8 @@ Requestor must be authenticated and assigned with the `yeep.org.write` permissio
 ### Body
 
 - **id** _(string)_ — org ID (required)
-- **name** _(string)_ — the name of the organization (required)
-- **slug** _(string)_ — the URL key of the organization, a.k.a. slug (required)
+- **name** _(string)_ — the name of the organization (optional)
+- **slug** _(string)_ — the URL key of the organization, a.k.a. slug (optional)
 
 _Please note: one of `name` or `slug` must be specified, otherwise update makes no sense._
 
@@ -30,7 +30,7 @@ _Please note: one of `name` or `slug` must be specified, otherwise update makes 
 
 - **ok** _(boolean)_ — indicates whether the request was successfully completed
 - **error** _(Object)_ — contains error details in case of an error
-- **role** _(Object)_ — role details
+- **org** _(Object)_ — org details
 
 ---
 

@@ -45,10 +45,13 @@ const doesRequestedOrgExist = async (ctx, next) => {
 };
 
 const isUserAuthorized = async ({ request }, next) => {
-  const hasPermission = findUserPermissionIndex(request.session.user.permissions, {
-    name: 'yeep.org.write',
-    orgId: request.body.id,
-  }) !== -1;
+  const hasPermission = Array.from(new Set([request.body.id, null])).some(
+    (orgId) =>
+      findUserPermissionIndex(request.session.user.permissions, {
+        name: 'yeep.role.write',
+        orgId,
+      }) !== -1
+  );
 
   if (!hasPermission) {
     throw new AuthorizationError(
