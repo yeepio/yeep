@@ -50,8 +50,9 @@ const OrgEditPage = ({ orgId }) => {
         <legend>Danger zone</legend>
         <Button danger={true}>Delete organization</Button>
       </fieldset>
-      <p>
-        Return to the <Link to="/organizations">list of organizations</Link>
+      <p className="flex">
+        <Link to="/organizations">Return to the list of organizations</Link>
+        <Link to={`/organizations/${orgId}/edit/permissions`} className="ml-auto">Permissions &raquo;</Link>
       </p>
     </React.Fragment>
   );
