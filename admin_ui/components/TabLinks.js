@@ -9,7 +9,7 @@ const TabLinks = ({ links, className }) => {
   return (
     <ul className={classNames('list-reset', 'flex', 'border-grey', 'border-b', className)}>
       {links.map((link) => (
-        <li key={`tab_{link.label}`} className="mr-1">
+        <li key={`tab_${link.label}`} className="mr-1">
           <Link to={link.to} getProps={getTabStyle}>
             {link.label}
           </Link>
@@ -47,7 +47,7 @@ const getTabStyle = ({ isCurrent }) => {
 TabLinks.propTypes = {
   // The "links" prop needs to be an array of strings
   // Each will be passed as the "to" prop of a router <Link/> component
-  links: PropTypes.arrayOf(PropTypes.string).isRequired,
+  links: PropTypes.arrayOf(PropTypes.object).isRequired,
   className: PropTypes.string,
 };
 

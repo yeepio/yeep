@@ -3,6 +3,9 @@ import { Router } from '@reach/router';
 import OrgListPage from './OrgListPage';
 import OrgCreatePage from './OrgCreatePage';
 import OrgEditPage from './OrgEditPage';
+import OrgEditPermissions from './OrgEditPermissions';
+import OrgEditRoles from './OrgEditRoles';
+import OrgEditUserMemberships from './OrgEditUserMemberships';
 
 const OrgMaster = () => {
   return (
@@ -10,6 +13,9 @@ const OrgMaster = () => {
       <OrgListPage path="/" />
       <OrgCreatePage path="/create" />
       <OrgEditPage path="/:orgId/edit" />
+      <OrgEditPermissions path="/:orgId/edit/permissions" />
+      <OrgEditRoles path="/:orgId/edit/roles" />
+      <OrgEditUserMemberships path="/:orgId/edit/users" />
     </Router>
   );
 };
