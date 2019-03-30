@@ -11,6 +11,8 @@ function Modal(props) {
         .modalOverlay {
         left:0;
         top:0;
+        right:0;
+        bottom:0;
           position:absolute;
           width:100%;
           height:100%;
@@ -20,18 +22,33 @@ function Modal(props) {
           justify-content:center;
         }
         .modal {
+        position:relative;
           background-color:white;
           padding:2rem;
           box-shadow:0px 10px 20px 0px rgba(0,0,0,0.5);
         }
+        .modalClose {
+          position:absolute;
+          right:10px;
+          top:10px;
+          width:16px;
+          height:16px;
+          float:right;
+          background:pink;
+        }
       `}</style>
-      <div className="modal">{props.children}</div>
+      <div className="modal">
+        <button onClick={props.onClose} className="modalClose" />
+        {props.children}
+      </div>
     </div>,
     document.getElementById('root')
   );
 }
 
 Modal.propTypes = {
+  // Parent component needs to send an onClose handler
+  onClose: PropTypes.func.isRequired,
   children: PropTypes.node,
 };
 

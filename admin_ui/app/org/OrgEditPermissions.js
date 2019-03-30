@@ -48,7 +48,7 @@ const OrgEditPermissions = ({ orgId }) => {
 
   return (
     <React.Fragment>
-      {showCreateModal && <Modal>Test!</Modal>}
+      {showCreateModal && <Modal onClose={() => setShowCreateModal(false)}>Test!</Modal>}
       <h1 className="mb-6">&quot;Organization name&quot;: Permissions</h1>
       <TabLinks
         className="mb-6"
