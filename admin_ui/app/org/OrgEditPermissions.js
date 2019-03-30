@@ -5,6 +5,7 @@ import useDocumentTitle from '@rehooks/document-title';
 import TabLinks from '../../components/TabLinks';
 import Button from '../../components/Button';
 import Grid from '../../components/Grid';
+import Modal from '../../components/Modal';
 
 // Dummy data
 let permissionHeadings = [
@@ -32,9 +33,22 @@ let permissionData = [
 ];
 
 const OrgEditPermissions = ({ orgId }) => {
+
+  // Set page title
   useDocumentTitle(`Organization name: Permissions`);
+
+  // This component's state will tell us if we need
+  // to show the Create, Edit or Delete modals
+  const [showCreateModal, setShowCreateModal] = React.useState(false);
+
+  // Clicking "Create new permission" should show the appropriate modal
+  function handleCreateClick() {
+    setShowCreateModal(true);
+  }
+
   return (
     <React.Fragment>
+      {showCreateModal && <Modal>Test!</Modal>}
       <h1 className="mb-6">&quot;Organization name&quot;: Permissions</h1>
       <TabLinks
         className="mb-6"
@@ -59,7 +73,7 @@ const OrgEditPermissions = ({ orgId }) => {
       />
       <fieldset className="mb-6">
         <legend>New permissions</legend>
-        <Button>Create new permission</Button>
+        <Button onClick={handleCreateClick}>Create new permission</Button>
         <p className="mt-4">
           Tip: If you want to create a permission that is <em>not</em> scoped to the
           &quot;ORGNAME&quot; organization, please{' '}

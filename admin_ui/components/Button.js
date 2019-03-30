@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-const Button = ({ children, secondary, danger, className }) => {
+const Button = ({ children, secondary, danger, className, onClick }) => {
   // Common classes for all buttons
   let styles = classNames('border', 'leading-tight', 'font-bold', 'py-2', 'px-4', 'rounded');
   if (secondary) {
@@ -43,7 +43,11 @@ const Button = ({ children, secondary, danger, className }) => {
   }
   // Add any custom classes that come from the props
   styles = classNames(className, styles);
-  return <button className={styles}>{children}</button>;
+  return (
+    <button onClick={onClick} className={styles}>
+      {children}
+    </button>
+  );
 };
 
 Button.propTypes = {
@@ -53,6 +57,8 @@ Button.propTypes = {
   secondary: PropTypes.bool,
   // IF set to true we'll show a red "Danger" button
   danger: PropTypes.bool,
+  // Click handler
+  onClick: PropTypes.func,
   // A custom className
   className: PropTypes.string,
 };
@@ -61,6 +67,11 @@ Button.defaultProps = {
   children: 'Submit',
   secondary: false,
   danger: false,
+  onClick: () => {
+    console.log(
+      'Default click method. Please pass the `onClick` prop to this button instance with your own code'
+    );
+  },
 };
 
 export default Button;
