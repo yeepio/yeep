@@ -8,7 +8,7 @@ const GridPager = () => {
         <li className="px-2 inline-block">
           <a href="/">&laquo; Previous</a>
         </li>
-        <li className="px-2 inline-block">
+{/*        <li className="px-2 inline-block">
           <a href="/">1</a>
         </li>
         <li className="px-2 inline-block">
@@ -17,7 +17,7 @@ const GridPager = () => {
         <li className="px-2 inline-block">...</li>
         <li className="px-2 inline-block">
           <a href="/">7</a>
-        </li>
+        </li>*/}
         <li className="px-2 inline-block">
           <a href="/">Next &raquo;</a>
         </li>

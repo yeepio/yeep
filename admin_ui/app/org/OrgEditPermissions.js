@@ -1,11 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from '@reach/router';
+import Store from '../Store';
+import OrgModalCreate from './OrgModalCreate';
 import useDocumentTitle from '@rehooks/document-title';
 import TabLinks from '../../components/TabLinks';
 import Button from '../../components/Button';
 import Grid from '../../components/Grid';
-import Modal from '../../components/Modal';
 
 // Dummy data
 let permissionHeadings = [
@@ -34,21 +35,15 @@ let permissionData = [
 
 const OrgEditPermissions = ({ orgId }) => {
 
+  // Load the store (we need access to store.org.currentModal$)
+  const store = React.useContext(Store);
+
   // Set page title
   useDocumentTitle(`Organization name: Permissions`);
 
-  // This component's state will tell us if we need
-  // to show the Create, Edit or Delete modals
-  const [showCreateModal, setShowCreateModal] = React.useState(false);
-
-  // Clicking "Create new permission" should show the appropriate modal
-  function handleCreateClick() {
-    setShowCreateModal(true);
-  }
-
   return (
     <React.Fragment>
-      {showCreateModal && <Modal onClose={() => setShowCreateModal(false)}>Test!</Modal>}
+      <OrgModalCreate />
       <h1 className="mb-6">&quot;Organization name&quot;: Permissions</h1>
       <TabLinks
         className="mb-6"
@@ -73,7 +68,13 @@ const OrgEditPermissions = ({ orgId }) => {
       />
       <fieldset className="mb-6">
         <legend>New permissions</legend>
-        <Button onClick={handleCreateClick}>Create new permission</Button>
+        <Button
+          onClick={() => {
+            store.org.currentModal$.next('CREATE');
+          }}
+        >
+          Create new permission
+        </Button>
         <p className="mt-4">
           Tip: If you want to create a permission that is <em>not</em> scoped to the
           &quot;ORGNAME&quot; organization, please{' '}
@@ -94,7 +95,8 @@ const OrgEditPermissions = ({ orgId }) => {
                 <td className="p-2 text-center">{permissionData.systemPermission ? 'Yes' : '-'}</td>
                 <td className="p-2 text-center">{permissionData.roles}</td>
                 <td className="p-2 text-center">
-                  <Link to={`/permissions/${permissionData.id}/edit`}>Edit</Link> <a href="/">Delete</a>
+                  <Link to={`/permissions/${permissionData.id}/edit`}>Edit</Link>{' '}
+                  <a href="/">Delete</a>
                 </td>
               </tr>
             );
