@@ -155,7 +155,12 @@ const UserListPage = () => {
               <td className="p-2">
                 <Link to={`${userData.id}/edit`}>{userData.fullName}</Link>
               </td>
-              <td className="p-2 text-center">{userData.verified? `Yes` : `No`}</td>
+              <td className="p-2 text-center">
+                {userData.verified && <img src="/icon-yes.svg" alt="Verified email" width={16} />}
+                {!userData.verified && (
+                  <img src="/icon-no.svg" alt="Non-verified email" width={16} />
+                )}
+              </td>
               <td className="p-2">{userData.email}</td>
               <td className="p-2 text-center">{userData.orgs}</td>
               <td className="p-2 text-center">{userData.roles}</td>
