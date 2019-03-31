@@ -14,14 +14,14 @@ const OrgEditRolesModals = () => {
 
   // Establish the value of the currentModal$ observable
   const currentModal = useObservable(
-    () => store.org.currentModal$,
-    store.org.currentModal$.getValue()
+    () => store.org.currentRolesModal$,
+    store.org.currentRolesModal$.getValue()
   );
 
   const handleESC = (e) => {
     if (e.which === 27) {
       // ESC key pressed. Hide any modals
-      store.org.currentModal$.next('');
+      store.org.currentRolesModal$.next('');
     }
   };
 
@@ -40,7 +40,7 @@ const OrgEditRolesModals = () => {
 
   if (currentModal === 'CREATE') {
     return (
-      <Modal onClose={() => store.org.currentModal$.next('')} className="sm:w-4/5">
+      <Modal onClose={() => store.org.currentRolesModal$.next('')} className="sm:w-4/5">
         <h2 className="mb-4">Create new role</h2>
         <div className="form-group mb-4">
           <label htmlFor="org-name">Organization scope:</label>
@@ -72,7 +72,7 @@ const OrgEditRolesModals = () => {
     );
   } else if (currentModal === 'EDIT') {
     return (
-      <Modal onClose={() => store.org.currentModal$.next('')} className="sm:w-4/5">
+      <Modal onClose={() => store.org.currentRolesModal$.next('')} className="sm:w-4/5">
         <h2 className="mb-4">Edit role</h2>
         <div className="form-group mb-4">
           <label htmlFor="org-name">Organization scope:</label>
@@ -104,7 +104,7 @@ const OrgEditRolesModals = () => {
     );
   } else if (currentModal === 'DELETE') {
     return (
-      <Modal onClose={() => store.org.currentModal$.next('')}>
+      <Modal onClose={() => store.org.currentRolesModal$.next('')}>
         <h2 className="mb-4">Delete role &quot;blog_admin&quot;?</h2>
         <p className="mb-4">
           Please note <Link to="/users">12</Link> users have this role assigned to them.

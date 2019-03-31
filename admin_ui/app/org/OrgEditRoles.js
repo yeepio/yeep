@@ -77,7 +77,7 @@ const OrgEditRoles = ({ orgId }) => {
         <legend>New role</legend>
         <Button
           onClick={() => {
-            store.org.currentModal$.next('CREATE');
+            store.org.currentRolesModal$.next('CREATE');
           }}
         >
           Create new role
@@ -102,7 +102,7 @@ const OrgEditRoles = ({ orgId }) => {
                       // Let's show the edit permission modal
                       // instead of redirecting the user
                       e.preventDefault();
-                      store.org.currentModal$.next('EDIT');
+                      store.org.currentRolesModal$.next('EDIT');
                     }}
                   >
                     {roleData.name}
@@ -117,7 +117,7 @@ const OrgEditRoles = ({ orgId }) => {
                       // Let's show the edit permission modal
                       // instead of redirecting the user
                       e.preventDefault();
-                      store.org.currentModal$.next('EDIT');
+                      store.org.currentRolesModal$.next('EDIT');
                     }}
                   >
                     Edit
@@ -128,7 +128,7 @@ const OrgEditRoles = ({ orgId }) => {
                       // Let's show the delete permission modal
                       // instead of redirecting the user
                       e.preventDefault();
-                      store.org.currentModal$.next('DELETE');
+                      store.org.currentRolesModal$.next('DELETE');
                     }}
                   >
                     Delete

@@ -14,14 +14,14 @@ const OrgEditPermissionsModals = () => {
 
   // Establish the value of the currentModal$ observable
   const currentModal = useObservable(
-    () => store.org.currentModal$,
-    store.org.currentModal$.getValue()
+    () => store.org.currentPermissionsModal$,
+    store.org.currentPermissionsModal$.getValue()
   );
 
   const handleESC = (e) => {
     if (e.which === 27) {
       // ESC key pressed. Hide any modals
-      store.org.currentModal$.next('');
+      store.org.currentPermissionsModal$.next('');
     }
   };
 
@@ -40,7 +40,7 @@ const OrgEditPermissionsModals = () => {
 
   if (currentModal === 'CREATE') {
     return (
-      <Modal onClose={() => store.org.currentModal$.next('')} className="sm:w-4/5">
+      <Modal onClose={() => store.org.currentPermissionsModal$.next('')} className="sm:w-4/5">
         <h2 className="mb-4">Create new permission</h2>
         <div className="form-group mb-4">
           <label htmlFor="org-name">Organization scope:</label>
@@ -66,7 +66,7 @@ const OrgEditPermissionsModals = () => {
     );
   } else if (currentModal === 'EDIT') {
     return (
-      <Modal onClose={() => store.org.currentModal$.next('')} className="sm:w-4/5">
+      <Modal onClose={() => store.org.currentPermissionsModal$.next('')} className="sm:w-4/5">
         <h2 className="mb-4">Edit permission</h2>
         <div className="form-group mb-4">
           <label htmlFor="org-name">Organization scope:</label>
@@ -78,7 +78,6 @@ const OrgEditPermissionsModals = () => {
             id="permission-name"
             placeholder='e.g. "blog.read"'
             className="w-full sm:w-1/2"
-            value="blog.read"
           />
         </div>
         <div className="form-group mb-4">
@@ -88,10 +87,7 @@ const OrgEditPermissionsModals = () => {
             placeholder="Enter a description for this permission"
             className="w-full sm:w-1/2"
             rows="6"
-          >
-            Users with this permission can access our company blog as well as individual articles
-            and content pages.
-          </Textarea>
+          />
         </div>
         <div className="form-submit">
           <Button>Save changes</Button>
@@ -100,7 +96,7 @@ const OrgEditPermissionsModals = () => {
     );
   } else if (currentModal === 'DELETE') {
     return (
-      <Modal onClose={() => store.org.currentModal$.next('')}>
+      <Modal onClose={() => store.org.currentPermissionsModal$.next('')}>
         <h2 className="mb-4">Delete permission &quot;blog.read&quot;?</h2>
         <p className="mb-4">
           Please note that blog.read is present in <Link to="/roles">4</Link> roles.
