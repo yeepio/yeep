@@ -36,7 +36,7 @@ let userData = [
     id: 3,
     username: 'pmartin_5',
     fullName: 'Philip Martin',
-    verified: true,
+    verified: false,
     email: 'mcarvallho45@hotmail.com',
     roles: 2,
   },
@@ -44,7 +44,7 @@ let userData = [
     id: 4,
     username: 'leeleeva',
     fullName: 'Liva Christensen',
-    verified: true,
+    verified: false,
     email: 'leeleeva@gmail.com',
     roles: 1,
   },
@@ -144,7 +144,10 @@ const OrgEditUsers = ({ orgId }) => {
                 <td className="p-2">
                   <Link to={`${userData.id}/edit`}>{userData.fullName}</Link>
                 </td>
-                <td className="p-2 text-center">{userData.verified ? `Yes` : `No`}</td>
+                <td className="p-2 text-center">
+                  {userData.verified && <img src="/icon-yes.svg" alt="Verified email" width={16} />}
+                  {!userData.verified && <img src="/icon-no.svg" alt="Non-verified email" width={16} />}
+                </td>
                 <td className="p-2">{userData.email}</td>
                 <td className="p-2 text-center">{userData.roles}</td>
                 <td className="p-2 text-right">
