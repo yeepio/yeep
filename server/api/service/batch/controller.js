@@ -1,10 +1,11 @@
 import http from 'http';
 import https from 'https';
+import { format as formatUrl } from 'url';
 import Joi from 'joi';
 import Boom from 'boom';
 import compose from 'koa-compose';
 import axios from 'axios';
-import memoize from 'lodash/memoize';
+import memoizeOne from 'memoize-one';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import { decorateSession, isUserAuthenticated } from '../../../middleware/auth';
@@ -47,7 +48,7 @@ const validationSchema = {
   },
 };
 
-const getClient = memoize((baseURL) => {
+const getClient = memoizeOne((baseURL) => {
   return axios.create({
     baseURL,
     httpAgent: new http.Agent({ keepAlive: true }),
@@ -58,6 +59,8 @@ const getClient = memoize((baseURL) => {
 const handler = async (ctx) => {
   const { request, response, config } = ctx;
   const client = getClient(config.baseUrl);
+
+  // process responses
   const responses = await Promise.all(
     request.body.requests.map((e) => {
       const tsStart = Date.now();
@@ -66,8 +69,8 @@ const handler = async (ctx) => {
           method: e.method.toLowerCase(),
           url: e.path,
           headers: {
-            ...request.headers,
             ...e.headers,
+            Authorization: request.headers.authorization,
             'X-Forwarded-For': request.ip,
           },
           data: e.body,

@@ -1,16 +1,11 @@
 /* eslint-env jest */
 import request from 'supertest';
-import noop from 'lodash/noop';
-import axios from 'axios';
-import MockAdapter from 'axios-mock-adapter';
 import config from '../../../../yeep.config';
 import server from '../../../server';
 import createUser from '../../user/create/service';
 import createSession from '../../session/create/service';
 import destroySession from '../../session/destroy/service';
 import deleteUser from '../../user/delete/service';
-
-const mock = new MockAdapter(axios);
 
 describe('api/batch', () => {
   let ctx;
@@ -220,23 +215,7 @@ describe('api/batch', () => {
       expect(res.body.error.details[0].type).toBe('string.regex.name');
     });
 
-    test('handles network error', async () => {
-      const roleResponse = {
-        ok: true,
-        role: {
-          id: '507f191e810c19729de860ea',
-          name: 'acme:manager',
-          description: 'Manager role',
-          permissions: ['327f191e810c19729de76232'],
-          scope: '5b2d649ce248cb779e7f26e2',
-          isSystemRole: false,
-          createdAt: '2017-07-13T05:00:42.145Z',
-          updatedAt: '2017-07-13T05:42:42.222Z',
-        },
-      };
-      mock.onPost('/api/user.info').networkErrorOnce();
-      mock.onPost('/api/role.info').reply(200, roleResponse);
-
+    test('processes requests in batch and returns proper response', async () => {
       const res = await request(server)
         .post('/api/batch')
         .set('Authorization', `Bearer ${wileSession.accessToken}`)
@@ -246,14 +225,14 @@ describe('api/batch', () => {
               method: 'POST',
               path: '/api/user.info',
               body: {
-                id: '507f191e810c19729de860ea',
+                id: wileUser.id,
               },
             },
             {
               method: 'POST',
-              path: '/api/role.info',
+              path: '/api/user.info',
               body: {
-                id: '507f191e810c19729de860fa',
+                id: wileUser.id,
               },
             },
           ],
@@ -264,64 +243,19 @@ describe('api/batch', () => {
         ok: true,
         responses: [
           {
-            ok: false,
-            error: { code: 502, message: 'Network Error' },
+            ok: true,
             ts: expect.any(Number),
+            user: expect.objectContaining({
+              id: wileUser.id,
+            }),
           },
-          roleResponse,
-        ],
-      });
-    });
-
-    test('handles timout errors', async () => {
-      const roleResponse = {
-        ok: true,
-        role: {
-          id: '507f191e810c19729de860ea',
-          name: 'acme:manager',
-          description: 'Manager role',
-          permissions: ['327f191e810c19729de76232'],
-          scope: '5b2d649ce248cb779e7f26e2',
-          isSystemRole: false,
-          createdAt: '2017-07-13T05:00:42.145Z',
-          updatedAt: '2017-07-13T05:42:42.222Z',
-        },
-      };
-      mock.onPost('/api/user.info').timeoutOnce();
-      mock.onPost('/api/role.info').reply(200, roleResponse);
-
-      const res = await request(server)
-        .post('/api/batch')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
-        .send({
-          requests: [
-            {
-              method: 'POST',
-              path: '/api/user.info',
-              body: {
-                id: '507f191e810c19729de860ea',
-              },
-            },
-            {
-              method: 'POST',
-              path: '/api/role.info',
-              body: {
-                id: '507f191e810c19729de860fa',
-              },
-            },
-          ],
-        });
-
-      expect(res.status).toBe(200);
-      expect(res.body).toMatchObject({
-        ok: true,
-        responses: [
           {
-            ok: false,
-            error: { code: 504 },
+            ok: true,
             ts: expect.any(Number),
+            user: expect.objectContaining({
+              id: wileUser.id,
+            }),
           },
-          roleResponse,
         ],
       });
     });
