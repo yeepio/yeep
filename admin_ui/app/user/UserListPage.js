@@ -165,7 +165,7 @@ const UserListPage = () => {
               <td className="p-2 text-center">{userData.orgs}</td>
               <td className="p-2 text-center">{userData.roles}</td>
               <td className="p-2 text-center">
-                <Link to={`${userData.id}/edit`}>Edit</Link> <a href="/">Delete</a>
+                <Link to={`${userData.id}/edit`}>Edit</Link> <a href="/">Remove</a>
               </td>
             </tr>
           );
