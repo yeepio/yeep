@@ -155,7 +155,7 @@ const UserListPage = () => {
               <td className="p-2">
                 <Link to={`${userData.id}/edit`}>{userData.fullName}</Link>
               </td>
-              <td className="p-2 text-center">{userData.verified? `Yay` : `Nay`}</td>
+              <td className="p-2 text-center">{userData.verified? `Yes` : `No`}</td>
               <td className="p-2">{userData.email}</td>
               <td className="p-2 text-center">{userData.orgs}</td>
               <td className="p-2 text-center">{userData.roles}</td>
