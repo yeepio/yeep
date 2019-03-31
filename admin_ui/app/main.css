@@ -82,3 +82,11 @@ legend {
     margin-left: 25%;
   }
 }
+
+/* Modal styles that cannot be applied via Tailwind */
+.modalOverlay {
+  background: rgba(0, 0, 0, 0.3);
+}
+.modal {
+  box-shadow: 0px 10px 20px 0px rgba(0, 0, 0, 0.5);
+}

@@ -2,7 +2,12 @@ import { BehaviorSubject } from 'rxjs';
 
 class OrgStore {
   constructor() {
-    // Potential values: empty string, "create", "edit", "delete"
+    /*
+      In OrgEditPermissions, OrgEditRoles and OrgEditUsers, the
+      Create, Update and Delete actions happen in modals.
+      The currentModal$ observable takes 4 possible values:
+      "" (empty string), "CREATE", "EDIT", "DELETE"
+     */
     this.currentModal$ = new BehaviorSubject('');
   }
 

@@ -4,7 +4,7 @@ import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import TabLinks from '../../components/TabLinks';
 
-const OrgEditUserMemberships = ({ orgId }) => {
+const OrgEditUsers = ({ orgId }) => {
   useDocumentTitle(`Organization name: User memberships`);
   return (
     <React.Fragment>
@@ -37,8 +37,8 @@ const OrgEditUserMemberships = ({ orgId }) => {
   );
 };
 
-OrgEditUserMemberships.propTypes = {
+OrgEditUsers.propTypes = {
   orgId: PropTypes.string,
 };
 
-export default OrgEditUserMemberships;
+export default OrgEditUsers;
