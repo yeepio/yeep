@@ -34,7 +34,6 @@ let permissionData = [
 ];
 
 const OrgEditPermissions = ({ orgId }) => {
-
   // Load the store (we need access to store.org.currentModal$)
   const store = React.useContext(Store);
 
@@ -90,13 +89,43 @@ const OrgEditPermissions = ({ orgId }) => {
             return (
               <tr key={`permissionRow${index}`} className={index % 2 ? `bg-grey-lightest` : ``}>
                 <td className="p-2">
-                  <Link to={`/permissions/${permissionData.id}/edit`}>{permissionData.name}</Link>
+                  <Link
+                    to={`/permissions/${permissionData.id}/edit`}
+                    onClick={(e) => {
+                      // Let's show the edit permission modal
+                      // instead of redirecting the user
+                      e.preventDefault();
+                      store.org.currentModal$.next('EDIT');
+                    }}
+                  >
+                    {permissionData.name}
+                  </Link>
                 </td>
                 <td className="p-2 text-center">{permissionData.systemPermission ? 'Yes' : '-'}</td>
                 <td className="p-2 text-center">{permissionData.roles}</td>
                 <td className="p-2 text-right">
-                  <Link to={`/permissions/${permissionData.id}/edit`}>Edit</Link>{' '}
-                  <a href="/">Delete</a>
+                  <Link
+                    to={`/permissions/${permissionData.id}/edit`}
+                    onClick={(e) => {
+                      // Let's show the edit permission modal
+                      // instead of redirecting the user
+                      e.preventDefault();
+                      store.org.currentModal$.next('EDIT');
+                    }}
+                  >
+                    Edit
+                  </Link>{' '}
+                  <Link
+                    to={`/permissions/${permissionData.id}/delete`}
+                    onClick={(e) => {
+                      // Let's show the delete permission modal
+                      // instead of redirecting the user
+                      e.preventDefault();
+                      store.org.currentModal$.next('DELETE');
+                    }}
+                  >
+                    Delete
+                  </Link>
                 </td>
               </tr>
             );
