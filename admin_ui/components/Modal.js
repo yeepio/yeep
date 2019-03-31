@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 function Modal(props) {
+  console.log(props.className);
   // Use a portal for the modal
   // to attach it as a child of <div id="root">
   return ReactDOM.createPortal(
@@ -22,16 +23,16 @@ function Modal(props) {
       <div
         className={classNames(
           'modal',
-          props.className,
           'w-full',
           'h-full',
-          'sm:w-4/5',
+          'sm:w-auto',
           'sm:h-auto',
           'max-w-lg',
           'relative',
           'bg-white',
           'p-4',
-          'sm:p-8'
+          'sm:p-8',
+          props.className
         )}
       >
         <button
