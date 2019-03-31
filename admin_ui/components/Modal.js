@@ -37,12 +37,14 @@ function Modal(props) {
         <button
           onClick={props.onClose}
           className={classNames(
+            'modalClose',
             'absolute',
-            'w-4',
-            'h-4',
+            'w-8',
+            'h-8',
+            'sm:w-4',
+            'sm:h-4',
             'pin-r',
             'pin-t',
-            'bg-pink',
             'mt-2',
             'mr-2'
           )}
