@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useObservable } from 'rxjs-hooks';
 import Store from '../Store';
 import { Link } from '@reach/router';
@@ -17,6 +17,26 @@ const OrgEditPermissionsModals = () => {
     () => store.org.currentModal$,
     store.org.currentModal$.getValue()
   );
+
+  const handleESC = (e) => {
+    if (e.which === 27) {
+      // ESC key pressed. Hide any modals
+      store.org.currentModal$.next('');
+    }
+  };
+
+  // Hide any modal on ESC keypress
+  // This will be an effect (with cleanup).
+  // We pass [] as second argument to avoid multiple add + remove invocaitons
+  // https://reactjs.org/docs/hooks-effect.html#tip-optimizing-performance-by-skipping-effects for details
+  useEffect(() => {
+    // console.log('useEffect called!!!');
+    window.document.addEventListener('keyup', handleESC);
+    return () => {
+      // console.log('useEffect: removing listener');
+      window.removeEventListener('keyup', handleESC);
+    };
+  }, []);
 
   if (currentModal === 'CREATE') {
     return (
