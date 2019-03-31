@@ -1,13 +1,56 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from '@reach/router';
+import Store from '../Store';
+import OrgEditRolesModals from './OrgEditRolesModals';
 import useDocumentTitle from '@rehooks/document-title';
 import TabLinks from '../../components/TabLinks';
+import Button from '../../components/Button';
+import Grid from '../../components/Grid';
+
+// Dummy data
+let roleHeadings = [
+  {
+    label: 'Name',
+    className: 'text-left',
+  },
+  {
+    label: 'Permissions',
+  },
+  {
+    label: 'Users',
+  },
+  {
+    label: 'Actions',
+    isSortable: false,
+    className: 'text-right',
+  },
+];
+let roleData = [
+  {
+    id: 1,
+    name: 'blog_user',
+    permissionCount: 1,
+    userCount: 10,
+  },
+  {
+    id: 2,
+    name: 'blog_admin',
+    permissionCount: 4,
+    userCount: 2,
+  },
+];
 
 const OrgEditRoles = ({ orgId }) => {
+  // Load the store (we need access to store.org.currentModal$)
+  const store = React.useContext(Store);
+
+  // Set page title
   useDocumentTitle(`Organization name: Roles`);
+
   return (
     <React.Fragment>
+      <OrgEditRolesModals/>
       <h1 className="mb-6">&quot;Organization name&quot;: Roles</h1>
       <TabLinks
         className="mb-6"
@@ -30,9 +73,77 @@ const OrgEditRoles = ({ orgId }) => {
           },
         ]}
       />
+      <fieldset className="mb-6">
+        <legend>New role</legend>
+        <Button
+          onClick={() => {
+            store.org.currentModal$.next('CREATE');
+          }}
+        >
+          Create new role
+        </Button>
+        <p className="mt-4">
+          Tip: If you want to create a role that is <em>not</em> scoped to the &quot;ORGNAME&quot;
+          organization, please visit the <Link to="/roles">Roles</Link> page.
+        </p>
+      </fieldset>
+      <fieldset className="mb-6">
+        <legend>Existing roles</legend>
+        <Grid
+          headings={roleHeadings}
+          data={roleData}
+          renderer={(roleData, index) => {
+            return (
+              <tr key={`roleRow${roleData.id}`} className={index % 2 ? `bg-grey-lightest` : ``}>
+                <td className="p-2">
+                  <Link
+                    to={`/roles/${roleData.id}/edit`}
+                    onClick={(e) => {
+                      // Let's show the edit permission modal
+                      // instead of redirecting the user
+                      e.preventDefault();
+                      store.org.currentModal$.next('EDIT');
+                    }}
+                  >
+                    {roleData.name}
+                  </Link>
+                </td>
+                <td className="p-2 text-center">{roleData.permissionCount}</td>
+                <td className="p-2 text-center">{roleData.userCount}</td>
+                <td className="p-2 text-right">
+                  <Link
+                    to={`/roles/${roleData.id}/edit`}
+                    onClick={(e) => {
+                      // Let's show the edit permission modal
+                      // instead of redirecting the user
+                      e.preventDefault();
+                      store.org.currentModal$.next('EDIT');
+                    }}
+                  >
+                    Edit
+                  </Link>{' '}
+                  <Link
+                    to={`/roles/${roleData.id}/delete`}
+                    onClick={(e) => {
+                      // Let's show the delete permission modal
+                      // instead of redirecting the user
+                      e.preventDefault();
+                      store.org.currentModal$.next('DELETE');
+                    }}
+                  >
+                    Delete
+                  </Link>
+                </td>
+              </tr>
+            );
+          }}
+        />
+      </fieldset>
       <p className="flex">
         <Link to={`/organizations/${orgId}/edit/permissions`}>&laquo; Permissions</Link>
-        <Link to={`/organizations/${orgId}/edit/users`} className="ml-auto">Users &raquo;</Link>
+        <Link to={`/organizations/${orgId}/edit/users`} className="ml-auto">
+          Users &raquo;
+        </Link>
       </p>
     </React.Fragment>
   );
