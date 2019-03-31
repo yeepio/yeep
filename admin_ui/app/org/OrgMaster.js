@@ -5,7 +5,7 @@ import OrgCreatePage from './OrgCreatePage';
 import OrgEditPage from './OrgEditPage';
 import OrgEditPermissions from './OrgEditPermissions';
 import OrgEditRoles from './OrgEditRoles';
-import OrgEditUserMemberships from './OrgEditUserMemberships';
+import OrgEditUsers from './OrgEditUsers';
 
 const OrgMaster = () => {
   return (
@@ -15,7 +15,7 @@ const OrgMaster = () => {
       <OrgEditPage path="/:orgId/edit" />
       <OrgEditPermissions path="/:orgId/edit/permissions" />
       <OrgEditRoles path="/:orgId/edit/roles" />
-      <OrgEditUserMemberships path="/:orgId/edit/users" />
+      <OrgEditUsers path="/:orgId/edit/users" />
     </Router>
   );
 };

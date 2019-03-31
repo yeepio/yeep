@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from '@reach/router';
 import Store from '../Store';
-import OrgModalCreate from './OrgModalCreate';
+import OrgEditPermissionsModals from './OrgEditPermissionsModals';
 import useDocumentTitle from '@rehooks/document-title';
 import TabLinks from '../../components/TabLinks';
 import Button from '../../components/Button';
@@ -16,7 +16,7 @@ let permissionHeadings = [
   },
   { label: 'Is system?' },
   { label: 'Role assignments' },
-  { label: 'Actions', isSortable: false },
+  { label: 'Actions', isSortable: false, className: 'text-right' },
 ];
 let permissionData = [
   {
@@ -43,7 +43,7 @@ const OrgEditPermissions = ({ orgId }) => {
 
   return (
     <React.Fragment>
-      <OrgModalCreate />
+      <OrgEditPermissionsModals />
       <h1 className="mb-6">&quot;Organization name&quot;: Permissions</h1>
       <TabLinks
         className="mb-6"
@@ -94,7 +94,7 @@ const OrgEditPermissions = ({ orgId }) => {
                 </td>
                 <td className="p-2 text-center">{permissionData.systemPermission ? 'Yes' : '-'}</td>
                 <td className="p-2 text-center">{permissionData.roles}</td>
-                <td className="p-2 text-center">
+                <td className="p-2 text-right">
                   <Link to={`/permissions/${permissionData.id}/edit`}>Edit</Link>{' '}
                   <a href="/">Delete</a>
                 </td>
