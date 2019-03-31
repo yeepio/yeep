@@ -69,7 +69,7 @@ const OrgEditPermissions = ({ orgId }) => {
         <legend>New permissions</legend>
         <Button
           onClick={() => {
-            store.org.currentModal$.next('CREATE');
+            store.org.currentPermissionsModal$.next('CREATE');
           }}
         >
           Create new permission
@@ -95,7 +95,7 @@ const OrgEditPermissions = ({ orgId }) => {
                       // Let's show the edit permission modal
                       // instead of redirecting the user
                       e.preventDefault();
-                      store.org.currentModal$.next('EDIT');
+                      store.org.currentPermissionsModal$.next('EDIT');
                     }}
                   >
                     {permissionData.name}
@@ -110,7 +110,7 @@ const OrgEditPermissions = ({ orgId }) => {
                       // Let's show the edit permission modal
                       // instead of redirecting the user
                       e.preventDefault();
-                      store.org.currentModal$.next('EDIT');
+                      store.org.currentPermissionsModal$.next('EDIT');
                     }}
                   >
                     Edit
@@ -121,7 +121,7 @@ const OrgEditPermissions = ({ orgId }) => {
                       // Let's show the delete permission modal
                       // instead of redirecting the user
                       e.preventDefault();
-                      store.org.currentModal$.next('DELETE');
+                      store.org.currentPermissionsModal$.next('DELETE');
                     }}
                   >
                     Delete
