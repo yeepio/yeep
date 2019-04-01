@@ -1,14 +1,17 @@
 language: node_js
 node_js:
   - 8.0
+addons:
+  hosts:
+    - yeep.travis.dev
 env:
   global:
     - MONGODB_URI=mongodb://localhost:27017/yeep
     - JWT_SECRET="keep it safe, keep it hidden!"
     - STORAGE_TYPE="fs"
     - NODE_ENV=test
-    - PORT="5000"
-    - BASE_URL="http://localhost:5000/"
+    - PORT="80"
+    - BASE_URL="http://yeep.travis.dev/"
   matrix:
     - MONGODB=4.0.0
 before_install:
