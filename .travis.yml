@@ -7,7 +7,8 @@ env:
     - JWT_SECRET="keep it safe, keep it hidden!"
     - STORAGE_TYPE="fs"
     - NODE_ENV=test
-    - BASE_URL="https://test.yeep.app/"
+    - PORT="5000"
+    - BASE_URL="http://localhost:5000/"
   matrix:
     - MONGODB=4.0.0
 before_install:
