@@ -1,10 +1,13 @@
 import React from 'react';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
+import Store from '../Store';
 import ButtonLink from '../../components/ButtonLink';
 import Select from 'react-select';
 import Grid from '../../components/Grid';
 import Input from '../../components/Input';
+import PermissionDeleteModal from './PermissionDeleteModal';
+
 // Dummy data
 let permissionHeadings = [
   {
@@ -83,8 +86,13 @@ let permissionData = [
 
 const PermissionListPage = () => {
   useDocumentTitle('Permissions');
+
+  // Load the store (we need access to store.permission.deleteModal$)
+  const store = React.useContext(Store);
+
   return (
     <React.Fragment>
+      <PermissionDeleteModal />
       <ButtonLink to="create" className="float-right">
         Create new
       </ButtonLink>
@@ -142,7 +150,13 @@ const PermissionListPage = () => {
               <td className="p-2 text-center">
                 {permissionData.orgScope && (
                   <React.Fragment>
-                    <Link to={`${permissionData.id}/edit`}>Edit</Link> <a href="/">Delete</a>
+                    <Link to={`${permissionData.id}/edit`}>Edit</Link>{' '}
+                    <button
+                      onClick={() => store.permission.deleteModal$.next('DELETE')}
+                      className="text-blue underline hover:text-blue-dark hover:no-underline"
+                    >
+                      Delete
+                    </button>
                   </React.Fragment>
                 )}
                 {!permissionData.orgScope && <span className="text-grey">Cannot modify</span>}
