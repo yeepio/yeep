@@ -26,12 +26,11 @@ Users are able to update their own account without explicit permissions.
 - **username** _(string)_ — the display name of the user (optional, only accepted as a value if `isUsernameEnabled` setting is true)
 - **password** _(string)_ — user password (optional)
 - **fullName** _(string)_ — user full name, e.g. "Wile E. Coyote"
+- **picture** _(string)_ — user profile picture URL (optional)
 (optional)
 - **emails** _(Array\<Object>)_ — array of emails (optional)
   - **emails[].address** _(string)_ — email address, e.g. "coyote@acme.com" (required)
-  - **emails[].isVerified** _(boolean)_ — indicates whether the specified email has been verified (optional; defaults to `false`)
-  - **emails[].isPrimary** _(boolean)_ — indicates whether the specified email is the user's primary email address (optional; defaults to `false`)
-- **orgs** _(Array\<string>)_ — array of org IDs to associate the user with (optional)
+  - **emails[].isPrimary** _(boolean)_ — indicates whether the specified email is the user's primary email address (optional; defaults to `false`, needs to be a verified email)
 
 ***
 
@@ -56,8 +55,7 @@ Authorization: `Bearer ${accessToken}`
 
 ``` json
 {
-  "username": "wile",
-  "password": "catch-the-b1rd$",
+  "id": "507f191e810c19729de860ea",
   "fullName": "Wile E. Coyote",
   "emails": [
     {
@@ -80,6 +78,7 @@ Authorization: `Bearer ${accessToken}`
     "id": "507f191e810c19729de860ea",
     "username": "wile",
     "fullName": "Wile E. Coyote",
+    "picture": "https://www.acme.com/pictures/coyote.png",
     "emails": [
       {
         "address": "coyote@acme.com",
