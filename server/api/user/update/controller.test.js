@@ -15,9 +15,11 @@ describe('api/user.update', () => {
   let ctx;
   let user;
   let existingUser;
+  let unauthorisedUser;
   let org;
   let permissionAssignment;
   let session;
+  let unauthorisedSession;
 
   beforeAll(async () => {
     await server.setup(config);
@@ -58,6 +60,18 @@ describe('api/user.update', () => {
       adminId: user.id,
     });
 
+    unauthorisedUser = await createUser(ctx, {
+      username: 'roadrunner',
+      password: 'you-c@nt-t0utch-m3',
+      fullName: 'Road Beep-Beep Runner',
+      picture: 'https://www.acme.com/picture/roadrunner.png',
+      emails: [{
+        address: 'roadrunner@acme.com',
+        isVerified: true,
+        isPrimary: true,
+      }],
+    })
+
     const PermissionModel = ctx.db.model('Permission');
     const requiredPermission = await PermissionModel.findOne({ name: 'yeep.user.write' });
     permissionAssignment = await createPermissionAssignment(ctx, {
@@ -70,15 +84,41 @@ describe('api/user.update', () => {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
+
+    unauthorisedSession = await createSession(ctx, {
+      username: 'roadrunner',
+      password: 'you-c@nt-t0utch-m3',
+    });
   });
 
   afterAll(async () => {
     await destroySession(ctx, session);
+    await destroySession(ctx, unauthorisedSession);
     await deletePermissionAssignment(ctx, permissionAssignment);
     await deleteOrg(ctx, org);
     await deleteUser(ctx, user);
     await deleteUser(ctx, existingUser);
+    await deleteUser(ctx, unauthorisedUser);
     await server.teardown();
+  });
+
+  test('returns unathorised error when requestor does not have suffiecient permissions', async () => {
+    const res = await request(server)
+      .post('/api/user.update')
+      .set('Authorization', `Bearer ${unauthorisedSession.accessToken}`)
+      .send({
+        id: user.id,
+        fullName: 'Not My Full Name',
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 10012,
+        message: `User ${unauthorisedUser.id} does not have sufficient permissions to access this resource`,
+      },
+    });
   });
 
   test('returns error when user does not exist', async () => {
