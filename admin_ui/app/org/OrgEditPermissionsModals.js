@@ -19,7 +19,7 @@ const OrgEditPermissionsModals = () => {
   );
 
   const handleESC = (e) => {
-    if (e.which === 27) {
+    if (e.key === "Escape") {
       // ESC key pressed. Hide any modals
       store.org.currentPermissionsModal$.next('');
     }
@@ -31,10 +31,10 @@ const OrgEditPermissionsModals = () => {
   // https://reactjs.org/docs/hooks-effect.html#tip-optimizing-performance-by-skipping-effects for details
   useEffect(() => {
     // console.log('useEffect called!!!');
-    window.document.addEventListener('keyup', handleESC);
+    window.document.addEventListener('keydown', handleESC);
     return () => {
       // console.log('useEffect: removing listener');
-      window.removeEventListener('keyup', handleESC);
+      window.removeEventListener('keydown', handleESC);
     };
   }, []);
 
