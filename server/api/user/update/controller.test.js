@@ -1,13 +1,11 @@
 /* eslint-env jest */
 import request from 'supertest';
-import compareDesc from 'date-fns/compare_desc';
 import server from '../../../server';
 import config from '../../../../yeep.config';
 import createOrg from '../../org/create/service';
 import createUser from '../create/service';
 import createPermissionAssignment from '../assignPermission/service';
 import createSession from '../../session/create/service';
-import updateUser from '../update/service';
 import destroySession from '../../session/destroy/service';
 import deletePermissionAssignment from '../revokePermission/service';
 import deleteOrg from '../../org/delete/service';
@@ -123,12 +121,17 @@ describe('api/user.update', () => {
   });
 
   test('returns error when specified email already exist', async () => {
+    // removes isVerified property
+    const badEmails = [...user.emails, ...existingUser.emails].map(({ address }) => (
+      { address})
+    );
+    badEmails[0].isPrimary = true;
     const res = await request(server)
       .post('/api/user.update')
       .set('Authorization', `Bearer ${session.accessToken}`)
       .send({
         id: user.id,
-        emails: [existingUser.emails[0]],
+        emails: badEmails,
       });
 
     expect(res.status).toBe(200);
@@ -142,74 +145,171 @@ describe('api/user.update', () => {
 
   });
 
-  // xtest('updates role and returns expected response', async () => {
-  //   const role = await createRole(ctx, {
-  //     name: 'acme:manager',
-  //     description: 'This is a test',
-  //     permissions: [permission.id],
-  //     scope: org.id,
-  //   });
+  test('returns error when providing isVerified values with the emails', async () => {
+    const badEmails = [...user.emails, {
+      address: 'not@verified.com',
+      isVerified: true,
+      isPrimary: false,
+    }];
+    const res = await request(server)
+      .post('/api/user.update')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .send({
+        id: user.id,
+        emails: badEmails,
+      });
 
-  //   const res = await request(server)
-  //     .post('/api/role.update')
-  //     .set('Authorization', `Bearer ${session.accessToken}`)
-  //     .send({
-  //       id: role.id,
-  //       name: 'acme:developer',
-  //       description: 'This is a tost',
-  //       permissions: [permission.id],
-  //     });
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 400,
+        message: 'Invalid request body',
+      },
+    });
+  });
+  test('returns error when specifying a primary email that is not verified', async () => {
+    const badEmails = [{
+      address: 'not@verified.com',
+      isPrimary: true,
+    }];
+    const res = await request(server)
+      .post('/api/user.update')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .send({
+        id: user.id,
+        emails: badEmails,
+      });
 
-  //   expect(res.status).toBe(200);
-  //   expect(res.body).toMatchObject({
-  //     ok: true,
-  //     role: {
-  //       id: role.id,
-  //       name: 'acme:developer',
-  //       description: 'This is a tost',
-  //       scope: role.scope,
-  //       permissions: [permission.id],
-  //       isSystemRole: role.isSystemRole,
-  //     },
-  //   });
-  //   expect(compareDesc(role.createdAt, res.body.role.createdAt)).toBe(0);
-  //   expect(compareDesc(role.updatedAt, res.body.role.updatedAt)).toBe(1);
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 10004,
+        message: `You need to verify ${badEmails[0].address} before marking it as primary`,
+      },
+    });
+  });
 
-  //   const isRoleDeleted = await deleteRole(ctx, {
-  //     id: role.id,
-  //   });
-  //   expect(isRoleDeleted).toBe(true);
-  // });
+  test('returns error when trying to add an org to the user', async () => {
+    const res = await request(server)
+      .post('/api/user.update')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .send({
+        id: user.id,
+        orgs: ['5b2d5dd0cd86b77258e16d39'], //random id
+      });
 
-  // xtest('returns error when role is out of scope', async () => {
-  //   const globalPermission = await ctx.db.model('Permission').findOne({ name: 'yeep.role.write' });
-  //   const role = await createRole(ctx, {
-  //     // note the absence of scope to denote global permission
-  //     name: 'developer',
-  //     description: 'This is a test',
-  //     permissions: [globalPermission.id],
-  //   });
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: false,
+      error: {
+        code: 400,
+        message: 'Invalid request body',
+      },
+    });
+  });
 
-  //   const res = await request(server)
-  //     .post('/api/role.update')
-  //     .set('Authorization', `Bearer ${session.accessToken}`)
-  //     .send({
-  //       id: role.id,
-  //       name: 'dev',
-  //     });
+  test('updates user with new image if picture url is provided', async () => {
+    const newPictureURL = 'https://www.acme.com/pictures/v2/coyote.png';
+    const res = await request(server)
+      .post('/api/user.update')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .send({
+        id: user.id,
+        picture: newPictureURL,
+      });
 
-  //   expect(res.status).toBe(200);
-  //   expect(res.body).toMatchObject({
-  //     ok: false,
-  //     error: {
-  //       code: 10012,
-  //       message: `User ${user.id} does not have sufficient permissions to access this resource`,
-  //     },
-  //   });
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: true,
+      user: {
+        id: user.id,
+        picture: newPictureURL,
+        fullName: user.fullName,
+        username: user.username,
+        emails: expect.any(Array),
+        orgs: expect.any(Array),
+      },
+    });
+  });
+  test('removes image from user if picture property is null', async () => {
+    const res = await request(server)
+      .post('/api/user.update')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .send({
+        id: user.id,
+        picture: null,
+      });
 
-  //   const isRoleDeleted = await deleteRole(ctx, {
-  //     id: role.id,
-  //   });
-  //   expect(isRoleDeleted).toBe(true);
-  // });
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: true,
+      user: {
+        id: user.id,
+        picture: null,
+        fullName: user.fullName,
+        username: user.username,
+        emails: expect.any(Array),
+        orgs: expect.any(Array),
+      },
+    });
+  });
+
+  test('updates user and returns expected response', async () => {
+    const newPictureURL = 'https://www.acme.com/pictures/v2/coyote.png';
+    const res = await request(server)
+      .post('/api/user.update')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .send({
+        id: user.id,
+        fullName: 'new Coyotee',
+        username: 'alibaba',
+        emails: [{
+          address: 'coyote@acme.com',
+          isPrimary: true,
+        }, {
+          address: 'coyote-new@acme.com',
+        }],
+        picture: newPictureURL,
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      ok: true,
+      user: {
+        id: user.id,
+        fullName: 'new Coyotee',
+        username: 'alibaba',
+        emails: expect.arrayContaining([{
+          address: expect.any(String),
+          isPrimary: expect.any(Boolean),
+        }]),
+        picture: newPictureURL,
+      },
+    });
+  });
+
+  test.only('updates user password', async () => {
+    const newPassword = 'thi$-$s-$af3r';
+    const res = await request(server)
+      .post('/api/user.update')
+      .set('Authorization', `Bearer ${session.accessToken}`)
+      .send({
+        id: user.id,
+        password: newPassword,
+      });
+
+    expect(res.status).toBe(200);
+    const newSession = await createSession(ctx, {
+      username: 'wile',
+      password: newPassword,
+    });
+    // destroying the session before asserting in case of test failing
+    await destroySession(ctx, newSession);
+    expect(newSession).toMatchObject({
+      accessToken: expect.any(String),
+      refreshToken: expect.any(String),
+    });
+  });
 });

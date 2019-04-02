@@ -1,6 +1,7 @@
 import Joi from 'joi';
 import Boom from 'boom';
 import compose from 'koa-compose';
+import isNull from 'lodash/isNull';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import {
@@ -36,6 +37,12 @@ export const validationSchema = {
       .min(2)
       .max(100)
       .optional(),
+    picture: Joi.string()
+      .allow(null)
+      .uri({ scheme: ['http', 'https'] })
+      .trim()
+      .max(500)
+      .optional(),
     emails: Joi.array()
       .items(
         Joi.object()
@@ -46,9 +53,8 @@ export const validationSchema = {
               .email()
               .max(100)
               .required(),
-            isVerified: Joi.boolean()
-              .default(false)
-              .optional(),
+            isVerified: Joi.any()
+              .forbidden(),
             isPrimary: Joi.boolean()
               .default(false)
               .optional(),
@@ -59,18 +65,6 @@ export const validationSchema = {
       .max(10)
       .unique((a, b) => a.address === b.address)
       .optional(),
-    orgs: Joi.array()
-      .items(
-        Joi.string()
-          .length(24)
-          .hex()
-      )
-      .min(1)
-      .max(10)
-      .single()
-      .unique()
-      .default([])
-      .optional(),
   },
 };
 
@@ -78,16 +72,6 @@ const isRequestorAllowedToEditUser = (requestorPermissions, orgId) => {
   const hasUserReadPermissions =
     findUserPermissionIndex(requestorPermissions, {
       name: 'yeep.user.Write',
-      orgId,
-    }) !== -1;
-  const hasPermissionsAssignmentWrite =
-    findUserPermissionIndex(requestorPermissions, {
-      name: 'yeep.permission.assignment.Write',
-      orgId,
-    }) !== -1;
-  const hasRoleAssignmentWrite =
-    findUserPermissionIndex(requestorPermissions, {
-      name: 'yeep.role.assignment.Write',
       orgId,
     }) !== -1;
 
@@ -125,20 +109,32 @@ const decorateRequestedUser = async (ctx, next) => {
 };
 
 async function handler(ctx) {
-  const { request, response } = ctx;
-  // const { name, description } = request.body;
+  const { request, response, config } = ctx;
+  const { isUsernameEnabled } = config;
+  const { username, password, fullName, picture, emails } = request.body;
 
-  // // ensure name or description have been specified
-  // if (!(name || description)) {
-  //   const boom = Boom.badRequest('Invalid request body');
-  //   boom.output.payload.details = [
-  //     {
-  //       path: ['name'],
-  //       type: 'any.required',
-  //     },
-  //   ];
-  //   throw boom;
-  // }
+  // ensure either user property has been specified
+  if (!(username || password || fullName || picture || isNull(picture) || emails)) {
+    const boom = Boom.badRequest('Invalid request body');
+    boom.output.payload.details = [
+      {
+        path: ['username'],
+        type: 'any.required',
+      },
+    ];
+    throw boom;
+  }
+
+  if (request.body.username && !isUsernameEnabled) {
+    const boom = Boom.badRequest('Invalid request body');
+    boom.output.payload.details = [
+      {
+        path: ['username'],
+        type: 'any.forbidden',
+      },
+    ];
+    throw boom;
+  }
 
   const user = await updateUser(ctx, request.session.requestedUser, request.body);
 
