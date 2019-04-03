@@ -25,7 +25,7 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 | **[user.deactivate](methods/user.deactivate.md)**             | Deactivates the designated user                               |
 | **[user.delete](methods/user.delete.md)**                     | Deletes the designated user                                   |
 | **[user.deletePicture](methods/user.deletePicture.md)**       | Deletes the profile picture of the designated user            |
-| **[user.addFactor](methods/user.addFactor.md)**               | Add new authentication factor                                 |
+| **[user.setFactor](methods/user.setFactor.md)**               | Sets the designated authentication factor                     |
 | **[user.forgotPassword](methods/user.forgotPassword.md)**     | Initiates the forgot password process for the designated user |
 | **[user.info](methods/user.info.md)**                         | Retrieves details for the designated user                     |
 | **[user.list](methods/user.list.md)**                         | Lists all users                                               |

@@ -1,10 +1,10 @@
-# user.addFactor
+# user.setFactor
 
-`POST /api/v1/user.addFactor`
+`POST /api/v1/user.setFactor`
 
 ## Description
 
-Enrolls new authentication factor for the specified user.
+Enrolls the designated authentication factor for the specified user.
 
 ---
 
@@ -17,7 +17,7 @@ Requestor must be authenticated and (a) assigned with the `yeep.user.write` perm
 ### Body
 
 - **userId** _(string)_ — the ID of the user (required)
-- **type** _(string)_ — the type of the factor; must be `SOTP` (required)
+- **type** _(string)_ — the type of the factor; only available option is `SOTP` for the time being (required)
 
 ---
 
@@ -36,7 +36,7 @@ Requestor must be authenticated and (a) assigned with the `yeep.user.write` perm
 **Request**
 
 ```
-POST /api/v1/user.addFactor
+POST /api/v1/user.setFactor
 Authorization: `Bearer ${accessToken}`
 ```
 
