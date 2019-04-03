@@ -154,6 +154,7 @@
     "sharp": "^0.21.3",
     "styled-jsx": "^3.2.1",
     "tailwindcss": "^0.7.4",
+    "thirty-two": "^1.0.2",
     "typeof": "^1.0.0"
   },
   "husky": {
