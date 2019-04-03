@@ -8,11 +8,12 @@ body {
 }
 
 /* Global default styles for Yeep */
-a {
+a, .pseudolink {
+  @apply underline;
   @apply text-blue;
 }
-a:hover {
-  text-decoration: none;
+a:hover, .pseudolink:hover {
+  @apply no-underline;
   @apply text-blue-dark;
 }
 
