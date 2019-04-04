@@ -153,7 +153,7 @@ const PermissionListPage = () => {
                     <Link to={`${permissionData.id}/edit`}>Edit</Link>{' '}
                     <button
                       onClick={() => store.permission.deleteModal$.next('DELETE')}
-                      className="text-blue underline hover:text-blue-dark hover:no-underline"
+                      className="pseudolink"
                     >
                       Delete
                     </button>

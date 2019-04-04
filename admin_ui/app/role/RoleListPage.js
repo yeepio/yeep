@@ -1,10 +1,12 @@
 import React from 'react';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
+import Store from '../Store';
 import ButtonLink from '../../components/ButtonLink';
 import Select from 'react-select';
 import Grid from '../../components/Grid';
 import Input from '../../components/Input';
+import RoleDeleteModal from './RoleDeleteModal';
 
 // Dummy data
 let roleHeadings = [
@@ -72,8 +74,11 @@ let roleData = [
 
 const RoleListPage = () => {
   useDocumentTitle('Roles');
+  // Load the store (we need access to store.role.deleteModal$)
+  const store = React.useContext(Store);
   return (
     <React.Fragment>
+      <RoleDeleteModal />
       <ButtonLink to="create" className="float-right">
         Create new
       </ButtonLink>
@@ -116,7 +121,13 @@ const RoleListPage = () => {
                 {roleData.orgScope ? roleData.orgScope.orgLabel : '-'}
               </td>
               <td className="p-2 text-center">
-                <Link to={`${roleData.id}/edit`}>Edit</Link> <a href="/">Delete</a>
+                <Link to={`${roleData.id}/edit`}>Edit</Link>{' '}
+                <button
+                  onClick={() => store.role.deleteModal$.next('DELETE')}
+                  className="pseudolink"
+                >
+                  Delete
+                </button>
               </td>
             </tr>
           );
