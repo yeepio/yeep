@@ -1,4 +1,5 @@
-import { ObjectId } from 'mongodb';
+import has from 'lodash/has';
+import isEmpty from 'lodash/isEmpty';
 import {
   InvalidPrimaryEmailError,
   DuplicateEmailAddressError,
@@ -12,7 +13,10 @@ async function updateUser({ db, storage }, user, nextProps) {
   const UserModel = db.model('User');
   const CredentialsModel = db.model('Credentials');
 
-  const updatedUser = { ...nextProps };
+  const nextUser = {};
+  const nextCredentials = {};
+
+  // decorate nextUser obj with emails
   if (nextProps.emails) {
     // ensure there is exactly 1 primary email
     const primaryEmails = nextProps.emails.filter((email) => email.isPrimary);
@@ -27,9 +31,10 @@ async function updateUser({ db, storage }, user, nextProps) {
     const primaryEmail = primaryEmails[0];
     const emailExisted = user.emails.find((email) => primaryEmail.address === email.address);
     if (!emailExisted || !emailExisted.isVerified) {
-      throw new InvalidPrimaryEmailError(`You need to verify ${primaryEmail.address} before marking it as primary`); 
+      throw new InvalidPrimaryEmailError(
+        `You need to verify ${primaryEmail.address} before marking it as primary`
+      );
     }
-
 
     // normalize emails
     const normalizedEmails = nextProps.emails.map((email) => {
@@ -39,9 +44,10 @@ async function updateUser({ db, storage }, user, nextProps) {
       };
     });
 
-    updatedUser.emails = normalizedEmails;
+    nextUser.emails = normalizedEmails;
   }
 
+  // decorate nextUser obj with username
   if (nextProps.username) {
     const normalizedUsername = UserModel.normalizeUsername(nextProps.username);
 
@@ -50,19 +56,28 @@ async function updateUser({ db, storage }, user, nextProps) {
       throw new InvalidUsernameError(`Username "${nextProps.username}" is reserved for system use`);
     }
 
-    updatedUser.username = normalizedUsername;
+    nextUser.username = normalizedUsername;
   }
 
-  let salt, iterationCount, password;
+  // decorate nextUser obj with picture
+  if (has(nextProps, 'picture') && nextProps.picture !== user.picture) {
+    nextUser.picture = nextProps.picture;
+  }
+
+  // decorate nextUser obj with fullName
+  if (has(nextProps, 'fullName') && nextProps.fullName !== user.fullName) {
+    nextUser.fullName = nextProps.fullName;
+  }
+
+  // decorate nextCredentials obj
   if (nextProps.password) {
-    salt = await CredentialsModel.generateSalt();
-    iterationCount = 100000; // ~0.3 secs on Macbook Pro Late 2011
-    password = await CredentialsModel.digestPassword(nextProps.password, salt, iterationCount);
-  }
-
-  // remove previous picture if property provided
-  if (nextProps.picture || nextProps.picture === null) {
-    await deleteUserPicture({ db, storage }, user);
+    nextCredentials.salt = await CredentialsModel.generateSalt();
+    nextCredentials.iterationCount = 100000; // ~0.3 secs on Macbook Pro Late 2011
+    nextCredentials.password = await CredentialsModel.digestPassword(
+      nextProps.password,
+      nextCredentials.salt,
+      nextCredentials.iterationCount
+    );
   }
 
   // init transaction to update user + related records in db
@@ -70,40 +85,44 @@ async function updateUser({ db, storage }, user, nextProps) {
   session.startTransaction();
 
   try {
+    const now = Date.now(); // get current timestamp
 
-    updatedUser.updatedAt = new Date();
-    if (nextProps.password) {
-      // update password credentials
+    if (!isEmpty(nextCredentials)) {
+      nextCredentials.updatedAt = now;
+
       await CredentialsModel.updateOne(
         {
           user: user.id,
           type: 'PASSWORD',
         },
         {
-          $set: {
-            password: password,
-            salt,
-            iterationCount,
-            updatedAt: updatedUser.updatedAt,
-          },
+          $set: nextCredentials,
         }
       );
     }
 
-    await UserModel.updateOne(
-      {
-        _id: user.id,
-      },
-      {
-        $set: updatedUser,
-      }
-    );
+    if (!isEmpty(nextUser)) {
+      nextUser.updatedAt = now;
+
+      await UserModel.updateOne(
+        {
+          _id: user.id,
+        },
+        {
+          $set: nextUser,
+        }
+      );
+    }
 
     await session.commitTransaction();
 
+    if (has(nextUser, 'picture')) {
+      await deleteUserPicture({ db, storage }, user);
+    }
+
     return {
       ...user,
-      ...updatedUser,
+      ...nextUser,
     };
   } catch (err) {
     await session.abortTransaction();
