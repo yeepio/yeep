@@ -1,8 +1,5 @@
-import randomstring from 'randomstring';
-import QRCode from 'qrcode';
-
 export const enrollSOTPFactor = async ({ db }, { key }) => {
-  const CredentialsModel = db.model('Credentials');
+  const TOTPModel = db.model('TOTP');
 
-  return CredentialsModel.getSOTP(key);
+  return TOTPModel.getToken(key);
 };

@@ -8,7 +8,7 @@ import {
 async function resetPassword({ db, bus }, { token: secret, password }) {
   const TokenModel = db.model('Token');
   const UserModel = db.model('User');
-  const CredentialsModel = db.model('Credentials');
+  const PasswordModel = db.model('Password');
 
   // acquire token from db
   const tokenRecord = await TokenModel.findOne({
@@ -35,9 +35,9 @@ async function resetPassword({ db, bus }, { token: secret, password }) {
   }
 
   // generate salt + digest password
-  const salt = await CredentialsModel.generateSalt();
+  const salt = await PasswordModel.generateSalt();
   const iterationCount = 100000; // ~0.3 secs on Macbook Pro Late 2011
-  const digestedPassword = await CredentialsModel.digestPassword(password, salt, iterationCount);
+  const digestedPassword = await PasswordModel.digestPassword(password, salt, iterationCount);
   const currentDate = new Date();
 
   // init transaction to update password in db
@@ -45,11 +45,10 @@ async function resetPassword({ db, bus }, { token: secret, password }) {
   session.startTransaction();
 
   try {
-    // update password credentials
-    await CredentialsModel.updateOne(
+    // update password auth factor
+    await PasswordModel.updateOne(
       {
         user: tokenRecord.userId,
-        type: 'PASSWORD',
       },
       {
         $set: {

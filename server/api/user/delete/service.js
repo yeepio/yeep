@@ -2,7 +2,7 @@ import { ObjectId } from 'mongodb';
 
 async function deleteUser({ db }, { id }) {
   const UserModel = db.model('User');
-  const CredentialsModel = db.model('Credentials');
+  const PasswordModel = db.model('Password');
   const OrgMembershipModel = db.model('OrgMembership');
 
   // init transaction to delete user + related records in db
@@ -15,8 +15,8 @@ async function deleteUser({ db }, { id }) {
       _id: ObjectId(id),
     });
 
-    // delete password credentials
-    await CredentialsModel.deleteMany({
+    // delete password auth factor
+    await PasswordModel.deleteMany({
       user: ObjectId(id),
     });
 

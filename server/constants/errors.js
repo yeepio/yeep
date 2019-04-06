@@ -5,7 +5,7 @@ export class UserNotFoundError extends Error {
   }
 }
 
-export class InvalidCredentialsError extends Error {
+export class InvalidUserPasswordError extends Error {
   constructor(message) {
     super(message);
     this.code = 10002;

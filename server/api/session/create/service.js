@@ -3,7 +3,7 @@ import isBefore from 'date-fns/is_before';
 import { ObjectId } from 'mongodb';
 import {
   UserNotFoundError,
-  InvalidCredentialsError,
+  InvalidUserPasswordError,
   UserDeactivatedError,
 } from '../../../constants/errors';
 import { getUserPermissions } from '../../user/info/service';
@@ -24,7 +24,7 @@ const constructMatchQuery = (username, emailAddress) => {
 };
 
 /**
- * Verifies password credentials and returns the designated user.
+ * Verifies password and returns the designated user.
  * @param {Object} ctx
  * @property {Object} ctx.db
  * @param {Object} props
@@ -33,12 +33,12 @@ const constructMatchQuery = (username, emailAddress) => {
  * @property {string} props.password
  * @returns {Promise}
  */
-export async function getUserByPasswordCredentials(ctx, props) {
+export async function getUserWithPassword(ctx, props) {
   const { db } = ctx;
   const { username, emailAddress, password } = props;
 
   const UserModel = db.model('User');
-  const CredentialsModel = db.model('Credentials');
+  const PasswordModel = db.model('Password');
   const normalizedEmailAddress = emailAddress && UserModel.normalizeEmailAddress(emailAddress);
 
   // retrieve user from db
@@ -48,7 +48,7 @@ export async function getUserByPasswordCredentials(ctx, props) {
     },
     {
       $lookup: {
-        from: 'credentials',
+        from: 'authFactors',
         let: { userId: '$_id' },
         pipeline: [
           {
@@ -59,11 +59,11 @@ export async function getUserByPasswordCredentials(ctx, props) {
             },
           },
         ],
-        as: 'credentials',
+        as: 'authFactor',
       },
     },
     {
-      $unwind: '$credentials',
+      $unwind: '$authFactor',
     },
     {
       $project: {
@@ -72,9 +72,9 @@ export async function getUserByPasswordCredentials(ctx, props) {
         fullName: 1,
         picture: 1,
         emails: 1,
-        password: '$credentials.password',
-        salt: '$credentials.salt',
-        iterationCount: '$credentials.iterationCount',
+        password: '$authFactor.password',
+        salt: '$authFactor.salt',
+        iterationCount: '$authFactor.iterationCount',
         deactivatedAt: 1,
       },
     },
@@ -93,14 +93,14 @@ export async function getUserByPasswordCredentials(ctx, props) {
   }
 
   // verify password
-  const digestedPassword = await CredentialsModel.digestPassword(
+  const digestedPassword = await PasswordModel.digestPassword(
     password,
     user.salt.buffer,
     user.iterationCount
   );
 
   if (user.password.buffer.compare(digestedPassword) !== 0) {
-    throw new InvalidCredentialsError('Invalid username or password credentials');
+    throw new InvalidUserPasswordError('Invalid user or password');
   }
 
   return {
@@ -194,7 +194,7 @@ export default async function createSession(
   ctx,
   { username, emailAddress, password, scope = defaultScope }
 ) {
-  const user = await getUserByPasswordCredentials(ctx, {
+  const user = await getUserWithPassword(ctx, {
     username,
     emailAddress,
     password,

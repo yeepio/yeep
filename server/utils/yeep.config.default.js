@@ -15,7 +15,7 @@ module.exports = {
     secret: 'please change this secret',
   },
   // MongoDB configuration (required).
-  // Yeep uses MongoDB to store users, orgs, credentials, etc.
+  // Yeep uses MongoDB to store users, orgs, auth factors, etc.
   mongo: {
     // MongoDB connection string URI (required).
     // @see https://docs.mongodb.com/manual/reference/connection-string/ for further info.

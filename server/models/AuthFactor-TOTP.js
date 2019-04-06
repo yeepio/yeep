@@ -1,44 +1,23 @@
 import crypto from 'crypto';
-import Promise from 'bluebird';
 import base32 from 'thirty-two';
 import { Schema } from 'mongoose';
+import randomstring from 'randomstring';
 
-const randomBytes = Promise.promisify(crypto.randomBytes);
-const pbkdf2 = Promise.promisify(crypto.pbkdf2);
-
-const credentialSchema = new Schema(
+/**
+ * TOTP is a discriminator of AuthFactor.
+ * @see {@link https://mongoosejs.com/docs/discriminators.html}
+ */
+const totpSchema = new Schema(
   {
-    user: {
-      type: Schema.Types.ObjectId,
-      required: true,
-    },
-    type: {
+    secret: {
       type: String,
-      enum: ['PASSWORD'],
+      maxlength: 64,
+      minlength: 32,
       required: true,
-    },
-    password: {
-      type: Buffer,
-      required: function() {
-        return this.type === 'PASSWORD';
-      },
-    },
-    salt: {
-      type: Buffer,
-      required: function() {
-        return this.type === 'PASSWORD';
-      },
-    },
-    iterationCount: {
-      type: Number,
-      required: function() {
-        return this.type === 'PASSWORD';
-      },
-      min: 1,
     },
   },
   {
-    collection: 'credentials',
+    collection: 'authFactors',
     autoIndex: false,
     bufferCommands: false,
     _id: true, // enable _id PK
@@ -48,48 +27,26 @@ const credentialSchema = new Schema(
     validateBeforeSave: true,
     versionKey: '_v',
     timestamps: true,
-  }
-);
-
-// user can only have one password
-credentialSchema.index(
-  { user: 1 },
-  {
-    unique: true,
-    name: 'user_password_uidx',
-    partialFilterExpression: { type: { $eq: 'PASSWORD' } },
+    discriminatorKey: 'type',
   }
 );
 
 /**
- * Generates and returns a cryptographically secure pseudorandom buffer of 30 bytes.
- * @return {Promise<Buffer>} a Bluebird promise resolving to a Buffer.
+ * Generates and returns a BASE-32 encoded secret key.
+ * @return {String}
  */
-credentialSchema.statics.generatePassword = function() {
-  return randomBytes(30);
+totpSchema.statics.generateSecret = function() {
+  // TODO: Replace randomstring.generate with async version
+  // @see https://github.com/klughammer/node-randomstring/issues/28
+  return randomstring.generate({
+    length: 32,
+    readable: false,
+    charset: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567', // i.e. Base32 characters
+  });
 };
 
 /**
- * Generates and returns a cryptographically secure pseudorandom buffer of 128 bytes.
- * @return {Promise<Buffer>} a Bluebird promise resolving to a Buffer.
- */
-credentialSchema.statics.generateSalt = function() {
-  return randomBytes(128);
-};
-
-/**
- * Returns a secure hash of the designated password using the supplied salt and iterations count.
- * @param {string} password
- * @param {Buffer} salt
- * @param {number} iterations
- * @return {Promise<Buffer>}
- */
-credentialSchema.statics.digestPassword = function(password, salt, iterations) {
-  return pbkdf2(password, salt, iterations, 128, 'sha512');
-};
-
-/**
- * Generates and returns a time-based SOTP token based on the supplied secret key.
+ * Generates and returns a TOTP token based on the supplied secret key.
  * @param {String} secretKey
  * @param {Number} [windowIndex=0] use window index to retrieve previous or next tokens
  * @return {String}
@@ -117,7 +74,7 @@ credentialSchema.statics.digestPassword = function(password, salt, iterations) {
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-credentialSchema.statics.getSOTP = function(secretKey, windowIndex = 0) {
+totpSchema.statics.getToken = function(secretKey, windowIndex = 0) {
   // calculate number of 30-seconds intervals from epoch time, encode this to hex and then 0-pad to obtain a 12 character string.
   // finally place this hex string into a buffer.
   var message = Buffer.from(
@@ -147,4 +104,4 @@ credentialSchema.statics.getSOTP = function(secretKey, windowIndex = 0) {
   );
 };
 
-export default credentialSchema;
+export default totpSchema;
