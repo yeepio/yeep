@@ -41,6 +41,7 @@ async function updateUser({ db, storage }, user, nextProps) {
       return {
         ...email,
         address: UserModel.normalizeEmailAddress(email.address),
+        isVerified: email.isVerified || false,
       };
     });
 

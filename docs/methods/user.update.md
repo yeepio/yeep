@@ -1,10 +1,12 @@
 # user.update
 
-`POST /api/v1/user.update`
+`POST /api/user.update`
 
 ## Description
 
-Updated user with the specified properties.
+Updates user details with the specified properties
+
+Please note: the user.update() API method accepts partial updates, meaning you need only specify the properties you want to change instead of supplying full user properties every single time.
 
 ***
 
@@ -25,11 +27,12 @@ Users are able to update their own account without explicit permissions.
 - **id** _(string)_ — the user id (required)
 - **username** _(string)_ — the display name of the user (optional, only accepted as a value if `isUsernameEnabled` setting is true)
 - **password** _(string)_ — user password (optional)
+- **oldPassword** _(string)_ — old user password (required only when password is provided)
 - **fullName** _(string)_ — user full name, e.g. "Wile E. Coyote"
 - **picture** _(string)_ — user profile picture URL (optional)
-(optional)
 - **emails** _(Array\<Object>)_ — array of emails (optional)
   - **emails[].address** _(string)_ — email address, e.g. "coyote@acme.com" (required)
+  - **emails[].isVerified** (boolean) - indicates whether the specified email has been verified (optional; may only be specified by the superuser)
   - **emails[].isPrimary** _(boolean)_ — indicates whether the specified email is the user's primary email address (optional; defaults to `false`, needs to be a verified email)
 
 ***
@@ -40,7 +43,7 @@ Users are able to update their own account without explicit permissions.
 
 - **ok** _(boolean)_ — indicates whether the request was successfully completed
 - **error** _(Object)_ — contains error details in case of an error
-- **user** _(Object)_ — the newly created user
+- **user** _(Object)_ — the updated user
 
 ***
 
