@@ -31,7 +31,7 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 | **[user.resetPassword](methods/user.resetPassword.md)**       | Resets user password                                          |
 | **[user.revokePermission](methods/user.revokePermission.md)** | Revokes the designated permission assignment                  |
 | **[user.revokeRole](methods/user.revokeRole.md)**             | Revokes the designated role assigment                         |
-| **[user.uploadPicture](methods/user.uploadPicture.md)**       | Uploaded and sets the profile picture of the designated user               |
+| **[user.uploadPicture](methods/user.uploadPicture.md)**       | Uploads the profile picture of the designated user               |
 
 ### Session
 

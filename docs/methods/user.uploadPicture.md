@@ -4,7 +4,7 @@
 
 ## Description
 
-Sets the profile picture of the designated user.
+Uploads the profile picture of the designated user.
 
 ***
 
