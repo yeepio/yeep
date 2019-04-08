@@ -1,5 +1,6 @@
 import has from 'lodash/has';
 import isEmpty from 'lodash/isEmpty';
+import get from 'lodash/get';
 import {
   InvalidPrimaryEmailError,
   DuplicateEmailAddressError,
@@ -30,7 +31,7 @@ async function updateUser({ db, storage }, user, nextProps) {
     // if requestor changes the previous primary email it also needs to be verified
     const primaryEmail = primaryEmails[0];
     const emailExisted = user.emails.find((email) => primaryEmail.address === email.address);
-    if (!emailExisted || !emailExisted.isVerified) {
+    if ((!emailExisted || !emailExisted.isVerified) && !primaryEmail.isVerified) {
       throw new InvalidPrimaryEmailError(
         `You need to verify ${primaryEmail.address} before marking it as primary`
       );
@@ -38,10 +39,11 @@ async function updateUser({ db, storage }, user, nextProps) {
 
     // normalize emails
     const normalizedEmails = nextProps.emails.map((email) => {
+      const existingEmail = user.emails.find((oldEmail) => oldEmail.address === email.address);
       return {
         ...email,
         address: UserModel.normalizeEmailAddress(email.address),
-        isVerified: email.isVerified || false,
+        isVerified: email.isVerified || get(existingEmail, 'isVerified') || false,
       };
     });
 
