@@ -105,9 +105,9 @@ describe('api/user.deletePicture', () => {
 
     test('deletes user profile picture', async () => {
       let res = await request(server)
-        .post('/api/user.setPicture')
+        .post('/api/user.uploadPicture')
         .set('Authorization', `Bearer ${wileSession.accessToken}`)
-        .attach('picture', path.resolve(__dirname, '../setPicture/__tests__/runner.png'))
+        .attach('picture', path.resolve(__dirname, '../uploadPicture/__tests__/runner.png'))
         .field('id', runner.id);
 
       expect(res.status).toBe(200);

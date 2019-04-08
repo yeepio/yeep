@@ -1,6 +1,6 @@
-# user.setPicture
+# user.uploadPicture
 
-`POST /api/v1/user.setPicture`
+`POST /api/user.uploadPicture`
 
 ## Description
 
@@ -49,7 +49,7 @@ Users are able to set their own profile picture without explicit permission.
 **Request**
 
 ```
-POST /api/v1/user.setPicture
+POST /api/v1/user.uploadPicture
 Authorization: `Bearer ${accessToken}`
 multipart/form-data
 ```
