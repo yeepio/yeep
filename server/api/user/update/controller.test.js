@@ -124,7 +124,7 @@ describe('api/user.update', () => {
     await server.teardown();
   });
 
-  test('returns unathorised error when requestor does not have sufficient permissions', async () => {
+  test('returns unauthorized error when requestor does not have sufficient permissions', async () => {
     const res = await request(server)
       .post('/api/user.update')
       .set('Authorization', `Bearer ${unauthorisedSession.accessToken}`)
@@ -272,6 +272,28 @@ describe('api/user.update', () => {
   });
 
   describe('Requestor is superuser', () => {
+    test('returns error when specifying a primary email that is not also sent as verified', async () => {
+      const emails = [{
+        address: 'not@verified.com',
+        isVerified: false,
+        isPrimary: false,
+      }];
+      const res = await request(server)
+        .post('/api/user.update')
+        .set('Authorization', `Bearer ${superuserSession.accessToken}`)
+        .send({
+          id: unauthorisedUser.id,
+          emails,
+        });
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 10004,
+          message: expect.any(String),
+        },
+      });
+    });
     test('returns valid user when setting emails as verified', async () => {
       const emails = [...unauthorisedUser.emails, {
         address: 'not@verified.com',
@@ -290,34 +312,6 @@ describe('api/user.update', () => {
         ok: true,
         user: {
           id: unauthorisedUser.id,
-          emails: expect.arrayContaining([{
-            address: expect.any(String),
-            isVerified: true,
-            isPrimary: expect.any(Boolean),
-          }]),
-        },
-      });
-    });
-    // discuss if we need to explicitly make this case work
-    xtest('returns valid user when setting non-verified as primary', async () => {
-      const badEmails = [{
-        address: 'not@verified.com',
-        isVerified: false,
-        isPrimary: true,
-      }];
-      const res = await request(server)
-        .post('/api/user.update')
-        .set('Authorization', `Bearer ${superuserSession.accessToken}`)
-        .send({
-          id: user.id,
-          emails: badEmails,
-        });
-
-      expect(res.status).toBe(200);
-      expect(res.body).toMatchObject({
-        ok: true,
-        user: {
-          id: user.id,
           emails: expect.arrayContaining([{
             address: expect.any(String),
             isVerified: true,
@@ -456,6 +450,10 @@ describe('api/user.update', () => {
           fullName: 'new Coyotee',
           username: 'wile2',
           emails: expect.arrayContaining([{
+            address: 'coyote@acme.com',
+            isVerified: true,
+            isPrimary: true,
+          }, {
             address: expect.any(String),
             isVerified: expect.any(Boolean),
             isPrimary: expect.any(Boolean),
