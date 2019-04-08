@@ -44,14 +44,30 @@ export const validationSchema = {
   },
 };
 
+const isRequestorAllowedToReadOrgs = (requestorPermissions, orgId) => {
+  const hasUserReadPermissions =
+    findUserPermissionIndex(requestorPermissions, {
+      name: 'yeep.user.read',
+      orgId,
+    }) !== -1;
+  const hasPermissionsAssignmentRead =
+    findUserPermissionIndex(requestorPermissions, {
+      name: 'yeep.permission.assignment.read',
+      orgId,
+    }) !== -1;
+  const hasRoleAssignmentRead =
+    findUserPermissionIndex(requestorPermissions, {
+      name: 'yeep.role.assignment.read',
+      orgId,
+    }) !== -1;
+
+  return hasUserReadPermissions && (hasPermissionsAssignmentRead || hasRoleAssignmentRead);
+};
+
 const isUserAuthorised = async ({ request }, next) => {
   // verify a user has access to the requested org
   if (request.body.org) {
-    const isScopeAccessible =
-      findUserPermissionIndex(request.session.user.permissions, {
-        name: 'yeep.user.read',
-        orgId: request.body.org,
-      }) !== -1;
+    const isScopeAccessible = isRequestorAllowedToReadOrgs(request.session.user.permissions, request.body.org);
 
     if (!isScopeAccessible) {
       throw new AuthorizationError(
