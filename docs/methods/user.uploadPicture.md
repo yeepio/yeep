@@ -1,10 +1,10 @@
-# user.setPicture
+# user.uploadPicture
 
-`POST /api/v1/user.setPicture`
+`POST /api/user.uploadPicture`
 
 ## Description
 
-Sets the profile picture of the designated user.
+Uploads the profile picture of the designated user.
 
 ***
 
@@ -49,7 +49,7 @@ Users are able to set their own profile picture without explicit permission.
 **Request**
 
 ```
-POST /api/v1/user.setPicture
+POST /api/user.uploadPicture
 Authorization: `Bearer ${accessToken}`
 multipart/form-data
 ```
