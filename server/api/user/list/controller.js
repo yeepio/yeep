@@ -9,7 +9,9 @@ import {
   isUserAuthenticated,
   decorateUserPermissions,
   getAuthorizedUniqueOrgIds,
+  findUserPermissionIndex,
 } from '../../../middleware/auth';
+import { AuthorizationError } from '../../../constants/errors';
 import listUsers, { parseCursor, stringifyCursor, defaultProjection } from './service';
 
 export const validationSchema = {
@@ -36,18 +38,58 @@ export const validationSchema = {
     )
       .optional()
       .default(defaultProjection),
+    org: Joi.string()
+      .base64()
+      .optional(),
   },
+};
+
+const isRequestorAllowedToReadOrgs = (requestorPermissions, orgId) => {
+  const hasUserReadPermissions =
+    findUserPermissionIndex(requestorPermissions, {
+      name: 'yeep.user.read',
+      orgId,
+    }) !== -1;
+  const hasPermissionsAssignmentRead =
+    findUserPermissionIndex(requestorPermissions, {
+      name: 'yeep.permission.assignment.read',
+      orgId,
+    }) !== -1;
+  const hasRoleAssignmentRead =
+    findUserPermissionIndex(requestorPermissions, {
+      name: 'yeep.role.assignment.read',
+      orgId,
+    }) !== -1;
+
+  return hasUserReadPermissions && (hasPermissionsAssignmentRead || hasRoleAssignmentRead);
+};
+
+const isUserAuthorised = async ({ request }, next) => {
+  // verify a user has access to the requested org
+  if (request.body.org) {
+    const isScopeAccessible = isRequestorAllowedToReadOrgs(request.session.user.permissions, request.body.org);
+
+    if (!isScopeAccessible) {
+      throw new AuthorizationError(
+        `User ${
+          request.session.user.id
+        } does not have sufficient permissions to list users under org ${request.body.org}`
+      );
+    }
+  }
+
+  await next();
 };
 
 async function handler(ctx) {
   const { request, response } = ctx;
-  const { q, limit, cursor, projection } = request.body;
+  const { q, limit, cursor, projection, org } = request.body;
 
   const users = await listUsers(ctx, {
     q,
     limit,
     cursor: cursor ? parseCursor(cursor) : null,
-    scopes: getAuthorizedUniqueOrgIds(request, 'yeep.user.read'),
+    scopes: org ? [org] : getAuthorizedUniqueOrgIds(request, 'yeep.user.read'),
     projection,
   });
 
@@ -64,5 +106,6 @@ export default compose([
   isUserAuthenticated(),
   validateRequest(validationSchema),
   decorateUserPermissions(),
+  isUserAuthorised,
   handler,
 ]);

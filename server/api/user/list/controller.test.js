@@ -280,6 +280,39 @@ describe('api/user.list', () => {
       expect(res.body.users.length).toBe(1);
     });
 
+    test('filters users using `org` param', async () => {
+      const res = await request(server)
+        .post('/api/user.list')
+        .set('Authorization', `Bearer ${session.accessToken}`)
+        .send({
+          org: monsters.id,
+        });
+      expect(res.body).toMatchObject({
+        ok: true,
+        users: expect.arrayContaining([
+          expect.objectContaining({
+            id: expect.any(String),
+            username: 'wazowski',
+            fullName: expect.any(String),
+            picture: expect.any(String),
+            emails: [
+              {
+                address: expect.any(String),
+                isVerified: true,
+                isPrimary: true,
+              },
+            ],
+            orgs: expect.arrayContaining([expect.any(String)]),
+            createdAt: expect.any(String),
+            updatedAt: expect.any(String),
+          }),
+        ]),
+      });
+      expect(res.body.users.length).toBe(2);
+      expect(res.body.users.findIndex((user) => user.username === 'wazowski')).not.toBe(-1);
+      expect(res.body.users.findIndex((user) => user.username === 'wile')).not.toBe(-1);
+    });
+
     test('projects user props using `projection` param', async () => {
       const res = await request(server)
         .post('/api/user.list')
@@ -334,6 +367,25 @@ describe('api/user.list', () => {
         expect(res.body).toMatchObject({
           ok: true,
           users: [],
+        });
+      });
+
+      test('returns authorization error when trying to filter by org id', async () => {
+        const res = await request(server)
+          .post('/api/user.list')
+          .set('Authorization', `Bearer ${otherSession.accessToken}`)
+          .send({
+            org: monsters.id,
+          });
+
+        expect(res.status).toBe(200);
+        expect(res.body).toMatchObject({
+          ok: false,
+          error: {
+            // authorisation code
+            code: 10012,
+            message: expect.any(String),
+          },
         });
       });
     });

@@ -24,7 +24,6 @@ export const defaultProjection = {
 
 async function listUsers({ db }, { q, limit, cursor, scopes, projection = defaultProjection }) {
   const UserModel = db.model('User');
-
   const users = await UserModel.aggregate([
     {
       $match: q

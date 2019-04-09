@@ -17,6 +17,7 @@ Requestor must be authenticated. No explicit permissions required; retrieves use
 ### Body
 
 - **q** _(string)_ — filters users by the designated query (optional)
+- **org** _(string)_ — filters users by the designated org (optional)
 - **limit** _(string)_ — maximum number of users to return (optional)
 - **cursor** _(string)_ — paginates through users by setting the `cursor` param (optional)
 - **projection** _(Object)_ — user fields to return (optional)
