@@ -13,7 +13,7 @@ const tokenSchema = new Schema(
     type: {
       type: String,
       required: true,
-      enum: ['AUTHENTICATION', 'SESSION_REFRESH', 'PASSWORD_RESET', 'INVITATION', 'TOTP_ENROLL'],
+      enum: ['AUTHENTICATION', 'SESSION_REFRESH', 'PASSWORD_RESET', 'INVITATION', 'TOTP_SECRET'],
     },
     payload: {
       type: Map,

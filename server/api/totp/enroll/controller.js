@@ -3,14 +3,17 @@ import compose from 'koa-compose';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import { decorateSession, isUserAuthenticated } from '../../../middleware/auth';
-import { generateSOTPSecret } from './service';
+import { createTOTPAuthFactor } from './service';
 
 export const validationSchema = {
   body: {
-    type: Joi.string()
-      .valid('SOTP')
+    secret: Joi.string()
+      .length(32)
       .required(),
-    // TODO: maybe add provider here?
+    token: Joi.string()
+      .length(6)
+      .regex(/\d/)
+      .required(),
   },
 };
 
@@ -18,12 +21,12 @@ async function handler(ctx) {
   const { request, response } = ctx;
   const { user } = request.session;
 
-  const secret = await generateSOTPSecret(ctx, { userId: user.id });
+  await createTOTPAuthFactor(ctx, {
+    ...request.body,
+    userId: user.id,
+  });
 
   response.status = 200; // OK
-  response.body = {
-    secret,
-  };
 }
 
 export default compose([

@@ -35,7 +35,7 @@ const totpSchema = new Schema(
  * Generates and returns a BASE-32 encoded secret key.
  * @return {String}
  */
-totpSchema.statics.generateSecret = function() {
+totpSchema.statics.generateSecret = () => {
   // TODO: Replace randomstring.generate with async version
   // @see https://github.com/klughammer/node-randomstring/issues/28
   return randomstring.generate({
@@ -47,7 +47,7 @@ totpSchema.statics.generateSecret = function() {
 
 /**
  * Generates and returns a TOTP token based on the supplied secret key.
- * @param {String} secretKey
+ * @param {String} secret
  * @param {Number} [windowIndex=0] use window index to retrieve previous or next tokens
  * @return {String}
  * @see {@link https://github.com/gfiocco/google-auth-totp}
@@ -74,10 +74,10 @@ totpSchema.statics.generateSecret = function() {
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-totpSchema.statics.getToken = function(secretKey, windowIndex = 0) {
+totpSchema.statics.getToken = (secret, windowIndex = 0) => {
   // calculate number of 30-seconds intervals from epoch time, encode this to hex and then 0-pad to obtain a 12 character string.
   // finally place this hex string into a buffer.
-  var message = Buffer.from(
+  const message = Buffer.from(
     Array(16)
       .fill(0)
       .concat((Math.floor(Math.round(Date.now() / 1000) / 30) + windowIndex).toString(16))
@@ -86,21 +86,34 @@ totpSchema.statics.getToken = function(secretKey, windowIndex = 0) {
     'hex'
   );
 
-  // decode secretKey from base32 and place it into a buffer
-  var key = Buffer.from(base32.decode(secretKey), 'utf8');
+  // decode secret from base32 and place it into a buffer
+  const key = Buffer.from(base32.decode(secret), 'utf8');
 
   // FYI - we have stored the message and secret into the buffer because the crypto hmac function requires buffer inputs
 
   // use crypto to obtain an SH1 HMAC digest from the key and message
-  var hmac = crypto.createHmac('sha1', key); // create Hmac instances
+  const hmac = crypto.createHmac('sha1', key); // create Hmac instances
   hmac.setEncoding('hex'); // instruct the Hmac instance that mssg is hex encoded
   hmac.update(message);
   hmac.end();
-  hmac = hmac.read(); // the SH1 HMAC output
 
   // bitwise operations to convert the SH1 HMAC output into a 6 digits code
-  return ((parseInt(hmac.substr(parseInt(hmac.slice(-1), 16) * 2, 8), 16) & 2147483647) + '').slice(
+  const data = data.read(); // the SH1 HMAC output
+  return ((parseInt(data.substr(parseInt(data.slice(-1), 16) * 2, 8), 16) & 2147483647) + '').slice(
     -6
+  );
+};
+
+/**
+ * Verifies the specified token based on the supplied secret key.
+ * @param {String} token
+ * @param {String} secret
+ * @return {Boolean}
+ */
+totpSchema.statics.verifyToken = (token, secret) => {
+  return (
+    totpSchema.statics.getToken(secret, 0) === token ||
+    totpSchema.statics.getToken(secret, -1) === token
   );
 };
 
