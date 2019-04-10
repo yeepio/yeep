@@ -1,5 +1,6 @@
 /* eslint-env jest */
 import request from 'supertest';
+import { ObjectId } from 'mongodb';
 import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
@@ -8,6 +9,7 @@ import deleteUser from '../../user/delete/service';
 // import deleteOrg from '../../org/delete/service';
 import createSession from '../../session/create/service';
 import destroySession from '../../session/destroy/service';
+import { addSeconds } from 'date-fns';
 
 describe('api/totp.enroll', () => {
   let ctx;
@@ -148,6 +150,122 @@ describe('api/totp.enroll', () => {
       });
       expect(res.body.error.details[0].path).toEqual(['token']);
       expect(res.body.error.details[0].type).toBe('string.length');
+    });
+
+    test('returns error when secret key does not exist in token collection', async () => {
+      const res = await request(server)
+        .post('/api/totp.enroll')
+        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .send({
+          secret: 'N34CXTAEDWWIETTGN7P7HGFVM2CPGAG2',
+          token: '123456',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 10027,
+          message: 'Secret key does not exist or has already expired',
+        },
+      });
+    });
+
+    test('returns error when secret key exists but is associated with another user', async () => {
+      const TokenModel = ctx.db.model('Token');
+      const TOTPModel = ctx.db.model('TOTP');
+
+      const secret = TOTPModel.generateSecret();
+      const tokenRecord = await TokenModel.create({
+        secret,
+        type: 'TOTP_SECRET',
+        user: ObjectId('507f191e810c19729de860ea'), // i.e. some random object ID
+        org: null,
+        expiresAt: addSeconds(new Date(), 1000),
+      });
+
+      const res = await request(server)
+        .post('/api/totp.enroll')
+        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .send({
+          secret,
+          token: '123456',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 10027,
+          message: 'Secret key does not exist or has already expired',
+        },
+      });
+
+      await TokenModel.deleteOne({
+        _id: tokenRecord._id,
+      });
+    });
+
+    test('returns error when the supplied token cannot be verified', async () => {
+      const TokenModel = ctx.db.model('Token');
+      const TOTPModel = ctx.db.model('TOTP');
+
+      const secret = TOTPModel.generateSecret();
+      const tokenRecord = await TokenModel.create({
+        secret,
+        type: 'TOTP_SECRET',
+        user: ObjectId(wileUser.id),
+        org: null,
+        expiresAt: addSeconds(new Date(), 1000),
+      });
+
+      const res = await request(server)
+        .post('/api/totp.enroll')
+        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .send({
+          secret,
+          token: '123456',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 10031,
+          message: 'TOTP token cannot be verified',
+        },
+      });
+
+      await TokenModel.deleteOne({
+        _id: tokenRecord._id,
+      });
+    });
+
+    test('enrolls user and returns proper response', async () => {
+      const TokenModel = ctx.db.model('Token');
+      const TOTPModel = ctx.db.model('TOTP');
+
+      const secret = TOTPModel.generateSecret();
+      await TokenModel.create({
+        secret,
+        type: 'TOTP_SECRET',
+        user: ObjectId(wileUser.id),
+        org: null,
+        expiresAt: addSeconds(new Date(), 1000),
+      });
+
+      const res = await request(server)
+        .post('/api/totp.enroll')
+        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .send({
+          secret,
+          token: TOTPModel.getToken(secret),
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: true,
+      });
     });
   });
 });
