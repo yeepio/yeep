@@ -221,3 +221,10 @@ export class InvalidRefreshToken extends Error {
     this.code = 10030;
   }
 }
+
+export class InvalidTOTPToken extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10031;
+  }
+}
