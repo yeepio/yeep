@@ -228,3 +228,10 @@ export class InvalidTOTPToken extends Error {
     this.code = 10031;
   }
 }
+
+export class DuplicateAuthFactor extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10032;
+  }
+}
