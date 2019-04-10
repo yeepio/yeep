@@ -67,7 +67,7 @@ describe('api/user.update', () => {
           },
         ],
       }),
-    ])
+    ]);
 
     org = await createOrg(ctx, {
       name: 'Acme Inc',
@@ -80,12 +80,14 @@ describe('api/user.update', () => {
       password: 'you-c@nt-t0utch-m3',
       fullName: 'Road Beep-Beep Runner',
       picture: 'https://www.acme.com/picture/roadrunner.png',
-      emails: [{
-        address: 'roadrunner@acme.com',
-        isVerified: true,
-        isPrimary: true,
-      }],
-    })
+      emails: [
+        {
+          address: 'roadrunner@acme.com',
+          isVerified: true,
+          isPrimary: true,
+        },
+      ],
+    });
 
     const PermissionModel = ctx.db.model('Permission');
     const requiredPermission = await PermissionModel.findOne({ name: 'yeep.user.write' });
@@ -138,7 +140,9 @@ describe('api/user.update', () => {
       ok: false,
       error: {
         code: 10012,
-        message: `User ${unauthorisedUser.id} does not have sufficient permissions to access this resource`,
+        message: `User ${
+          unauthorisedUser.id
+        } does not have sufficient permissions to access this resource`,
       },
     });
   });
@@ -183,9 +187,7 @@ describe('api/user.update', () => {
 
   test('returns error when specified email already exists', async () => {
     // removes isVerified property
-    const badEmails = [...user.emails, ...existingUser.emails].map(({ address }) => (
-      { address})
-    );
+    const badEmails = [...user.emails, ...existingUser.emails].map(({ address }) => ({ address }));
     badEmails[0].isPrimary = true;
     const res = await request(server)
       .post('/api/user.update')
@@ -273,11 +275,13 @@ describe('api/user.update', () => {
 
   describe('Requestor is superuser', () => {
     test('returns error when specifying a primary email that is not also sent as verified', async () => {
-      const emails = [{
-        address: 'not@verified.com',
-        isVerified: false,
-        isPrimary: false,
-      }];
+      const emails = [
+        {
+          address: 'not@verified.com',
+          isVerified: false,
+          isPrimary: false,
+        },
+      ];
       const res = await request(server)
         .post('/api/user.update')
         .set('Authorization', `Bearer ${superuserSession.accessToken}`)
@@ -295,11 +299,14 @@ describe('api/user.update', () => {
       });
     });
     test('returns valid user when setting emails as verified', async () => {
-      const emails = [...unauthorisedUser.emails, {
-        address: 'not@verified.com',
-        isVerified: true,
-        isPrimary: false,
-      }];
+      const emails = [
+        ...unauthorisedUser.emails,
+        {
+          address: 'not@verified.com',
+          isVerified: true,
+          isPrimary: false,
+        },
+      ];
       const res = await request(server)
         .post('/api/user.update')
         .set('Authorization', `Bearer ${superuserSession.accessToken}`)
@@ -312,11 +319,13 @@ describe('api/user.update', () => {
         ok: true,
         user: {
           id: unauthorisedUser.id,
-          emails: expect.arrayContaining([{
-            address: expect.any(String),
-            isVerified: true,
-            isPrimary: expect.any(Boolean),
-          }]),
+          emails: expect.arrayContaining([
+            {
+              address: expect.any(String),
+              isVerified: true,
+              isPrimary: expect.any(Boolean),
+            },
+          ]),
         },
       });
     });
@@ -329,12 +338,15 @@ describe('api/user.update', () => {
           id: unauthorisedUser.id,
           fullName: 'new Coyotee',
           username: 'alibaba',
-          emails: [{
-            address: 'roadrunner@acme.com',
-            isPrimary: true,
-          }, {
-            address: 'roadrunner-new@acme.com',
-          }],
+          emails: [
+            {
+              address: 'roadrunner@acme.com',
+              isPrimary: true,
+            },
+            {
+              address: 'roadrunner-new@acme.com',
+            },
+          ],
           picture: newPictureURL,
         });
 
@@ -345,11 +357,13 @@ describe('api/user.update', () => {
           id: unauthorisedUser.id,
           fullName: 'new Coyotee',
           username: 'alibaba',
-          emails: expect.arrayContaining([{
-            address: expect.any(String),
-            isVerified: expect.any(Boolean),
-            isPrimary: expect.any(Boolean),
-          }]),
+          emails: expect.arrayContaining([
+            {
+              address: expect.any(String),
+              isVerified: expect.any(Boolean),
+              isPrimary: expect.any(Boolean),
+            },
+          ]),
           picture: newPictureURL,
         },
       });
@@ -380,11 +394,14 @@ describe('api/user.update', () => {
 
   describe('Requestor updates their own profile', () => {
     test('returns error when providing isVerified values with the emails', async () => {
-      const badEmails = [...user.emails, {
-        address: 'not@verified.com',
-        isVerified: true,
-        isPrimary: false,
-      }];
+      const badEmails = [
+        ...user.emails,
+        {
+          address: 'not@verified.com',
+          isVerified: true,
+          isPrimary: false,
+        },
+      ];
       const res = await request(server)
         .post('/api/user.update')
         .set('Authorization', `Bearer ${session.accessToken}`)
@@ -403,10 +420,12 @@ describe('api/user.update', () => {
       });
     });
     test('returns error when specifying a primary email that is not verified', async () => {
-      const badEmails = [{
-        address: 'not@verified.com',
-        isPrimary: true,
-      }];
+      const badEmails = [
+        {
+          address: 'not@verified.com',
+          isPrimary: true,
+        },
+      ];
       const res = await request(server)
         .post('/api/user.update')
         .set('Authorization', `Bearer ${session.accessToken}`)
@@ -433,12 +452,15 @@ describe('api/user.update', () => {
           id: user.id,
           fullName: 'new Coyotee',
           username: 'wile2',
-          emails: [{
-            address: 'coyote@acme.com',
-            isPrimary: true,
-          }, {
-            address: 'coyote-new@acme.com',
-          }],
+          emails: [
+            {
+              address: 'coyote@acme.com',
+              isPrimary: true,
+            },
+            {
+              address: 'coyote-new@acme.com',
+            },
+          ],
           picture: newPictureURL,
         });
 
@@ -449,15 +471,18 @@ describe('api/user.update', () => {
           id: user.id,
           fullName: 'new Coyotee',
           username: 'wile2',
-          emails: expect.arrayContaining([{
-            address: 'coyote@acme.com',
-            isVerified: true,
-            isPrimary: true,
-          }, {
-            address: expect.any(String),
-            isVerified: expect.any(Boolean),
-            isPrimary: expect.any(Boolean),
-          }]),
+          emails: expect.arrayContaining([
+            {
+              address: 'coyote@acme.com',
+              isVerified: true,
+              isPrimary: true,
+            },
+            {
+              address: expect.any(String),
+              isVerified: expect.any(Boolean),
+              isPrimary: expect.any(Boolean),
+            },
+          ]),
           picture: newPictureURL,
         },
       });
