@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import has from 'lodash/has';
 import isEmpty from 'lodash/isEmpty';
 import get from 'lodash/get';
@@ -12,7 +13,7 @@ import commonNames from '../../../utils/commonNames';
 
 async function updateUser({ db, storage }, user, nextProps) {
   const UserModel = db.model('User');
-  const CredentialsModel = db.model('Credentials');
+  const PasswordModel = db.model('Password');
 
   const nextUser = {};
   const nextCredentials = {};
@@ -74,9 +75,9 @@ async function updateUser({ db, storage }, user, nextProps) {
 
   // decorate nextCredentials obj
   if (nextProps.password) {
-    nextCredentials.salt = await CredentialsModel.generateSalt();
+    nextCredentials.salt = await PasswordModel.generateSalt();
     nextCredentials.iterationCount = 100000; // ~0.3 secs on Macbook Pro Late 2011
-    nextCredentials.password = await CredentialsModel.digestPassword(
+    nextCredentials.password = await PasswordModel.digestPassword(
       nextProps.password,
       nextCredentials.salt,
       nextCredentials.iterationCount
@@ -93,9 +94,9 @@ async function updateUser({ db, storage }, user, nextProps) {
     if (!isEmpty(nextCredentials)) {
       nextCredentials.updatedAt = now;
 
-      await CredentialsModel.updateOne(
+      await PasswordModel.updateOne(
         {
-          user: user.id,
+          user: ObjectId(user.id),
           type: 'PASSWORD',
         },
         {
@@ -109,7 +110,7 @@ async function updateUser({ db, storage }, user, nextProps) {
 
       await UserModel.updateOne(
         {
-          _id: user.id,
+          _id: ObjectId(user.id),
         },
         {
           $set: nextUser,
