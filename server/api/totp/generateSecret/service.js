@@ -1,5 +1,4 @@
 import { ObjectId } from 'mongodb';
-import randomstring from 'randomstring';
 import QRCode from 'qrcode';
 import { addSeconds } from 'date-fns';
 
@@ -7,15 +6,10 @@ const TOKEN_LIFETIME_IN_SECONDS = 15 * 60; // 15 mins
 
 export const generateTOTPSecret = async ({ db, config }, { userId }) => {
   const TokenModel = db.model('Token');
+  const TOTPModel = db.model('TOTP');
 
   // generate secret
-  // TODO: Replace randomstring.generate with async version
-  // @see https://github.com/klughammer/node-randomstring/issues/28
-  const secret = randomstring.generate({
-    length: 32,
-    readable: false,
-    charset: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567', // i.e. Base32 characters
-  });
+  const secret = TOTPModel.generateSecret();
 
   // create totp_enroll token
   await TokenModel.create({
