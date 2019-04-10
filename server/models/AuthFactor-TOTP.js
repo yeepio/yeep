@@ -98,7 +98,7 @@ totpSchema.statics.getToken = (secret, windowIndex = 0) => {
   hmac.end();
 
   // bitwise operations to convert the SH1 HMAC output into a 6 digits code
-  const data = data.read(); // the SH1 HMAC output
+  const data = hmac.read(); // the SH1 HMAC output
   return ((parseInt(data.substr(parseInt(data.slice(-1), 16) * 2, 8), 16) & 2147483647) + '').slice(
     -6
   );
