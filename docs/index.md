@@ -24,7 +24,6 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 | **[user.create](methods/user.create.md)**                     | Creates new user                                              |
 | **[user.deactivate](methods/user.deactivate.md)**             | Deactivates the designated user                               |
 | **[user.delete](methods/user.delete.md)**                     | Deletes the designated user                                   |
-| **[user.deleteFactor](methods/user.deleteFactor.md)**         | Deletes the designated authentication factor                  |
 | **[user.deletePicture](methods/user.deletePicture.md)**       | Deletes the profile picture of the designated user            |
 | **[user.forgotPassword](methods/user.forgotPassword.md)**     | Initiates the forgot password process for the designated user |
 | **[user.info](methods/user.info.md)**                         | Retrieves details for the designated user                     |
@@ -33,7 +32,6 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 | **[user.revokePermission](methods/user.revokePermission.md)** | Revokes the designated permission assignment                  |
 | **[user.revokeRole](methods/user.revokeRole.md)**             | Revokes the designated role assigment                         |
 | **[user.uploadPicture](methods/user.uploadPicture.md)**       | Uploads the profile picture of the designated user            |
-| **[user.setFactor](methods/user.setFactor.md)**               | Sets the designated authentication factor                     |
 
 ### Session
 
@@ -70,3 +68,12 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 | **[invitation.accept](methods/invitation.accept.md)** | Adds user to org by redeeming invitation token |
 | **[invitation.create](methods/invitation.create.md)** | Invites user to join org                       |
 | **[invitation.list](methods/invitation.list.md)**     | Lists pending invitations                      |
+
+### Time-based One-Time Password Authentication Factor, a.k.a. TOTP
+
+| Method                                        | Description                                                 |
+| :-------------------------------------------- | :---------------------------------------------------------- |
+| **[totp.enroll](methods/totp.enroll.md)**     | Enrolls the designated user to TOTP authentication          |
+| **[totp.activate](methods/totp.activate.md)** | Activates TOTP authentication for the designated user       |
+| **[totp.verify](methods/totp.verify.md)**     | Verifies the supplied OTP token                             |
+| **[totp.eject](methods/totp.eject.md)**       | Removes TOTP authentication factor from the designated user |

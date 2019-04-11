@@ -1,10 +1,12 @@
-# user.deleteFactor
+# totp.eject
 
-`POST /api/v1/user.deleteFactor`
+`POST /api/v1/totp.eject`
 
 ## Description
 
-Deletes designated authentication factor from the specified user.
+Removes TOTP authentication factor from the designated user.
+
+The user may call [totp.enroll()](totp.enroll.md) to enroll to a new TOTP authentication factor after calling this method.
 
 ---
 
@@ -16,8 +18,7 @@ Requestor must be authenticated and (a) assigned with the `yeep.user.write` perm
 
 ### Body
 
-- **userId** _(string)_ — the ID of the user (required)
-- **type** _(string)_ — the type of the factor to delete (required)
+- **userId** _(string)_ — the ID of the user to eject from TOTP authentication (required)
 
 ---
 
@@ -35,14 +36,13 @@ Requestor must be authenticated and (a) assigned with the `yeep.user.write` perm
 **Request**
 
 ```
-POST /api/v1/user.deleteFactor
+POST /api/v1/totp.eject
 Authorization: `Bearer ${accessToken}`
 ```
 
 ```json
 {
-  "userId": "507f191e810c19729de860ea",
-  "type": "SOTP"
+  "userId": "507f191e810c19729de860ea"
 }
 ```
 
