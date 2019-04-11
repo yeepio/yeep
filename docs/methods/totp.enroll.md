@@ -31,7 +31,7 @@ Requestor must be authenticated and (a) assigned with the `yeep.user.write` perm
 - **totp** _(Object)_ — TOTP authentication details
   - **totp.secret** _(string)_ — TOTP secret key
   - **totp.qrcode** _(string)_ — handy QR code to use with your authenticator software
-  - **totp.pendingActivation** _(boolean)_ — indicates whether the TOTP authentication factor is pending activation
+  - **totp.isPendingActivation** _(boolean)_ — indicates whether the TOTP authentication factor is pending activation
 
 ---
 
@@ -63,7 +63,7 @@ Authorization: `Bearer ${accessToken}`
   ANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4
   //8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU
   5ErkJggg==",
-    "pendingActivation": true
+    "isPendingActivation": true
   }
 }
 ```
