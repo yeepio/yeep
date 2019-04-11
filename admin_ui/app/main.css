@@ -32,6 +32,7 @@ legend {
 }
 
 /* Form layout */
+.pseudolabel,
 .form-group label {
   @apply mb-1;
   display: block;
@@ -57,6 +58,7 @@ legend {
     flex-wrap: wrap;
     align-items: flex-start;
   }
+  .pseudolabel,
   .form-group label {
     @apply mb-0;
     flex: 0 0 25%;
@@ -81,6 +83,15 @@ legend {
   }
   .form-submit {
     margin-left: 25%;
+  }
+  /*
+    When we need to have some text instead of a form element
+    Used along with .pseudolabel (see Users => Edit => Org Membership for example)
+  */
+  .text-instead-of-form-field {
+    width:50%;
+    @apply block;
+    line-height:2.6rem;
   }
 }
 
