@@ -11,7 +11,7 @@ import {
   decorateUserPermissions,
   findUserPermissionIndex,
 } from '../../../middleware/auth';
-import { getUserByPasswordCredentials } from '../../session/create/service';
+import { getUserWithPassword } from '../../session/create/service';
 import updateUser from './service';
 import getUserInfo from '../info/service';
 import { AuthorizationError } from '../../../constants/errors';
@@ -60,8 +60,7 @@ export const validationSchema = {
               .email()
               .max(100)
               .required(),
-            isVerified: Joi.boolean()
-              .optional(),
+            isVerified: Joi.boolean().optional(),
             isPrimary: Joi.boolean()
               .default(false)
               .optional(),
@@ -105,10 +104,11 @@ const isUserAllowed = async (ctx, next) => {
   const { isUsernameEnabled } = config;
   const { username, password, oldPassword, fullName, picture, emails } = request.body;
 
-  const isSuperUser = findUserPermissionIndex(request.session.user.permissions, {
-    name: 'yeep.user.write',
-    orgId: '',
-  }) !== -1;
+  const isSuperUser =
+    findUserPermissionIndex(request.session.user.permissions, {
+      name: 'yeep.user.write',
+      orgId: '',
+    }) !== -1;
 
   // only a superuser can change a password without having the old one
   if (!isSuperUser && password && !oldPassword) {
@@ -124,10 +124,13 @@ const isUserAllowed = async (ctx, next) => {
 
   // also check if user is superuser
   if (!isSuperUser && password) {
-    await getUserByPasswordCredentials({ db }, {
-      username: request.session.requestedUser.username,
-      password: oldPassword,
-    });
+    await getUserWithPassword(
+      { db },
+      {
+        username: request.session.requestedUser.username,
+        password: oldPassword,
+      }
+    );
   }
 
   // only superusers are allowed to set emails as verified
