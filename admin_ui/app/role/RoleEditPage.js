@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from '@reach/router';
+import { useObservable } from 'rxjs-hooks';
 import useDocumentTitle from '@rehooks/document-title';
 import Store from '../Store';
 import Input from '../../components/Input';
@@ -11,8 +12,15 @@ import RoleDeleteModal from './RoleDeleteModal';
 
 const RoleEditPage = ({ roleId }) => {
   useDocumentTitle(`Edit role#${roleId}`);
-  // Load the store (we need access to store.role.deleteModal$)
+  // Load the store
   const store = React.useContext(Store);
+  // Establish the values for the changedPermissions$ and changedOrg$ flags
+  // (we'll use to decide whether to show "Save changes" buttons in the appropriate sections)
+  const changedPermissions = useObservable(
+    () => store.role.changedPermissions$,
+    store.role.changedPermissions$.getValue()
+  );
+  const changedOrg = useObservable(() => store.role.changedOrg$, store.role.changedOrg$.getValue());
   return (
     <React.Fragment>
       <RoleDeleteModal />
@@ -54,8 +62,13 @@ const RoleEditPage = ({ roleId }) => {
               { value: 8, label: 'Organization #8' },
             ]}
             isClearable={true}
+            onChange={() => {
+              // Set the changedOrg$ flag to "true" to indicate that the user
+              // has made some changes to this section
+              store.role.changedOrg$.next(true);
+            }}
           />
-          <div className="neutral">
+          <div className="neutral mb-4">
             Scoping to an organisation ensures:
             <br />
             <ul>
@@ -65,14 +78,19 @@ const RoleEditPage = ({ roleId }) => {
               <li>You can only associate permissions that are also scoped to that organization</li>
             </ul>
           </div>
+          {changedOrg && (
+            <div className="form-submit">
+              <Button className="w-full sm:w-auto sm:mr-4">Save changes</Button>
+            </div>
+          )}
         </div>
       </fieldset>
       <fieldset className="mb-6">
         <legend>Permissions</legend>
-        <p className="mb-4">Please choose one or more permissions to associate with this role:</p>
+        <p className="mb-4">Pick one or more permissions to associate with this role:</p>
         <Select
           isMulti
-          className="w-full"
+          className="w-full mb-4"
           placeholder="Choose one or more permissions"
           options={[
             { value: 1, label: 'blog.read' },
@@ -89,7 +107,13 @@ const RoleEditPage = ({ roleId }) => {
             { value: 12, label: 'crm.access.3', isDisabled: true },
           ]}
           defaultValue={[{ value: 1, label: 'blog.read' }, { value: 2, label: 'blog.write' }]}
+          onChange={() => {
+            // Set the changedOrg$ flag to "true" to indicate that the user
+            // has made some changes to the permnissions for this role
+            store.role.changedPermissions$.next(true);
+          }}
         />
+        {changedPermissions && <Button className="w-full sm:w-auto">Save changes</Button>}
       </fieldset>
       <fieldset className="mb-6">
         <legend>Danger zone</legend>
