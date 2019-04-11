@@ -5,10 +5,10 @@ import { validateRequest } from '../../../middleware/validation';
 import {
   decorateSession,
   isUserAuthenticated,
-  findUserPermissionIndex,
   decorateUserPermissions,
+  findUserPermissionIndex,
 } from '../../../middleware/auth';
-import { enrollTOTPAuthFactor } from './service';
+import { activateTOTPAuthFactor } from './service';
 import { AuthorizationError } from '../../../constants/errors';
 
 export const validationSchema = {
@@ -16,6 +16,13 @@ export const validationSchema = {
     userId: Joi.string()
       .length(24)
       .hex()
+      .required(),
+    secret: Joi.string()
+      .length(32)
+      .required(),
+    token: Joi.string()
+      .length(6)
+      .regex(/\d/)
       .required(),
   },
 };
@@ -40,16 +47,9 @@ const isUserAuthorized = async ({ request }, next) => {
 async function handler(ctx) {
   const { request, response } = ctx;
 
-  const { secret, qrcode } = await enrollTOTPAuthFactor(ctx, request.body);
+  await activateTOTPAuthFactor(ctx, request.body);
 
   response.status = 200; // OK
-  response.body = {
-    totp: {
-      secret,
-      qrcode,
-      isPendingActivation: true,
-    },
-  };
 }
 
 export default compose([

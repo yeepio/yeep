@@ -1,50 +1,61 @@
 import { ObjectId } from 'mongodb';
-import {
-  TokenNotFoundError,
-  InvalidTOTPToken,
-  DuplicateAuthFactor,
-} from '../../../constants/errors';
+import QRCode from 'qrcode';
+import { addSeconds } from 'date-fns';
+import { DuplicateAuthFactor } from '../../../constants/errors';
 
-export const createTOTPAuthFactor = async ({ db }, { secret, token, userId }) => {
+const TOKEN_LIFETIME_IN_SECONDS = 15 * 60; // 15 mins
+
+export const enrollTOTPAuthFactor = async ({ db, config }, { userId }) => {
   const TokenModel = db.model('Token');
   const TOTPModel = db.model('TOTP');
 
-  // acquire token from db
-  const tokenRecord = await TokenModel.findOne({
-    secret,
-    type: 'TOTP_SECRET',
+  // ensure user has not already activated TOTP authentication factor
+  const totpCount = await TOTPModel.countDocuments({
+    user: ObjectId(userId),
   });
 
-  // ensure token exists
-  if (!tokenRecord) {
-    throw new TokenNotFoundError('Secret key does not exist or has already expired');
+  if (totpCount !== 0) {
+    throw new DuplicateAuthFactor(`User ${userId} is already enrolled to TOTP authentication`);
   }
 
-  // ensure token is associated with the designated user
-  if (!tokenRecord.user.equals(userId)) {
-    // TODO: Handle potential security compromise by communicating with the admin or user
-    throw new TokenNotFoundError('Secret key does not exist or has already expired');
-  }
+  // generate secret
+  const secret = TOTPModel.generateSecret();
 
-  // verify token
-  if (!TOTPModel.verifyToken(token, secret)) {
-    throw new InvalidTOTPToken('TOTP token cannot be verified');
-  }
-
+  // update db
   const session = await db.startSession();
   session.startTransaction();
 
   try {
-    // redeem token, i.e. delete from db
-    await TokenModel.deleteOne({ _id: tokenRecord._id });
-
-    // register TOTP Auth Factor for the designated user
-    await TOTPModel.create({
+    // delete previous in-flight totp_enroll tokens (if any)
+    await TokenModel.deleteMany({
+      type: 'TOTP_ENROLL',
       user: ObjectId(userId),
+    });
+
+    // create new totp_enroll token
+    await TokenModel.create({
       secret,
+      type: 'TOTP_ENROLL',
+      user: ObjectId(userId),
+      org: null,
+      expiresAt: addSeconds(new Date(), TOKEN_LIFETIME_IN_SECONDS),
     });
 
     await session.commitTransaction();
+
+    // construct key URI
+    // @see https://github.com/google/google-authenticator/wiki/Key-Uri-Format
+    const keyUri = `otpauth://totp/${encodeURIComponent(
+      config.name
+    )}:${userId}?secret=${secret}&issuer=${encodeURIComponent(config.name)}`;
+
+    // render qrcode
+    const qrcode = await QRCode.toDataURL(keyUri);
+
+    return {
+      secret,
+      qrcode,
+    };
   } catch (err) {
     await session.abortTransaction();
 
