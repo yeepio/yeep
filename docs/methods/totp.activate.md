@@ -18,7 +18,7 @@ Requestor must be authenticated and (a) assigned with the `yeep.user.write` perm
 
 - **userId** _(string)_ — the ID of the user to activate TOTP authentication for (required)
 - **secret** _(string)_ — TOTP secret key (required)
-- **token** _(string)_ — OTP token as produces by the authenticator software (required)
+- **token** _(string)_ — OTP token as produced by the authenticator software (required)
 
 ---
 
