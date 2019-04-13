@@ -139,4 +139,46 @@ userSchema.methods.findPrimaryEmail = function() {
   return null;
 };
 
+/**
+ * Finds and returns the user matching the .
+ * @return {string|null} primary email address
+ */
+userSchema.static('findOneWithAuthFactors', async function(matchQuery) {
+  const userRecords = await this.aggregate([
+    {
+      $match: matchQuery,
+    },
+    {
+      $lookup: {
+        from: 'authFactors',
+        let: { userId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ['$user', '$$userId'],
+              },
+            },
+          },
+        ],
+        as: 'authFactors',
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        username: 1,
+        fullName: 1,
+        picture: 1,
+        emails: 1,
+        deactivatedAt: 1,
+        authFactors: '$authFactors',
+      },
+    },
+    { $limit: 1 },
+  ]).exec();
+
+  return userRecords[0] || null;
+});
+
 export default userSchema;
