@@ -33,7 +33,7 @@ const totpSchema = new Schema(
 
 /**
  * Generates and returns a BASE-32 encoded secret key.
- * @return {String}
+ * @return {string}
  */
 totpSchema.statics.generateSecret = () => {
   // TODO: Replace randomstring.generate with async version
@@ -47,9 +47,9 @@ totpSchema.statics.generateSecret = () => {
 
 /**
  * Generates and returns a TOTP token based on the supplied secret key.
- * @param {String} secret
- * @param {Number} [windowIndex=0] use window index to retrieve previous or next tokens
- * @return {String}
+ * @param {string} secret
+ * @param {number} [windowIndex=0] use window index to retrieve previous or next tokens
+ * @return {string}
  * @see {@link https://github.com/gfiocco/google-auth-totp}
  * @license
  * MIT License
@@ -106,9 +106,9 @@ totpSchema.statics.getToken = (secret, windowIndex = 0) => {
 
 /**
  * Verifies the specified token based on the supplied secret key.
- * @param {String} token
- * @param {String} secret
- * @return {Boolean}
+ * @param {string} token
+ * @param {string} secret
+ * @return {boolean}
  */
 totpSchema.statics.verifyToken = (token, secret) => {
   return (

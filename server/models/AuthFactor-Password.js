@@ -67,4 +67,17 @@ passwordSchema.statics.digestPassword = function(password, salt, iterations) {
   return pbkdf2(password, salt, iterations, 128, 'sha512');
 };
 
+/**
+ * Verifies the supplied password.
+ * @param {string} password
+ * @param {Buffer} salt
+ * @param {number} iterations
+ * @param {Buffer} secret digested password as stored in the db
+ * @return {Promise<boolean>}
+ */
+passwordSchema.statics.verifyPassword = async function(password, salt, iterations, secret) {
+  const digestedPassword = await passwordSchema.statics.digestPassword(password, salt, iterations);
+  return secret.compare(digestedPassword) === 0;
+};
+
 export default passwordSchema;
