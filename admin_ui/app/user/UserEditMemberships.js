@@ -70,11 +70,19 @@ const UserEditMemberships = ({ userId }) => {
         </div>
         <div className="form-group mb-4">
           <label htmlFor="membership-roles">Roles:</label>
-          <Select isDisabled={true} className="w-full sm:w-1/2" placeholder="Choose an organisation first" />
+          <Select
+            isDisabled={true}
+            className="w-full sm:w-1/2"
+            placeholder="Choose an organisation first"
+          />
         </div>
         <div className="form-group mb-4">
           <label htmlFor="membership-permissions">Permissions:</label>
-          <Select isDisabled={true} className="w-full sm:w-1/2" placeholder="Choose an organisation first" />
+          <Select
+            isDisabled={true}
+            className="w-full sm:w-1/2"
+            placeholder="Choose an organisation first"
+          />
         </div>
         <div className="form-submit">
           <Button className="w-full sm:w-auto">Save changes</Button>
