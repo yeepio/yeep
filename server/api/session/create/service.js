@@ -53,7 +53,7 @@ export async function getUserAndVerifyPassword({ db }, { username, emailAddress,
 
   // make sure user is active
   if (!!user.deactivatedAt && isBefore(user.deactivatedAt, new Date())) {
-    throw new UserDeactivatedError(`User ${user.id} is deactivated`);
+    throw new UserDeactivatedError(`User "${username || emailAddress}" is deactivated`);
   }
 
   // retrieve password authentication factor
@@ -61,7 +61,9 @@ export async function getUserAndVerifyPassword({ db }, { username, emailAddress,
 
   // make sure password authentication factor exists
   if (!passwordAuthFactor) {
-    throw new AuthFactorNotFound(`Password authentication factor not found for user ${user.id}`);
+    throw new AuthFactorNotFound(
+      `Password authentication factor not found for user "${username || emailAddress}"`
+    );
   }
 
   // verify password
