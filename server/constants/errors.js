@@ -242,3 +242,10 @@ export class AuthFactorNotFound extends Error {
     this.code = 10033;
   }
 }
+
+export class SecondaryAuthFactorRequired extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10034;
+  }
+}
