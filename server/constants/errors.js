@@ -250,3 +250,10 @@ export class SecondaryAuthFactorRequired extends Error {
     this.applicableAuthFactorTypes = applicableAuthFactorTypes;
   }
 }
+
+export class InvalidAuthFactor extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10035;
+  }
+}
