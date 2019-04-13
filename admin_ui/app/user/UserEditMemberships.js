@@ -31,6 +31,39 @@ let gridData = [
 ];
 
 const UserEditMemberships = ({ userId }) => {
+  // Store the list of all roles for the selected org
+  const [roles, setRoles] = React.useState([]);
+
+  const handleOrgChange = org => {
+    if (org === null) {
+      // User opted to clear the "organization" Select
+      // Reset the roles to be an empty array
+      setRoles([]);
+      console.log('org is null, roles should be null: ', roles);
+    } else {
+      // We'll replace this with an API call. For now just populate with dummy roles
+      setRoles([
+        {
+          id: 1,
+          name: 'role_1',
+        },
+        {
+          id: 2,
+          name: 'role_2',
+        },
+        {
+          id: 3,
+          name: 'role_3',
+        },
+        {
+          id: 4,
+          name: 'role_4',
+        },
+      ]);
+      console.log('org is not null, org should have 4 values:', roles);
+    }
+  };
+
   useDocumentTitle(`Organization memberships for user Justine Singh`);
   return (
     <React.Fragment>
@@ -66,6 +99,7 @@ const UserEditMemberships = ({ userId }) => {
               { value: 8, label: 'Organization #8' },
             ]}
             isClearable={true}
+            onChange={handleOrgChange}
           />
         </div>
         <div className="form-group mb-4">
