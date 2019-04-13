@@ -148,13 +148,13 @@ describe('api/session.create', () => {
     );
   });
 
-  test('adds user profile data to accessToken payload when `scope.profile` is true', async () => {
+  test('adds user profile data to accessToken payload when `projection.profile` is true', async () => {
     const res = await request(server)
       .post('/api/session.create')
       .send({
         user: 'Wile', // this will be automaticaly lower-cased
         password: 'catch-the-b1rd$',
-        scope: {
+        projection: {
           profile: true,
         },
       });
@@ -216,7 +216,7 @@ describe('api/session.create', () => {
       permission = await createPermission(ctx, {
         name: 'acme.test',
         description: 'Test permission',
-        scope: acme.id,
+        projection: acme.id,
       });
 
       permissionAssignment = await createPermissionAssignment(ctx, {
@@ -232,13 +232,13 @@ describe('api/session.create', () => {
       await deletePermission(ctx, permission);
     });
 
-    test('adds permissions to accessToken payload when `scope.permissions` is true', async () => {
+    test('adds permissions to accessToken payload when `projection.permissions` is true', async () => {
       const res = await request(server)
         .post('/api/session.create')
         .send({
           user: 'Wile', // this will be automaticaly lower-cased
           password: 'catch-the-b1rd$',
-          scope: {
+          projection: {
             permissions: true,
           },
         });

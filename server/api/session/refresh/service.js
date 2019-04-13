@@ -91,7 +91,7 @@ export default async function refreshSessionToken(ctx, props) {
       ...user,
       id: user._id.toHexString(),
     },
-    scope: {
+    projection: {
       profile: has(accessTokenPayload, ['user', 'fullName']),
       permissions: has(accessTokenPayload, ['user', 'permissions']),
     },

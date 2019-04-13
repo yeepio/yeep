@@ -27,7 +27,7 @@ This method is publicly available.
 
 - **user** _(string)_ — the username or email address of the user (required)
 - **password** _(string)_ — the user password (required)
-- **scope** _(Object)_ — user props to include in the `accessToken` payload (optional)
+- **projection** _(Object)_ — user props to include in the `accessToken` payload (optional)
   - **profile** _(boolean)_ — indicates whether to include user profile information to the `accessToken` payload (optional; defaults to `false`)
   - **permissions** _(boolean)_ — indicates whether to include user permissions to the `accessToken` payload (optional; defaults to `false`)
 

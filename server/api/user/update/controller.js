@@ -11,7 +11,7 @@ import {
   decorateUserPermissions,
   findUserPermissionIndex,
 } from '../../../middleware/auth';
-import { getUserWithPassword } from '../../session/create/service';
+import { getUserAndVerifyPassword } from '../../session/create/service';
 import updateUser from './service';
 import getUserInfo from '../info/service';
 import { AuthorizationError } from '../../../constants/errors';
@@ -124,7 +124,7 @@ const isUserAllowed = async (ctx, next) => {
 
   // also check if user is superuser
   if (!isSuperUser && password) {
-    await getUserWithPassword(
+    await getUserAndVerifyPassword(
       { db },
       {
         username: request.session.requestedUser.username,

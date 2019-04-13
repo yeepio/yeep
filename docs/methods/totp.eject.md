@@ -6,7 +6,7 @@
 
 Removes TOTP authentication factor from the designated user.
 
-The user may call [totp.enroll()](totp.enroll.md) to enroll to a new TOTP authentication factor after calling this method.
+User may call [totp.enroll()](totp.enroll.md) to enroll to a new TOTP authentication factor after calling this method.
 
 ---
 
@@ -19,6 +19,9 @@ Requestor must be authenticated and (a) assigned with the `yeep.user.write` perm
 ### Body
 
 - **userId** _(string)_ — the ID of the user to eject from TOTP authentication (required)
+- **secondaryAuthFactor** _(Object)_ — secondary authentication factor (required)
+  - **type** _(string)_ — authentication factor type, e.g. "PASSWORD" - must not be "TOTP" (required)
+  - **token** _(string)_ — authentication factor token, e.g. the user's password (required)
 
 ---
 
@@ -42,7 +45,11 @@ Authorization: `Bearer ${accessToken}`
 
 ```json
 {
-  "userId": "507f191e810c19729de860ea"
+  "userId": "507f191e810c19729de860ea",
+  "secondaryAuthFactor": {
+    "type": "PASSWORD",
+    "token": "catch-the-b1rd$"
+  }
 }
 ```
 
