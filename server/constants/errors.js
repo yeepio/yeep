@@ -235,3 +235,10 @@ export class DuplicateAuthFactor extends Error {
     this.code = 10032;
   }
 }
+
+export class AuthFactorNotFound extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10033;
+  }
+}
