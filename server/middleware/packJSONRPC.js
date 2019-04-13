@@ -28,7 +28,7 @@ async function packJSONRPC(ctx, next) {
       ctx.response.body = {
         ok: false,
         error: {
-          code: err.code,
+          ...err,
           message: err.message,
         },
       };
