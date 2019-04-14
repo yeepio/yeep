@@ -1,20 +1,34 @@
 import { ObjectId } from 'mongodb';
 import QRCode from 'qrcode';
-import { addSeconds } from 'date-fns';
-import { DuplicateAuthFactor } from '../../../constants/errors';
+import { addSeconds, isBefore } from 'date-fns';
+import {
+  DuplicateAuthFactor,
+  UserNotFoundError,
+  UserDeactivatedError,
+} from '../../../constants/errors';
 
 const TOKEN_LIFETIME_IN_SECONDS = 15 * 60; // 15 mins
 
 export const enrollTOTPAuthFactor = async ({ db, config }, { userId }) => {
+  const UserModel = db.model('User');
   const TokenModel = db.model('Token');
   const TOTPModel = db.model('TOTP');
 
-  // ensure user has not already activated TOTP authentication factor
-  const totpCount = await TOTPModel.countDocuments({
-    user: ObjectId(userId),
-  });
+  // retrieve user from db
+  const user = await UserModel.findOneWithAuthFactors({ _id: ObjectId(userId) });
 
-  if (totpCount !== 0) {
+  // make sure user exists
+  if (!user) {
+    throw new UserNotFoundError(`User ${userId} not found`);
+  }
+
+  // make sure user is active
+  if (!!user.deactivatedAt && isBefore(user.deactivatedAt, new Date())) {
+    throw new UserDeactivatedError(`User ${userId} is deactivated`);
+  }
+
+  // ensure user has not already activated TOTP authentication factor
+  if (user.authFactors.some((e) => e.type === 'TOTP')) {
     throw new DuplicateAuthFactor(`User ${userId} is already enrolled to TOTP authentication`);
   }
 
