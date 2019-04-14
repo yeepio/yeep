@@ -55,8 +55,8 @@ async function handler(ctx) {
 export default compose([
   packJSONRPC,
   decorateSession(),
-  validateRequest(validationSchema),
   isUserAuthenticated(),
+  validateRequest(validationSchema),
   decorateUserPermissions(),
   isUserAuthorized,
   handler,
