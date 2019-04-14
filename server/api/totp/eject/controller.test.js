@@ -1,6 +1,5 @@
 /* eslint-env jest */
 import request from 'supertest';
-import { ObjectId } from 'mongodb';
 import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';

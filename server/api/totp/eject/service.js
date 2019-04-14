@@ -1,9 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { isBefore } from 'date-fns';
 import {
-  TokenNotFoundError,
-  InvalidTOTPToken,
-  DuplicateAuthFactor,
   AuthFactorNotFound,
   UserNotFoundError,
   UserDeactivatedError,
