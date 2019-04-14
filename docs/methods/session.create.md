@@ -30,6 +30,9 @@ This method is publicly available.
 - **projection** _(Object)_ — user props to include in the `accessToken` payload (optional)
   - **profile** _(boolean)_ — indicates whether to include user profile information to the `accessToken` payload (optional; defaults to `false`)
   - **permissions** _(boolean)_ — indicates whether to include user permissions to the `accessToken` payload (optional; defaults to `false`)
+- **secondaryAuthFactor** _(Object)_ — secondary authentication factor (optional; required only if user has enabled MFA)
+  - **type** _(string)_ — authentication factor type, e.g. "TOTP" - must not be "PASSWORD" (required)
+  - **token** _(string)_ — authentication factor token, e.g. OTP code as provided by the user's authenticator software (required)
 
 ---
 
