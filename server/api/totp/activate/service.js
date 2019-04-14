@@ -1,21 +1,34 @@
 import { ObjectId } from 'mongodb';
+import { isBefore } from 'date-fns';
 import {
   TokenNotFoundError,
   InvalidTOTPToken,
   DuplicateAuthFactor,
+  UserNotFoundError,
+  UserDeactivatedError,
 } from '../../../constants/errors';
 
 export const activateTOTPAuthFactor = async ({ db }, { secret, token, userId }) => {
+  const UserModel = db.model('User');
   const TokenModel = db.model('Token');
   const TOTPModel = db.model('TOTP');
 
-  // ensure user has not already activated TOTP authentication factor
-  const totpCount = await TOTPModel.countDocuments({
-    user: ObjectId(userId),
-  });
+  // retrieve user from db
+  const user = await UserModel.findOneWithAuthFactors({ _id: ObjectId(userId) });
 
-  if (totpCount !== 0) {
-    throw new DuplicateAuthFactor(`User ${userId} is already enrolled to TOTP authentication`);
+  // make sure user exists
+  if (!user) {
+    throw new UserNotFoundError(`User ${userId} not found`);
+  }
+
+  // make sure user is active
+  if (!!user.deactivatedAt && isBefore(user.deactivatedAt, new Date())) {
+    throw new UserDeactivatedError(`User ${userId} is deactivated`);
+  }
+
+  // ensure user has not already activated TOTP authentication factor
+  if (user.authFactors.some((e) => e.type === 'TOTP')) {
+    throw new DuplicateAuthFactor(`User ${userId} has already activated TOTP authentication`);
   }
 
   // acquire token from db
@@ -40,6 +53,7 @@ export const activateTOTPAuthFactor = async ({ db }, { secret, token, userId }) 
     throw new InvalidTOTPToken('TOTP token cannot be verified');
   }
 
+  // update db
   const session = await db.startSession();
   session.startTransaction();
 
