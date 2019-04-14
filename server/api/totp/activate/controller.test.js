@@ -268,7 +268,7 @@ describe('api/totp.activate', () => {
       });
     });
 
-    test('enrolls user and returns proper response', async () => {
+    test('activates TOTP authentication factor and returns proper response', async () => {
       const TokenModel = ctx.db.model('Token');
       const TOTPModel = ctx.db.model('TOTP');
 
