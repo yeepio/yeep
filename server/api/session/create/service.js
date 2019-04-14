@@ -176,8 +176,8 @@ export async function verifyAuthFactor({ db }, { type, token, user }) {
 
   // verify token
   switch (type) {
-    case 'PASSWORD':
-      return db
+    case 'PASSWORD': {
+      const isPasswordVerified = await db
         .model('Password')
         .verifyPassword(
           token,
@@ -185,10 +185,24 @@ export async function verifyAuthFactor({ db }, { type, token, user }) {
           authFactor.iterationCount,
           authFactor.password.buffer
         );
-    case 'TOTP':
-      return db.model('TOTP').verifyToken(token, authFactor.secret);
+
+      if (!isPasswordVerified) {
+        throw new InvalidAuthFactor(`The supplied password cannot be verified`);
+      }
+
+      break;
+    }
+    case 'TOTP': {
+      const isTokenVerified = await db.model('TOTP').verifyToken(token, authFactor.secret);
+
+      if (!isTokenVerified) {
+        throw new InvalidAuthFactor(`The supplied OTP token cannot be verified`);
+      }
+
+      break;
+    }
     default:
-      return false;
+      throw new InvalidAuthFactor(`Unknown authentication factor type "${type}"`);
   }
 }
 
@@ -223,16 +237,10 @@ export default async function createSession(
     }
 
     // verify secondary auth factor
-    const isSecondaryAuthFactorVerified = await verifyAuthFactor(ctx, {
+    await verifyAuthFactor(ctx, {
       ...secondaryAuthFactor,
       user,
     });
-
-    if (!isSecondaryAuthFactorVerified) {
-      throw new InvalidAuthFactor(
-        `Supplied token for ${secondaryAuthFactor.type.toLowerCase()} authentication factor cannot be verified`
-      );
-    }
   }
 
   // issue access + refresh tokens
