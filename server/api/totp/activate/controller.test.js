@@ -26,7 +26,7 @@ describe('api/totp.activate', () => {
   describe('unauthorized user', () => {
     test('returns error pretending resource does not exist', async () => {
       const res = await request(server)
-        .post('/api/invitation.create')
+        .post('/api/totp.activate')
         .send();
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
