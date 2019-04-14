@@ -19,8 +19,8 @@ Requestor must be authenticated and (a) assigned with the `yeep.user.write` perm
 ### Body
 
 - **userId** _(string)_ — the ID of the user to eject from TOTP authentication (required)
-- **secondaryAuthFactor** _(Object)_ — secondary authentication factor (required)
-  - **type** _(string)_ — authentication factor type, e.g. "PASSWORD" - must not be "TOTP" (required)
+- **secondaryAuthFactor** _(Object)_ — secondary authentication factor (optional; required when requestor matches the designated user)
+  - **type** _(string)_ — authentication factor type, e.g. "PASSWORD" (required)
   - **token** _(string)_ — authentication factor token, e.g. the user's password (required)
 
 ---
