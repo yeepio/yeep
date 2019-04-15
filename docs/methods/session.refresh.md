@@ -1,6 +1,6 @@
 # session.refresh
 
-`POST /api/v1/session.refresh`
+`POST /api/session.refresh`
 
 ## Description
 
@@ -37,7 +37,7 @@ This method is publicly available.
 **Request**
 
 ```
-POST /api/v1/session.refresh
+POST /api/session.refresh
 ```
 
 ```json

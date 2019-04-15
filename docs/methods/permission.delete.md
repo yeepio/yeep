@@ -1,6 +1,6 @@
 # permission.delete
 
-`POST /api/v1/permission.delete`
+`POST /api/permission.delete`
 
 ## Description
 
@@ -34,7 +34,7 @@ Requestor must be authenticated and assigned with the `yeep.permission.write` pe
 **Request**
 
 ```
-POST /api/v1/permission.delete
+POST /api/permission.delete
 Authorization: `Bearer ${accessToken}`
 ```
 

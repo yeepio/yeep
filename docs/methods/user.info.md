@@ -1,6 +1,6 @@
 # user.info
 
-`POST /api/v1/user.info`
+`POST /api/user.info`
 
 ## Description
 
@@ -49,7 +49,7 @@ Users are able to retrieve their own details without explicit permissions.
 **Request**
 
 ```
-POST /api/v1/user.info
+POST /api/user.info
 Authorization: `Bearer ${accessToken}`
 ```
 

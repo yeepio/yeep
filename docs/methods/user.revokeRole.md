@@ -1,6 +1,6 @@
 # user.revokeRole
 
-`POST /api/v1/user.revokeRole`
+`POST /api/user.revokeRole`
 
 ## Description
 
@@ -37,7 +37,7 @@ Requestor must be authenticated and assigned with the `yeep.role.assignment.writ
 **Request**
 
 ```
-POST /api/v1/user.revokeRole
+POST /api/user.revokeRole
 Authorization: `Bearer ${accessToken}`
 ```
 

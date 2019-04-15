@@ -1,6 +1,6 @@
 # user.resetPassword
 
-`POST /api/v1/user.resetPassword`
+`POST /api/user.resetPassword`
 
 ## Description
 
@@ -36,7 +36,7 @@ This method is publicly available.
 **Request**
 
 ```
-POST /api/v1/user.resetPassword
+POST /api/user.resetPassword
 ```
 
 ```json

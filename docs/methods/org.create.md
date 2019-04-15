@@ -1,6 +1,6 @@
 # org.create
 
-`POST /api/v1/org.create`
+`POST /api/org.create`
 
 ## Description
 
@@ -8,7 +8,7 @@ Creates new org.
 
 Requestor is automatically assigned with the "admin" role for the newly created org, assuming the org was successfully created.
 
-***
+---
 
 ## Auth logic
 
@@ -16,8 +16,8 @@ Requestor must be authenticated and assigned with the `yeep.org.write` permissio
 
 | isOrgCreationOpen | Required permission |
 | ----------------- | ------------------- |
-| `false` | `yeep.org.write` |
-| `true` | - |
+| `false`           | `yeep.org.write`    |
+| `true`            | -                   |
 
 ## Parameters
 
@@ -26,7 +26,7 @@ Requestor must be authenticated and assigned with the `yeep.org.write` permissio
 - **name** _(string)_ — the name of the organization (required)
 - **slug** _(string)_ — the URL key of the organization, a.k.a. slug (required)
 
-***
+---
 
 ## Returns
 
@@ -36,18 +36,18 @@ Requestor must be authenticated and assigned with the `yeep.org.write` permissio
 - **error** _(Object)_ — contains error details in case of an error
 - **org** _(Object)_ — the newly created org
 
-***
+---
 
 ## Example
 
 **Request**
 
 ```
-POST /api/v1/org.create
+POST /api/org.create
 Authorization: `Bearer ${accessToken}`
 ```
 
-``` json
+```json
 {
   "name": "ACME Inc.",
   "slug": "acme"
@@ -58,7 +58,7 @@ Authorization: `Bearer ${accessToken}`
 
 `200 OK`
 
-``` json
+```json
 {
   "ok": true,
   "org": {

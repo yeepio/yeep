@@ -1,6 +1,6 @@
 # user.assignPermission
 
-`POST /api/v1/user.assignPermission`
+`POST /api/user.assignPermission`
 
 ## Description
 
@@ -38,7 +38,7 @@ Requestor must be authenticated and assigned with the `yeep.permission.assignmen
 **Request**
 
 ```
-POST /api/v1/user.assignPermission
+POST /api/user.assignPermission
 Authorization: `Bearer ${accessToken}`
 ```
 

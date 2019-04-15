@@ -1,6 +1,6 @@
 # org.removeMember
 
-`POST /api/v1/org.removeMember`
+`POST /api/org.removeMember`
 
 ## Description
 
@@ -35,7 +35,7 @@ Requestor must be authenticated and assigned with the `yeep.user.write` permissi
 **Request**
 
 ```
-POST /api/v1/org.removeMember
+POST /api/org.removeMember
 Authorization: `Bearer ${accessToken}`
 ```
 

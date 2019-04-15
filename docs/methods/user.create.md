@@ -1,12 +1,12 @@
 # user.create
 
-`POST /api/v1/user.create`
+`POST /api/user.create`
 
 ## Description
 
 Creates new user with the specified properties.
 
-***
+---
 
 ## Auth logic
 
@@ -19,7 +19,7 @@ Requestor must be authenticated and assigned with the `yeep.user.write` permissi
 - **username** _(string)_ — the display name of the user (required if `isUsernameEnabled` setting is true, otherwise forbidden)
 - **password** _(string)_ — user password (required)
 - **fullName** _(string)_ — user full name, e.g. "Wile E. Coyote"
-(required)
+  (required)
 - **picture** _(string)_ — user profile picture URL (optional)
 - **emails** _(Array\<Object>)_ — array of emails (required; at least 1 email must be specified)
   - **emails[].address** _(string)_ — email address, e.g. "coyote@acme.com" (required)
@@ -27,7 +27,7 @@ Requestor must be authenticated and assigned with the `yeep.user.write` permissi
   - **emails[].isPrimary** _(boolean)_ — indicates whether the specified email is the user's primary email address (optional; defaults to `false`)
 - **orgs** _(Array\<string>)_ — array of org IDs to associate the user with (optional)
 
-***
+---
 
 ## Returns
 
@@ -37,18 +37,18 @@ Requestor must be authenticated and assigned with the `yeep.user.write` permissi
 - **error** _(Object)_ — contains error details in case of an error
 - **user** _(Object)_ — the newly created user
 
-***
+---
 
 ## Example
 
 **Request**
 
 ```
-POST /api/v1/user.create
+POST /api/user.create
 Authorization: `Bearer ${accessToken}`
 ```
 
-``` json
+```json
 {
   "username": "wile",
   "password": "catch-the-b1rd$",
@@ -58,8 +58,8 @@ Authorization: `Bearer ${accessToken}`
     {
       "address": "coyote@acme.com",
       "isVerified": true,
-      "isPrimary": true,
-    },
+      "isPrimary": true
+    }
   ]
 }
 ```
@@ -68,7 +68,7 @@ Authorization: `Bearer ${accessToken}`
 
 `200 OK`
 
-``` json
+```json
 {
   "ok": true,
   "user": {
@@ -80,8 +80,8 @@ Authorization: `Bearer ${accessToken}`
       {
         "address": "coyote@acme.com",
         "isVerified": true,
-        "isPrimary": true,
-      },
+        "isPrimary": true
+      }
     ],
     "orgs": [],
     "createdAt": "2017-07-13T05:00:42.145Z",

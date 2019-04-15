@@ -1,6 +1,6 @@
 # user.activate
 
-`POST /api/v1/user.activate`
+`POST /api/user.activate`
 
 ## Description
 
@@ -8,7 +8,7 @@ Activates the designated user.
 
 This function only makes sense if the user had previously been deactivated.
 
-***
+---
 
 ## Auth logic
 
@@ -20,7 +20,7 @@ Requestor must be authenticated and assigned with `yeep.user.write` permission i
 
 - **id** _(string)_ — user ID (required)
 
-***
+---
 
 ## Returns
 
@@ -30,18 +30,18 @@ Requestor must be authenticated and assigned with `yeep.user.write` permission i
 - **error** _(Object)_ — contains error details in case of an error
 - **user** _(Object)_ — updated user info
 
-***
+---
 
 ## Example
 
 **Request**
 
 ```
-POST /api/v1/user.activate
+POST /api/user.activate
 Authorization: `Bearer ${accessToken}`
 ```
 
-``` json
+```json
 {
   "id": "507f191e810c19729de860ea"
 }
@@ -51,7 +51,7 @@ Authorization: `Bearer ${accessToken}`
 
 `200 OK`
 
-``` json
+```json
 {
   "ok": true,
   "user": {
