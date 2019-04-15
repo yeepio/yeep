@@ -1,6 +1,6 @@
 # permission.create
 
-`POST /api/v1/permission.create`
+`POST /api/permission.create`
 
 ## Description
 
@@ -39,7 +39,7 @@ _Please note: global permissions can be applied to any org._
 **Request**
 
 ```
-POST /api/v1/permission.create
+POST /api/permission.create
 Authorization: `Bearer ${accessToken}`
 ```
 

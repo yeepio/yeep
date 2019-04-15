@@ -1,6 +1,6 @@
 # totp.enroll
 
-`POST /api/v1/totp.enroll`
+`POST /api/totp.enroll`
 
 ## Description
 
@@ -40,7 +40,7 @@ Requestor must be authenticated and (a) assigned with the `yeep.user.write` perm
 **Request**
 
 ```
-POST /api/v1/totp.enroll
+POST /api/totp.enroll
 Authorization: `Bearer ${accessToken}`
 ```
 

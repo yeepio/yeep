@@ -1,6 +1,6 @@
 # session.create
 
-`POST /api/v1/session.create`
+`POST /api/session.create`
 
 ## Description
 
@@ -9,7 +9,7 @@ Creates new session, a.k.a. sign-in, for the designated user. Returns (1) an `ac
 The `accessToken` is used to authenticate the user identity in API requests that require authentication, e.g.
 
 ```
-POST /api/v1/user.info
+POST /api/user.info
 Authorization: `Bearer ${accessToken}`
 ```
 
@@ -52,7 +52,7 @@ This method is publicly available.
 **Request**
 
 ```
-POST /api/v1/session.create
+POST /api/session.create
 ```
 
 ```json

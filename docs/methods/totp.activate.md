@@ -1,6 +1,6 @@
 # totp.activate
 
-`POST /api/v1/totp.activate`
+`POST /api/totp.activate`
 
 ## Description
 
@@ -36,7 +36,7 @@ Requestor must be authenticated and (a) assigned with the `yeep.user.write` perm
 **Request**
 
 ```
-POST /api/v1/totp.activate
+POST /api/totp.activate
 Authorization: `Bearer ${accessToken}`
 ```
 

@@ -1,6 +1,6 @@
 # role.info
 
-`POST /api/v1/role.info`
+`POST /api/role.info`
 
 ## Description
 
@@ -35,7 +35,7 @@ Requestor must be authenticated and assigned with the `yeep.role.read` permissio
 **Request**
 
 ```
-POST /api/v1/role.info
+POST /api/role.info
 Authorization: `Bearer ${accessToken}`
 ```
 

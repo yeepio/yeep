@@ -1,6 +1,6 @@
 # totp.eject
 
-`POST /api/v1/totp.eject`
+`POST /api/totp.eject`
 
 ## Description
 
@@ -39,7 +39,7 @@ Requestor must be authenticated and (a) assigned with the `yeep.user.write` perm
 **Request**
 
 ```
-POST /api/v1/totp.eject
+POST /api/totp.eject
 Authorization: `Bearer ${accessToken}`
 ```
 

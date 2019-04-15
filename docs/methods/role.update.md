@@ -1,6 +1,6 @@
 # role.update
 
-`POST /api/v1/role.update`
+`POST /api/role.update`
 
 ## Description
 
@@ -40,7 +40,7 @@ _Please note: one of `name`, `description` or `permissions` must be specified, o
 **Request**
 
 ```
-POST /api/v1/role.update
+POST /api/role.update
 Authorization: `Bearer ${accessToken}`
 ```
 

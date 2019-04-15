@@ -1,6 +1,6 @@
 # org.update
 
-`POST /api/v1/org.update`
+`POST /api/org.update`
 
 ## Description
 
@@ -39,7 +39,7 @@ _Please note: one of `name` or `slug` must be specified, otherwise update makes 
 **Request**
 
 ```
-POST /api/v1/org.update
+POST /api/org.update
 Authorization: `Bearer ${accessToken}`
 ```
 

@@ -1,6 +1,6 @@
 # org.delete
 
-`POST /api/v1/org.delete`
+`POST /api/org.delete`
 
 ## Description
 
@@ -8,7 +8,7 @@ Deletes the designated org.
 
 Users are automatically dissociated with the deleted org. Assigned roles and permissions are deleted. Scoped permissions and roles not associated with another org are also deleted.
 
-***
+---
 
 ## Auth logic
 
@@ -20,7 +20,7 @@ Requestor must be authenticated and assigned with the `yeep.org.write` permissio
 
 - **id** _(string)_ — the ID of the organization to delete (required)
 
-***
+---
 
 ## Returns
 
@@ -30,18 +30,18 @@ Requestor must be authenticated and assigned with the `yeep.org.write` permissio
 - **error** _(Object)_ — contains error details in case of an error
 - **org** _(Object)_ — the newly delete org
 
-***
+---
 
 ## Example
 
 **Request**
 
 ```
-POST /api/v1/org.delete
+POST /api/org.delete
 Authorization: `Bearer ${accessToken}`
 ```
 
-``` json
+```json
 {
   "id": "507f191e810c19729de860ea"
 }
@@ -51,7 +51,7 @@ Authorization: `Bearer ${accessToken}`
 
 `200 OK`
 
-``` json
+```json
 {
   "ok": true
 }

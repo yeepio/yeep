@@ -1,6 +1,6 @@
 # role.create
 
-`POST /api/v1/role.create`
+`POST /api/role.create`
 
 ## Description
 
@@ -40,7 +40,7 @@ _Please note: global roles can be applied to any org._
 **Request**
 
 ```
-POST /api/v1/role.create
+POST /api/role.create
 Authorization: `Bearer ${accessToken}`
 ```
 

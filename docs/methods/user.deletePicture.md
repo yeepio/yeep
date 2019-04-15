@@ -1,6 +1,6 @@
 # user.deletePicture
 
-`POST /api/v1/user.deletePicture`
+`POST /api/user.deletePicture`
 
 ## Description
 
@@ -41,7 +41,7 @@ Users are able to delete their own profile picture without explicit permissions.
 **Request**
 
 ```
-POST /api/v1/user.deletePicture
+POST /api/user.deletePicture
 Authorization: `Bearer ${accessToken}`
 ```
 

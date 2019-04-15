@@ -1,6 +1,6 @@
 # user.delete
 
-`POST /api/v1/user.delete`
+`POST /api/user.delete`
 
 ## Description
 
@@ -40,7 +40,7 @@ Users are able to delete their own account without explicit permissions.
 **Request**
 
 ```
-POST /api/v1/user.delete
+POST /api/user.delete
 Authorization: `Bearer ${accessToken}`
 ```
 

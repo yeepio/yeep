@@ -1,6 +1,6 @@
 module.exports = {
   // External public URL to access your Yeep installation (required).
-  // Please note this defines the URI for all Yeep endpoints, such as `${baseUrl}/api/v1/ping`.
+  // Please note this defines the URI for all Yeep endpoints, such as `${baseUrl}/api/ping`.
   // Feel free to specify port if necessary.
   // Trailing "/" is optional.
   baseUrl: 'https://your-domain.com',

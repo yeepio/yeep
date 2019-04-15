@@ -1,6 +1,6 @@
 # user.assignRole
 
-`POST /api/v1/user.assignRole`
+`POST /api/user.assignRole`
 
 ## Description
 
@@ -38,7 +38,7 @@ Requestor must be authenticated and assigned with the `yeep.role.assignment.writ
 **Request**
 
 ```
-POST /api/v1/user.assignRole
+POST /api/user.assignRole
 Authorization: `Bearer ${accessToken}`
 ```
 

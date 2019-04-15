@@ -8,7 +8,7 @@ Updates user details with the specified properties
 
 Please note: the user.update() API method accepts partial updates, meaning you need only specify the properties you want to change instead of supplying full user properties every single time.
 
-***
+---
 
 ## Auth logic
 
@@ -35,7 +35,7 @@ Users are able to update their own account without explicit permissions.
   - **emails[].isVerified** (boolean) - indicates whether the specified email has been verified (optional; may only be specified by the superuser)
   - **emails[].isPrimary** _(boolean)_ — indicates whether the specified email is the user's primary email address (optional; defaults to `false`, needs to be a verified email)
 
-***
+---
 
 ## Returns
 
@@ -45,18 +45,18 @@ Users are able to update their own account without explicit permissions.
 - **error** _(Object)_ — contains error details in case of an error
 - **user** _(Object)_ — the updated user
 
-***
+---
 
 ## Example
 
 **Request**
 
 ```
-POST /api/v1/user.update
+POST /api/user.update
 Authorization: `Bearer ${accessToken}`
 ```
 
-``` json
+```json
 {
   "id": "507f191e810c19729de860ea",
   "fullName": "Wile E. Coyote",
@@ -64,8 +64,8 @@ Authorization: `Bearer ${accessToken}`
     {
       "address": "coyote@acme.com",
       "isVerified": true,
-      "isPrimary": true,
-    },
+      "isPrimary": true
+    }
   ]
 }
 ```
@@ -74,7 +74,7 @@ Authorization: `Bearer ${accessToken}`
 
 `200 OK`
 
-``` json
+```json
 {
   "ok": true,
   "user": {
@@ -86,8 +86,8 @@ Authorization: `Bearer ${accessToken}`
       {
         "address": "coyote@acme.com",
         "isVerified": true,
-        "isPrimary": true,
-      },
+        "isPrimary": true
+      }
     ],
     "orgs": [],
     "createdAt": "2017-07-13T05:00:42.145Z",
