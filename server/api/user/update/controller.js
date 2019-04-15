@@ -74,23 +74,15 @@ export const validationSchema = {
   },
 };
 
-const isRequestorAllowedToEditUser = (requestorPermissions, orgId) => {
-  const hasUserReadPermissions =
-    findUserPermissionIndex(requestorPermissions, {
-      name: 'yeep.user.write',
-      orgId,
-    }) !== -1;
-
-  return hasUserReadPermissions;
-};
-
 const isUserAuthorized = async ({ request }, next) => {
   const isUserRequestorIdentical = request.session.user.id === request.body.id;
-  const hasPermission = Array.from(new Set([...request.session.requestedUser.orgs, null])).some(
-    (orgId) => isRequestorAllowedToEditUser(request.session.user.permissions, orgId)
-  );
+  const isRequestorAssignedWithGlobalUserWrite =
+    findUserPermissionIndex(request.session.user.permissions, {
+      name: 'yeep.user.write',
+      orgId: null, // i.e. global scope
+    }) !== -1;
 
-  if (!isUserRequestorIdentical && !hasPermission) {
+  if (!isUserRequestorIdentical && !isRequestorAssignedWithGlobalUserWrite) {
     throw new AuthorizationError(
       `User ${request.session.user.id} does not have sufficient permissions to access this resource`
     );
