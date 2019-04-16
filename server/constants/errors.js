@@ -33,6 +33,21 @@ export class DuplicateEmailAddressError extends Error {
   }
 }
 
+// Do i need to update every single code in order to add a new one?! :scream:
+export class EmailNotFoundError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10031;
+  }
+}
+
+export class EmailAlreadyVerifiedError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10032;
+  }
+}
+
 export class DuplicateUsernameError extends Error {
   constructor(message) {
     super(message);

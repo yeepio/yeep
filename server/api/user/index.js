@@ -14,6 +14,7 @@ import uploadUserPicture from './uploadPicture';
 import deleteUserPicture from './deletePicture';
 import forgotPassword from './forgotPassword';
 import resetPassword from './resetPassword';
+import verifyEmail from './verifyEmail';
 
 const router = Router();
 
@@ -34,5 +35,6 @@ router.post('user.uploadPicture', '/user.uploadPicture', uploadUserPicture);
 router.post('user.deletePicture', '/user.deletePicture', deleteUserPicture);
 router.post('user.forgotPassword', '/user.forgotPassword', forgotPassword);
 router.post('user.resetPassword', '/user.resetPassword', resetPassword);
+router.post('user.verifyEmail', '/user.verifyEmail', verifyEmail);
 
 export default router;

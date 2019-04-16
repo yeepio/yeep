@@ -26,6 +26,7 @@ module.exports = {
   mail: {
     templates: {
       passwordReset: path.resolve(__dirname, 'server/views/passwordResetInit.html'),
+      emailVerification: path.resolve(__dirname, 'server/views/emailVerification.html'),
     },
   },
   isUsernameEnabled: true,
