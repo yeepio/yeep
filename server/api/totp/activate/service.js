@@ -39,13 +39,17 @@ export const activateTOTPAuthFactor = async ({ db }, { secret, token, userId }) 
 
   // ensure token exists
   if (!tokenRecord) {
-    throw new TokenNotFoundError('Secret key does not exist or has already expired');
+    throw new TokenNotFoundError(
+      'Secret key not associated with the designated user or has already expired'
+    );
   }
 
   // ensure token is associated with the designated user
   if (!tokenRecord.user.equals(userId)) {
     // TODO: Handle potential security compromise by communicating with the admin or user
-    throw new TokenNotFoundError('Secret key does not exist or has already expired');
+    throw new TokenNotFoundError(
+      'Secret key not associated with the designated user or has already expired'
+    );
   }
 
   // verify token

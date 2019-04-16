@@ -191,7 +191,7 @@ describe('api/totp.activate', () => {
         ok: false,
         error: {
           code: 10027,
-          message: 'Secret key does not exist or has already expired',
+          message: 'Secret key not associated with the designated user or has already expired',
         },
       });
     });
@@ -223,7 +223,7 @@ describe('api/totp.activate', () => {
         ok: false,
         error: {
           code: 10027,
-          message: 'Secret key does not exist or has already expired',
+          message: 'Secret key not associated with the designated user or has already expired',
         },
       });
 
