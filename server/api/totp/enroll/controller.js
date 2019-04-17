@@ -22,13 +22,13 @@ export const validationSchema = {
 
 const isUserAuthorized = async ({ request }, next) => {
   const isUserRequestorIdentical = request.session.user.id === request.body.userId;
-  const isRequestorAssignedWithGlobalUserWrite =
+  const isRequestorSuperUser =
     findUserPermissionIndex(request.session.user.permissions, {
       name: 'yeep.user.write',
       orgId: null, // i.e. global scope
     }) !== -1;
 
-  if (!(isUserRequestorIdentical || isRequestorAssignedWithGlobalUserWrite)) {
+  if (!(isUserRequestorIdentical || isRequestorSuperUser)) {
     throw new AuthorizationError(
       `User ${request.session.user.id} is not authorized to perform this action`
     );
