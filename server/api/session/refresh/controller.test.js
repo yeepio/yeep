@@ -6,6 +6,7 @@ import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
 import deleteUser from '../../user/delete/service';
 import createSession from '../create/service';
+import { AUTHENTICATION, SESSION_REFRESH } from '../../../constants/tokenTypes';
 
 describe('api/session.refresh', () => {
   let ctx;
@@ -68,13 +69,13 @@ describe('api/session.refresh', () => {
     expect(
       TokenModel.countDocuments({
         secret: prevPayload.jti,
-        type: 'AUTHENTICATION',
+        type: AUTHENTICATION,
       })
     ).resolves.toBe(0);
     expect(
       TokenModel.countDocuments({
         secret: refreshToken,
-        type: 'SESSION_REFRESH',
+        type: SESSION_REFRESH,
       })
     ).resolves.toBe(0);
   });

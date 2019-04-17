@@ -1,5 +1,12 @@
 import { Schema } from 'mongoose';
 import randomstring from 'randomstring';
+import {
+  TOTP_ENROLL,
+  INVITATION,
+  PASSWORD_RESET,
+  SESSION_REFRESH,
+  AUTHENTICATION,
+} from '../constants/tokenTypes';
 
 const tokenSchema = new Schema(
   {
@@ -13,7 +20,7 @@ const tokenSchema = new Schema(
     type: {
       type: String,
       required: true,
-      enum: ['AUTHENTICATION', 'SESSION_REFRESH', 'PASSWORD_RESET', 'INVITATION', 'TOTP_ENROLL'],
+      enum: [AUTHENTICATION, SESSION_REFRESH, PASSWORD_RESET, INVITATION, TOTP_ENROLL],
     },
     payload: {
       type: Map,

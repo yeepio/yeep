@@ -11,6 +11,7 @@ import {
   RoleNotFoundError,
   InvalidRoleAssignmentError,
 } from '../../../constants/errors';
+import { INVITATION } from '../../../constants/tokenTypes';
 
 export const defaultTokenExpiresInSeconds = 7 * 24 * 60 * 60; // i.e. 1 week
 
@@ -120,7 +121,7 @@ const inviteUser = async (
   // create invitation token
   const tokenRecord = await TokenModel.create({
     secret: TokenModel.generateSecret({ length: 24 }),
-    type: 'INVITATION',
+    type: INVITATION,
     payload: {
       roles,
       permissions,

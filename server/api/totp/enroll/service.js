@@ -6,6 +6,7 @@ import {
   UserNotFoundError,
   UserDeactivatedError,
 } from '../../../constants/errors';
+import { TOTP_ENROLL } from '../../../constants/tokenTypes';
 
 const TOKEN_LIFETIME_IN_SECONDS = 15 * 60; // 15 mins
 
@@ -42,14 +43,14 @@ export const enrollTOTPAuthFactor = async ({ db, config }, { userId }) => {
   try {
     // delete previous in-flight totp_enroll tokens (if any)
     await TokenModel.deleteMany({
-      type: 'TOTP_ENROLL',
+      type: TOTP_ENROLL,
       user: ObjectId(userId),
     });
 
     // create new totp_enroll token
     await TokenModel.create({
       secret,
-      type: 'TOTP_ENROLL',
+      type: TOTP_ENROLL,
       user: ObjectId(userId),
       org: null,
       expiresAt: addSeconds(new Date(), TOKEN_LIFETIME_IN_SECONDS),

@@ -10,6 +10,7 @@ import {
   InvalidAuthFactor,
 } from '../../../constants/errors';
 import { getUserPermissions } from '../../user/info/service';
+import { AUTHENTICATION, SESSION_REFRESH } from '../../../constants/tokenTypes';
 
 export const defaultProjection = {
   permissions: false,
@@ -109,7 +110,7 @@ export async function issueAccessAndRefreshTokens(ctx, { user, projection }) {
   const secret = TokenModel.generateSecret({ length: 24 });
   const authToken = await TokenModel.create({
     secret,
-    type: 'AUTHENTICATION',
+    type: AUTHENTICATION,
     payload: {},
     user: ObjectId(user.id),
     expiresAt: addSeconds(now, config.accessToken.lifetimeInSeconds),
@@ -150,7 +151,7 @@ export async function issueAccessAndRefreshTokens(ctx, { user, projection }) {
     // create refreshToken in db
     TokenModel.create({
       secret: TokenModel.generateSecret({ length: 60 }),
-      type: 'SESSION_REFRESH',
+      type: SESSION_REFRESH,
       payload: {
         accessTokenSecret: authToken.secret,
       },

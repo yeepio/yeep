@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongodb';
+import { INVITATION } from '../../../constants/tokenTypes';
 
 export const stringifyCursor = ({ id }) => {
   return Buffer.from(JSON.stringify(id)).toString('base64');
@@ -13,7 +14,7 @@ async function listPendingInvitations({ db }, { orgId, userId, limit, cursor }) 
   const TokenModel = db.model('Token');
 
   const query = {
-    type: 'INVITATION',
+    type: INVITATION,
   };
   if (orgId) {
     query.org = ObjectId(orgId);

@@ -10,6 +10,7 @@ import deleteUser from '../../user/delete/service';
 import createSession from '../../session/create/service';
 import destroySession from '../../session/destroy/service';
 import { addSeconds } from 'date-fns';
+import { TOTP_ENROLL } from '../../../constants/tokenTypes';
 
 describe('api/totp.activate', () => {
   let ctx;
@@ -203,7 +204,7 @@ describe('api/totp.activate', () => {
       const secret = TOTPModel.generateSecret();
       const tokenRecord = await TokenModel.create({
         secret,
-        type: 'TOTP_ENROLL',
+        type: TOTP_ENROLL,
         user: ObjectId('507f191e810c19729de860ea'), // i.e. some random object ID
         org: null,
         expiresAt: addSeconds(new Date(), 1000),
@@ -239,7 +240,7 @@ describe('api/totp.activate', () => {
       const secret = TOTPModel.generateSecret();
       const tokenRecord = await TokenModel.create({
         secret,
-        type: 'TOTP_ENROLL',
+        type: TOTP_ENROLL,
         user: ObjectId(wileUser.id),
         org: null,
         expiresAt: addSeconds(new Date(), 1000),
@@ -275,7 +276,7 @@ describe('api/totp.activate', () => {
       const secret = TOTPModel.generateSecret();
       await TokenModel.create({
         secret,
-        type: 'TOTP_ENROLL',
+        type: TOTP_ENROLL,
         user: ObjectId(wileUser.id),
         org: null,
         expiresAt: addSeconds(new Date(), 1000),

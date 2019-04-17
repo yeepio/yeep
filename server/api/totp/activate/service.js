@@ -7,6 +7,7 @@ import {
   UserNotFoundError,
   UserDeactivatedError,
 } from '../../../constants/errors';
+import { TOTP_ENROLL } from '../../../constants/tokenTypes';
 
 export const activateTOTPAuthFactor = async ({ db }, { secret, token, userId }) => {
   const UserModel = db.model('User');
@@ -34,7 +35,7 @@ export const activateTOTPAuthFactor = async ({ db }, { secret, token, userId }) 
   // acquire token from db
   const tokenRecord = await TokenModel.findOne({
     secret,
-    type: 'TOTP_ENROLL',
+    type: TOTP_ENROLL,
   });
 
   // ensure token exists

@@ -9,6 +9,7 @@ import {
   InvalidRefreshToken,
 } from '../../../constants/errors';
 import { issueAccessAndRefreshTokens } from '../create/service';
+import { AUTHENTICATION, SESSION_REFRESH } from '../../../constants/tokenTypes';
 
 /**
  * Refreshes the supplied accessToken.
@@ -26,7 +27,7 @@ export default async function refreshSessionToken(ctx, props) {
   // retrieve refreshToken from db
   const refreshToken = await TokenModel.findOne({
     secret: props.refreshToken,
-    type: 'SESSION_REFRESH',
+    type: SESSION_REFRESH,
   });
 
   // ensure refreshToken exists
@@ -62,12 +63,12 @@ export default async function refreshSessionToken(ctx, props) {
     // redeem refreshToken - it can only be used once
     TokenModel.deleteOne({
       secret: props.refreshToken,
-      type: 'SESSION_REFRESH',
+      type: SESSION_REFRESH,
     }),
     // redeem accessToken - client should use the new accessToken from now on
     TokenModel.deleteOne({
       secret: accessTokenPayload.jti,
-      type: 'AUTHENTICATION',
+      type: AUTHENTICATION,
     }),
   ]);
 

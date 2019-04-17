@@ -12,6 +12,7 @@ import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
+import { INVITATION } from '../../../constants/tokenTypes';
 // import createPermission from '../../permission/create/service';
 // import createRole from '../create/service';
 // import deleteRole from '../delete/service';
@@ -114,7 +115,7 @@ describe('api/invitation.list', () => {
       await TokenModel.create([
         {
           secret: TokenModel.generateSecret({ length: 24 }),
-          type: 'INVITATION',
+          type: INVITATION,
           payload: {
             roles: [
               {
@@ -130,7 +131,7 @@ describe('api/invitation.list', () => {
         },
         {
           secret: TokenModel.generateSecret({ length: 24 }),
-          type: 'INVITATION',
+          type: INVITATION,
           payload: {
             roles: [],
             permissions: [
@@ -146,7 +147,7 @@ describe('api/invitation.list', () => {
         },
         {
           secret: TokenModel.generateSecret({ length: 24 }),
-          type: 'INVITATION',
+          type: INVITATION,
           payload: {
             roles: [
               {

@@ -4,6 +4,7 @@ import {
   UserDeactivatedError,
   TokenNotFoundError,
 } from '../../../constants/errors';
+import { PASSWORD_RESET } from '../../../constants/tokenTypes';
 
 async function resetPassword({ db, bus }, { token: secret, password }) {
   const TokenModel = db.model('Token');
@@ -13,7 +14,7 @@ async function resetPassword({ db, bus }, { token: secret, password }) {
   // acquire token from db
   const tokenRecord = await TokenModel.findOne({
     secret,
-    type: 'PASSWORD_RESET',
+    type: PASSWORD_RESET,
   });
 
   // ensure token exists
