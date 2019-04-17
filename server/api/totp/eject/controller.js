@@ -10,7 +10,7 @@ import {
 } from '../../../middleware/auth';
 import { ejectTOTPAuthFactor } from './service';
 import { AuthorizationError } from '../../../constants/errors';
-import authFactorSchema from '../../../models/AuthFactor';
+import * as authFactorTypes from '../../../constants/authFactorTypes';
 
 export const validationSchema = {
   body: {
@@ -20,7 +20,7 @@ export const validationSchema = {
       .required(),
     secondaryAuthFactor: Joi.object({
       type: Joi.string()
-        .valid(authFactorSchema.obj.type.enum)
+        .valid(authFactorTypes)
         .required(),
       token: Joi.string()
         .min(6)
