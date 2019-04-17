@@ -6,6 +6,7 @@ import { validateRequest } from '../../../middleware/validation';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import createSession, { defaultProjection } from './service';
 import authFactorSchema from '../../../models/AuthFactor';
+import { PASSWORD } from '../../../constants/authFactorTypes';
 
 export const validationSchema = {
   body: {
@@ -40,7 +41,7 @@ export const validationSchema = {
     secondaryAuthFactor: Joi.object({
       type: Joi.string()
         // does not accept password again as secondary auth factor
-        .valid(authFactorSchema.obj.type.enum.filter((e) => e !== 'PASSWORD'))
+        .valid(authFactorSchema.obj.type.enum.filter((e) => e !== PASSWORD))
         .required(),
       token: Joi.string()
         .min(6)

@@ -10,6 +10,7 @@ import {
 } from '../../../constants/errors';
 import deleteUserPicture from '../deletePicture/service';
 import commonNames from '../../../utils/commonNames';
+import { PASSWORD } from '../../../constants/authFactorTypes';
 
 async function updateUser({ db, storage }, user, nextProps) {
   const UserModel = db.model('User');
@@ -97,7 +98,7 @@ async function updateUser({ db, storage }, user, nextProps) {
       await PasswordModel.updateOne(
         {
           user: ObjectId(user.id),
-          type: 'PASSWORD',
+          type: PASSWORD,
         },
         {
           $set: nextCredentials,

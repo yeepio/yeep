@@ -1,4 +1,5 @@
 import { Schema } from 'mongoose';
+import { PASSWORD, TOTP } from '../constants/authFactorTypes';
 
 const authFactorSchema = new Schema(
   {
@@ -8,7 +9,7 @@ const authFactorSchema = new Schema(
     },
     type: {
       type: String,
-      enum: ['PASSWORD', 'TOTP'],
+      enum: [PASSWORD, TOTP],
       required: true,
     },
   },

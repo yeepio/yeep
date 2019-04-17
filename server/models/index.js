@@ -7,6 +7,7 @@ import permissionSchema from './Permission';
 import roleSchema from './Role';
 import passwordSchema from './AuthFactor-Password';
 import totpSchema from './AuthFactor-TOTP';
+import { PASSWORD, TOTP } from '../constants/authFactorTypes';
 
 export const registerModels = (db) => {
   db.model('Org', orgSchema);
@@ -16,6 +17,6 @@ export const registerModels = (db) => {
   db.model('OrgMembership', orgMembershipSchema);
   db.model('Token', tokenSchema);
   db.model('AuthFactor', authFactorSchema);
-  db.model('AuthFactor').discriminator('Password', passwordSchema, 'PASSWORD'); // 3rd param declares the "type" value
-  db.model('AuthFactor').discriminator('TOTP', totpSchema, 'TOTP');
+  db.model('AuthFactor').discriminator('Password', passwordSchema, PASSWORD); // 3rd param declares the "type" value
+  db.model('AuthFactor').discriminator('TOTP', totpSchema, TOTP);
 };

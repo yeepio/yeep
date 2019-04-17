@@ -10,6 +10,7 @@ import createSession from '../../session/create/service';
 import destroySession from '../../session/destroy/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
+import { PASSWORD, TOTP } from '../../../constants/authFactorTypes';
 
 describe('api/totp.eject', () => {
   let ctx;
@@ -95,7 +96,7 @@ describe('api/totp.eject', () => {
         .send({
           userId: wileUser.id,
           secondaryAuthFactor: {
-            type: 'PASSWORD',
+            type: PASSWORD,
             token: 'catch-the-b1rd$',
           },
         });
@@ -133,7 +134,7 @@ describe('api/totp.eject', () => {
           message: `User ${
             wileUser.id
           } has enabled MFA; please specify secondary authentication factor`,
-          applicableAuthFactorTypes: expect.arrayContaining(['PASSWORD', 'TOTP']),
+          applicableAuthFactorTypes: expect.arrayContaining([PASSWORD, TOTP]),
         },
       });
 
@@ -156,7 +157,7 @@ describe('api/totp.eject', () => {
         .send({
           userId: wileUser.id,
           secondaryAuthFactor: {
-            type: 'PASSWORD',
+            type: PASSWORD,
             token: 'catch-the-b1rd$',
           },
         });

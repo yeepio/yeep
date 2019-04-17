@@ -11,6 +11,7 @@ import {
 } from '../../../constants/errors';
 import { getUserPermissions } from '../../user/info/service';
 import { AUTHENTICATION, SESSION_REFRESH } from '../../../constants/tokenTypes';
+import { PASSWORD } from '../../../constants/authFactorTypes';
 
 export const defaultProjection = {
   permissions: false,
@@ -58,7 +59,7 @@ export async function getUserAndVerifyPassword({ db }, { username, emailAddress,
   }
 
   // retrieve password authentication factor
-  const passwordAuthFactor = user.authFactors.find((e) => e.type === 'PASSWORD');
+  const passwordAuthFactor = user.authFactors.find((e) => e.type === PASSWORD);
 
   // make sure password authentication factor exists
   if (!passwordAuthFactor) {
@@ -177,7 +178,7 @@ export async function verifyAuthFactor({ db }, { type, token, user }) {
 
   // verify token
   switch (type) {
-    case 'PASSWORD': {
+    case PASSWORD: {
       const isPasswordVerified = await db
         .model('Password')
         .verifyPassword(
@@ -224,7 +225,7 @@ export default async function createSession(
     if (!secondaryAuthFactor) {
       const availableAuthFactors = Array.from(
         user.authFactors.reduce((accumulator, authFactor) => {
-          if (authFactor.type !== 'PASSWORD') {
+          if (authFactor.type !== PASSWORD) {
             accumulator.add(authFactor.type);
           }
           return accumulator;

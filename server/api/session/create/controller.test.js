@@ -10,6 +10,7 @@ import createPermissionAssignment from '../../user/assignPermission/service';
 import createPermission from '../../permission/create/service';
 import deletePermission from '../../permission/delete/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
+import { PASSWORD } from '../../../constants/authFactorTypes';
 
 describe('api/session.create', () => {
   let ctx;
@@ -366,7 +367,7 @@ describe('api/session.create', () => {
           user: 'wile',
           password: 'catch-the-b1rd$',
           secondaryAuthFactor: {
-            type: 'PASSWORD',
+            type: PASSWORD,
             token: 'catch-the-b1rd$',
           },
         });
