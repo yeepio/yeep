@@ -139,7 +139,7 @@
     "mime": "^2.4.0",
     "mkdirp": "^0.5.1",
     "mongoose": "^5.4.22",
-    "nodemailer": "^5.1.1",
+    "nodemailer": "^6.1.1",
     "nodemailer-mailgun-transport": "^1.4.0",
     "nodemailer-sendgrid-transport": "^0.2.0",
     "normalize-email": "^1.1.1",
