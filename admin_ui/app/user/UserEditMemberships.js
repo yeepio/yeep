@@ -30,38 +30,128 @@ let gridData = [
   },
 ];
 
+// Dummy role and permission data just for the react-select proof of concept
+let dummyRoles = [
+  {
+    value: 1,
+    label: 'blog_reader',
+  },
+  {
+    value: 2,
+    label: 'blog_editor',
+  },
+  {
+    value: 3,
+    label: 'blog_admin',
+  },
+];
+let dummyPermissions = {
+  blog_reader: [
+    {
+      value: 1,
+      label: 'blog.read',
+      isFixed: 1,
+    },
+  ],
+  blog_editor: [
+    {
+      value: 1,
+      label: 'blog.read',
+      isFixed: 1,
+    },
+    {
+      value: 2,
+      label: 'blog.edit',
+      isFixed: 1,
+    },
+  ],
+  blog_admin: [
+    {
+      value: 1,
+      label: 'blog.read',
+      isFixed: 1,
+    },
+    {
+      value: 2,
+      label: 'blog.edit',
+      isFixed: 1,
+    },
+    {
+      value: 3,
+      label: 'blog.delete',
+      isFixed: 1,
+    },
+    {
+      value: 4,
+      label: 'blog.admin',
+      isFixed: 1,
+    },
+  ],
+};
+
 const UserEditMemberships = ({ userId }) => {
   // Store the list of all roles for the selected org
   const [roles, setRoles] = React.useState([]);
+  const [permissions, setPermissions] = React.useState([]);
 
-  const handleOrgChange = org => {
+  /**
+   * Loads the roles for the currently selected org
+   * @param org - The currently selected organization
+   */
+  const handleOrgChange = (org) => {
     if (org === null) {
       // User opted to clear the "organization" Select
       // Reset the roles to be an empty array
       setRoles([]);
-      console.log('org is null, roles should be null: ', roles);
+      setPermissions([]);
     } else {
       // We'll replace this with an API call. For now just populate with dummy roles
-      setRoles([
-        {
-          id: 1,
-          name: 'role_1',
-        },
-        {
-          id: 2,
-          name: 'role_2',
-        },
-        {
-          id: 3,
-          name: 'role_3',
-        },
-        {
-          id: 4,
-          name: 'role_4',
-        },
-      ]);
-      console.log('org is not null, org should have 4 values:', roles);
+      setRoles(dummyRoles);
     }
+  };
+
+  /**
+   * Loads appropriate permissions for the currently selected role(s)
+   * @param role - An array of currently selected roles returned from the Select component
+   */
+  const handleRoleChange = (role) => {
+    if (role.length === 0) {
+      // User opted to clear the "permissions" Select
+      // Clear the roles as well!
+      setPermissions([]);
+    } else {
+      // Uber hacky - just for the proof of concept
+      setPermissions(dummyPermissions[role.slice(-1)[0].label]);
+    }
+  };
+
+  const handlePermissionChange = (permissions, {action, removedValue}) => {
+    switch (action) {
+      case 'remove-value':
+      case 'pop-value':
+        if (removedValue.isFixed) {
+          return;
+        }
+        break;
+      case 'clear':
+        permissions = permissions.filter((v) => v.isFixed);
+        break;
+    }
+    setPermissions(permissions);
+  };
+
+  // Config object passed to the "styles" property of the permissions Select component
+  // that ensures the "X" button is not shown for permissions that have the isFixed === 1 flag
+  const permissionPillboxStyles = {
+    multiValue: (base, state) => {
+      return state.data.isFixed ? { ...base, backgroundColor: 'gray' } : base;
+    },
+    multiValueLabel: (base, state) => {
+      return state.data.isFixed ? { ...base, fontWeight: 'bold', color: 'white', paddingRight: 6 } : base;
+    },
+    multiValueRemove: (base, state) => {
+      return state.data.isFixed ? { ...base, display: 'none' } : base;
+    },
   };
 
   useDocumentTitle(`Organization memberships for user Justine Singh`);
@@ -105,22 +195,37 @@ const UserEditMemberships = ({ userId }) => {
         <div className="form-group mb-4">
           <label htmlFor="membership-roles">Roles:</label>
           <Select
-            isDisabled={true}
+            options={roles}
+            isDisabled={!roles.length}
             className="w-full sm:w-1/2"
-            placeholder="Choose an organisation first"
+            placeholder={roles.length ? 'Choose one or more roles' : 'Choose an organisation first'}
+            isMulti={true}
+            onChange={handleRoleChange}
           />
         </div>
         <div className="form-group mb-4">
           <label htmlFor="membership-permissions">Permissions:</label>
           <Select
-            isDisabled={true}
+            value={permissions}
+            isDisabled={!permissions.length}
             className="w-full sm:w-1/2"
-            placeholder="Choose an organisation first"
+            placeholder="Choose a role first"
+            isMulti={true}
+            isClearable={permissions.some(v => !v.isFixed)}
+            styles={permissionPillboxStyles}
+            options={[
+              { value: 10, label: 'yeep.perm.1' },
+              { value: 11, label: 'yeep.perm.2' },
+              { value: 12, label: 'yeep.perm.3' },
+            ]}
+            onChange={handlePermissionChange}
           />
         </div>
-        <div className="form-submit">
-          <Button className="w-full sm:w-auto">Save changes</Button>
-        </div>
+        {!!permissions.length && (
+          <div className="form-submit">
+            <Button className="w-full sm:w-auto">Save changes</Button>
+          </div>
+        )}
       </fieldset>
       <fieldset className="mb-6">
         <legend>Current memberships</legend>
