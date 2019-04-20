@@ -11,10 +11,9 @@ import {
   decorateUserPermissions,
   findUserPermissionIndex,
 } from '../../../middleware/auth';
-import { getUserAndVerifyPassword } from '../../session/create/service';
-import updateUser from './service';
-import getUserInfo from '../info/service';
+import { updateUser } from './service';
 import { AuthorizationError } from '../../../constants/errors';
+import * as authFactorTypes from '../../../constants/authFactorTypes';
 
 export const validationSchema = {
   body: {
@@ -29,11 +28,6 @@ export const validationSchema = {
       .max(30)
       .optional()
       .regex(/^[A-Za-z0-9_\-.]*$/, { name: 'username' }),
-    oldPassword: Joi.string()
-      .trim()
-      .min(8)
-      .max(50)
-      .optional(),
     password: Joi.string()
       .trim()
       .min(8)
@@ -71,11 +65,20 @@ export const validationSchema = {
       .max(10)
       .unique((a, b) => a.address === b.address)
       .optional(),
+    secondaryAuthFactor: Joi.object({
+      type: Joi.string()
+        .valid(Object.values(authFactorTypes))
+        .required(),
+      token: Joi.string()
+        .min(6)
+        .max(50)
+        .required(),
+    }).optional(),
   },
 };
 
 const isUserAuthorized = async ({ request }, next) => {
-  const isUserRequestorIdentical = request.session.user.id === request.body.userId;
+  const isUserRequestorIdentical = request.session.user.id === request.body.id;
   const isRequestorSuperUser =
     findUserPermissionIndex(request.session.user.permissions, {
       name: 'yeep.user.write',
@@ -88,60 +91,30 @@ const isUserAuthorized = async ({ request }, next) => {
     );
   }
 
-  await next();
-};
-
-const isUserAllowed = async (ctx, next) => {
-  const { db, request, config } = ctx;
-  const { isUsernameEnabled } = config;
-  const { username, password, oldPassword, fullName, picture, emails } = request.body;
-
-  const isSuperUser =
-    findUserPermissionIndex(request.session.user.permissions, {
-      name: 'yeep.user.write',
-      orgId: '',
-    }) !== -1;
-
-  // only a superuser can change a password without having the old one
-  if (!isSuperUser && password && !oldPassword) {
+  // only superusers are allowed to set emails as verified
+  if (
+    !isRequestorSuperUser &&
+    request.body.emails &&
+    request.body.emails.some((email) => !isUndefined(email.isVerified))
+  ) {
     const boom = Boom.badRequest('Invalid request body');
     boom.output.payload.details = [
       {
-        path: ['oldPassword'],
-        type: 'any.required',
+        path: ['emails', 'isVerified'],
+        type: 'any.unknown',
+        message: '"isVerified" is not allowed',
       },
     ];
     throw boom;
   }
 
-  // also check if user is superuser
-  if (!isSuperUser && password) {
-    await getUserAndVerifyPassword(
-      { db },
-      {
-        username: request.session.requestedUser.username,
-        password: oldPassword,
-      }
-    );
-  }
+  await next();
+};
 
-  // only superusers are allowed to set emails as verified
-  if (!isSuperUser && emails) {
-    const containsVerifiedProperty = emails.some((email) => !isUndefined(email.isVerified));
-    if (containsVerifiedProperty) {
-      const boom = Boom.badRequest('Invalid request body');
-      boom.output.payload.details = [
-        {
-          path: ['emails.isVerified'],
-          type: 'any.unknown',
-          message: '"isVerified" is not allowed',
-        },
-      ];
-      throw boom;
-    }
-  }
+const ensureSomeUserPropSpecified = async ({ request }, next) => {
+  const { username, password, fullName, picture, emails } = request.body;
 
-  // ensure either user property has been specified
+  // ensure at least one user property has been specified
   if (!(username || password || fullName || picture || isNull(picture) || emails)) {
     const boom = Boom.badRequest('Invalid request body');
     boom.output.payload.details = [
@@ -153,7 +126,14 @@ const isUserAllowed = async (ctx, next) => {
     throw boom;
   }
 
-  if (request.body.username && !isUsernameEnabled) {
+  await next();
+};
+
+const ensureUsernameAllowed = async ({ request, config }, next) => {
+  const { isUsernameEnabled } = config;
+  const { username } = request.body;
+
+  if (username && !isUsernameEnabled) {
     const boom = Boom.badRequest('Invalid request body');
     boom.output.payload.details = [
       {
@@ -167,22 +147,12 @@ const isUserAllowed = async (ctx, next) => {
   await next();
 };
 
-const decorateRequestedUser = async (ctx, next) => {
-  const { request } = ctx;
-  const user = await getUserInfo(ctx, request.body);
-
-  // decorate session object with requested user data
-  request.session = {
-    ...request.session,
-    requestedUser: user,
-  };
-
-  await next();
-};
-
 async function handler(ctx) {
   const { request, response } = ctx;
-  const user = await updateUser(ctx, request.session.requestedUser, request.body);
+  const user = await updateUser(ctx, {
+    ...request.body,
+    isMFARequired: request.session.user.id === request.body.id,
+  });
 
   response.status = 200; // OK
   response.body = {
@@ -195,9 +165,9 @@ export default compose([
   decorateSession(),
   isUserAuthenticated(),
   validateRequest(validationSchema),
+  ensureSomeUserPropSpecified,
+  ensureUsernameAllowed,
   decorateUserPermissions(),
-  decorateRequestedUser,
   isUserAuthorized,
-  isUserAllowed,
   handler,
 ]);

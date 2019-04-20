@@ -7,22 +7,70 @@ import {
   DuplicateEmailAddressError,
   DuplicateUsernameError,
   InvalidUsernameError,
+  UserNotFoundError,
+  AuthFactorRequired,
 } from '../../../constants/errors';
 import deleteUserPicture from '../deletePicture/service';
 import commonNames from '../../../utils/commonNames';
-import { PASSWORD } from '../../../constants/authFactorTypes';
+import { verifyAuthFactor } from '../../session/create/service';
 
-async function updateUser({ db, storage }, user, nextProps) {
+export async function updateUser(
+  ctx,
+  { id, username, password, fullName, picture, emails, secondaryAuthFactor, isMFARequired = true }
+) {
+  const { db } = ctx;
   const UserModel = db.model('User');
   const PasswordModel = db.model('Password');
 
+  // retrieve user from db
+  const user = await UserModel.findOneWithAuthFactors({ _id: ObjectId(id) });
+
+  // make sure user exists
+  if (!user) {
+    throw new UserNotFoundError(`User ${id} not found`);
+  }
+
+  const nextPassword = {};
   const nextUser = {};
-  const nextCredentials = {};
+
+  // decorate nextPassword obj
+  if (password) {
+    // ensure secondary auth factor has been specified
+    if (isMFARequired) {
+      if (!secondaryAuthFactor) {
+        const availableAuthFactors = Array.from(
+          user.authFactors.reduce((accumulator, authFactor) => {
+            accumulator.add(authFactor.type);
+            return accumulator;
+          }, new Set())
+        );
+
+        throw new AuthFactorRequired(
+          `User ${id} has enabled MFA; please specify secondary authentication factor`,
+          availableAuthFactors
+        );
+      }
+
+      // verify secondary auth factor - throws error if unsuccessful
+      await verifyAuthFactor(ctx, {
+        ...secondaryAuthFactor,
+        user,
+      });
+    }
+
+    nextPassword.salt = await PasswordModel.generateSalt();
+    nextPassword.iterationCount = 100000; // ~0.3 secs on Macbook Pro Late 2011
+    nextPassword.password = await PasswordModel.digestPassword(
+      password,
+      nextPassword.salt,
+      nextPassword.iterationCount
+    );
+  }
 
   // decorate nextUser obj with emails
-  if (nextProps.emails) {
+  if (emails) {
     // ensure there is exactly 1 primary email
-    const primaryEmails = nextProps.emails.filter((email) => email.isPrimary);
+    const primaryEmails = emails.filter((email) => email.isPrimary);
     if (primaryEmails.length < 1) {
       throw new InvalidPrimaryEmailError('You must specify at least 1 primary email');
     }
@@ -32,15 +80,15 @@ async function updateUser({ db, storage }, user, nextProps) {
 
     // if requestor changes the previous primary email it also needs to be verified
     const primaryEmail = primaryEmails[0];
-    const emailExisted = user.emails.find((email) => primaryEmail.address === email.address);
-    if ((!emailExisted || !emailExisted.isVerified) && !primaryEmail.isVerified) {
+    const prevEmail = user.emails.find((email) => primaryEmail.address === email.address);
+    if ((!prevEmail || !prevEmail.isVerified) && !primaryEmail.isVerified) {
       throw new InvalidPrimaryEmailError(
         `You need to verify ${primaryEmail.address} before marking it as primary`
       );
     }
 
     // normalize emails
-    const normalizedEmails = nextProps.emails.map((email) => {
+    const normalizedEmails = emails.map((email) => {
       const existingEmail = user.emails.find((oldEmail) => oldEmail.address === email.address);
       return {
         ...email,
@@ -53,36 +101,25 @@ async function updateUser({ db, storage }, user, nextProps) {
   }
 
   // decorate nextUser obj with username
-  if (nextProps.username) {
-    const normalizedUsername = UserModel.normalizeUsername(nextProps.username);
+  if (username) {
+    const normalizedUsername = UserModel.normalizeUsername(username);
 
     // ensure username does not contain common names
     if (commonNames.has(normalizedUsername)) {
-      throw new InvalidUsernameError(`Username "${nextProps.username}" is reserved for system use`);
+      throw new InvalidUsernameError(`Username "${username}" is reserved for system use`);
     }
 
     nextUser.username = normalizedUsername;
   }
 
   // decorate nextUser obj with picture
-  if (has(nextProps, 'picture') && nextProps.picture !== user.picture) {
-    nextUser.picture = nextProps.picture;
+  if (picture !== undefined && picture !== user.picture) {
+    nextUser.picture = picture;
   }
 
   // decorate nextUser obj with fullName
-  if (has(nextProps, 'fullName') && nextProps.fullName !== user.fullName) {
-    nextUser.fullName = nextProps.fullName;
-  }
-
-  // decorate nextCredentials obj
-  if (nextProps.password) {
-    nextCredentials.salt = await PasswordModel.generateSalt();
-    nextCredentials.iterationCount = 100000; // ~0.3 secs on Macbook Pro Late 2011
-    nextCredentials.password = await PasswordModel.digestPassword(
-      nextProps.password,
-      nextCredentials.salt,
-      nextCredentials.iterationCount
-    );
+  if (fullName && fullName !== user.fullName) {
+    nextUser.fullName = fullName;
   }
 
   // init transaction to update user + related records in db
@@ -92,16 +129,15 @@ async function updateUser({ db, storage }, user, nextProps) {
   try {
     const now = Date.now(); // get current timestamp
 
-    if (!isEmpty(nextCredentials)) {
-      nextCredentials.updatedAt = now;
+    if (!isEmpty(nextPassword)) {
+      nextPassword.updatedAt = now;
 
       await PasswordModel.updateOne(
         {
-          user: ObjectId(user.id),
-          type: PASSWORD,
+          user: user._id,
         },
         {
-          $set: nextCredentials,
+          $set: nextPassword,
         }
       );
     }
@@ -111,7 +147,7 @@ async function updateUser({ db, storage }, user, nextProps) {
 
       await UserModel.updateOne(
         {
-          _id: ObjectId(user.id),
+          _id: user._id,
         },
         {
           $set: nextUser,
@@ -119,15 +155,18 @@ async function updateUser({ db, storage }, user, nextProps) {
       );
     }
 
-    await session.commitTransaction();
-
     if (has(nextUser, 'picture')) {
-      await deleteUserPicture({ db, storage }, user);
+      await deleteUserPicture(ctx, { id });
     }
 
+    await session.commitTransaction();
+
     return {
-      ...user,
-      ...nextUser,
+      id: user._id.toHexString(),
+      picture: nextUser.picture === undefined ? user.picture : nextUser.picture,
+      username: nextUser.username || user.username,
+      fullName: nextUser.fullName || user.fullName,
+      emails: nextUser.emails || user.emails,
     };
   } catch (err) {
     await session.abortTransaction();
@@ -137,7 +176,7 @@ async function updateUser({ db, storage }, user, nextProps) {
       }
 
       if (err.message.includes('username_uidx')) {
-        throw new DuplicateUsernameError(`Username "${nextProps.username}" already in use`);
+        throw new DuplicateUsernameError(`Username "${username}" already in use`);
       }
     }
 
@@ -146,5 +185,3 @@ async function updateUser({ db, storage }, user, nextProps) {
     session.endSession();
   }
 }
-
-export default updateUser;

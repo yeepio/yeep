@@ -140,9 +140,7 @@ describe('api/user.update', () => {
       ok: false,
       error: {
         code: 10012,
-        message: `User ${
-          unauthorisedUser.id
-        } does not have sufficient permissions to access this resource`,
+        message: `User ${unauthorisedUser.id} is not authorized to perform this action`,
       },
     });
   });
@@ -150,7 +148,7 @@ describe('api/user.update', () => {
   test('returns error when user does not exist', async () => {
     const res = await request(server)
       .post('/api/user.update')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${superuserSession.accessToken}`)
       .send({
         id: '5b2d5dd0cd86b77258e16d39', // some random objectid
         fullName: 'Not My Full Name',
@@ -161,7 +159,7 @@ describe('api/user.update', () => {
       ok: false,
       error: {
         code: 10001,
-        message: 'User does not exist',
+        message: 'User 5b2d5dd0cd86b77258e16d39 not found',
       },
     });
   });
@@ -245,7 +243,6 @@ describe('api/user.update', () => {
         fullName: user.fullName,
         username: user.username,
         emails: expect.any(Array),
-        orgs: expect.any(Array),
       },
     });
   });
@@ -268,13 +265,12 @@ describe('api/user.update', () => {
         fullName: user.fullName,
         username: user.username,
         emails: expect.any(Array),
-        orgs: expect.any(Array),
       },
     });
   });
 
-  describe('Requestor is superuser', () => {
-    test('returns error when specifying a primary email that is not also sent as verified', async () => {
+  describe('requestor is superuser', () => {
+    test('returns error when specifying a primary email that is NOT verified', async () => {
       const emails = [
         {
           address: 'not@verified.com',
@@ -298,6 +294,7 @@ describe('api/user.update', () => {
         },
       });
     });
+
     test('returns valid user when setting emails as verified', async () => {
       const emails = [
         ...unauthorisedUser.emails,
@@ -329,6 +326,7 @@ describe('api/user.update', () => {
         },
       });
     });
+
     test('updates any user and returns expected response', async () => {
       const newPictureURL = 'https://www.acme.com/pictures/v2/coyote.png';
       const res = await request(server)
@@ -368,7 +366,8 @@ describe('api/user.update', () => {
         },
       });
     });
-    test('updates user password without needing the oldPassword', async () => {
+
+    test('updates user password without requiring 2FA', async () => {
       const newPassword = 'thi$-$s-$af3r';
       const res = await request(server)
         .post('/api/user.update')
@@ -392,8 +391,8 @@ describe('api/user.update', () => {
     });
   });
 
-  describe('Requestor updates their own profile', () => {
-    test('returns error when providing isVerified values with the emails', async () => {
+  describe('requestor updates their own profile', () => {
+    test('returns error when setting email as verified', async () => {
       const badEmails = [
         ...user.emails,
         {
@@ -419,7 +418,8 @@ describe('api/user.update', () => {
         },
       });
     });
-    test('returns error when specifying a primary email that is not verified', async () => {
+
+    test('returns error when specifying a primary email that has not been verified', async () => {
       const badEmails = [
         {
           address: 'not@verified.com',
@@ -443,6 +443,7 @@ describe('api/user.update', () => {
         },
       });
     });
+
     test('updates user and returns expected response', async () => {
       const newPictureURL = 'https://www.acme.com/pictures/v2/coyote.png';
       const res = await request(server)
@@ -486,15 +487,18 @@ describe('api/user.update', () => {
           picture: newPictureURL,
         },
       });
+
+      // update user obj in context
+      user.username = 'wile2';
     });
-    test('returns invalid password error if oldPassword is invalid', async () => {
+
+    test('returns error when updating password without 2FA', async () => {
       const newPassword = 'thi$-$s-$af3r';
       const res = await request(server)
         .post('/api/user.update')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           id: user.id,
-          oldPassword: 'invalid-password',
           password: newPassword,
         });
 
@@ -502,25 +506,54 @@ describe('api/user.update', () => {
       expect(res.body).toMatchObject({
         ok: false,
         error: {
-          code: 10002,
+          code: 10034,
           message: expect.any(String),
+          applicableAuthFactorTypes: expect.any(Array),
         },
       });
     });
-    test('updates user password', async () => {
+
+    test('returns error when 2FA is invalid', async () => {
       const newPassword = 'thi$-$s-$af3r';
       const res = await request(server)
         .post('/api/user.update')
         .set('Authorization', `Bearer ${session.accessToken}`)
         .send({
           id: user.id,
-          oldPassword: 'catch-the-b1rd$',
           password: newPassword,
+          secondaryAuthFactor: {
+            type: 'PASSWORD',
+            token: 'invalid-password',
+          },
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 10035,
+          message: expect.any(String),
+        },
+      });
+    });
+
+    test('successfully updates user password', async () => {
+      const newPassword = 'thi$-$s-$af3r';
+      const res = await request(server)
+        .post('/api/user.update')
+        .set('Authorization', `Bearer ${session.accessToken}`)
+        .send({
+          id: user.id,
+          password: newPassword,
+          secondaryAuthFactor: {
+            type: 'PASSWORD',
+            token: 'catch-the-b1rd$',
+          },
         });
 
       expect(res.status).toBe(200);
       const newSession = await createSession(ctx, {
-        username: 'wile2', // this was changed in an earlier test. How can we avoid it best?
+        username: user.username, // this was changed in an earlier test. How can we avoid it best?
         password: newPassword,
       });
       // destroying the session before asserting in case of test failing
