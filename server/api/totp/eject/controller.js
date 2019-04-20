@@ -20,7 +20,7 @@ export const validationSchema = {
       .required(),
     secondaryAuthFactor: Joi.object({
       type: Joi.string()
-        .valid(authFactorTypes)
+        .valid(Object.values(authFactorTypes))
         .required(),
       token: Joi.string()
         .min(6)
