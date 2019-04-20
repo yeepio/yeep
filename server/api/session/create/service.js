@@ -3,17 +3,22 @@ import isBefore from 'date-fns/is_before';
 import { ObjectId } from 'mongodb';
 import {
   UserNotFoundError,
-  InvalidCredentialsError,
+  InvalidUserPasswordError,
   UserDeactivatedError,
+  AuthFactorNotFound,
+  AuthFactorRequired,
+  InvalidAuthFactor,
 } from '../../../constants/errors';
 import { getUserPermissions } from '../../user/info/service';
+import { AUTHENTICATION, SESSION_REFRESH } from '../../../constants/tokenTypes';
+import { PASSWORD } from '../../../constants/authFactorTypes';
 
-export const defaultScope = {
+export const defaultProjection = {
   permissions: false,
   profile: false,
 };
 
-const constructMatchQuery = (username, emailAddress) => {
+const constructUserMatchQuery = (username, emailAddress) => {
   if (username) {
     return { username };
   }
@@ -24,7 +29,7 @@ const constructMatchQuery = (username, emailAddress) => {
 };
 
 /**
- * Verifies password credentials and returns the designated user.
+ * Verifies password and returns the designated user.
  * @param {Object} ctx
  * @property {Object} ctx.db
  * @param {Object} props
@@ -33,74 +38,46 @@ const constructMatchQuery = (username, emailAddress) => {
  * @property {string} props.password
  * @returns {Promise}
  */
-export async function getUserByPasswordCredentials(ctx, props) {
-  const { db } = ctx;
-  const { username, emailAddress, password } = props;
-
+export async function getUserAndVerifyPassword({ db }, { username, emailAddress, password }) {
   const UserModel = db.model('User');
-  const CredentialsModel = db.model('Credentials');
+  const PasswordModel = db.model('Password');
   const normalizedEmailAddress = emailAddress && UserModel.normalizeEmailAddress(emailAddress);
 
   // retrieve user from db
-  const userRecords = await UserModel.aggregate([
-    {
-      $match: constructMatchQuery(username, normalizedEmailAddress),
-    },
-    {
-      $lookup: {
-        from: 'credentials',
-        let: { userId: '$_id' },
-        pipeline: [
-          {
-            $match: {
-              $expr: {
-                $and: [{ $eq: ['$type', 'PASSWORD'] }, { $eq: ['$user', '$$userId'] }],
-              },
-            },
-          },
-        ],
-        as: 'credentials',
-      },
-    },
-    {
-      $unwind: '$credentials',
-    },
-    {
-      $project: {
-        _id: 1,
-        username: 1,
-        fullName: 1,
-        picture: 1,
-        emails: 1,
-        password: '$credentials.password',
-        salt: '$credentials.salt',
-        iterationCount: '$credentials.iterationCount',
-        deactivatedAt: 1,
-      },
-    },
-  ]).exec();
+  const user = await UserModel.findOneWithAuthFactors(
+    constructUserMatchQuery(username, normalizedEmailAddress)
+  );
 
   // make sure user exists
-  if (userRecords.length === 0) {
+  if (!user) {
     throw new UserNotFoundError(`User "${username || emailAddress}" not found`);
   }
-
-  const user = userRecords[0];
 
   // make sure user is active
   if (!!user.deactivatedAt && isBefore(user.deactivatedAt, new Date())) {
     throw new UserDeactivatedError(`User "${username || emailAddress}" is deactivated`);
   }
 
+  // retrieve password authentication factor
+  const passwordAuthFactor = user.authFactors.find((e) => e.type === PASSWORD);
+
+  // make sure password authentication factor exists
+  if (!passwordAuthFactor) {
+    throw new AuthFactorNotFound(
+      `Password authentication factor not found for user "${username || emailAddress}"`
+    );
+  }
+
   // verify password
-  const digestedPassword = await CredentialsModel.digestPassword(
+  const isPasswordVerified = await PasswordModel.verifyPassword(
     password,
-    user.salt.buffer,
-    user.iterationCount
+    passwordAuthFactor.salt.buffer,
+    passwordAuthFactor.iterationCount,
+    passwordAuthFactor.password.buffer
   );
 
-  if (user.password.buffer.compare(digestedPassword) !== 0) {
-    throw new InvalidCredentialsError('Invalid username or password credentials');
+  if (!isPasswordVerified) {
+    throw new InvalidUserPasswordError('Invalid user or password');
   }
 
   return {
@@ -109,6 +86,7 @@ export async function getUserByPasswordCredentials(ctx, props) {
     fullName: user.fullName,
     picture: user.picture,
     emails: user.emails,
+    authFactors: user.authFactors,
   };
 }
 
@@ -120,21 +98,20 @@ export async function getUserByPasswordCredentials(ctx, props) {
  * @property {Object} ctx.config
  * @param {Object} props
  * @property {Object} props.user
- * @property {Object} [ctx.scope]
+ * @property {Object} [props.projection]
  * @return {Promise}
  */
-export async function issueAccessAndRefreshTokens(ctx, props) {
+export async function issueAccessAndRefreshTokens(ctx, { user, projection }) {
   const { db, jwt, config } = ctx;
-  const { user, scope } = props;
-
   const TokenModel = db.model('Token');
   const UserModel = db.model('User');
   const now = new Date();
 
   // create authToken in db
+  const secret = TokenModel.generateSecret({ length: 24 });
   const authToken = await TokenModel.create({
-    secret: TokenModel.generateSecret({ length: 24 }),
-    type: 'AUTHENTICATION',
+    secret,
+    type: AUTHENTICATION,
     payload: {},
     user: ObjectId(user.id),
     expiresAt: addSeconds(now, config.accessToken.lifetimeInSeconds),
@@ -148,7 +125,7 @@ export async function issueAccessAndRefreshTokens(ctx, props) {
   };
 
   // decorate accessToken payload with user profile data
-  if (scope.profile) {
+  if (projection.profile) {
     payload.user.username = user.username;
     payload.user.fullName = user.fullName;
     payload.user.picture = user.picture || undefined;
@@ -156,7 +133,7 @@ export async function issueAccessAndRefreshTokens(ctx, props) {
   }
 
   // decorate accessToken payload with user permissions
-  if (scope.permissions) {
+  if (projection.permissions) {
     const permissions = await getUserPermissions(ctx, { userId: user.id });
     payload.user.permissions = permissions.map((e) => {
       return {
@@ -175,7 +152,7 @@ export async function issueAccessAndRefreshTokens(ctx, props) {
     // create refreshToken in db
     TokenModel.create({
       secret: TokenModel.generateSecret({ length: 60 }),
-      type: 'SESSION_REFRESH',
+      type: SESSION_REFRESH,
       payload: {
         accessTokenSecret: authToken.secret,
       },
@@ -190,14 +167,92 @@ export async function issueAccessAndRefreshTokens(ctx, props) {
   };
 }
 
+export async function verifyAuthFactor({ db }, { type, token, user }) {
+  // retrieve auth factor by type
+  const authFactor = user.authFactors.find((authFactor) => authFactor.type === type);
+
+  // ensure auth factor exists
+  if (!authFactor) {
+    throw new AuthFactorNotFound(`User ${user.id} has not activated ${type} authentication`);
+  }
+
+  // verify token
+  switch (type) {
+    case PASSWORD: {
+      const isPasswordVerified = await db
+        .model('Password')
+        .verifyPassword(
+          token,
+          authFactor.salt.buffer,
+          authFactor.iterationCount,
+          authFactor.password.buffer
+        );
+
+      if (!isPasswordVerified) {
+        throw new InvalidAuthFactor(`The supplied password cannot be verified`);
+      }
+
+      break;
+    }
+    case 'TOTP': {
+      const isTokenVerified = await db.model('TOTP').verifyToken(token, authFactor.secret);
+
+      if (!isTokenVerified) {
+        throw new InvalidAuthFactor(`The supplied OTP token cannot be verified`);
+      }
+
+      break;
+    }
+    default:
+      throw new InvalidAuthFactor(`Unknown authentication factor type "${type}"`);
+  }
+}
+
 export default async function createSession(
   ctx,
-  { username, emailAddress, password, scope = defaultScope }
+  { username, emailAddress, password, projection = defaultProjection, secondaryAuthFactor }
 ) {
-  const user = await getUserByPasswordCredentials(ctx, {
+  // retrieve user + verify password
+  const user = await getUserAndVerifyPassword(ctx, {
     username,
     emailAddress,
     password,
   });
-  return issueAccessAndRefreshTokens(ctx, { user, scope });
+
+  // check if user has enabled multi-factor authentication (MFA)
+  if (user.authFactors.length > 1) {
+    // ensure secondary auth factor has been specified
+    if (!secondaryAuthFactor) {
+      const availableAuthFactors = Array.from(
+        user.authFactors.reduce((accumulator, authFactor) => {
+          if (authFactor.type !== PASSWORD) {
+            accumulator.add(authFactor.type);
+          }
+          return accumulator;
+        }, new Set())
+      );
+      throw new AuthFactorRequired(
+        `User "${username ||
+          emailAddress}" has enabled MFA; please specify secondary authentication factor`,
+        availableAuthFactors
+      );
+    }
+
+    // verify secondary auth factor
+    await verifyAuthFactor(ctx, {
+      ...secondaryAuthFactor,
+      user,
+    });
+  }
+
+  // issue access + refresh tokens
+  const { accessToken, refreshToken } = await issueAccessAndRefreshTokens(ctx, {
+    user,
+    projection,
+  });
+
+  return {
+    accessToken,
+    refreshToken,
+  };
 }

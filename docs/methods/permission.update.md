@@ -1,6 +1,6 @@
 # permission.update
 
-`POST /api/v1/permission.update`
+`POST /api/permission.update`
 
 ## Description
 
@@ -39,7 +39,7 @@ _Please note: `name` or `description` must be specified, otherwise update makes 
 **Request**
 
 ```
-POST /api/v1/permission.update
+POST /api/permission.update
 Authorization: `Bearer ${accessToken}`
 ```
 

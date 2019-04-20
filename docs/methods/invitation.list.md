@@ -1,6 +1,6 @@
 # invitation.list
 
-`POST /api/v1/invitation.list`
+`POST /api/invitation.list`
 
 ## Description
 
@@ -45,7 +45,7 @@ Users are able to retrieve a list of their own pending invitations as long as us
 **Request**
 
 ```
-POST /api/v1/invitation.list
+POST /api/invitation.list
 Authorization: `Bearer ${accessToken}`
 ```
 

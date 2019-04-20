@@ -6,6 +6,7 @@ import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../create/service';
 import deleteUser from '../delete/service';
+import { PASSWORD_RESET } from '../../../constants/tokenTypes';
 
 describe('api/user.forgotPassword', () => {
   let ctx;
@@ -70,7 +71,7 @@ describe('api/user.forgotPassword', () => {
         token: expect.objectContaining({
           id: expect.any(String),
           secret: expect.any(String),
-          type: 'PASSWORD_RESET',
+          type: PASSWORD_RESET,
           createdAt: expect.any(Date),
           expiresAt: expect.any(Date),
         }),

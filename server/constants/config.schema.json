@@ -2,12 +2,23 @@
   "$schema": "http://json-schema.org/schema#",
   "title": "Yeep Configuration",
   "type": "object",
-  "required": ["baseUrl", "jwt", "mongo", "storage"],
+  "required": ["name", "baseUrl", "jwt", "mongo", "storage"],
   "properties": {
+    "name": {
+      "type": "string",
+      "description": "Account public name",
+      "minLength": 8,
+      "maxLength": 100
+    },
     "baseUrl": {
       "type": "string",
       "format": "uri",
       "description": "Server base url"
+    },
+    "port": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 65535
     },
     "jwt": {
       "type": "object",
@@ -38,11 +49,6 @@
         }
       },
       "description": "Mongo configuration object"
-    },
-    "port": {
-      "type": "number",
-      "minimum": 0,
-      "maximum": 65535
     },
     "storage": {
       "type": "object",

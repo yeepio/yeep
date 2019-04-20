@@ -1,6 +1,6 @@
 # session.destroy
 
-`POST /api/v1/session.destroy`
+`POST /api/session.destroy`
 
 ## Description
 
@@ -37,7 +37,7 @@ This method is publicly available.
 **Request**
 
 ```
-POST /api/v1/session.destroy
+POST /api/session.destroy
 ```
 
 ```json

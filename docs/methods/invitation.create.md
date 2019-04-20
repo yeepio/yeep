@@ -1,6 +1,6 @@
 # invitation.create
 
-`POST /api/v1/invitation.create`
+`POST /api/invitation.create`
 
 ## Description
 
@@ -48,7 +48,7 @@ When `roles` are specified (see body params below) then requestor must be additi
 **Request**
 
 ```
-POST /api/v1/invitation.create
+POST /api/invitation.create
 Authorization: `Bearer ${accessToken}`
 ```
 

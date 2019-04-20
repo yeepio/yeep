@@ -31,7 +31,7 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 | **[user.resetPassword](methods/user.resetPassword.md)**       | Resets user password                                          |
 | **[user.revokePermission](methods/user.revokePermission.md)** | Revokes the designated permission assignment                  |
 | **[user.revokeRole](methods/user.revokeRole.md)**             | Revokes the designated role assigment                         |
-| **[user.uploadPicture](methods/user.uploadPicture.md)**       | Uploads the profile picture of the designated user               |
+| **[user.uploadPicture](methods/user.uploadPicture.md)**       | Uploads the profile picture of the designated user            |
 
 ### Session
 
@@ -68,3 +68,11 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 | **[invitation.accept](methods/invitation.accept.md)** | Adds user to org by redeeming invitation token |
 | **[invitation.create](methods/invitation.create.md)** | Invites user to join org                       |
 | **[invitation.list](methods/invitation.list.md)**     | Lists pending invitations                      |
+
+### Time-based One-Time Password Authentication Factor, a.k.a. TOTP
+
+| Method                                        | Description                                                 |
+| :-------------------------------------------- | :---------------------------------------------------------- |
+| **[totp.enroll](methods/totp.enroll.md)**     | Enrolls the designated user to TOTP authentication          |
+| **[totp.activate](methods/totp.activate.md)** | Activates TOTP authentication for the designated user       |
+| **[totp.eject](methods/totp.eject.md)**       | Removes TOTP authentication factor from the designated user |

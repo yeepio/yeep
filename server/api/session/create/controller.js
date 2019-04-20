@@ -4,7 +4,9 @@ import compose from 'koa-compose';
 import mapValues from 'lodash/mapValues';
 import { validateRequest } from '../../../middleware/validation';
 import packJSONRPC from '../../../middleware/packJSONRPC';
-import createSession, { defaultScope } from './service';
+import createSession, { defaultProjection } from './service';
+import authFactorSchema from '../../../models/AuthFactor';
+import { PASSWORD } from '../../../constants/authFactorTypes';
 
 export const validationSchema = {
   body: {
@@ -27,23 +29,33 @@ export const validationSchema = {
       .min(8)
       .max(50)
       .required(),
-    scope: Joi.object(
-      mapValues(defaultScope, (value) =>
+    projection: Joi.object(
+      mapValues(defaultProjection, (value) =>
         Joi.boolean()
           .optional()
           .default(value)
       )
     )
       .optional()
-      .default(defaultScope),
+      .default(defaultProjection),
+    secondaryAuthFactor: Joi.object({
+      type: Joi.string()
+        // does not accept password again as secondary auth factor
+        .valid(authFactorSchema.obj.type.enum.filter((e) => e !== PASSWORD))
+        .required(),
+      token: Joi.string()
+        .min(6)
+        .max(50)
+        .required(),
+    }).optional(),
   },
 };
 
 async function handler(ctx) {
   const { request, response } = ctx;
-  const { user, password, scope } = request.body;
+  const { user, password, projection, secondaryAuthFactor } = request.body;
 
-  const props = { password, scope };
+  const props = { password, projection, secondaryAuthFactor };
   if (isemail.validate(user)) {
     props.emailAddress = user;
   } else {

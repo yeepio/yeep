@@ -1,4 +1,5 @@
 import { InvalidAccessToken } from '../../../constants/errors';
+import { AUTHENTICATION, SESSION_REFRESH } from '../../../constants/tokenTypes';
 
 /**
  * Destroys the designated `accessToken` and (optionally) `refreshToken`, a.k.a sign-out.
@@ -27,7 +28,7 @@ export default async function destroySession(ctx, props) {
     // retrieve refreshToken from db
     const refreshToken = await TokenModel.findOne({
       secret: props.refreshToken,
-      type: 'SESSION_REFRESH',
+      type: SESSION_REFRESH,
     });
 
     // delete if it exists and is applicable to the accessToken
@@ -41,7 +42,7 @@ export default async function destroySession(ctx, props) {
   // delete accessToken
   const result = await TokenModel.deleteOne({
     secret: accessTokenPayload.jti,
-    type: 'AUTHENTICATION',
+    type: AUTHENTICATION,
   });
   return !!result.ok;
 }

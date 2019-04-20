@@ -8,6 +8,7 @@ import { decorateSession } from '../../../middleware/auth';
 import createUser from '../../user/create/service';
 import getUserInfo from '../../user/info/service';
 import addMemberToOrg from '../../org/addMember/service';
+import { INVITATION } from '../../../constants/tokenTypes';
 
 export const validationSchema = {
   body: {
@@ -48,7 +49,7 @@ const decorateToken = async ({ request, db }, next) => {
   // acquire token from db
   const tokenRecord = await TokenModel.findOne({
     secret: request.body.token,
-    type: 'INVITATION',
+    type: INVITATION,
   });
 
   // ensure token exists

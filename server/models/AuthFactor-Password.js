@@ -5,39 +5,28 @@ import { Schema } from 'mongoose';
 const randomBytes = Promise.promisify(crypto.randomBytes);
 const pbkdf2 = Promise.promisify(crypto.pbkdf2);
 
-const credentialSchema = new Schema(
+/**
+ * Password is a discriminator of AuthFactor.
+ * @see {@link https://mongoosejs.com/docs/discriminators.html}
+ */
+const passwordSchema = new Schema(
   {
-    user: {
-      type: Schema.Types.ObjectId,
-      required: true,
-    },
-    type: {
-      type: String,
-      enum: ['PASSWORD'],
-      required: true,
-    },
     password: {
       type: Buffer,
-      required: function() {
-        return this.type === 'PASSWORD';
-      },
+      required: true,
     },
     salt: {
       type: Buffer,
-      required: function() {
-        return this.type === 'PASSWORD';
-      },
+      required: true,
     },
     iterationCount: {
       type: Number,
-      required: function() {
-        return this.type === 'PASSWORD';
-      },
+      required: true,
       min: 1,
     },
   },
   {
-    collection: 'credentials',
+    collection: 'authFactors',
     autoIndex: false,
     bufferCommands: false,
     _id: true, // enable _id PK
@@ -47,16 +36,7 @@ const credentialSchema = new Schema(
     validateBeforeSave: true,
     versionKey: '_v',
     timestamps: true,
-  }
-);
-
-// user can only have one password
-credentialSchema.index(
-  { user: 1 },
-  {
-    unique: true,
-    name: 'user_password_uidx',
-    partialFilterExpression: { type: { $eq: 'PASSWORD' } },
+    discriminatorKey: 'type',
   }
 );
 
@@ -64,7 +44,7 @@ credentialSchema.index(
  * Generates and returns a cryptographically secure pseudorandom buffer of 30 bytes.
  * @return {Promise<Buffer>} a Bluebird promise resolving to a Buffer.
  */
-credentialSchema.statics.generatePassword = function() {
+passwordSchema.statics.generatePassword = function() {
   return randomBytes(30);
 };
 
@@ -72,7 +52,7 @@ credentialSchema.statics.generatePassword = function() {
  * Generates and returns a cryptographically secure pseudorandom buffer of 128 bytes.
  * @return {Promise<Buffer>} a Bluebird promise resolving to a Buffer.
  */
-credentialSchema.statics.generateSalt = function() {
+passwordSchema.statics.generateSalt = function() {
   return randomBytes(128);
 };
 
@@ -83,8 +63,21 @@ credentialSchema.statics.generateSalt = function() {
  * @param {number} iterations
  * @return {Promise<Buffer>}
  */
-credentialSchema.statics.digestPassword = function(password, salt, iterations) {
+passwordSchema.statics.digestPassword = function(password, salt, iterations) {
   return pbkdf2(password, salt, iterations, 128, 'sha512');
 };
 
-export default credentialSchema;
+/**
+ * Verifies the supplied password.
+ * @param {string} password
+ * @param {Buffer} salt
+ * @param {number} iterations
+ * @param {Buffer} secret digested password as stored in the db
+ * @return {Promise<boolean>}
+ */
+passwordSchema.statics.verifyPassword = async function(password, salt, iterations, secret) {
+  const digestedPassword = await passwordSchema.statics.digestPassword(password, salt, iterations);
+  return secret.compare(digestedPassword) === 0;
+};
+
+export default passwordSchema;

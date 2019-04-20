@@ -13,7 +13,7 @@ import Boom from 'boom';
 import mongoose from 'mongoose';
 import serveStatic from 'koa-static';
 import mount from 'koa-mount';
-import * as models from './models';
+import { registerModels } from './models';
 import JsonWebToken from './utils/JsonWebToken';
 import FileStorage from './utils/FileStorage';
 import MailService from './utils/MailService';
@@ -98,7 +98,7 @@ server.setup = async (config) => {
   // create message bus
   const bus = new EventEmitter();
 
-  // connect to mongodb + register models
+  // create mongodb connection
   const db = await mongoose.createConnection(config.mongo.uri, {
     useNewUrlParser: true,
     useFindAndModify: false,
@@ -107,9 +107,8 @@ server.setup = async (config) => {
     ignoreUndefined: true,
   });
 
-  Object.entries(models).forEach(([key, schema]) => {
-    db.model(key, schema);
-  });
+  // register mongodb models
+  registerModels(db);
 
   // setup storage layer
   const storage = new FileStorage({

@@ -1,12 +1,12 @@
 # user.list
 
-`POST /api/v1/user.list`
+`POST /api/user.list`
 
 ## Description
 
 Retrieves list of users that the requestor has access to.
 
-***
+---
 
 ## Auth logic
 
@@ -29,7 +29,8 @@ Requestor must be authenticated. No explicit permissions required; retrieves use
   - **orgs** _(boolean)_ - (optional; defaults to `true`)
   - **createdAt** _(boolean)_ - (optional; defaults to `true`)
   - **updatedAt** _(boolean)_ - (optional; defaults to `true`)
-***
+
+---
 
 ## Returns
 
@@ -40,18 +41,18 @@ Requestor must be authenticated. No explicit permissions required; retrieves use
 - **users** _(Array\<Object>)_ — array of users
 - **nextCursor** _(string)_ — use this `cursor` to facilitate pagination
 
-***
+---
 
 ## Example
 
 **Request**
 
 ```
-POST /api/v1/user.list
+POST /api/user.list
 Authorization: `Bearer ${accessToken}`
 ```
 
-``` json
+```json
 {
   "q": "acme",
   "limit": 1,
@@ -66,20 +67,20 @@ Authorization: `Bearer ${accessToken}`
 
 `200 OK`
 
-``` json
+```json
 {
   "ok": true,
-  "users": [{
-    "id": "507f191e810c19729de860ea",
-    "username": "wile",
-    "fullName": "Wile E. Coyote",
-    "picture": "https://www.acme.com/pictures/coyote.png",
-    "orgs": [
-      "5b85b610394ca184fe18076e"
-    ],
-    "createdAt": "2017-07-13T05:00:42.145Z",
-    "updatedAt": "2017-07-13T05:42:42.222Z"
-  }],
+  "users": [
+    {
+      "id": "507f191e810c19729de860ea",
+      "username": "wile",
+      "fullName": "Wile E. Coyote",
+      "picture": "https://www.acme.com/pictures/coyote.png",
+      "orgs": ["5b85b610394ca184fe18076e"],
+      "createdAt": "2017-07-13T05:00:42.145Z",
+      "updatedAt": "2017-07-13T05:42:42.222Z"
+    }
+  ],
   "nextCursor": "IjViN2QwZGIyMzg1YzcyNWY5ZjNkODkwYSI="
 }
 ```

@@ -5,7 +5,7 @@ export class UserNotFoundError extends Error {
   }
 }
 
-export class InvalidCredentialsError extends Error {
+export class InvalidUserPasswordError extends Error {
   constructor(message) {
     super(message);
     this.code = 10002;
@@ -219,5 +219,41 @@ export class InvalidRefreshToken extends Error {
   constructor(message) {
     super(message);
     this.code = 10030;
+  }
+}
+
+export class InvalidTOTPToken extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10031;
+  }
+}
+
+export class DuplicateAuthFactor extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10032;
+  }
+}
+
+export class AuthFactorNotFound extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10033;
+  }
+}
+
+export class AuthFactorRequired extends Error {
+  constructor(message, applicableAuthFactorTypes) {
+    super(message);
+    this.code = 10034;
+    this.applicableAuthFactorTypes = applicableAuthFactorTypes;
+  }
+}
+
+export class InvalidAuthFactor extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10035;
   }
 }

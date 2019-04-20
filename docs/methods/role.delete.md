@@ -1,6 +1,6 @@
 # role.delete
 
-`POST /api/v1/role.delete`
+`POST /api/role.delete`
 
 ## Description
 
@@ -34,7 +34,7 @@ Requestor must be authenticated and assigned with the `yeep.role.write` permissi
 **Request**
 
 ```
-POST /api/v1/role.delete
+POST /api/role.delete
 Authorization: `Bearer ${accessToken}`
 ```
 

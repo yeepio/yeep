@@ -1,6 +1,6 @@
 module.exports = {
   // External public URL to access your Yeep installation (required).
-  // Please note this defines the URI for all Yeep endpoints, such as `${baseUrl}/api/v1/ping`.
+  // Please note this defines the URI for all Yeep endpoints, such as `${baseUrl}/api/ping`.
   // Feel free to specify port if necessary.
   // Trailing "/" is optional.
   baseUrl: 'https://your-domain.com',
@@ -15,7 +15,7 @@ module.exports = {
     secret: 'please change this secret',
   },
   // MongoDB configuration (required).
-  // Yeep uses MongoDB to store users, orgs, credentials, etc.
+  // Yeep uses MongoDB to store users, orgs, auth factors, etc.
   mongo: {
     // MongoDB connection string URI (required).
     // @see https://docs.mongodb.com/manual/reference/connection-string/ for further info.

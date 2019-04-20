@@ -1,6 +1,6 @@
 # org.addMember
 
-`POST /api/v1/org.addMember`
+`POST /api/org.addMember`
 
 ## Description
 
@@ -46,7 +46,7 @@ When `roles` are specified (see body params below) then requestor must be additi
 **Request**
 
 ```
-POST /api/v1/org.addMember
+POST /api/org.addMember
 Authorization: `Bearer ${accessToken}`
 ```
 

@@ -1,6 +1,6 @@
 # permission.info
 
-`POST /api/v1/permission.info`
+`POST /api/permission.info`
 
 ## Description
 
@@ -35,7 +35,7 @@ Requestor must be authenticated and assigned with the `yeep.permission.read` per
 **Request**
 
 ```
-POST /api/v1/permission.info
+POST /api/permission.info
 Authorization: `Bearer ${accessToken}`
 ```
 

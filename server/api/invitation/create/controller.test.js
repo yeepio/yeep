@@ -12,6 +12,7 @@ import createSession from '../../session/create/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import createOrg from '../../org/create/service';
 import deleteOrg from '../../org/delete/service';
+import { INVITATION } from '../../../constants/tokenTypes';
 
 describe('api/invitation.create', () => {
   let ctx;
@@ -124,7 +125,7 @@ describe('api/invitation.create', () => {
         token: expect.objectContaining({
           id: expect.any(String),
           secret: expect.any(String),
-          type: 'INVITATION',
+          type: INVITATION,
           createdAt: expect.any(Date),
           expiresAt: expect.any(Date),
         }),

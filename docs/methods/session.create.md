@@ -1,6 +1,6 @@
 # session.create
 
-`POST /api/v1/session.create`
+`POST /api/session.create`
 
 ## Description
 
@@ -9,7 +9,7 @@ Creates new session, a.k.a. sign-in, for the designated user. Returns (1) an `ac
 The `accessToken` is used to authenticate the user identity in API requests that require authentication, e.g.
 
 ```
-POST /api/v1/user.info
+POST /api/user.info
 Authorization: `Bearer ${accessToken}`
 ```
 
@@ -27,9 +27,12 @@ This method is publicly available.
 
 - **user** _(string)_ — the username or email address of the user (required)
 - **password** _(string)_ — the user password (required)
-- **scope** _(Object)_ — user props to include in the `accessToken` payload (optional)
+- **projection** _(Object)_ — user props to include in the `accessToken` payload (optional)
   - **profile** _(boolean)_ — indicates whether to include user profile information to the `accessToken` payload (optional; defaults to `false`)
   - **permissions** _(boolean)_ — indicates whether to include user permissions to the `accessToken` payload (optional; defaults to `false`)
+- **secondaryAuthFactor** _(Object)_ — secondary authentication factor (required only if user has enabled MFA)
+  - **type** _(string)_ — authentication factor type, e.g. "TOTP" - must not be "PASSWORD" (required)
+  - **token** _(string)_ — authentication factor token, e.g. OTP code as provided by the user's authenticator software (required)
 
 ---
 
@@ -46,16 +49,73 @@ This method is publicly available.
 
 ## Example
 
+### User without MFA
+
 **Request**
 
 ```
-POST /api/v1/session.create
+POST /api/session.create
 ```
 
 ```json
 {
   "user": "coyote@acme.com",
   "password": "catch-the-b1rd$"
+}
+```
+
+**Response**
+
+`200 OK`
+
+```json
+{
+  "ok": true,
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ",
+  "refreshToken": "frpp2b3fesG3ZS3E9vqa3pm1"
+}
+```
+
+### User with MFA enabled
+
+**Request**
+
+```
+POST /api/session.create
+```
+
+```json
+{
+  "user": "coyote@acme.com",
+  "password": "catch-the-b1rd$"
+}
+```
+
+**Response**
+
+`200 OK`
+
+```json
+{
+  "ok": false,
+  "error": {
+    "code": 10034,
+    "message": "User \"coyote@acme.com\" has enabled MFA; please specify secondary authentication factor",
+    "applicableAuthFactorTypes": ["TOTP"]
+  }
+}
+```
+
+In which case the user should repeat the initial request, alongside their OTP token...
+
+```json
+{
+  "user": "coyote@acme.com",
+  "password": "catch-the-b1rd$",
+  "secondaryAuthFactor": {
+    "type": "TOTP",
+    "token": "009910"
+  }
 }
 ```
 

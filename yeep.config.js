@@ -4,6 +4,7 @@ require('dotenv').config({
 });
 
 module.exports = {
+  name: 'Yeep Dev',
   baseUrl: process.env.BASE_URL,
   port: 5000,
   accessToken: {
