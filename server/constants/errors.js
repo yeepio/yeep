@@ -257,3 +257,10 @@ export class InvalidAuthFactor extends Error {
     this.code = 10035;
   }
 }
+
+export class IdentityProviderNotFound extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10036;
+  }
+}
