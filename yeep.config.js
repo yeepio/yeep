@@ -30,4 +30,5 @@ module.exports = {
   },
   isUsernameEnabled: true,
   isOrgCreationOpen: true,
+  allowedCallbackUrl: [process.env.BASE_URL],
 };
