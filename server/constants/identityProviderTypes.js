@@ -1,2 +1,1 @@
-export const GOOGLE = 'GOOGLE';
-export const GITHUB = 'GITHUB';
+export const OAUTH = 'OAUTH';

@@ -264,3 +264,10 @@ export class IdentityProviderNotFound extends Error {
     this.code = 10036;
   }
 }
+
+export class InvalidRedirectURI extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10037;
+  }
+}

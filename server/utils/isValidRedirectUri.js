@@ -4,7 +4,7 @@ import isFunction from 'lodash/isFunction';
 import isArray from 'lodash/isArray';
 import typeOf from 'typeof';
 
-export default function isValidCallbackUrl(callbackUrl, allowedList = []) {
+export default function isValidRedirectUri(callbackUrl, allowedList = []) {
   if (!isString(callbackUrl)) {
     throw new TypeError(
       `Invalid callbackUrl param; expected string, received ${typeOf(callbackUrl)}`

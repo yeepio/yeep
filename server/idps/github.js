@@ -8,12 +8,12 @@ import { OAUTH } from '../constants/identityProviderTypes';
  * @param {Object} props
  * @property {string} props.redirectUri URL to redirect back to
  * @property {string} props.state unique string to be passed back upon completion
- * @property {Array<string>} props.scope list of oauth tokens
+ * @property {Array<string>} [props.scope] list of oauth tokens
  * @property {string} props.clientId client id
  * @returns {string}
  * @see {@link https://developer.github.com/v3/oauth/#web-application-flow}
  */
-function formatAuthUrl({ state, scope, redirectUri, clientId }) {
+function formatAuthUrl({ state, scope = ['read:user', 'user:email'], redirectUri, clientId }) {
   return formatUrl({
     protocol: 'https:',
     hostname: 'github.com',

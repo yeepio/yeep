@@ -8,12 +8,20 @@ import { OAUTH } from '../constants/identityProviderTypes';
  * @param {Object} props
  * @property {string} props.redirectUri
  * @property {string} props.state
- * @property {Array<string>} props.scope
+ * @property {Array<string>} [props.scope]
  * @property {string} props.clientId
  * @returns {string}
  * @see {@link https://developers.google.com/identity/protocols/OAuth2WebServer#creatingclient}
  */
-function formatAuthUrl({ state, scope, redirectUri, clientId }) {
+function formatAuthUrl({
+  state,
+  scope = [
+    'https://www.googleapis.com/auth/userinfo.email',
+    'https://www.googleapis.com/auth/userinfo.profile',
+  ],
+  redirectUri,
+  clientId,
+}) {
   return formatUrl({
     protocol: 'https:',
     hostname: 'accounts.google.com',

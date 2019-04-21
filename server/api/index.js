@@ -8,6 +8,7 @@ import role from './role';
 import media from './media';
 import invitation from './invitation';
 import totp from './totp';
+import idp from './idp';
 
 const router = Router();
 
@@ -28,6 +29,7 @@ router.use('/api', permission.routes(), permission.allowedMethods());
 router.use('/api', role.routes(), role.allowedMethods());
 router.use('/api', invitation.routes(), invitation.allowedMethods());
 router.use('/api', totp.routes(), totp.allowedMethods());
+router.use('/api', idp.routes(), idp.allowedMethods());
 router.use(media.routes(), media.allowedMethods());
 
 export default router;
