@@ -110,11 +110,25 @@
         },
         "templates": {
           "type": "object",
-          "required": ["passwordReset"],
+          "required": [
+            "passwordReset",
+            "emailVerification",
+            "emailVerificationSuccess",
+            "emailVerificationError",
+          ],
           "properties": {
             "passwordReset": {
               "type": "string"
-            }
+            },
+            "emailVerification": {
+              "type": "string"
+            },
+            "emailVerificationSuccess": {
+              "type": "string"
+            },
+            "emailVerificationError": {
+              "type": "string"
+            },
           }
         }
       },
