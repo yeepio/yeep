@@ -1,8 +1,17 @@
 import Router from 'koa-router';
-import emailVerify from './emailVerify';
+import email from './email';
 
 const router = Router();
 
-router.get('/verify-email', emailVerify);
+// create ctx.request.params alias to ctx.params
+router.use(async (ctx, next) => {
+  if (ctx.params) {
+    ctx.request.params = ctx.params;
+  }
+
+  await next();
+});
+
+router.use('/public', email.routes(), email.allowedMethods());
 
 export default router;

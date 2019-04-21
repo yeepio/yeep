@@ -1,7 +1,7 @@
 import Joi from 'joi';
 import compose from 'koa-compose';
-import compileHtmlTemplate from '../../utils/compileHtmlTemplate';
-import emailVerify from '../../api/email/verify/service';
+import compileHtmlTemplate from '../../../utils/compileHtmlTemplate';
+import emailVerify from '../../../api/email/verify/service';
 
 export const validationSchema = {
   query: {
