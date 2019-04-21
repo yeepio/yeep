@@ -36,20 +36,19 @@ async function verify(ctx, { token: secret }) {
   }
 
   const nextEmails = user.emails.map((email) => {
-    if (email.address === tokenRecord.payload.emailAddress) {
+    if (email.address === tokenRecord.payload.get('emailAddress')) {
       email.isVerified = true;
     }
 
     return email;
   });
-  
+
   const currentDate = new Date();
 
   // init transaction to update emails in db
   const session = await db.startSession();
   session.startTransaction();
   try {
-
     // update user in db
     await UserModel.updateOne(
       {
@@ -75,13 +74,15 @@ async function verify(ctx, { token: secret }) {
         id: user._id.toHexString(),
         fullName: user.fullName,
         picture: user.picture,
-        emailAddress: tokenRecord.payload.emailAddress,
+        emailAddress: tokenRecord.payload.get('emailAddress'),
       },
     });
 
     return {
-      ...user,
       id: user._id.toHexString(),
+      username: user.username,
+      fullName: user.fullName,
+      picture: user.picture,
       emails: nextEmails,
       updatedAt: currentDate,
     };

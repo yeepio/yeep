@@ -1,7 +1,7 @@
-import compileEmailTemplate from '../utils/compileEmailTemplate';
+import compileHtmlTemplate from '../utils/compileHtmlTemplate';
 
 const handler = ({ mail, config }, props) => {
-  const template = compileEmailTemplate(config.mail.templates.passwordReset);
+  const template = compileHtmlTemplate(config.mail.templates.passwordReset);
   const htmlTemplate = template({ url: `${config.baseUrl}/forgot-password` });
   const message = {
     to: props.user.emailAddress,

@@ -2,7 +2,7 @@
   <head>
     <meta name="viewport" content="width=device-width" />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Verify your email</title>
+    <title>Error while verifying your Email</title>
     <style>
       body {
         margin: 0;
@@ -95,14 +95,8 @@
             </tr>
             <tr>
               <td class="intro">
-                <p class="text">We received a request to verify your email address on Yeep.</p>
-              </td>
-            </tr>
-            <tr>
-              <td class="cta">
-                <a href="<%= url %>" class="button" target="_blank">Verify email</a>
-                <p class="help">Need the raw link? <a href="<%= url %>" target="_blank"><%= url %></a></p>
-                <p class="help">This verification email will be active until <%= expiresAt %></p>
+                <p class="text">There was an error while trying to verify your email.</p>
+                <p class="text"><%= reason %></p>
               </td>
             </tr>
             <tr>

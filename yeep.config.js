@@ -27,6 +27,11 @@ module.exports = {
     templates: {
       passwordReset: path.resolve(__dirname, 'server/views/passwordResetInit.html'),
       emailVerification: path.resolve(__dirname, 'server/views/emailVerification.html'),
+      emailVerificationSuccess: path.resolve(
+        __dirname,
+        'server/views/emailVerificationSuccess.html'
+      ),
+      emailVerificationError: path.resolve(__dirname, 'server/views/emailVerificationError.html'),
     },
   },
   isUsernameEnabled: true,

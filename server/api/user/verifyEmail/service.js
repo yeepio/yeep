@@ -1,8 +1,6 @@
+import { ObjectId } from 'mongodb';
 import addSeconds from 'date-fns/add_seconds';
-import {
-  EmailNotFoundError,
-  EmailAlreadyVerifiedError,
-} from '../../../constants/errors';
+import { EmailNotFoundError, EmailAlreadyVerifiedError } from '../../../constants/errors';
 
 async function initEmailVerification(ctx, user, nextProps) {
   const { db, bus } = ctx;
@@ -11,13 +9,11 @@ async function initEmailVerification(ctx, user, nextProps) {
 
   const emailExists = user.emails.find((email) => emailAddress === email.address);
   if (!emailExists) {
-    throw new EmailNotFoundError(
-        `User ${user.id} does not have an email address ${emailAddress}`
-      );
+    throw new EmailNotFoundError(`User ${user.id} does not have an email address ${emailAddress}`);
   } else if (emailExists.isVerified) {
     throw new EmailAlreadyVerifiedError(
-        `Email address ${emailAddress} is already verified for user ${user.id}`
-      );
+      `Email address ${emailAddress} is already verified for user ${user.id}`
+    );
   }
   // create email verification token
   const secret = TokenModel.generateSecret({ length: 24 });
@@ -27,14 +23,14 @@ async function initEmailVerification(ctx, user, nextProps) {
     payload: {
       emailAddress,
     },
-    user: user._id,
+    user: ObjectId(user.id),
     expiresAt: addSeconds(new Date(), tokenExpiresInSeconds), // i.e. in 1 hour
   });
 
   // emit event
   bus.emit('email_verification_init', {
     user: {
-      id: user._id.toHexString(),
+      id: user.id,
       fullName: user.fullName,
       picture: user.picture,
       emailAddress,

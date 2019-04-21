@@ -1,13 +1,14 @@
-import compileEmailTemplate from '../utils/compileEmailTemplate';
+import compileHtmlTemplate from '../utils/compileHtmlTemplate';
 
 const handler = ({ mail, config }, props) => {
-  const template = compileEmailTemplate(config.mail.templates.emailVerification);
+  const template = compileHtmlTemplate(config.mail.templates.emailVerification);
   const htmlTemplate = template({
-    url: `${config.baseUrl}/api/email/verify?token=${props.token.secret}`,
+    url: `${config.baseUrl}/verify-email?token=${props.token.secret}`,
     expiresAt: new Date(props.token.expiresAt),
   });
   const message = {
     to: props.user.emailAddress,
+    subject: 'Verify your email',
     html: htmlTemplate,
   };
   mail

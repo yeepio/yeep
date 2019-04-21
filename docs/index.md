@@ -31,7 +31,12 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 | **[user.resetPassword](methods/user.resetPassword.md)**       | Resets user password                                          |
 | **[user.revokePermission](methods/user.revokePermission.md)** | Revokes the designated permission assignment                  |
 | **[user.revokeRole](methods/user.revokeRole.md)**             | Revokes the designated role assigment                         |
+<<<<<<< HEAD
 | **[user.uploadPicture](methods/user.uploadPicture.md)**       | Uploads the profile picture of the designated user            |
+=======
+| **[user.uploadPicture](methods/user.uploadPicture.md)**       | Uploads the profile picture of the designated user               |
+| **[user.verifyEmail](methods/user.verifyEmail.md)**           | Initiates the verify email process for the designated user               |
+>>>>>>> add public routes for email verification, update tests, update docs
 
 ### Session
 
@@ -76,3 +81,9 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 | **[totp.enroll](methods/totp.enroll.md)**     | Enrolls the designated user to TOTP authentication          |
 | **[totp.activate](methods/totp.activate.md)** | Activates TOTP authentication for the designated user       |
 | **[totp.eject](methods/totp.eject.md)**       | Removes TOTP authentication factor from the designated user |
+
+### Email
+
+| Method                                                | Description                                    |
+| :---------------------------------------------------- | :--------------------------------------------- |
+| **[email.verify](methods/invitation.accept.md)**      | Verifies user email address by redeeming verification token |

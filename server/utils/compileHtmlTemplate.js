@@ -5,7 +5,7 @@ import template from 'lodash/template';
 import partialRight from 'lodash/partialRight';
 import juice from 'juice';
 
-const compileEmailTemplate = memoize(
+const compileHtmlTemplate = memoize(
   flow(
     partialRight(readFileSync, 'utf8'),
     juice,
@@ -13,4 +13,4 @@ const compileEmailTemplate = memoize(
   )
 );
 
-export default compileEmailTemplate;
+export default compileHtmlTemplate;
