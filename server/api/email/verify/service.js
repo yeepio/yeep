@@ -1,10 +1,11 @@
 import { ObjectId } from 'mongodb';
-import isBefore from 'date-fns/is_before';
 import {
   UserNotFoundError,
-  UserDeactivatedError,
   TokenNotFoundError,
 } from '../../../constants/errors';
+import {
+  EMAIL_VERIFICATION,
+} from '../../../constants/tokenTypes';
 
 async function verify(ctx, { token: secret }) {
   const { db, bus } = ctx;
@@ -14,7 +15,7 @@ async function verify(ctx, { token: secret }) {
   // acquire token from db
   const tokenRecord = await TokenModel.findOne({
     secret,
-    type: 'EMAIL_VERIFICATION',
+    type: EMAIL_VERIFICATION,
   });
 
   // ensure token exists
@@ -28,11 +29,6 @@ async function verify(ctx, { token: secret }) {
   // ensure user exists
   if (!user) {
     throw new UserNotFoundError('User does not exist');
-  }
-
-  // ensure user is active
-  if (!!user.deactivatedAt && isBefore(user.deactivatedAt, new Date())) {
-    throw new UserDeactivatedError(`User ${tokenRecord.userId.toHexString()} is deactivated`);
   }
 
   const nextEmails = user.emails.map((email) => {

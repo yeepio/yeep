@@ -104,7 +104,6 @@ describe('api/user.verifyEmail', () => {
         .send({
           id: wile.id,
           emailAddress: unverifiedEmail.address,
-          tokenExpiresInSeconds: 4 * 60 * 60, // i.e. 4 hours
         });
       const endDate = new Date();
 
@@ -189,7 +188,7 @@ describe('api/user.verifyEmail', () => {
       expect(res.body).toMatchObject({
         ok: false,
         error: {
-          code: 10031,
+          code: 10036,
           message: expect.any(String),
         },
       });
@@ -220,7 +219,6 @@ describe('api/user.verifyEmail', () => {
         .send({
           id: oswell.id,
           emailAddress: unverifiedEmail.address,
-          tokenExpiresInSeconds: 4 * 60 * 60, // i.e. 4 hours
         });
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -308,7 +306,6 @@ describe('api/user.verifyEmail', () => {
         .send({
           id: wile.id,
           emailAddress: unverifiedEmail.address,
-          tokenExpiresInSeconds: 4 * 60 * 60, // i.e. 4 hours
         });
       const endDate = new Date();
 

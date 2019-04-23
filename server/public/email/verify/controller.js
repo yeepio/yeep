@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import compose from 'koa-compose';
+import { validateRequest } from '../../../middleware/validation';
 import compileHtmlTemplate from '../../../utils/compileHtmlTemplate';
 import emailVerify from '../../../api/email/verify/service';
 
@@ -14,15 +15,12 @@ export const validationSchema = {
   },
 };
 
-const validateRequest = async (ctx, next) => {
-  const { request, response, config } = ctx;
-  const { error } = Joi.validate(request.query, validationSchema.query, {
-    allowUnknown: true,
-    abortEarly: false, // returns all errors found
-  });
-
-  if (error) {
-    const template = compileHtmlTemplate(config.mail.templates.emailVerificationError);
+const validateHtmlRequest = async (ctx, next) => {
+  const { response, config } = ctx;
+  try {
+    await validateRequest(validationSchema)(ctx, next);
+  } catch (e) {
+    const template = compileHtmlTemplate(config.htmlTemplates.emailVerificationError);
     const htmlTemplate = template({
       reason: 'Missing or invalid token',
     });
@@ -32,8 +30,6 @@ const validateRequest = async (ctx, next) => {
     response.body = htmlTemplate;
     return response.body;
   }
-
-  await next();
 };
 
 async function handler(ctx) {
@@ -42,12 +38,12 @@ async function handler(ctx) {
   // handle errors thrown by returning HTML instead of JSON
   try {
     await emailVerify(ctx, request.query);
-    const template = compileHtmlTemplate(config.mail.templates.emailVerificationSuccess);
+    const template = compileHtmlTemplate(config.htmlTemplates.emailVerificationSuccess);
     htmlTemplate = template({
       url: config.baseUrl,
     });
   } catch (e) {
-    const template = compileHtmlTemplate(config.mail.templates.emailVerificationError);
+    const template = compileHtmlTemplate(config.htmlTemplates.emailVerificationError);
     htmlTemplate = template({
       reason: e.message,
     });
@@ -58,4 +54,4 @@ async function handler(ctx) {
   response.body = htmlTemplate;
 }
 
-export default compose([validateRequest, handler]);
+export default compose([validateHtmlRequest, handler]);

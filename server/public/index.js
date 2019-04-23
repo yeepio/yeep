@@ -12,6 +12,6 @@ router.use(async (ctx, next) => {
   await next();
 });
 
-router.use('/public', email.routes(), email.allowedMethods());
+router.use(email.routes(), email.allowedMethods());
 
 export default router;

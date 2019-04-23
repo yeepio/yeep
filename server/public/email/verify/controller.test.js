@@ -63,7 +63,7 @@ describe('public/verify-email', () => {
       const f = jest.fn();
       ctx.bus.once('email_verification_success', f);
 
-      const res = await request(server).get(`/public/verify-email?token=${token}`);
+      const res = await request(server).get(`/verify-email?token=${token}`);
       expect(res.status).toEqual(200);
       expect(res.type).toMatch(/html/);
 
@@ -86,7 +86,7 @@ describe('public/verify-email', () => {
     });
 
     test('returns error when no token exists', async () => {
-      const res = await request(server).get('/public/verify-email');
+      const res = await request(server).get('/verify-email');
 
       expect(res.status).toEqual(200);
       expect(res.type).toMatch(/html/);

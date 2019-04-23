@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import compose from 'koa-compose';
+import Boom from 'boom';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import {
@@ -26,30 +27,35 @@ export const validationSchema = {
       .min(0)
       .max(30 * 24 * 60 * 60) // i.e. 30 days
       .optional()
-      .default(3 * 60 * 60), // i.e. 3 hours
   },
-};
-
-const isRequestorAllowedToEditUser = (requestorPermissions, orgId) => {
-  const hasUserWritePermissions =
-    findUserPermissionIndex(requestorPermissions, {
-      name: 'yeep.user.write',
-      orgId,
-    }) !== -1;
-
-  return hasUserWritePermissions;
 };
 
 const isUserAuthorized = async ({ request }, next) => {
   const isUserRequestorIdentical = request.session.user.id === request.body.id;
-  const hasPermission = Array.from(new Set([...request.session.requestedUser.orgs, null])).some(
-    (orgId) => isRequestorAllowedToEditUser(request.session.user.permissions, orgId)
-  );
+  const isRequestorSuperUser = findUserPermissionIndex(request.session.user.permissions, {
+    name: 'yeep.user.write',
+    orgId: null,
+  }) !== -1;
 
-  if (!isUserRequestorIdentical && !hasPermission) {
+  if (!isUserRequestorIdentical && !isRequestorSuperUser) {
     throw new AuthorizationError(
-      `User ${request.session.user.id} does not have sufficient permissions to access this resource`
+      `User ${request.session.user.id} is not authorized to access this resource`
     );
+  }
+
+    // only superusers are allowed to set token expiration date
+  if (!isRequestorSuperUser && request.body.tokenExpiresInSeconds) {
+    const boom = Boom.badRequest('Invalid request body');
+    boom.output.payload.details = [
+      {
+        path: ['tokenExpiresInSeconds'],
+        type: 'any.unknown',
+        message: '"tokenExpiresInSeconds" is not allowed',
+      },
+    ];
+    throw boom;
+  } else {
+    request.body.tokenExpiresInSeconds = 3 * 60 * 60 // i.e. 3 hours
   }
 
   await next();
