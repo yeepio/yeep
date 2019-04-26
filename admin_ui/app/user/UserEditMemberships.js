@@ -30,67 +30,110 @@ let gridData = [
   },
 ];
 
+// Dummy org data
+let dummyOrgs = [
+  { value: 1, label: 'Organization #1' },
+  { value: 2, label: 'Organization #2' },
+  { value: 3, label: 'Organization #3' },
+  {
+    value: 4,
+    label:
+      'How does it look if the org name is so big that it span more than one line in the interface?',
+  },
+  { value: 5, label: 'Organization #5' },
+];
+
 // Dummy role and permission data just for the react-select proof of concept
 let dummyRoles = [
   {
-    value: 1,
+    value: 'blog_reader',
     label: 'blog_reader',
+    permissions: [
+      {
+        value: 'blog.read',
+        label: 'blog.read',
+        isFixed: 1,
+      },
+    ],
   },
   {
-    value: 2,
+    value: 'blog_editor',
     label: 'blog_editor',
+    permissions: [
+      {
+        value: 'blog.read',
+        label: 'blog.read',
+        isFixed: 1,
+      },
+      {
+        value: 'blog.edit',
+        label: 'blog.edit',
+        isFixed: 1,
+      },
+    ],
   },
   {
-    value: 3,
+    value: 'blog_admin',
     label: 'blog_admin',
+    permissions: [
+      {
+        value: 'blog.read',
+        label: 'blog.read',
+        isFixed: 1,
+      },
+      {
+        value: 'blog.edit',
+        label: 'blog.edit',
+        isFixed: 1,
+      },
+      {
+        value: 'blog.delete',
+        label: 'blog.delete',
+        isFixed: 1,
+      },
+      {
+        value: 'blog.admin',
+        label: 'blog.admin',
+        isFixed: 1,
+      },
+    ],
   },
 ];
-let dummyPermissions = {
-  blog_reader: [
-    {
-      value: 1,
-      label: 'blog.read',
-      isFixed: 1,
-    },
-  ],
-  blog_editor: [
-    {
-      value: 1,
-      label: 'blog.read',
-      isFixed: 1,
-    },
-    {
-      value: 2,
-      label: 'blog.edit',
-      isFixed: 1,
-    },
-  ],
-  blog_admin: [
-    {
-      value: 1,
-      label: 'blog.read',
-      isFixed: 1,
-    },
-    {
-      value: 2,
-      label: 'blog.edit',
-      isFixed: 1,
-    },
-    {
-      value: 3,
-      label: 'blog.delete',
-      isFixed: 1,
-    },
-    {
-      value: 4,
-      label: 'blog.admin',
-      isFixed: 1,
-    },
-  ],
-};
+let dummyPermissions = [
+  {
+    value: 'yeep.admin',
+    label: 'yeep.admin',
+  },
+  {
+    value: 'yeep.write',
+    label: 'yeep.write',
+  },
+  {
+    value: 'yeep.read',
+    label: 'yeep.read',
+  },
+  {
+    value: 'blog.read',
+    label: 'blog.read',
+  },
+  {
+    value: 'blog.edit',
+    label: 'blog.edit',
+  },
+  {
+    value: 'blog.delete',
+    label: 'blog.delete',
+  },
+  {
+    value: 'blog.admin',
+    label: 'blog.admin',
+  },
+];
 
 const UserEditMemberships = ({ userId }) => {
-  // Store the list of all roles for the selected org
+  // Keep the currently selected org, role(s) and
+  // permission(s) to the local state of this component
+  const [organization, setOrganization] = React.useState(null);
   const [roles, setRoles] = React.useState([]);
   const [permissions, setPermissions] = React.useState([]);
 
@@ -99,45 +142,58 @@ const UserEditMemberships = ({ userId }) => {
    * @param org - The currently selected organization
    */
   const handleOrgChange = (org) => {
+    console.log(org);
     if (org === null) {
       // User opted to clear the "organization" Select
-      // Reset the roles to be an empty array
+      // org and role dropdowns should clear completely
       setRoles([]);
-      setPermissions([]);
+      setOrganization(null);
+      // We should remove all "isFixed" permissions (which have
+      // been added from a handleRoleChange call)
+      setPermissions(permissions.filter((v) => v.isFixed));
     } else {
-      // We'll replace this with an API call. For now just populate with dummy roles
-      setRoles(dummyRoles);
+      // Store the selected org to the store
+      setOrganization(org);
     }
   };
 
-  /**
-   * Loads appropriate permissions for the currently selected role(s)
-   * @param role - An array of currently selected roles returned from the Select component
-   */
-  const handleRoleChange = (role) => {
-    if (role.length === 0) {
-      // User opted to clear the "permissions" Select
-      // Clear the roles as well!
-      setPermissions([]);
-    } else {
-      // Uber hacky - just for the proof of concept
-      setPermissions(dummyPermissions[role.slice(-1)[0].label]);
-    }
-  };
-
-  const handlePermissionChange = (permissions, {action, removedValue}) => {
+  const handleRoleChange = (chosenRoles, { action, removedValue }) => {
     switch (action) {
+      case 'clear':
+        // Clear all roles
+        setRoles([]);
+        break;
       case 'remove-value':
       case 'pop-value':
-        if (removedValue.isFixed) {
-          return;
-        }
+        // Remove the role the user picked
+        setRoles(roles.filter((v) => v.value !== removedValue.value));
+        // TODO: Remove this roles' permissions
         break;
-      case 'clear':
-        permissions = permissions.filter((v) => v.isFixed);
+      default:
+        setRoles(chosenRoles);
+        // TODO: add this roles' permissions as fixed
         break;
     }
-    setPermissions(permissions);
+  };
+
+  const handlePermissionChange = (chosenPermissions, { action, removedValue }) => {
+    console.log(chosenPermissions, action, removedValue);
+    switch (action) {
+      case 'clear':
+        // Clear all permissions _except_ the ones assigned by a role
+        setPermissions(permissions.filter((v) => v.isFixed));
+        break;
+      case 'remove-value':
+      case 'pop-value':
+        // Remote the permission the user picked but only if not isFixed
+        if (!removedValue.isFixed) {
+          setPermissions(permissions.filter((v) => v.value !== removedValue.value));
+        }
+        break;
+      default:
+        setPermissions(chosenPermissions);
+        break;
+    }
   };
 
   // Config object passed to the "styles" property of the permissions Select component
@@ -147,7 +203,9 @@ const UserEditMemberships = ({ userId }) => {
       return state.data.isFixed ? { ...base, backgroundColor: 'gray' } : base;
     },
     multiValueLabel: (base, state) => {
-      return state.data.isFixed ? { ...base, fontWeight: 'bold', color: 'white', paddingRight: 6 } : base;
+      return state.data.isFixed
+        ? { ...base, fontWeight: 'bold', color: 'white', paddingRight: 6 }
+        : base;
     },
     multiValueRemove: (base, state) => {
       return state.data.isFixed ? { ...base, display: 'none' } : base;
@@ -178,27 +236,22 @@ const UserEditMemberships = ({ userId }) => {
           <Select
             className="w-full sm:w-1/2"
             placeholder="Choose an organization"
-            options={[
-              { value: 1, label: 'Organization #1' },
-              { value: 2, label: 'Organization #2' },
-              { value: 3, label: 'Organization #3' },
-              { value: 4, label: 'Organization #4' },
-              { value: 5, label: 'Organization #5 with a much longer name than usual' },
-              { value: 6, label: 'Organization #6' },
-              { value: 7, label: 'Organization #7' },
-              { value: 8, label: 'Organization #8' },
-            ]}
+            options={dummyOrgs}
             isClearable={true}
+            value={organization}
             onChange={handleOrgChange}
           />
         </div>
         <div className="form-group mb-4">
           <label htmlFor="membership-roles">Roles:</label>
           <Select
-            options={roles}
-            isDisabled={!roles.length}
+            value={roles}
+            options={dummyRoles}
+            isDisabled={organization === null}
             className="w-full sm:w-1/2"
-            placeholder={roles.length ? 'Choose one or more roles' : 'Choose an organisation first'}
+            placeholder={
+              organization === null ? 'Choose an organisation first' : 'Choose one or more roles'
+            }
             isMulti={true}
             onChange={handleRoleChange}
           />
@@ -207,17 +260,15 @@ const UserEditMemberships = ({ userId }) => {
           <label htmlFor="membership-permissions">Permissions:</label>
           <Select
             value={permissions}
-            isDisabled={!permissions.length}
+            options={dummyPermissions}
+            isDisabled={organization === null}
             className="w-full sm:w-1/2"
-            placeholder="Choose a role first"
+            placeholder={
+              organization === null ? 'Choose an organization first' : 'Choose permissions'
+            }
             isMulti={true}
-            isClearable={permissions.some(v => !v.isFixed)}
+            isClearable={permissions.some((v) => !v.isFixed)}
             styles={permissionPillboxStyles}
-            options={[
-              { value: 10, label: 'yeep.perm.1' },
-              { value: 11, label: 'yeep.perm.2' },
-              { value: 12, label: 'yeep.perm.3' },
-            ]}
             onChange={handlePermissionChange}
           />
         </div>
