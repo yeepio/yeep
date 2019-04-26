@@ -42,8 +42,6 @@ let dummyOrgs = [
   },
   { value: 5, label: 'Organization #5' },
 ];
-
-// Dummy role and permission data just for the react-select proof of concept
 let dummyRoles = [
   {
     value: 'blog_reader',
@@ -135,22 +133,16 @@ const UserEditMemberships = ({ userId }) => {
   // permission(s) to the local state of this component
   const [organization, setOrganization] = React.useState(null);
   const [roles, setRoles] = React.useState([]);
-  const [permissions, setPermissions] = React.useState([]);
+  // For permissions use an object to help us quickly establish if a certain permission is present
+  const [permissions, setPermissions] = React.useState({});
 
-  /**
-   * Loads the roles for the currently selected org
-   * @param org - The currently selected organization
-   */
   const handleOrgChange = (org) => {
-    console.log(org);
     if (org === null) {
       // User opted to clear the "organization" Select
       // org and role dropdowns should clear completely
       setRoles([]);
       setOrganization(null);
-      // We should remove all "isFixed" permissions (which have
-      // been added from a handleRoleChange call)
-      setPermissions(permissions.filter((v) => v.isFixed));
+      setPermissions({});
     } else {
       // Store the selected org to the store
       setOrganization(org);
@@ -158,40 +150,75 @@ const UserEditMemberships = ({ userId }) => {
   };
 
   const handleRoleChange = (chosenRoles, { action, removedValue }) => {
-    switch (action) {
-      case 'clear':
-        // Clear all roles
-        setRoles([]);
-        break;
-      case 'remove-value':
-      case 'pop-value':
-        // Remove the role the user picked
-        setRoles(roles.filter((v) => v.value !== removedValue.value));
-        // TODO: Remove this roles' permissions
-        break;
-      default:
-        setRoles(chosenRoles);
-        // TODO: add this roles' permissions as fixed
-        break;
+    // Any role change will also affect the currently shown permissions
+    // Clone them for ease of manipulation
+    let temp = { ...permissions };
+    // Act depending on the action
+    if (action === 'clear') {
+      // Clear all roles
+      setRoles([]);
+      // Remove any isFixed === 1 permissions
+      setPermissions(
+        Object.values(temp)
+          .filter((v) => !v.isFixed)
+          .reduce((accummulator, currentValue) => {
+            accummulator[currentValue.value] = currentValue;
+            return accummulator;
+          }, {})
+      );
+    } else if (action === 'remove-value' || action === 'pop-value') {
+      // Remove the role the user picked
+      setRoles(roles.filter((v) => v.value !== removedValue.value));
+      // Remove any permissions from this role
+      removedValue.permissions.map((permission) => {
+        delete temp[permission.value];
+      });
+      setPermissions(temp);
+    } else {
+      setRoles(chosenRoles);
+      // Let's add the permissions for each of the chosenRoles
+      // These should be added with isFixed:1 (so that they are removed
+      // only if the user removes the role that applied them)
+      chosenRoles.map((chosenRole) => {
+        chosenRole.permissions.map((permission) => {
+          temp[permission.value] = permission;
+        });
+      });
+      setPermissions(temp);
     }
   };
 
   const handlePermissionChange = (chosenPermissions, { action, removedValue }) => {
-    console.log(chosenPermissions, action, removedValue);
+    // Clone the current permissions for ease of manipulation
+    let temp = { ...permissions };
     switch (action) {
       case 'clear':
         // Clear all permissions _except_ the ones assigned by a role
-        setPermissions(permissions.filter((v) => v.isFixed));
+        //setPermissions(permissions.filter((v) => v.isFixed));
+        setPermissions(
+          Object.values(temp)
+            .filter((v) => v.isFixed)
+            .reduce((accummulator, currentValue) => {
+              accummulator[currentValue.value] = currentValue;
+              return accummulator;
+            }, {})
+        );
         break;
       case 'remove-value':
       case 'pop-value':
         // Remote the permission the user picked but only if not isFixed
-        if (!removedValue.isFixed) {
-          setPermissions(permissions.filter((v) => v.value !== removedValue.value));
+        if (!removedValue.isFixed && permissions[removedValue.value]) {
+          delete temp[removedValue.value];
+          setPermissions(temp);
         }
         break;
       default:
-        setPermissions(chosenPermissions);
+        setPermissions(
+          chosenPermissions.reduce((accumulator, currentValue) => {
+            accumulator[currentValue.value] = currentValue;
+            return accumulator;
+          }, {})
+        );
         break;
     }
   };
@@ -259,7 +286,7 @@ const UserEditMemberships = ({ userId }) => {
         <div className="form-group mb-4">
           <label htmlFor="membership-permissions">Permissions:</label>
           <Select
-            value={permissions}
+            value={Object.values(permissions)}
             options={dummyPermissions}
             isDisabled={organization === null}
             className="w-full sm:w-1/2"
@@ -267,12 +294,12 @@ const UserEditMemberships = ({ userId }) => {
               organization === null ? 'Choose an organization first' : 'Choose permissions'
             }
             isMulti={true}
-            isClearable={permissions.some((v) => !v.isFixed)}
+            //isClearable={permissions.some((v) => !v.isFixed)}
             styles={permissionPillboxStyles}
             onChange={handlePermissionChange}
           />
         </div>
-        {!!permissions.length && (
+        {!!Object.keys(permissions).length && (
           <div className="form-submit">
             <Button className="w-full sm:w-auto">Save changes</Button>
           </div>
