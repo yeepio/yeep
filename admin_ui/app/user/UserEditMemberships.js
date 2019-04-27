@@ -138,8 +138,8 @@ const UserEditMemberships = ({ userId }) => {
 
   const handleOrgChange = (org) => {
     if (org === null) {
-      // User opted to clear the "organization" Select
-      // org and role dropdowns should clear completely
+      // User cleared the organization dropdown.
+      // Let's clear everything else.
       setRoles([]);
       setOrganization(null);
       setPermissions({});
@@ -151,41 +151,50 @@ const UserEditMemberships = ({ userId }) => {
 
   const handleRoleChange = (chosenRoles, { action, removedValue }) => {
     // Any role change will also affect the currently shown permissions
-    // Clone them for ease of manipulation
-    let temp = { ...permissions };
+    // Let's create a cou[le
+    let tempRoles = roles;
+    let tempPermissions = permissions;
     // Act depending on the action
     if (action === 'clear') {
-      // Clear all roles
-      setRoles([]);
-      // Remove any isFixed === 1 permissions
-      setPermissions(
-        Object.values(temp)
-          .filter((v) => !v.isFixed)
-          .reduce((accummulator, currentValue) => {
-            accummulator[currentValue.value] = currentValue;
-            return accummulator;
-          }, {})
-      );
+      // User pressed the "X" to clear all roles
+      // First empty the roles array
+      tempRoles = [];
+      // Then remove any isFixed === 1 permissions
+      tempPermissions = Object.values(tempPermissions)
+        .filter((v) => !v.isFixed)
+        .reduce((accummulator, currentValue) => {
+          accummulator[currentValue.value] = currentValue;
+          return accummulator;
+        }, {});
     } else if (action === 'remove-value' || action === 'pop-value') {
       // Remove the role the user picked
-      setRoles(roles.filter((v) => v.value !== removedValue.value));
+      tempRoles = roles.filter((v) => v.value !== removedValue.value);
       // Remove any permissions from this role
       removedValue.permissions.map((permission) => {
-        delete temp[permission.value];
+        delete tempPermissions[permission.value];
       });
-      setPermissions(temp);
+      // It is possible that we removed a permission that is needed by one of the
+      // still-present roles. Iterate through the role(s) currently in state
+      // and re-add their permissions.
+      tempRoles.map((role) => {
+        role.permissions.map((permission) => {
+          tempPermissions[permission.value] = permission;
+        });
+      });
     } else {
-      setRoles(chosenRoles);
+      tempRoles = chosenRoles;
       // Let's add the permissions for each of the chosenRoles
       // These should be added with isFixed:1 (so that they are removed
       // only if the user removes the role that applied them)
       chosenRoles.map((chosenRole) => {
         chosenRole.permissions.map((permission) => {
-          temp[permission.value] = permission;
+          tempPermissions[permission.value] = permission;
         });
       });
-      setPermissions(temp);
     }
+    // Update the state
+    setRoles(tempRoles);
+    setPermissions(tempPermissions);
   };
 
   const handlePermissionChange = (chosenPermissions, { action, removedValue }) => {
@@ -193,8 +202,8 @@ const UserEditMemberships = ({ userId }) => {
     let temp = { ...permissions };
     switch (action) {
       case 'clear':
-        // Clear all permissions _except_ the ones assigned by a role
-        //setPermissions(permissions.filter((v) => v.isFixed));
+        // Clear all permissions _except_ the ones with isFixed === 1 (
+        // i.e. the ones assigned by a role)
         setPermissions(
           Object.values(temp)
             .filter((v) => v.isFixed)
