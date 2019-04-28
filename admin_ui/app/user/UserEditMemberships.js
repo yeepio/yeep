@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
-import Input from '../../components/Input';
 import Button from '../../components/Button';
 import TabLinks from '../../components/TabLinks';
 import Grid from '../../components/Grid';
@@ -30,7 +29,8 @@ let gridData = [
   },
 ];
 
-// Dummy org data
+// Dummy data to populate the various dropdowns
+// Need to be replaced with calls to the API
 let dummyOrgs = [
   { value: 1, label: 'Organization #1' },
   { value: 2, label: 'Organization #2' },
@@ -129,19 +129,23 @@ let dummyPermissions = [
 ];
 
 const UserEditMemberships = ({ userId }) => {
-  // Keep the currently selected org, role(s) and
-  // permission(s) to the local state of this component
+  // Keep the currently selected org, role(s) and permission(s) to the local state of this component
   const [organization, setOrganization] = React.useState(null);
   const [roles, setRoles] = React.useState([]);
-  // For permissions use an object to help us quickly establish if a certain permission is present
+  // For permissions use an object instead of an array. The ability to quickly lookup using a key
+  // makes the "remove-value" / "pop-value" react-select actions require _much_ less code.
   const [permissions, setPermissions] = React.useState({});
 
+  /**
+   * Handles the onChange event of the Organization react-select dropdown
+   * @param {null|{value:foo,label:bar}} org - Null if user cleared the dropdown or an org object if user picked an org
+   */
   const handleOrgChange = (org) => {
     if (org === null) {
       // User cleared the organization dropdown.
-      // Let's clear everything else.
-      setRoles([]);
+      // Let's clear our local state
       setOrganization(null);
+      setRoles([]);
       setPermissions({});
     } else {
       // Store the selected org to the store
@@ -149,11 +153,17 @@ const UserEditMemberships = ({ userId }) => {
     }
   };
 
+  /**
+   * Handles the onChange event of the Roles react-select dropdown
+   * @param {Object[]} chosenRoles - An array of role objects that are currently selected in the dropdown
+   * @param {Object} options - Options passed to the onChange handler depending on the action
+   * @param {string} options.action - One of "clear", "remove-value" and "pop-value" (among others we don't use)
+   * @param {Object[]} options.removedValue - An containing the role object that was just deleted (for "remove-value" and "pop-value" actions)
+   */
   const handleRoleChange = (chosenRoles, { action, removedValue }) => {
     // Any role change will also affect the currently shown permissions
-    // Let's create a cou[le
-    let tempRoles = roles;
-    let tempPermissions = permissions;
+    let tempRoles = { ...roles };
+    let tempPermissions = { ...permissions };
     // Act depending on the action
     if (action === 'clear') {
       // User pressed the "X" to clear all roles
@@ -197,15 +207,22 @@ const UserEditMemberships = ({ userId }) => {
     setPermissions(tempPermissions);
   };
 
+  /**
+   * Handles the onChange event of the Permissions react-select dropdown
+   * @param {Object[]} chosenPermissions - An array of permission objects that are currently selected in the dropdown
+   * @param {Object} options - Options passed to the onChange handler depending on the action
+   * @param {string} options.action - One of "clear", "remove-value" and "pop-value" (among others we don't use)
+   * @param {Object[]} options.removedValue - An containing the permission object that was just deleted (for "remove-value" and "pop-value" actions)
+   */
   const handlePermissionChange = (chosenPermissions, { action, removedValue }) => {
     // Clone the current permissions for ease of manipulation
-    let temp = { ...permissions };
+    let tempPermissions = { ...permissions };
     switch (action) {
       case 'clear':
         // Clear all permissions _except_ the ones with isFixed === 1 (
         // i.e. the ones assigned by a role)
         setPermissions(
-          Object.values(temp)
+          Object.values(tempPermissions)
             .filter((v) => v.isFixed)
             .reduce((accummulator, currentValue) => {
               accummulator[currentValue.value] = currentValue;
@@ -217,8 +234,8 @@ const UserEditMemberships = ({ userId }) => {
       case 'pop-value':
         // Remote the permission the user picked but only if not isFixed
         if (!removedValue.isFixed && permissions[removedValue.value]) {
-          delete temp[removedValue.value];
-          setPermissions(temp);
+          delete tempPermissions[removedValue.value];
+          setPermissions(tempPermissions);
         }
         break;
       default:
