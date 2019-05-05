@@ -81,10 +81,10 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 
 | Method                                       | Description                                                   |
 | :------------------------------------------- | :------------------------------------------------------------ |
-| **[idp.types](methods/idp.types.md)**        | Lists identity provider types                                 |
-| **[idp.list](methods/idp.list.md)**          | Lists all identity providers                                  |
-| **[idp.create](methods/idp.create.md)**      | Adds the specified identity provider under the designated org |
+| **[idp.types](methods/idp.types.md)**        | Lists identity provider types available for installation      |
+| **[idp.list](methods/idp.list.md)**          | Lists identity providers installed under the designated org   |
+| **[idp.create](methods/idp.create.md)**      | Installs the given identity provider under the designated org |
 | **[idp.info](methods/idp.info.md)**          | Retrieves info on the designated identity provider            |
-| **[idp.update](methods/idp.update.md)**      | Updates the specified identity provider                       |
-| **[idp.delete](methods/idp.delete.md)**      | Removes the specified identity provider                       |
+| **[idp.update](methods/idp.update.md)**      | Updates the designated identity provider                      |
+| **[idp.delete](methods/idp.delete.md)**      | Uninstalls the designated identity provider                   |
 | **[idp.authenticate](methods/idp.types.md)** | Authenticates user against the designated identity provider   |
