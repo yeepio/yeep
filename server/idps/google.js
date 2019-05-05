@@ -1,7 +1,8 @@
 import { readFileSync } from 'fs';
 import { format as formatUrl } from 'url';
 import axios from 'axios';
-import { OAUTH } from '../constants/identityProviderTypes';
+import { OAUTH } from '../constants/idpProtocols';
+import { GOOGLE } from '../constants/idpTypes';
 
 /**
  * Formats and returns a Google authorization URL with the supplied properties.
@@ -68,7 +69,8 @@ async function exchangeAuthCode({ code, redirectUri, clientId, clientSecret }) {
 
 export default {
   name: 'Google',
-  type: OAUTH,
+  type: GOOGLE,
+  protocol: OAUTH,
   logo: {
     mime: 'image/svg+xml',
     extension: 'svg',

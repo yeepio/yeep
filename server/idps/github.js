@@ -1,7 +1,8 @@
 import { readFileSync } from 'fs';
 import { format as formatUrl } from 'url';
 import axios from 'axios';
-import { OAUTH } from '../constants/identityProviderTypes';
+import { GITHUB } from '../constants/idpTypes';
+import { OAUTH } from '../constants/idpProtocols';
 
 /**
  * Formats and returns an authorization URL with the supplied properties.
@@ -58,7 +59,8 @@ async function exchangeAuthCode({ state, code, redirectUri, clientId, clientSecr
 
 export default {
   name: 'GitHub',
-  type: OAUTH,
+  type: GITHUB,
+  protocol: OAUTH,
   logo: {
     mime: 'image/svg+xml',
     extension: 'svg',
