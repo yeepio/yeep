@@ -76,3 +76,15 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 | **[totp.enroll](methods/totp.enroll.md)**     | Enrolls the designated user to TOTP authentication          |
 | **[totp.activate](methods/totp.activate.md)** | Activates TOTP authentication for the designated user       |
 | **[totp.eject](methods/totp.eject.md)**       | Removes TOTP authentication factor from the designated user |
+
+### Identity Provider, a.k.a. IdP
+
+| Method                                       | Description                                                   |
+| :------------------------------------------- | :------------------------------------------------------------ |
+| **[idp.types](methods/idp.types.md)**        | Lists identity provider types                                 |
+| **[idp.list](methods/idp.list.md)**          | Lists all identity providers                                  |
+| **[idp.create](methods/idp.create.md)**      | Adds the specified identity provider under the designated org |
+| **[idp.info](methods/idp.info.md)**          | Retrieves info on the designated identity provider            |
+| **[idp.update](methods/idp.update.md)**      | Updates the specified identity provider                       |
+| **[idp.delete](methods/idp.delete.md)**      | Removes the specified identity provider                       |
+| **[idp.authenticate](methods/idp.types.md)** | Authenticates user against the designated identity provider   |
