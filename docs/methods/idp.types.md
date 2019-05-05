@@ -4,13 +4,9 @@
 
 ## Description
 
-Lists identity provider types.
+Lists identity provider types available for installation.
 
 ---
-
-## Auth logic
-
-Requestor must be authenticated. No explicit permissions are required.
 
 ## Parameters
 
@@ -26,8 +22,7 @@ Requestor must be authenticated. No explicit permissions are required.
 
 - **ok** _(boolean)_ — indicates whether the request was successfully completed
 - **error** _(Object)_ — contains error details in case of an error
-- **orgs** _(Array\<Object>)_ — array of organisations
-- **nextCursor** _(string)_ — use this `cursor` to facilitate pagination
+- **types** _(Array\<Object>)_ — array of identity provider types
 
 ---
 
