@@ -31,10 +31,4 @@ module.exports = {
   isUsernameEnabled: true,
   isOrgCreationOpen: true,
   allowedRedirectUris: [process.env.BASE_URL, `https://dev.yeep.io`],
-  idps: {
-    github: {
-      clientId: '',
-      clientSecret: '',
-    },
-  },
 };
