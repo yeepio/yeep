@@ -22,6 +22,10 @@ const UserEditPage = ({ userId }) => {
             label: 'Organization membership',
             to: `/users/${userId}/edit/memberships`,
           },
+          {
+            label: 'System permissions',
+            to: `/users/${userId}/edit/system-permissions`,
+          }
         ]}
       />
       <fieldset className="mb-6">

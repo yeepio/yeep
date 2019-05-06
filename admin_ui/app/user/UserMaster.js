@@ -4,6 +4,7 @@ import UserListPage from './UserListPage';
 import UserCreatePage from './UserCreatePage';
 import UserEditPage from './UserEditPage';
 import UserEditMemberships from './UserEditMemberships';
+import UserEditSystemPermissions from './UserEditSystemPermissions';
 
 const UserMaster = () => {
   return (
@@ -12,6 +13,7 @@ const UserMaster = () => {
       <UserCreatePage path="/create" />
       <UserEditPage path="/:userId/edit" />
       <UserEditMemberships path="/:userId/edit/memberships" />
+      <UserEditSystemPermissions path="/:userId/edit/system-permissions" />
     </Router>
   );
 };
