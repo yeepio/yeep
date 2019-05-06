@@ -133,7 +133,7 @@ const UserEditMemberships = ({ userId }) => {
   const [organization, setOrganization] = React.useState(null);
   const [roles, setRoles] = React.useState([]);
   // For permissions use an object instead of an array. The ability to quickly lookup using a key
-  // makes the "remove-value" / "pop-value" react-select actions require _much_ less code.
+  // makes the "remove-value" / "pop-value" react-select actions require much less code.
   const [permissions, setPermissions] = React.useState({});
 
   /**
@@ -268,7 +268,7 @@ const UserEditMemberships = ({ userId }) => {
   useDocumentTitle(`Organization memberships for user Justine Singh`);
   return (
     <React.Fragment>
-      <h1 className="mb-6">&quot;Justine Singh&quot;: Organization memberships</h1>
+      <h1 className="mb-6">&quot;USER_FULLNAME&quot;: Organization memberships</h1>
       <TabLinks
         className="mb-6"
         links={[
@@ -279,6 +279,10 @@ const UserEditMemberships = ({ userId }) => {
           {
             label: 'Organization membership',
             to: `/users/${userId}/edit/memberships`,
+          },
+          {
+            label: 'System permissions',
+            to: `/users/${userId}/edit/system-permissions`,
           },
         ]}
       />
