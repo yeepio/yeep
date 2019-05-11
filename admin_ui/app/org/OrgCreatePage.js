@@ -4,7 +4,7 @@ import useDocumentTitle from '@rehooks/document-title';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 
-const OrgCreate = () => {
+const OrgCreatePage = () => {
   useDocumentTitle('Create new organization');
   return (
     <React.Fragment>
@@ -30,4 +30,4 @@ const OrgCreate = () => {
   );
 };
 
-export default OrgCreate;
+export default OrgCreatePage;
