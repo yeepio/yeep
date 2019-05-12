@@ -37,6 +37,9 @@ const OrgEditPermissions = ({ orgId }) => {
   // Load the store (we need access to store.org.currentModal$)
   const store = React.useContext(Store);
 
+  // Memoize the handleClick handler (Called from "Edit" or "Delete" actions below)
+  const handleClick = React.useCallback((e, clickType) => {}, []);
+
   // Set page title
   useDocumentTitle(`Organization name: Permissions`);
 
@@ -104,8 +107,8 @@ const OrgEditPermissions = ({ orgId }) => {
                 <td className="p-2 text-center">{permissionData.systemPermission ? 'Yes' : '-'}</td>
                 <td className="p-2 text-center">{permissionData.roles}</td>
                 <td className="p-2 text-right">
-                  <Link
-                    to={`/permissions/${permissionData.id}/edit`}
+                  <button
+                    className="pseudolink"
                     onClick={(e) => {
                       // Let's show the edit permission modal
                       // instead of redirecting the user
@@ -114,9 +117,9 @@ const OrgEditPermissions = ({ orgId }) => {
                     }}
                   >
                     Edit
-                  </Link>{' '}
-                  <Link
-                    to={`/permissions/${permissionData.id}/delete`}
+                  </button>{' '}
+                  <button
+                    className="pseudolink"
                     onClick={(e) => {
                       // Let's show the delete permission modal
                       // instead of redirecting the user
@@ -125,7 +128,7 @@ const OrgEditPermissions = ({ orgId }) => {
                     }}
                   >
                     Delete
-                  </Link>
+                  </button>
                 </td>
               </tr>
             );
