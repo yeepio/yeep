@@ -37,9 +37,6 @@ const OrgEditPermissions = ({ orgId }) => {
   // Load the store (we need access to store.org.currentModal$)
   const store = React.useContext(Store);
 
-  // Memoize the handleClick handler (Called from "Edit" or "Delete" actions below)
-  const handleClick = React.useCallback((e, clickType) => {}, []);
-
   // Set page title
   useDocumentTitle(`Organization name: Permissions`);
 
