@@ -50,7 +50,7 @@ const OrgEditRoles = ({ orgId }) => {
 
   return (
     <React.Fragment>
-      <OrgEditRolesModals/>
+      <OrgEditRolesModals />
       <h1 className="mb-6">&quot;Organization name&quot;: Roles</h1>
       <TabLinks
         className="mb-6"
@@ -92,12 +92,12 @@ const OrgEditRoles = ({ orgId }) => {
         <Grid
           headings={roleHeadings}
           data={roleData}
-          renderer={(roleData, index) => {
+          renderer={(role, index) => {
             return (
-              <tr key={`roleRow${roleData.id}`} className={index % 2 ? `bg-grey-lightest` : ``}>
+              <tr key={`roleRow${role.id}`} className={index % 2 ? `bg-grey-lightest` : ``}>
                 <td className="p-2">
                   <Link
-                    to={`/roles/${roleData.id}/edit`}
+                    to={`/roles/${role.id}/edit`}
                     onClick={(e) => {
                       // Let's show the edit permission modal
                       // instead of redirecting the user
@@ -105,14 +105,14 @@ const OrgEditRoles = ({ orgId }) => {
                       store.org.currentRolesModal$.next('EDIT');
                     }}
                   >
-                    {roleData.name}
+                    {role.name}
                   </Link>
                 </td>
-                <td className="p-2 text-center">{roleData.permissionCount}</td>
-                <td className="p-2 text-center">{roleData.userCount}</td>
+                <td className="p-2 text-center">{role.permissionCount}</td>
+                <td className="p-2 text-center">{role.userCount}</td>
                 <td className="p-2 text-right">
-                  <Link
-                    to={`/roles/${roleData.id}/edit`}
+                  <button
+                    className="pseudolink"
                     onClick={(e) => {
                       // Let's show the edit permission modal
                       // instead of redirecting the user
@@ -121,9 +121,9 @@ const OrgEditRoles = ({ orgId }) => {
                     }}
                   >
                     Edit
-                  </Link>{' '}
-                  <Link
-                    to={`/roles/${roleData.id}/delete`}
+                  </button>{' '}
+                  <button
+                    className="pseudolink"
                     onClick={(e) => {
                       // Let's show the delete permission modal
                       // instead of redirecting the user
@@ -132,7 +132,7 @@ const OrgEditRoles = ({ orgId }) => {
                     }}
                   >
                     Delete
-                  </Link>
+                  </button>
                 </td>
               </tr>
             );
