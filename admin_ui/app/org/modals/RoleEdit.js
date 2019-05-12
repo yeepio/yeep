@@ -11,7 +11,7 @@ const RoleEdit = () => {
   // Load the store
   const store = useContext(Store);
   return (
-    <Modal onClose={() => store.org.currentRolesModal$.next('')} className="sm:w-4/5">
+    <Modal onClose={() => store.org.displayedModal$.next('')} className="sm:w-4/5">
       <h2 className="mb-4">Edit role</h2>
       <div className="form-group mb-4">
         <label htmlFor="org-name">Organization scope:</label>

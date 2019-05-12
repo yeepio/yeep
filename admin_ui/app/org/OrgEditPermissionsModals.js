@@ -4,6 +4,7 @@ import Store from '../Store';
 import PermissionCreate from './modals/PermissionCreate';
 import PermissionEdit from './modals/PermissionEdit';
 import PermissionDelete from './modals/PermissionDelete';
+import * as modalTypes from '../constants/modalTypes';
 
 // The CREATE, EDIT or DELETE modals for the OrgEditPermissions page
 const OrgEditPermissionsModals = () => {
@@ -12,16 +13,16 @@ const OrgEditPermissionsModals = () => {
 
   // Establish the value of the currentModal$ observable
   const currentModal = useObservable(
-    () => store.org.currentPermissionsModal$,
-    store.org.currentPermissionsModal$.getValue()
+    () => store.org.displayedModal$,
+    store.org.displayedModal$.getValue()
   );
 
   switch (currentModal) {
-    case 'CREATE':
+    case modalTypes.PERMISSION_CREATE:
       return <PermissionCreate />;
-    case 'EDIT':
+    case modalTypes.PERMISSION_EDIT:
       return <PermissionEdit />;
-    case 'DELETE':
+    case modalTypes.PERMISSION_DELETE:
       return <PermissionDelete />;
   }
   return null;

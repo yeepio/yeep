@@ -10,7 +10,7 @@ const PermissionCreate = () => {
   // Load the store
   const store = useContext(Store);
   return (
-    <Modal onClose={() => store.org.currentPermissionsModal$.next('')} className="sm:w-4/5">
+    <Modal onClose={() => store.org.displayedModal$.next('')} className="sm:w-4/5">
       <h2 className="mb-4">Create new permission</h2>
       <div className="form-group mb-4">
         <label htmlFor="org-name">Organization scope:</label>

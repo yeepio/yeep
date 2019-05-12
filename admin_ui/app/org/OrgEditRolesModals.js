@@ -4,6 +4,7 @@ import Store from '../Store';
 import RoleCreate from './modals/RoleCreate';
 import RoleEdit from './modals/RoleEdit';
 import RoleDelete from './modals/RoleDelete';
+import * as modalTypes from '../constants/modalTypes';
 
 // The CREATE, EDIT or DELETE modals for the OrgEditPermissions page
 const OrgEditRolesModals = () => {
@@ -12,16 +13,16 @@ const OrgEditRolesModals = () => {
 
   // Establish the value of the currentModal$ observable
   const currentModal = useObservable(
-    () => store.org.currentRolesModal$,
-    store.org.currentRolesModal$.getValue()
+    () => store.org.displayedModal$,
+    store.org.displayedModal$.getValue()
   );
 
   switch (currentModal) {
-    case 'CREATE':
+    case modalTypes.ROLE_CREATE:
       return <RoleCreate />;
-    case 'EDIT':
+    case modalTypes.ROLE_EDIT:
       return <RoleEdit />;
-    case 'DELETE':
+    case modalTypes.ROLE_DELETE:
       return <RoleDelete />;
   }
   return null;
