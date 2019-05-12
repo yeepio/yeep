@@ -7,6 +7,7 @@ import useDocumentTitle from '@rehooks/document-title';
 import TabLinks from '../../components/TabLinks';
 import Button from '../../components/Button';
 import Grid from '../../components/Grid';
+import * as modalTypes from '../constants/modalTypes';
 
 // Dummy data
 let permissionHeadings = [
@@ -69,7 +70,7 @@ const OrgEditPermissions = ({ orgId }) => {
         <legend>New permissions</legend>
         <Button
           onClick={() => {
-            store.org.currentPermissionsModal$.next('CREATE');
+            store.org.displayedModal$.next(modalTypes.PERMISSION_CREATE);
           }}
         >
           Create new permission
@@ -88,29 +89,15 @@ const OrgEditPermissions = ({ orgId }) => {
           renderer={(permissionData, index) => {
             return (
               <tr key={`permissionRow${index}`} className={index % 2 ? `bg-grey-lightest` : ``}>
-                <td className="p-2">
-                  <Link
-                    to={`/permissions/${permissionData.id}/edit`}
-                    onClick={(e) => {
-                      // Let's show the edit permission modal
-                      // instead of redirecting the user
-                      e.preventDefault();
-                      store.org.currentPermissionsModal$.next('EDIT');
-                    }}
-                  >
-                    {permissionData.name}
-                  </Link>
-                </td>
+                <td className="p-2">{permissionData.name}</td>
                 <td className="p-2 text-center">{permissionData.systemPermission ? 'Yes' : '-'}</td>
                 <td className="p-2 text-center">{permissionData.roles}</td>
                 <td className="p-2 text-right">
                   <button
                     className="pseudolink"
                     onClick={(e) => {
-                      // Let's show the edit permission modal
-                      // instead of redirecting the user
                       e.preventDefault();
-                      store.org.currentPermissionsModal$.next('EDIT');
+                      store.org.displayedModal$.next(modalTypes.PERMISSION_EDIT);
                     }}
                   >
                     Edit
@@ -118,10 +105,8 @@ const OrgEditPermissions = ({ orgId }) => {
                   <button
                     className="pseudolink"
                     onClick={(e) => {
-                      // Let's show the delete permission modal
-                      // instead of redirecting the user
                       e.preventDefault();
-                      store.org.currentPermissionsModal$.next('DELETE');
+                      store.org.displayedModal$.next(modalTypes.PERMISSION_DELETE);
                     }}
                   >
                     Delete

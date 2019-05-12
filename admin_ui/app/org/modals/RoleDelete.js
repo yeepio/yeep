@@ -9,7 +9,7 @@ const RoleDelete = () => {
   // Load the store
   const store = useContext(Store);
   return (
-    <Modal onClose={() => store.org.currentRolesModal$.next('')}>
+    <Modal onClose={() => store.org.displayedModal$.next('')}>
       <h2 className="mb-4">Delete role &quot;blog_admin&quot;?</h2>
       <p className="mb-4">
         Please note <Link to="/users">12</Link> users have this role assigned to them.

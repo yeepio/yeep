@@ -7,6 +7,7 @@ import useDocumentTitle from '@rehooks/document-title';
 import TabLinks from '../../components/TabLinks';
 import Button from '../../components/Button';
 import Grid from '../../components/Grid';
+import * as modalTypes from '../constants/modalTypes';
 
 // Dummy data
 let roleHeadings = [
@@ -77,7 +78,7 @@ const OrgEditRoles = ({ orgId }) => {
         <legend>New role</legend>
         <Button
           onClick={() => {
-            store.org.currentRolesModal$.next('CREATE');
+            store.org.displayedModal$.next(modalTypes.ROLE_CREATE);
           }}
         >
           Create new role
@@ -96,17 +97,7 @@ const OrgEditRoles = ({ orgId }) => {
             return (
               <tr key={`roleRow${role.id}`} className={index % 2 ? `bg-grey-lightest` : ``}>
                 <td className="p-2">
-                  <Link
-                    to={`/roles/${role.id}/edit`}
-                    onClick={(e) => {
-                      // Let's show the edit permission modal
-                      // instead of redirecting the user
-                      e.preventDefault();
-                      store.org.currentRolesModal$.next('EDIT');
-                    }}
-                  >
-                    {role.name}
-                  </Link>
+                  {role.name}
                 </td>
                 <td className="p-2 text-center">{role.permissionCount}</td>
                 <td className="p-2 text-center">{role.userCount}</td>
@@ -114,10 +105,8 @@ const OrgEditRoles = ({ orgId }) => {
                   <button
                     className="pseudolink"
                     onClick={(e) => {
-                      // Let's show the edit permission modal
-                      // instead of redirecting the user
                       e.preventDefault();
-                      store.org.currentRolesModal$.next('EDIT');
+                      store.org.displayedModal$.next(modalTypes.ROLE_EDIT);
                     }}
                   >
                     Edit
@@ -125,10 +114,8 @@ const OrgEditRoles = ({ orgId }) => {
                   <button
                     className="pseudolink"
                     onClick={(e) => {
-                      // Let's show the delete permission modal
-                      // instead of redirecting the user
                       e.preventDefault();
-                      store.org.currentRolesModal$.next('DELETE');
+                      store.org.displayedModal$.next(modalTypes.ROLE_DELETE);
                     }}
                   >
                     Delete
