@@ -1,6 +1,11 @@
 import { ObjectId } from 'mongodb';
 import addSeconds from 'date-fns/add_seconds';
-import { EmailNotFoundError, EmailAlreadyVerifiedError } from '../../../constants/errors';
+import isBefore from 'date-fns/is_before';
+import {
+  EmailNotFoundError,
+  EmailAlreadyVerifiedError,
+  UserDeactivatedError,
+} from '../../../constants/errors';
 
 async function initEmailVerification(ctx, user, nextProps) {
   const { db, bus } = ctx;
@@ -10,10 +15,15 @@ async function initEmailVerification(ctx, user, nextProps) {
   const emailExists = user.emails.find((email) => emailAddress === email.address);
   if (!emailExists) {
     throw new EmailNotFoundError(`User ${user.id} does not have an email address ${emailAddress}`);
-  } else if (emailExists.isVerified) {
+  }
+  if (emailExists.isVerified) {
     throw new EmailAlreadyVerifiedError(
       `Email address ${emailAddress} is already verified for user ${user.id}`
     );
+  }
+
+  if (!!user.deactivatedAt && isBefore(user.deactivatedAt, new Date())) {
+   throw new UserDeactivatedError(`User ${tokenRecord.userId.toHexString()} is deactivated`);
   }
   // create email verification token
   const secret = TokenModel.generateSecret({ length: 24 });

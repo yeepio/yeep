@@ -2,6 +2,7 @@ import { ObjectId } from 'mongodb';
 import {
   UserNotFoundError,
   TokenNotFoundError,
+  EmailNotFoundError,
 } from '../../../constants/errors';
 import {
   EMAIL_VERIFICATION,
@@ -30,14 +31,22 @@ async function verify(ctx, { token: secret }) {
   if (!user) {
     throw new UserNotFoundError('User does not exist');
   }
-
+  
+  let didUpdateField = false;
+  const emailToVerify = tokenRecord.payload.get('emailAddress');
   const nextEmails = user.emails.map((email) => {
-    if (email.address === tokenRecord.payload.get('emailAddress')) {
+    if (email.address === emailToVerify) {
       email.isVerified = true;
+      didUpdateField = true;
     }
 
     return email;
   });
+
+  // early return in case an email was not found
+  if (!didUpdateField) {
+    throw new EmailNotFoundError(`User ${user.id} does not have an email address ${emailToVerify}`);
+  }
 
   const currentDate = new Date();
 
@@ -70,7 +79,7 @@ async function verify(ctx, { token: secret }) {
         id: user._id.toHexString(),
         fullName: user.fullName,
         picture: user.picture,
-        emailAddress: tokenRecord.payload.get('emailAddress'),
+        emailAddress: emailToVerify,
       },
     });
 
