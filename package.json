@@ -81,7 +81,7 @@
     "react-dev-utils": "^8.0.0",
     "react-loadable": "^5.5.0",
     "rimraf": "^2.6.3",
-    "rollup": "^1.4.0",
+    "rollup": "^1.12.0",
     "rollup-plugin-babel": "^4.3.2",
     "rollup-plugin-commonjs": "^9.2.1",
     "rollup-plugin-copy": "^0.2.3",
