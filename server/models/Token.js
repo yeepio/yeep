@@ -6,6 +6,7 @@ import {
   PASSWORD_RESET,
   SESSION_REFRESH,
   AUTHENTICATION,
+  EMAIL_VERIFICATION,
 } from '../constants/tokenTypes';
 
 const tokenSchema = new Schema(
@@ -20,7 +21,7 @@ const tokenSchema = new Schema(
     type: {
       type: String,
       required: true,
-      enum: [AUTHENTICATION, SESSION_REFRESH, PASSWORD_RESET, INVITATION, TOTP_ENROLL],
+      enum: [AUTHENTICATION, SESSION_REFRESH, PASSWORD_RESET, INVITATION, TOTP_ENROLL, EMAIL_VERIFICATION],
     },
     payload: {
       type: Map,

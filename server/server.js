@@ -18,6 +18,7 @@ import JsonWebToken from './utils/JsonWebToken';
 import FileStorage from './utils/FileStorage';
 import MailService from './utils/MailService';
 import errorHandler from './middleware/errorHandler';
+import publicRoutes from './public';
 import api from './api';
 import events from './events';
 
@@ -69,6 +70,7 @@ app.use(
 
 // register router
 app.use(api.routes());
+app.use(publicRoutes.routes());
 app.use(
   api.allowedMethods({
     throw: true,

@@ -76,3 +76,9 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 | **[totp.enroll](methods/totp.enroll.md)**     | Enrolls the designated user to TOTP authentication          |
 | **[totp.activate](methods/totp.activate.md)** | Activates TOTP authentication for the designated user       |
 | **[totp.eject](methods/totp.eject.md)**       | Removes TOTP authentication factor from the designated user |
+
+### Email
+
+| Method                                                | Description                                    |
+| :---------------------------------------------------- | :--------------------------------------------- |
+| **[email.verify](methods/email.verify.md)**           | Verifies user email address by redeeming verification token |

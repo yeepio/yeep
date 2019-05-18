@@ -64,6 +64,21 @@
       },
       "description": "Storage configuration object"
     },
+    "htmlTemplates": {
+      "type": "object",
+      "required": [
+        "emailVerificationSuccess",
+        "emailVerificationError"
+      ],
+      "properties": {
+        "emailVerificationSuccess": {
+          "type": "string"
+        },
+        "emailVerificationError": {
+          "type": "string"
+        }
+      }
+    },
     "mail": {
       "type": "object",
       "properties": {
@@ -110,9 +125,15 @@
         },
         "templates": {
           "type": "object",
-          "required": ["passwordReset"],
+          "required": [
+            "passwordReset",
+            "emailVerification"
+          ],
           "properties": {
             "passwordReset": {
+              "type": "string"
+            },
+            "emailVerification": {
               "type": "string"
             }
           }

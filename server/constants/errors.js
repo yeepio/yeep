@@ -257,3 +257,17 @@ export class InvalidAuthFactor extends Error {
     this.code = 10035;
   }
 }
+
+export class EmailNotFoundError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10036;
+  }
+}
+
+export class EmailAlreadyVerifiedError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10037;
+  }
+}

@@ -1,0 +1,119 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Error while verifying your Email</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #F7F8FA;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 16px;
+      }
+
+      .root {
+        width: 100%;
+        background-color: #F7F8FA;
+      }
+
+      .grid {
+        max-width: 570px;
+        margin: 0 auto;
+        padding: 0 15px;
+        text-align: center;
+      }
+
+      .header {
+        padding-top: 60px;
+      }
+
+      .intro {
+        padding-top: 50px;
+      }
+
+      .text {
+        line-height: 1.5;
+      }
+
+      .button {
+        display: inline-block;
+        padding: 0 20px;
+        border: 0;
+        border-radius: 2px;
+        outline: none;
+        background-color: #67E298;
+        font-size: 18px;
+        font-weight: bold;
+        line-height: 50px;
+        color: #fff;
+        text-decoration: none;
+      }
+
+      .cta {
+        padding-top: 30px;
+      }
+
+      .help {
+        margin: 15px 0 0;
+        font-size: 14px;
+        color: #8492A6;
+        line-height: 1.5;
+      }
+
+      .help a {
+        color: #08B0F4;
+      }
+
+      .outro {
+        padding-top: 15px;
+      }
+
+      .footer {
+        padding-top: 80px;
+        padding-bottom: 15px;
+      }
+
+      .small {
+        font-size: 12px;
+        color: #3C4858;
+        line-height: 1.6;
+      }
+    </style>
+  </head>
+  <body>
+    <table border="0" cellpadding="0" cellspacing="0" class="root">
+      <tr>
+        <td>
+          <table border="0" cellpadding="0" cellspacing="0" class="grid">
+            <tr>
+              <td class="header">
+                <a href="https://www.yeep.io" target="_blank">
+                  <img alt="Yeep logo" src="https://s3-eu-west-1.amazonaws.com/media.yeep.io/yeep-logo-gray-blue-45x65.png" width="45" height="65" />
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td class="intro">
+                <p class="text">There was an error while trying to verify your email.</p>
+                <p class="text"><%= reason %></p>
+              </td>
+            </tr>
+            <tr>
+              <td class="outro">
+                <p class="text">If you didn't make a request to verify this email address, simply ignore this email.</p>
+              </td>
+            </tr>
+            <tr>
+              <td class="footer">
+                <p class="small">
+                  <a href="https://www.yeep.io" target="_blank">Yeep</a> - Headless user management<br />
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
