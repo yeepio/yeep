@@ -1,0 +1,62 @@
+[
+  {
+    "name": "yeepdev.Nikolaus-Bode-and-Von.read",
+    "description": "Permission to read Nikolaus, Bode and Von",
+    "isSystemPermission": false,
+    "scope": "Nikolaus-Bode-and-Von"
+  },
+  {
+    "name": "yeepdev.Nikolaus-Bode-and-Von.write",
+    "description": "Permissions to write at Nikolaus, Bode and Von",
+    "isSystemPermission": false,
+    "scope": "Nikolaus-Bode-and-Von"
+  },
+  {
+    "name": "yeepdev.Fahey-Bernhard-and-Dietrich.read",
+    "description": "Permission to read Fahey, Bernhard and Dietrich",
+    "isSystemPermission": false,
+    "scope": "Fahey-Bernhard-and-Dietrich"
+  },
+  {
+    "name": "yeepdev.Fahey-Bernhard-and-Dietrich.write",
+    "description": "Permissions to write at Fahey, Bernhard and Dietrich",
+    "isSystemPermission": false,
+    "scope": "Fahey-Bernhard-and-Dietrich"
+  },
+  {
+    "name": "yeepdev.Heidenreich---Ledner.read",
+    "description": "Permission to read Heidenreich - Ledner",
+    "isSystemPermission": false,
+    "scope": "Heidenreich---Ledner"
+  },
+  {
+    "name": "yeepdev.Heidenreich---Ledner.write",
+    "description": "Permissions to write at Heidenreich - Ledner",
+    "isSystemPermission": false,
+    "scope": "Heidenreich---Ledner"
+  },
+  {
+    "name": "yeepdev.Emard-Group.read",
+    "description": "Permission to read Emard Group",
+    "isSystemPermission": false,
+    "scope": "Emard-Group"
+  },
+  {
+    "name": "yeepdev.Emard-Group.write",
+    "description": "Permissions to write at Emard Group",
+    "isSystemPermission": false,
+    "scope": "Emard-Group"
+  },
+  {
+    "name": "yeepdev.Simonis---Stanton.read",
+    "description": "Permission to read Simonis - Stanton",
+    "isSystemPermission": false,
+    "scope": "Simonis---Stanton"
+  },
+  {
+    "name": "yeepdev.Simonis---Stanton.write",
+    "description": "Permissions to write at Simonis - Stanton",
+    "isSystemPermission": false,
+    "scope": "Simonis---Stanton"
+  }
+]
