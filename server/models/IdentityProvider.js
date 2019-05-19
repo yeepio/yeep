@@ -30,6 +30,7 @@ const identityProviderSchema = new Schema(
     validateBeforeSave: true,
     versionKey: '_v',
     timestamps: true,
+    discriminatorKey: 'protocol',
   }
 );
 
