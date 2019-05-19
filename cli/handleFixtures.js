@@ -6,7 +6,8 @@ import {
   renderInvalidFixturesAction,
 } from './templates';
 import schema from '../server/constants/config.schema.json';
-import generateFixtures from '../fixtures';
+import generateFixtures from '../fixtures/generate';
+import loadFixtures from '../fixtures/load';
 
 const renderHelp = () => `
   generates fixtures, loads them to the database or deletes them, for testing purposes
@@ -60,7 +61,16 @@ const handleFixtures = (inputArr, flagsObj) => {
         });
     } else if (action === 'load') {
       spinner.start('Loading fixtures to the database...');
-      spinner.succeed('Loaded all fixtures to the database');
+      const dataPath = path.join(__dirname, '../fixtures/data/data.json');
+      loadFixtures(dataPath)
+        .then(() => {
+          spinner.succeed('Loaded all fixtures to the database');
+        })
+        .catch((err) => {
+          console.log(err)
+          spinner.fail(`${err.message}`);
+          spinner.fail('Loading fixtures failed');
+        });
     }
   }
 };

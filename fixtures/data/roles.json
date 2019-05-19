@@ -1,0 +1,114 @@
+[
+  {
+    "name": "Durgan-Ward-and-Bernier.read",
+    "description": "This role provides read access to Durgan, Ward and Bernier",
+    "isSystemRole": false,
+    "permissions": [
+      "yeepdev.Durgan-Ward-and-Bernier.read"
+    ],
+    "scope": "Durgan-Ward-and-Bernier"
+  },
+  {
+    "name": "Durgan-Ward-and-Bernier.edit",
+    "description": "This role provides edit access to Durgan, Ward and Bernier",
+    "isSystemRole": false,
+    "permissions": [
+      "yeepdev.Durgan-Ward-and-Bernier.write"
+    ],
+    "scope": "Durgan-Ward-and-Bernier"
+  },
+  {
+    "name": "Durgan-Ward-and-Bernier.admin",
+    "description": "This role provides admin access to Durgan, Ward and Bernier",
+    "isSystemRole": false,
+    "permissions": [
+      "yeepdev.Durgan-Ward-and-Bernier.read",
+      "yeepdev.Durgan-Ward-and-Bernier.write"
+    ],
+    "scope": "Durgan-Ward-and-Bernier"
+  },
+  {
+    "name": "Schulist-Effertz-and-Kshlerin.read",
+    "description": "This role provides read access to Schulist, Effertz and Kshlerin",
+    "isSystemRole": false,
+    "permissions": [
+      "yeepdev.Schulist-Effertz-and-Kshlerin.read"
+    ],
+    "scope": "Schulist-Effertz-and-Kshlerin"
+  },
+  {
+    "name": "Schulist-Effertz-and-Kshlerin.edit",
+    "description": "This role provides edit access to Schulist, Effertz and Kshlerin",
+    "isSystemRole": false,
+    "permissions": [
+      "yeepdev.Schulist-Effertz-and-Kshlerin.write"
+    ],
+    "scope": "Schulist-Effertz-and-Kshlerin"
+  },
+  {
+    "name": "Schulist-Effertz-and-Kshlerin.admin",
+    "description": "This role provides admin access to Schulist, Effertz and Kshlerin",
+    "isSystemRole": false,
+    "permissions": [
+      "yeepdev.Schulist-Effertz-and-Kshlerin.read",
+      "yeepdev.Schulist-Effertz-and-Kshlerin.write"
+    ],
+    "scope": "Schulist-Effertz-and-Kshlerin"
+  },
+  {
+    "name": "Powlowski-LLC.read",
+    "description": "This role provides read access to Powlowski LLC",
+    "isSystemRole": false,
+    "permissions": [
+      "yeepdev.Powlowski-LLC.read"
+    ],
+    "scope": "Powlowski-LLC"
+  },
+  {
+    "name": "Powlowski-LLC.edit",
+    "description": "This role provides edit access to Powlowski LLC",
+    "isSystemRole": false,
+    "permissions": [
+      "yeepdev.Powlowski-LLC.write"
+    ],
+    "scope": "Powlowski-LLC"
+  },
+  {
+    "name": "Powlowski-LLC.admin",
+    "description": "This role provides admin access to Powlowski LLC",
+    "isSystemRole": false,
+    "permissions": [
+      "yeepdev.Powlowski-LLC.read",
+      "yeepdev.Powlowski-LLC.write"
+    ],
+    "scope": "Powlowski-LLC"
+  },
+  {
+    "name": "Rolfson-Inc.read",
+    "description": "This role provides read access to Rolfson Inc",
+    "isSystemRole": false,
+    "permissions": [
+      "yeepdev.Rolfson-Inc.read"
+    ],
+    "scope": "Rolfson-Inc"
+  },
+  {
+    "name": "Rolfson-Inc.edit",
+    "description": "This role provides edit access to Rolfson Inc",
+    "isSystemRole": false,
+    "permissions": [
+      "yeepdev.Rolfson-Inc.write"
+    ],
+    "scope": "Rolfson-Inc"
+  },
+  {
+    "name": "Rolfson-Inc.admin",
+    "description": "This role provides admin access to Rolfson Inc",
+    "isSystemRole": false,
+    "permissions": [
+      "yeepdev.Rolfson-Inc.read",
+      "yeepdev.Rolfson-Inc.write"
+    ],
+    "scope": "Rolfson-Inc"
+  }
+]
