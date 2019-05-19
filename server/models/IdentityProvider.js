@@ -13,9 +13,10 @@ const identityProviderSchema = new Schema(
       type: Schema.Types.ObjectId,
       required: false, // org missing implies global assigment
     },
-    options: {
-      type: Map,
-      required: false,
+    protocol: {
+      type: String,
+      enum: [OAUTH],
+      required: true,
     },
   },
   {
