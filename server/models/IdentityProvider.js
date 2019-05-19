@@ -1,9 +1,15 @@
 import { Schema } from 'mongoose';
 import * as idpTypes from '../constants/idpTypes';
-import { OAUTH } from '../constants/idpProtocols';
 
 const identityProviderSchema = new Schema(
   {
+    name: {
+      type: String,
+      required: false,
+      trim: true,
+      maxlength: 60,
+      minlength: 2,
+    },
     type: {
       type: String,
       required: true,
