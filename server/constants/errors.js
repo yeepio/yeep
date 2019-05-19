@@ -271,3 +271,10 @@ export class InvalidRedirectURI extends Error {
     this.code = 10037;
   }
 }
+
+export class InvalidIdentityProviderProtocol extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10038;
+  }
+}
