@@ -8,6 +8,7 @@ import {
 import schema from '../server/constants/config.schema.json';
 import generateFixtures from '../fixtures/generate';
 import loadFixtures from '../fixtures/load';
+import clearFixtures from '../fixtures/clear';
 
 const renderHelp = () => `
   generates fixtures, loads them to the database or deletes them, for testing purposes
@@ -67,9 +68,18 @@ const handleFixtures = (inputArr, flagsObj) => {
           spinner.succeed('Loaded all fixtures to the database');
         })
         .catch((err) => {
-          console.log(err)
           spinner.fail(`${err.message}`);
           spinner.fail('Loading fixtures failed');
+        });
+    } else if (action === 'clear') {
+      spinner.start('Dropping fixtures from the database...');
+      clearFixtures()
+        .then(() => {
+          spinner.succeed('Dropped all fixtures from the database');
+        })
+        .catch((err) => {
+          spinner.fail(`${err.message}`);
+          spinner.fail('Failed dropping fixtures');
         });
     }
   }

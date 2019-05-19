@@ -72,7 +72,6 @@ const loadFixtures = async (dataPath) => {
   const dbName = 'test';
   const client = await connectDb();
   const db = client.db(dbName);
-  console.log("\nwill load fixtures");
 
   try {
     await saveUsers(db, data.users);    
@@ -109,7 +108,6 @@ const loadFixtures = async (dataPath) => {
   } finally {
     client.close();
   }
-  return true;
 };
 
 export default loadFixtures;
