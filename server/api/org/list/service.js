@@ -38,10 +38,11 @@ async function listOrgs({ db }, { q, limit, scopes, cursor }) {
     });
   }
 
+  const $match = matchExpressions.length ? { $and: matchExpressions } : {};
   // retrieve orgs
   const orgs = await OrgModel.aggregate([
     {
-      $match: { $and: matchExpressions },
+      $match,
     },
     {
       $lookup: {

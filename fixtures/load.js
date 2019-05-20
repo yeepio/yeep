@@ -1,13 +1,48 @@
 import fs from 'fs';
-import { MongoClient } from 'mongodb';
+import crypto from 'crypto';
+import { MongoClient, ObjectId } from 'mongodb';
 import { promisify } from 'util';
+import { PASSWORD } from '../server/constants/authFactorTypes';
 
+const randomBytes = promisify(crypto.randomBytes);
+const pbkdf2 = promisify(crypto.pbkdf2);
 const readFileAsync = promisify(fs.readFile);
 
-const connectDb = async () => {
-  const url = 'mongodb://localhost:27017';
-  const client = await MongoClient.connect(url, { useNewUrlParser: true });
+const connectDb = async (uri) => {
+  const client = await MongoClient.connect(uri, { useNewUrlParser: true });
   return client;
+}
+
+const getAdminRole = async (db) => {
+  const adminRole = db.collection('roles').findOne({ name: 'admin' });
+  if (!adminRole) {
+    throw new Error('Admin Role does not already exist in the database, please make sure you have run all the correct migrations');
+  }
+  return adminRole;
+}
+
+const saveAdminUser = async (db, user) => {
+  const salt = await randomBytes(128);
+  const iterations = 100000; // ~0.3 secs on Macbook Pro Late 2011
+  const digestedPassword = await pbkdf2(user.password, salt, iterations, 128, 'sha512');
+  await db.collection('authFactors').insertOne({
+    user: ObjectId(user.id),
+    password: digestedPassword,
+    type: PASSWORD,
+    salt,
+    iterationCount: iterations,
+    isFixture: true,
+  });
+
+  const adminRole = await getAdminRole(db);
+  db.collection('orgMemberships').insertOne({
+    userId: ObjectId(user.id),
+    orgId: null,
+    roles: [{
+      id: adminRole._id,
+    }],
+    isFixture: true,
+  });
 }
 
 const saveUsers = async (db, users) => {
@@ -18,8 +53,8 @@ const saveUsers = async (db, users) => {
     user.createdAt = new Date();
     user.updatedAt = new Date();
     // we need to create credentials for this password if we need to keep it
-    delete user.password;
-    bulk.insert(user);
+    const { password, ...dbUser } = user; // eslint-disable-line
+    bulk.insert(dbUser);
   });
   const operation = await bulk.execute();
   return operation.result.insertedIds.map((user) => user._id.toString());
@@ -64,17 +99,21 @@ const saveRoles = async (db, roles) => {
   return operation.result.insertedIds.map((role) => role._id.toString());
 };
 
-const loadFixtures = async (dataPath) => {
+const loadFixtures = async (config, dataPath) => {
 
   const dataTxt = await readFileAsync(dataPath, 'utf-8');
   const data = JSON.parse(dataTxt);
 
-  const dbName = 'test';
-  const client = await connectDb();
-  const db = client.db(dbName);
+  const client = await connectDb(config.mongo.uri);
+  const db = client.db();
 
   try {
-    await saveUsers(db, data.users);    
+    const userIds = await saveUsers(db, data.users);
+    const adminUser = data.users[0];
+    adminUser.id = userIds[0];
+
+    await saveAdminUser(db, adminUser);
+
     const orgIds = await saveOrgs(db, data.orgs);
     
     const editedPermissions = data.permissions.map((permission) => {
@@ -93,7 +132,7 @@ const loadFixtures = async (dataPath) => {
       const orgIndex = data.orgs.findIndex((org) => org.slug === role.scope);
       role.scope = orgIds[orgIndex];
       // we need to replace permission names with their generated ids
-      role.permissions = role.permissions.map((permissionName, idx) => {
+      role.permissions = role.permissions.map((permissionName) => {
         const foundPermission = permissionsWithIds.find((permission) => {
           return permission.name === permissionName;
         });
@@ -103,6 +142,8 @@ const loadFixtures = async (dataPath) => {
       return role;
     });
     await saveRoles(db, editedRoles);
+
+    return adminUser;
   } catch (err) {
     throw err;
   } finally {

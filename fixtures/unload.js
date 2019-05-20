@@ -1,23 +1,21 @@
 import { MongoClient } from 'mongodb';
-// import { promisify } from 'util';
 
-
-const connectDb = async () => {
-  const url = 'mongodb://localhost:27017';
-  const client = await MongoClient.connect(url, { useNewUrlParser: true });
+const connectDb = async (uri) => {
+  const client = await MongoClient.connect(uri, { useNewUrlParser: true });
   return client;
 }
 
-const clearFixtures = async () => {
-  const dbName = 'test';
-  const client = await connectDb();
-  const db = client.db(dbName);
+const unloadFixtures = async (config) => {
+  const client = await connectDb(config.mongo.uri);
+  const db = client.db();
 
   try {
     await db.collection('users').deleteMany({ isFixture: true });
     await db.collection('orgs').deleteMany({ isFixture: true });
     await db.collection('roles').deleteMany({ isFixture: true });
     await db.collection('permissions').deleteMany({ isFixture: true });
+    await db.collection('authFactors').deleteMany({ isFixture: true });
+    await db.collection('orgMemberships').deleteMany({ isFixture: true });
   } catch (err) {
     throw err;
   } finally {
@@ -25,4 +23,4 @@ const clearFixtures = async () => {
   }
 }
 
-export default clearFixtures;
+export default unloadFixtures;

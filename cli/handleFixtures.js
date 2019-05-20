@@ -5,16 +5,15 @@ import {
   renderNativeError,
   renderInvalidFixturesAction,
 } from './templates';
-import schema from '../server/constants/config.schema.json';
 import generateFixtures from '../fixtures/generate';
 import loadFixtures from '../fixtures/load';
-import clearFixtures from '../fixtures/clear';
+import unloadFixtures from '../fixtures/unload';
 
 const renderHelp = () => `
   generates fixtures, loads them to the database or deletes them, for testing purposes
 
   USAGE
-    $ yeep fixtures generate|load|clear
+    $ yeep fixtures generate|load|unload
 
   OPTIONS
     -c, --config=<path>       path to yeep configuration file (required)
@@ -43,7 +42,7 @@ const handleFixtures = (inputArr, flagsObj) => {
 
     const action = inputArr[1];
 
-    if (!['generate', 'load', 'clear'].includes(action)) {
+    if (!['generate', 'load', 'unload'].includes(action)) {
       console.error(renderInvalidFixturesAction(action));
       return;
     }
@@ -63,17 +62,19 @@ const handleFixtures = (inputArr, flagsObj) => {
     } else if (action === 'load') {
       spinner.start('Loading fixtures to the database...');
       const dataPath = path.join(__dirname, '../fixtures/data/data.json');
-      loadFixtures(dataPath)
-        .then(() => {
+      loadFixtures(config, dataPath)
+        .then((adminUser) => {
           spinner.succeed('Loaded all fixtures to the database');
+          spinner.succeed('Your administrator user is');
+          spinner.succeed(JSON.stringify(adminUser, null , 2));
         })
         .catch((err) => {
           spinner.fail(`${err.message}`);
           spinner.fail('Loading fixtures failed');
         });
-    } else if (action === 'clear') {
+    } else if (action === 'unload') {
       spinner.start('Dropping fixtures from the database...');
-      clearFixtures()
+      unloadFixtures(config)
         .then(() => {
           spinner.succeed('Dropped all fixtures from the database');
         })

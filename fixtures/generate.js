@@ -1,10 +1,10 @@
 import fs from 'fs';
 import path from 'path';
 import config from '../yeep.config';
-import { generateFakeUser } from './users';
-import { generateFakeOrg } from './orgs';
-import { generateFakePermissions } from './permissions';
-import { generateFakeRoles } from './roles';
+import { generateFakeUser } from './models/users';
+import { generateFakeOrg } from './models/orgs';
+import { generateFakePermissions } from './models/permissions';
+import { generateFakeRoles } from './models/roles';
 import { promisify } from 'util';
 
 const writeFileAsync = promisify(fs.writeFile);
