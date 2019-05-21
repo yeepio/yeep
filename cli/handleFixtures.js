@@ -19,6 +19,7 @@ const renderHelp = () => `
     -c, --config=<path>       path to yeep configuration file (required)
     -o, --output-path=<path>  path to output json file
     -v, --verbose             prints json file in human readable format
+    -i, --input-path=<path>   path to input json file
     -n                        number of generated fixtures
 
 
@@ -61,8 +62,7 @@ const handleFixtures = (inputArr, flagsObj) => {
         });
     } else if (action === 'load') {
       spinner.start('Loading fixtures to the database...');
-      const dataPath = path.join(__dirname, '../fixtures/data/data.json');
-      loadFixtures(config, dataPath)
+      loadFixtures(config, flagsObj.i)
         .then((adminUser) => {
           spinner.succeed('Loaded all fixtures to the database');
           spinner.succeed('Your administrator user is');

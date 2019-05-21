@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 import crypto from 'crypto';
 import { MongoClient, ObjectId } from 'mongodb';
 import { promisify } from 'util';
@@ -99,8 +100,8 @@ const saveRoles = async (db, roles) => {
   return operation.result.insertedIds.map((role) => role._id.toString());
 };
 
-const loadFixtures = async (config, dataPath) => {
-
+const loadFixtures = async (config, inputPath) => {
+  const dataPath = inputPath || path.join(__dirname, '../fixtures/data/data.json');
   const dataTxt = await readFileAsync(dataPath, 'utf-8');
   const data = JSON.parse(dataTxt);
 

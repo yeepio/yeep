@@ -52,7 +52,7 @@ const generateFixtures = async (count, outputPath, verbose) => {
   const users = generateFakeUsers(numberOfUsers);
   const orgs = generateFakeOrgs(numberOfOrgs);
   const [ permissions, roles ] = generatePermissionsAndRolesFromOrgs(config, orgs);
-  const dataPath = path.join(__dirname, './data/data.json');
+  const dataPath = outputPath || path.join(__dirname, './data/data.json');
   if (verbose) {
     const usersPath = path.join(__dirname, './data/users.json');
     const orgsPath = path.join(__dirname, './data/orgs.json');

@@ -23,6 +23,10 @@ const args = meow({
       type: 'string',
       alias: 'o',
     },
+    'input-path': {
+      type: 'string',
+      alias: 'i',
+    },
     n: {
       type: 'number',
     },
