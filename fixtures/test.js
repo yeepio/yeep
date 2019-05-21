@@ -11,8 +11,8 @@ describe('Test login', () => {
     await server.setup(config);
     ctx = server.getAppContext();
     userSession = await createSession(ctx, {
-      username: 'Maybelle.Balistreri40',
-      password: 'lebLughAQpEnFoL',
+      username: 'Wallace76',
+      password: 'APi7KiTkBQmdZO5',
     });
   });
 

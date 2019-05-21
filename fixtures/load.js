@@ -100,6 +100,24 @@ const saveRoles = async (db, roles) => {
   return operation.result.insertedIds.map((role) => role._id.toString());
 };
 
+const saveOrgMemberships = async (db, userIds) => {
+  let bulk = db.collection('orgMemberships').initializeUnorderedBulkOp();
+  userIds.forEach((userId) => {
+    const orgMembership = {
+      userId: ObjectId(userId),
+      orgId: null,
+      roles: [],
+      permissions: [],
+      expiresAt: null,
+      isFixture: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+    bulk.insert(orgMembership);
+  });
+  const operation = await bulk.execute();
+}
+
 const loadFixtures = async (config, inputPath) => {
   const dataPath = inputPath || path.join(__dirname, '../fixtures/data/data.json');
   const dataTxt = await readFileAsync(dataPath, 'utf-8');
@@ -110,8 +128,12 @@ const loadFixtures = async (config, inputPath) => {
 
   try {
     const userIds = await saveUsers(db, data.users);
+    const adminUserID = userIds.shift(); // not cool but it would create duplicates
+
+    await saveOrgMemberships(db, userIds);
+
     const adminUser = data.users[0];
-    adminUser.id = userIds[0];
+    adminUser.id = adminUserID;
 
     await saveAdminUser(db, adminUser);
 
