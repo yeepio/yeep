@@ -47,10 +47,16 @@ const RoleCreatePage = () => {
             isClearable={true}
           />
           <div className="neutral">
-            Scoping to an organisation ensures:<br/>
+            Scoping to an organisation ensures:
+            <br />
             <ul>
-              <li>This role can only be assigned to users that are also assigned to that organization</li>
-              <li>You can only associate permissions that are also scoped to that organization</li>
+              <li>
+                This role can only be assigned to users that are also assigned to that
+                organization
+              </li>
+              <li>
+                You can only associate permissions that are also scoped to that organization
+              </li>
             </ul>
           </div>
         </div>
@@ -63,23 +69,20 @@ const RoleCreatePage = () => {
           className="w-full"
           placeholder="Choose one or more permissions"
           options={[
-            { value: 1, label: 'blog.read'},
-            { value: 2, label: 'blog.write'},
-            { value: 3, label: 'yeep.org.write'},
-            { value: 4, label: 'yeep.org.read'},
-            { value: 5, label: 'yeep.users.read'},
-            { value: 6, label: 'yeep.users.write'},
-            { value: 7, label: 'yeep.someperm.1'},
-            { value: 8, label: 'yeep.someperm.2'},
-            { value: 9, label: 'yeep.someperm.2'},
-            { value: 10, label: 'crm.access.1', isDisabled: true},
-            { value: 11, label: 'crm.access.2', isDisabled: true},
-            { value: 12, label: 'crm.access.3', isDisabled: true},
+            { value: 1, label: 'blog.read' },
+            { value: 2, label: 'blog.write' },
+            { value: 3, label: 'yeep.org.write' },
+            { value: 4, label: 'yeep.org.read' },
+            { value: 5, label: 'yeep.users.read' },
+            { value: 6, label: 'yeep.users.write' },
+            { value: 7, label: 'yeep.someperm.1' },
+            { value: 8, label: 'yeep.someperm.2' },
+            { value: 9, label: 'yeep.someperm.2' },
+            { value: 10, label: 'crm.access.1', isDisabled: true },
+            { value: 11, label: 'crm.access.2', isDisabled: true },
+            { value: 12, label: 'crm.access.3', isDisabled: true },
           ]}
-          defaultValue={[
-            { value: 1, label: 'blog.read'},
-            { value: 2, label: 'blog.write'}
-          ]}
+          defaultValue={[{ value: 1, label: 'blog.read' }, { value: 2, label: 'blog.write' }]}
         />
       </fieldset>
       <div className="sm:flex items-center">
