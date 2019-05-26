@@ -92,7 +92,7 @@ userSchema.index(
  * @return {string} normalized username
  */
 userSchema.statics.normalizeUsername = function(username) {
-  return username.normalize('NFKC').toLowerCase();
+  return username.toLowerCase();
 };
 
 /**
