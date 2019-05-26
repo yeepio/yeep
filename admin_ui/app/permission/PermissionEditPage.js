@@ -7,7 +7,6 @@ import Input from '../../components/Input';
 import Textarea from '../../components/Textarea';
 import Button from '../../components/Button';
 import Select from 'react-select';
-import PermissionDeleteModal from './PermissionDeleteModal';
 
 const PermissionEditPage = ({ permissionId }) => {
   useDocumentTitle(`Edit permission #${permissionId}`);
@@ -15,7 +14,6 @@ const PermissionEditPage = ({ permissionId }) => {
   const store = React.useContext(Store);
   return (
     <React.Fragment>
-      <PermissionDeleteModal />
       <h1 className="mb-6">Edit permission #{permissionId}</h1>
       <fieldset className="mb-6">
         <legend>Permission fields</legend>
@@ -63,7 +61,7 @@ const PermissionEditPage = ({ permissionId }) => {
       </fieldset>
       <fieldset className="mb-6">
         <legend>Danger zone</legend>
-        <Button danger={true} onClick={() => store.permission.deleteModal$.next('DELETE')}>
+        <Button danger={true}>
           Delete permission
         </Button>
       </fieldset>
