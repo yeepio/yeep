@@ -11,21 +11,44 @@ const writeFileAsync = promisify(fs.writeFile);
 
 const generateFakeUsers = (numberOfUsers) => {
   const users = [];
+  // usernames are taken from the email property so both are unique
+  const uniqueUsernames = new Set();
   for (var i = numberOfUsers - 1; i >= 0; i--) {
-    const user = generateFakeUser();
-    users.push(user);
+    // maintain some sane loops
+    let count = 0;
+    while (count < 100) {
+      let user = generateFakeUser();
+      if (!uniqueUsernames.has(user.username)) {
+        uniqueUsernames.add(user.username);
+        users.push(user);
+        break;
+      }
+      count ++;
+    }
   }
 
+  uniqueUsernames.clear();
   return users;
 }
 
 const generateFakeOrgs = (numberOfOrgs) => {
   const orgs = [];
+  const uniqueSlugs = new Set();
   for (var i = numberOfOrgs - 1; i >= 0; i--) {
-    const org = generateFakeOrg();
-    orgs.push(org);
+    // maintain some sane loops
+    let count = 0;
+    while (count < 100) {
+      let org = generateFakeOrg();
+      if (!uniqueSlugs.has(org.slug)) {
+        uniqueSlugs.add(org.slug);
+        orgs.push(org);
+        break;
+      }
+      count ++;
+    }
   }
 
+  uniqueSlugs.clear();
   return orgs;
 }
 
