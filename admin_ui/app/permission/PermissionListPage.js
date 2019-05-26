@@ -6,7 +6,7 @@ import ButtonLink from '../../components/ButtonLink';
 import Select from 'react-select';
 import Grid from '../../components/Grid';
 import Input from '../../components/Input';
-import PermissionDeleteModal from './PermissionDeleteModal';
+import PermissionDeleteModal from '../modals/PermissionDeleteModal';
 
 // Dummy data
 let permissionHeadings = [
@@ -152,7 +152,18 @@ const PermissionListPage = () => {
                   <React.Fragment>
                     <Link to={`${permissionData.id}/edit`}>Edit</Link>{' '}
                     <button
-                      onClick={() => store.permission.deleteModal$.next('DELETE')}
+                      onClick={() =>
+                        store.modals.permissionDelete.open({
+                          id: 1,
+                          name: 'blog.read',
+                          onSubmit: () => {
+                            console.log('Submit from permissionDelete modal!');
+                          },
+                          onCancel: () => {
+                            console.log('Cancel from permissionDelete modal');
+                          },
+                        })
+                      }
                       className="pseudolink"
                     >
                       Delete
