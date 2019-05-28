@@ -5,7 +5,7 @@ export const up = async (db) => {
       unique: true,
       sparse: true,
       name: 'username_uidx',
-      collation: { locale: 'en', strength: 2 },
+      collation: { locale: 'en', strength: 1 },
     }
   );
 };
