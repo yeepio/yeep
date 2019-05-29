@@ -1,17 +1,19 @@
-import { BehaviorSubject } from 'rxjs';
+import { createAction, handleActions } from 'redux-actions';
 
-class SessionStore {
-  constructor() {
-    const cachedUser = localStorage.getItem('session.user');
-    this.user$ = new BehaviorSubject(cachedUser ? JSON.parse(cachedUser) : {});
-    this.isLoginPending$ = new BehaviorSubject(false);
-  }
+// initial state
+export const initialState = {
+  user: {},
+  loginError: {},
+  isLoginPending: false,
+};
 
-  login = ({ username, password }) => {
-    console.log(`Mock login ${username}:${password}`);
-    // show pending login indicator
-    this.isLoginPending$.next(true);
-    // mock login functionality
+// actions
+const initLogin = createAction('LOGIN_INIT');
+const resolveLogin = createAction('LOGIN_RESOLVE', (user) => ({ user }));
+const rejectLogin = createAction('LOGIN_REJECT', (err) => ({ err }));
+const mockApiRequest = (user, password) =>
+  new Promise((resolve) => {
+    console.log(`Logging in with ${user} / ${password}`);
     setTimeout(() => {
       const user = {
         id: '507f191e810c19729de860ea',
@@ -19,21 +21,33 @@ class SessionStore {
         fullName: 'Wile E. Coyote',
         picture: 'https://www.acme.com/pictures/coyote.png',
       };
-      // update state
-      this.user$.next(user);
-      this.isLoginPending$.next(false);
-      // cache user in local storage
-      localStorage.setItem('session.user', JSON.stringify(user));
+      resolve(user);
     }, 2000);
-  };
+  });
+export const login = (user, password) => (dispatch) => {
+  dispatch(initLogin());
+  mockApiRequest(user, password)
+    .then((user) => dispatch(resolveLogin(user)))
+    .catch((err) => dispatch(rejectLogin(err)));
+};
 
-  logout = () => {
-    // clear state
-    this.user$.next({});
-    this.isLoginPending$.next(false);
-    // clear cache
-    localStorage.removeItem('session.user');
-  };
-}
+export const logout = createAction('LOGOUT');
 
-export default SessionStore;
+// reducer
+export const reducer = handleActions(
+  {
+    [initLogin]: () => ({ ...initialState, isLoginPending: true }),
+    [rejectLogin]: (state, action) => ({
+      ...state,
+      isLoginPending: false,
+      loginError: action.payload.err,
+    }),
+    [resolveLogin]: (state, action) => ({
+      ...state,
+      isLoginPending: false,
+      user: action.payload.user,
+    }),
+    [logout]: () => initialState,
+  },
+  initialState
+);
