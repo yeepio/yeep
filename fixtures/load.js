@@ -1,12 +1,13 @@
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
+import mongoose from 'mongoose';
 import { MongoClient, ObjectId } from 'mongodb';
 import { promisify } from 'util';
 import { PASSWORD } from '../server/constants/authFactorTypes';
+import passwordSchema from '../server/models/AuthFactor-Password';
 
-const randomBytes = promisify(crypto.randomBytes);
-const pbkdf2 = promisify(crypto.pbkdf2);
+const authFactor = mongoose.model('authFactor', passwordSchema);
 const readFileAsync = promisify(fs.readFile);
 
 const connectDb = async (uri) => {
@@ -23,9 +24,9 @@ const getAdminRole = async (db) => {
 }
 
 const saveAdminUser = async (db, user) => {
-  const salt = await randomBytes(128);
+  const salt = await authFactor.generateSalt();
   const iterations = 100000; // ~0.3 secs on Macbook Pro Late 2011
-  const digestedPassword = await pbkdf2(user.password, salt, iterations, 128, 'sha512');
+  const digestedPassword = await authFactor.digestPassword(user.password, salt, iterations);
   await db.collection('authFactors').insertOne({
     user: ObjectId(user.id),
     password: digestedPassword,

@@ -9,7 +9,7 @@ import { promisify } from 'util';
 
 const writeFileAsync = promisify(fs.writeFile);
 
-const generateFakeUsers = (numberOfUsers) => {
+const generateManyFakeUsers = (numberOfUsers) => {
   const users = [];
   // usernames are taken from the email property so both are unique
   const uniqueUsernames = new Set();
@@ -72,7 +72,7 @@ const generateFixtures = async (count, outputPath, verbose) => {
   const numberOfUsers = count;
   const numberOfOrgs = Math.ceil(count/3);
   const hrstart = process.hrtime();
-  const users = generateFakeUsers(numberOfUsers);
+  const users = generateManyFakeUsers(numberOfUsers);
   const orgs = generateFakeOrgs(numberOfOrgs);
   const [ permissions, roles ] = generatePermissionsAndRolesFromOrgs(config, orgs);
   const dataPath = outputPath || path.join(__dirname, './data/data.json');

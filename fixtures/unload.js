@@ -10,12 +10,14 @@ const unloadFixtures = async (config) => {
   const db = client.db();
 
   try {
-    await db.collection('users').deleteMany({ isFixture: true });
-    await db.collection('orgs').deleteMany({ isFixture: true });
-    await db.collection('roles').deleteMany({ isFixture: true });
-    await db.collection('permissions').deleteMany({ isFixture: true });
-    await db.collection('authFactors').deleteMany({ isFixture: true });
-    await db.collection('orgMemberships').deleteMany({ isFixture: true });
+    await Promise.all([
+      db.collection('users').deleteMany({ isFixture: true }),
+      db.collection('orgs').deleteMany({ isFixture: true }),
+      db.collection('roles').deleteMany({ isFixture: true }),
+      db.collection('permissions').deleteMany({ isFixture: true }),
+      db.collection('authFactors').deleteMany({ isFixture: true }),
+      db.collection('orgMemberships').deleteMany({ isFixture: true }),
+    ]);
   } catch (err) {
     throw err;
   } finally {

@@ -52,7 +52,6 @@
     "babel-jest": "^24.1.0",
     "babel-loader": "^8.0.5",
     "case-sensitive-paths-webpack-plugin": "^2.2.0",
-    "chance": "^1.0.18",
     "clean-webpack-plugin": "^2.0.0",
     "concurrently": "^4.1.0",
     "css-loader": "^2.1.0",
