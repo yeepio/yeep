@@ -80,6 +80,7 @@
     "purgecss-webpack-plugin": "^1.4.0",
     "react-dev-utils": "^8.0.0",
     "react-loadable": "^5.5.0",
+    "redux-devtools": "^3.5.0",
     "rimraf": "^2.6.3",
     "rollup": "^1.4.0",
     "rollup-plugin-babel": "^4.3.2",
