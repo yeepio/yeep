@@ -4,7 +4,7 @@ export const up = async (db) => {
     {
       unique: true,
       name: 'slug_uidx',
-      collation: { locale: 'en', strength: 2 },
+      collation: { locale: 'en', strength: 1 },
     }
   );
 };

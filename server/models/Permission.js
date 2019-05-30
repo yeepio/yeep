@@ -41,7 +41,7 @@ permissionSchema.index(
   {
     unique: true,
     name: 'name_uidx',
-    collation: { locale: 'en', strength: 2 },
+    collation: { locale: 'en', strength: 1 },
   }
 );
 

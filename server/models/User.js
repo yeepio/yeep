@@ -73,7 +73,7 @@ userSchema.index(
     unique: true,
     sparse: true,
     name: 'username_uidx',
-    collation: { locale: 'en', strength: 2 },
+    collation: { locale: 'en', strength: 1 },
   }
 );
 
@@ -82,7 +82,7 @@ userSchema.index(
   {
     unique: true,
     name: 'email_address_uidx',
-    collation: { locale: 'en', strength: 2 },
+    collation: { locale: 'en', strength: 1 },
   }
 );
 
@@ -92,7 +92,7 @@ userSchema.index(
  * @return {string} normalized username
  */
 userSchema.statics.normalizeUsername = function(username) {
-  return username.normalize('NFKC').toLowerCase();
+  return username.toLowerCase();
 };
 
 /**
