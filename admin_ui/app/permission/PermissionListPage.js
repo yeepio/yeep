@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
-import Store from '../Store';
+import { useDispatch } from 'react-redux';
 import ButtonLink from '../../components/ButtonLink';
 import Select from 'react-select';
 import Grid from '../../components/Grid';
 import Input from '../../components/Input';
 import PermissionDeleteModal from '../modals/PermissionDeleteModal';
+import { openPermissionDeleteModal } from '../modals/modalStore';
 
 // Dummy data
 let permissionHeadings = [
@@ -87,8 +88,23 @@ let permissionData = [
 const PermissionListPage = () => {
   useDocumentTitle('Permissions');
 
-  // Load the store (we need access to store.permission.deleteModal$)
-  const store = React.useContext(Store);
+  const dispatch = useDispatch();
+  const handleDelete = useCallback(() => {
+    dispatch(
+      openPermissionDeleteModal(
+        {
+          id: 1,
+          name: 'blog.read',
+        },
+        () => {
+          console.log('Submit from permissionDelete modal!');
+        },
+        () => {
+          console.log('Cancel from permissionDelete modal');
+        }
+      )
+    );
+  }, [dispatch]);
 
   return (
     <React.Fragment>
@@ -151,21 +167,7 @@ const PermissionListPage = () => {
                 {permissionData.orgScope && (
                   <React.Fragment>
                     <Link to={`${permissionData.id}/edit`}>Edit</Link>{' '}
-                    <button
-                      onClick={() =>
-                        store.modals.permissionDelete.open({
-                          id: 1,
-                          name: 'blog.read',
-                          onSubmit: () => {
-                            console.log('Submit from permissionDelete modal!');
-                          },
-                          onCancel: () => {
-                            console.log('Cancel from permissionDelete modal');
-                          },
-                        })
-                      }
-                      className="pseudolink"
-                    >
+                    <button onClick={handleDelete} className="pseudolink">
                       Delete
                     </button>
                   </React.Fragment>

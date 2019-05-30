@@ -4,13 +4,16 @@ import {
   reducer as sessionReducer,
   initialState as sessionInitialState,
 } from './session/sessionStore';
+import { reducer as modalReducer, initialState as modalInitialState } from './modals/modalStore';
 
 const rootReducer = combineReducers({
   session: sessionReducer,
+  modal: modalReducer,
 });
 
 const preloadedState = {
   session: sessionInitialState,
+  modal: modalInitialState,
 };
 
 const middleware = [ReduxThunk];
