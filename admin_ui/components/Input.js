@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 const Input = ({ className, ...otherProps }) => {
+  console.log(otherProps.disabled);
   return (
     <input
       {...otherProps}
@@ -13,7 +14,8 @@ const Input = ({ className, ...otherProps }) => {
         'p-2',
         'rounded',
         'leading-normal',
-        className
+        className,
+        { 'bg-grey-light' : otherProps.disabled }
       )}
     />
   );

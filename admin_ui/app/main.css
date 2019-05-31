@@ -4,20 +4,22 @@
 
 body {
   @apply antialiased;
+  @apply text-black;
 }
 
 /* Global default styles for Yeep */
-a {
+a, .pseudolink {
+  @apply underline;
   @apply text-blue;
 }
-a:hover {
-  text-decoration: none;
+a:hover, .pseudolink:hover {
+  @apply no-underline;
   @apply text-blue-dark;
 }
 
 /* Form elements: fieldset */
 fieldset {
-  @apply border border-grey p-8;
+  @apply border border-grey p-6;
   position: relative;
 }
 legend {
@@ -30,6 +32,7 @@ legend {
 }
 
 /* Form layout */
+.pseudolabel,
 .form-group label {
   @apply mb-1;
   display: block;
@@ -55,6 +58,7 @@ legend {
     flex-wrap: wrap;
     align-items: flex-start;
   }
+  .pseudolabel,
   .form-group label {
     @apply mb-0;
     flex: 0 0 25%;
@@ -80,4 +84,29 @@ legend {
   .form-submit {
     margin-left: 25%;
   }
+  /*
+    When we need to have some text instead of a form element
+    Used along with .pseudolabel (see Users => Edit => Org Membership for example)
+  */
+  .text-instead-of-form-field {
+    width:50%;
+    @apply block;
+    line-height:2.6rem;
+  }
+}
+
+/* Modal styles that cannot be applied via Tailwind */
+.modalOverlay {
+  background: rgba(0, 0, 0, 0.3);
+}
+.modal {
+  box-shadow: 0px 10px 20px 0px rgba(0, 0, 0, 0.5);
+}
+.modalClose {
+  background:url("/icon-close.svg") no-repeat;
+  background-size:100% 100%;
+  opacity:0.5;
+}
+.modalClose:hover {
+  opacity:1;
 }
