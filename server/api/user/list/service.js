@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
 import escapeRegExp from 'lodash/escapeRegExp';
+import invokeMap from 'lodash/invokeMap';
 import pick from 'lodash/pick';
 
 export const stringifyCursor = ({ id }) => {
@@ -103,7 +104,7 @@ async function listUsers({ db }, { q, limit, cursor, scopes, projection = defaul
         fullName: user.fullName,
         picture: user.picture,
         emails: user.emails,
-        orgs: user.orgMemberships.map((orgMembership) => orgMembership.orgId.toHexString()),
+        orgs: invokeMap(user.orgMemberships, 'orgId.toHexString'),
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       },

@@ -5,6 +5,7 @@ import handleValidate from './handleValidate';
 import handleSysCheck from './handleSysCheck';
 import handleMigrate from './handleMigrate';
 import handleMkDirUpload from './handleMkDirUpload';
+import handleFixtures from './handleFixtures';
 
 const args = meow({
   flags: {
@@ -14,6 +15,20 @@ const args = meow({
     },
     to: {
       type: 'string',
+    },
+    v: {
+      type: 'boolean',
+    },
+    'output-path': {
+      type: 'string',
+      alias: 'o',
+    },
+    'input-path': {
+      type: 'string',
+      alias: 'i',
+    },
+    n: {
+      type: 'number',
     },
   },
   autoHelp: false,
@@ -38,6 +53,10 @@ switch (args.input[0]) {
   }
   case 'mkdirupload': {
     handleMkDirUpload(args.input, args.flags);
+    break;
+  }
+  case 'fixtures': {
+    handleFixtures(args.input, args.flags);
     break;
   }
   default: {

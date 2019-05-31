@@ -12,6 +12,7 @@ const renderHelp = () => `
     syscheck      performs a systems-check and prints diagnostics
     migrate       applies database migration
     mkdirupload   creates local upload directory
+    fixtures      generates, loads or clears yeep fixtures
 
   EXAMPLES
     $ yeep start --config=yeep.config.js

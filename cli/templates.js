@@ -20,6 +20,13 @@ export const renderInvalidCommand = (command) => `
   See 'yeep --help'.
 `;
 
+export const renderInvalidFixturesAction = (action) => `
+  ${chalk.red('Error: unknown fixtures action')}
+    expected "generate", "load" or "clear", received "${action}"
+
+  See 'yeep --help'.
+`;
+
 export const renderNativeError = (err) => `
   ${chalk.red(`Error: ${err.message}`)}
 `;
