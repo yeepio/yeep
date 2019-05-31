@@ -1,6 +1,5 @@
-import React, { useContext } from 'react';
-import { useObservable } from 'rxjs-hooks';
-import Store from '../Store';
+import React from 'react';
+import { useSelector } from 'react-redux';
 import PermissionCreate from './modals/PermissionCreate';
 import PermissionEdit from './modals/PermissionEdit';
 import PermissionDelete from './modals/PermissionDelete';
@@ -8,16 +7,9 @@ import * as modalTypes from '../constants/modalTypes';
 
 // The CREATE, EDIT or DELETE modals for the OrgEditPermissions page
 const OrgEditPermissionsModals = () => {
-  // Load the store
-  const store = useContext(Store);
+  const displayedModal = useSelector((state) => state.org.displayedModal);
 
-  // Establish the value of the currentModal$ observable
-  const currentModal = useObservable(
-    () => store.org.displayedModal$,
-    store.org.displayedModal$.getValue()
-  );
-
-  switch (currentModal) {
+  switch (displayedModal) {
     case modalTypes.PERMISSION_CREATE:
       return <PermissionCreate />;
     case modalTypes.PERMISSION_EDIT:
@@ -26,7 +18,6 @@ const OrgEditPermissionsModals = () => {
       return <PermissionDelete />;
   }
   return null;
-
 };
 
 export default OrgEditPermissionsModals;

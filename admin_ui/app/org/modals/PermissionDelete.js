@@ -1,15 +1,16 @@
-import React, { useContext } from 'react';
-import Store from '../../Store';
+import React from 'react';
+import { useDispatch } from 'react-redux';
 import Modal from '../../../components/Modal';
 import Button from '../../../components/Button';
 import { Link } from '@reach/router';
+import { setDisplayedModal } from '../orgStore';
 
 // The Create permission modal
 const PermissionDelete = () => {
-  // Load the store
-  const store = useContext(Store);
+  const dispatch = useDispatch();
+
   return (
-    <Modal onClose={() => store.org.displayedModal$.next('')}>
+    <Modal onClose={() => dispatch(setDisplayedModal(''))}>
       <h2 className="mb-4">Delete permission &quot;blog.read&quot;?</h2>
       <p className="mb-4">
         Please note that blog.read is present in <Link to="/roles">4</Link> roles.
