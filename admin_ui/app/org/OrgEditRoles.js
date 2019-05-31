@@ -1,13 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from '@reach/router';
-import Store from '../Store';
+import { useDispatch } from 'react-redux';
 import OrgEditRolesModals from './OrgEditRolesModals';
 import useDocumentTitle from '@rehooks/document-title';
 import TabLinks from '../../components/TabLinks';
 import Button from '../../components/Button';
 import Grid from '../../components/Grid';
 import * as modalTypes from '../constants/modalTypes';
+import { setDisplayedModal } from './orgStore';
 
 // Dummy data
 let roleHeadings = [
@@ -43,8 +44,7 @@ let roleData = [
 ];
 
 const OrgEditRoles = ({ orgId }) => {
-  // Load the store (we need access to store.org.currentModal$)
-  const store = React.useContext(Store);
+  const dispatch = useDispatch();
 
   // Set page title
   useDocumentTitle(`Organization name: Roles`);
@@ -78,7 +78,7 @@ const OrgEditRoles = ({ orgId }) => {
         <legend>New role</legend>
         <Button
           onClick={() => {
-            store.org.displayedModal$.next(modalTypes.ROLE_CREATE);
+            dispatch(setDisplayedModal(modalTypes.ROLE_CREATE));
           }}
         >
           Create new role
@@ -96,9 +96,7 @@ const OrgEditRoles = ({ orgId }) => {
           renderer={(role, index) => {
             return (
               <tr key={`roleRow${role.id}`} className={index % 2 ? `bg-grey-lightest` : ``}>
-                <td className="p-2">
-                  {role.name}
-                </td>
+                <td className="p-2">{role.name}</td>
                 <td className="p-2 text-center">{role.permissionCount}</td>
                 <td className="p-2 text-center">{role.userCount}</td>
                 <td className="p-2 text-right">
@@ -106,7 +104,7 @@ const OrgEditRoles = ({ orgId }) => {
                     className="pseudolink"
                     onClick={(e) => {
                       e.preventDefault();
-                      store.org.displayedModal$.next(modalTypes.ROLE_EDIT);
+                      dispatch(setDisplayedModal(modalTypes.ROLE_EDIT));
                     }}
                   >
                     Edit
@@ -115,7 +113,7 @@ const OrgEditRoles = ({ orgId }) => {
                     className="pseudolink"
                     onClick={(e) => {
                       e.preventDefault();
-                      store.org.displayedModal$.next(modalTypes.ROLE_DELETE);
+                      dispatch(setDisplayedModal(modalTypes.ROLE_DELETE));
                     }}
                   >
                     Delete

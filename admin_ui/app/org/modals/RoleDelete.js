@@ -1,15 +1,16 @@
-import React, { useContext } from 'react';
-import Store from '../../Store';
+import React from 'react';
+import { useDispatch } from 'react-redux';
 import Modal from '../../../components/Modal';
 import Button from '../../../components/Button';
 import { Link } from '@reach/router';
+import { setDisplayedModal } from '../orgStore';
 
 // The Create permission modal
 const RoleDelete = () => {
-  // Load the store
-  const store = useContext(Store);
+  const dispatch = useDispatch();
+
   return (
-    <Modal onClose={() => store.org.displayedModal$.next('')}>
+    <Modal onClose={() => dispatch(setDisplayedModal(''))}>
       <h2 className="mb-4">Delete role &quot;blog_admin&quot;?</h2>
       <p className="mb-4">
         Please note <Link to="/users">12</Link> users have this role assigned to them.

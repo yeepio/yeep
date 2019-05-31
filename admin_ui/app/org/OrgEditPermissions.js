@@ -1,13 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from '@reach/router';
-import Store from '../Store';
+import { useDispatch } from 'react-redux';
 import OrgEditPermissionsModals from './OrgEditPermissionsModals';
 import useDocumentTitle from '@rehooks/document-title';
 import TabLinks from '../../components/TabLinks';
 import Button from '../../components/Button';
 import Grid from '../../components/Grid';
 import * as modalTypes from '../constants/modalTypes';
+import { setDisplayedModal } from './orgStore';
 
 // Dummy data
 let permissionHeadings = [
@@ -35,8 +36,7 @@ let permissionData = [
 ];
 
 const OrgEditPermissions = ({ orgId }) => {
-  // Load the store (we need access to store.org.currentModal$)
-  const store = React.useContext(Store);
+  const dispatch = useDispatch();
 
   // Set page title
   useDocumentTitle(`Organization name: Permissions`);
@@ -70,7 +70,7 @@ const OrgEditPermissions = ({ orgId }) => {
         <legend>New permissions</legend>
         <Button
           onClick={() => {
-            store.org.displayedModal$.next(modalTypes.PERMISSION_CREATE);
+            dispatch(setDisplayedModal(modalTypes.PERMISSION_CREATE));
           }}
         >
           Create new permission
@@ -97,7 +97,7 @@ const OrgEditPermissions = ({ orgId }) => {
                     className="pseudolink"
                     onClick={(e) => {
                       e.preventDefault();
-                      store.org.displayedModal$.next(modalTypes.PERMISSION_EDIT);
+                      dispatch(setDisplayedModal(modalTypes.PERMISSION_EDIT));
                     }}
                   >
                     Edit
@@ -106,7 +106,7 @@ const OrgEditPermissions = ({ orgId }) => {
                     className="pseudolink"
                     onClick={(e) => {
                       e.preventDefault();
-                      store.org.displayedModal$.next(modalTypes.PERMISSION_DELETE);
+                      dispatch(setDisplayedModal(modalTypes.PERMISSION_DELETE));
                     }}
                   >
                     Delete

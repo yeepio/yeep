@@ -1,16 +1,17 @@
-import React, { useContext } from 'react';
-import Store from '../../Store';
+import React from 'react';
+import { useDispatch } from 'react-redux';
 import Modal from '../../../components/Modal';
 import Input from '../../../components/Input';
 import Button from '../../../components/Button';
 import Textarea from '../../../components/Textarea';
+import { setDisplayedModal } from '../orgStore';
 
 // The Create permission modal
 const PermissionEdit = () => {
-  // Load the store
-  const store = useContext(Store);
+  const dispatch = useDispatch();
+
   return (
-    <Modal onClose={() => store.org.displayedModal$.next('')} className="sm:w-4/5">
+    <Modal onClose={() => dispatch(setDisplayedModal(''))} className="sm:w-4/5">
       <h2 className="mb-4">Edit permission</h2>
       <div className="form-group mb-4">
         <label htmlFor="org-name">Organization scope:</label>
