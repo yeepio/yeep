@@ -2,25 +2,25 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
-import Store from '../Store';
+import { useDispatch } from 'react-redux';
 import Input from '../../components/Input';
 import Textarea from '../../components/Textarea';
 import Button from '../../components/Button';
 import Select from 'react-select';
 import RoleDeleteModal from './RoleDeleteModal';
+import { setDeleteModal } from './roleStore';
 
 const RoleEditPage = ({ roleId }) => {
-  useDocumentTitle(`Edit role#${roleId}`);
-
-  // Load the store (we need access to store.role.deleteModal$)
-  const store = React.useContext(Store);
+  const dispatch = useDispatch();
 
   // On componentDidUnmount close any open modals!
   React.useEffect(() => {
     return () => {
-      store.role.deleteModal$.next('');
+      dispatch(setDeleteModal(''));
     };
-  });
+  }, [dispatch]);
+
+  useDocumentTitle(`Edit role#${roleId}`);
 
   return (
     <React.Fragment>
@@ -76,7 +76,7 @@ const RoleEditPage = ({ roleId }) => {
       </fieldset>
       <fieldset className="mb-6">
         <legend>Danger zone</legend>
-        <Button danger={true} onClick={() => store.role.deleteModal$.next('DELETE')}>
+        <Button danger={true} onClick={() => dispatch(setDeleteModal('DELETE'))}>
           Delete role
         </Button>
       </fieldset>
