@@ -1,12 +1,13 @@
 import React from 'react';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
-import Store from '../Store';
+import { useDispatch } from 'react-redux';
 import ButtonLink from '../../components/ButtonLink';
 import Select from 'react-select';
 import Grid from '../../components/Grid';
 import Input from '../../components/Input';
 import RoleDeleteModal from './RoleDeleteModal';
+import { setDeleteModal } from './roleStore';
 
 // Dummy data
 let roleHeadings = [
@@ -73,9 +74,10 @@ let roleData = [
 ];
 
 const RoleListPage = () => {
+  const dispatch = useDispatch();
+
   useDocumentTitle('Roles');
-  // Load the store (we need access to store.role.deleteModal$)
-  const store = React.useContext(Store);
+
   return (
     <React.Fragment>
       <RoleDeleteModal />
@@ -122,10 +124,7 @@ const RoleListPage = () => {
               </td>
               <td className="p-2 text-center">
                 <Link to={`${roleData.id}/edit`}>Edit</Link>{' '}
-                <button
-                  onClick={() => store.role.deleteModal$.next('DELETE')}
-                  className="pseudolink"
-                >
+                <button onClick={() => dispatch(setDeleteModal('DELETE'))} className="pseudolink">
                   Delete
                 </button>
               </td>
