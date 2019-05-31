@@ -24,4 +24,11 @@ const preloadedState = {
 
 const middleware = [ReduxThunk];
 
+if (process.env.NODE_ENV !== 'production') {
+  const { createLogger } = require('redux-logger'); // eslint-disable-line global-require
+  const freeze = require('redux-freeze');
+
+  middleware.push(createLogger({ level: 'info', collapsed: true }), freeze);
+}
+
 export const store = createStore(rootReducer, preloadedState, applyMiddleware(...middleware));
