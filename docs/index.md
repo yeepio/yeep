@@ -35,11 +35,12 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 
 ### Session
 
-| Method                                            | Description                                                                  |
-| :------------------------------------------------ | :--------------------------------------------------------------------------- |
-| **[session.create](methods/session.create.md)**   | Creates new session, a.k.a. sign-in                                          |
-| **[session.destroy](methods/session.destroy.md)** | Destroys an existing session, a.k.a sign-out                                 |
-| **[session.refresh](methods/session.refresh.md)** | Refreshes an existing session that is about to expire or has already expired |
+| Method                                                | Description                                                                  |
+| :---------------------------------------------------- | :--------------------------------------------------------------------------- |
+| **[session.create](methods/session.create.md)**       | Creates new session, a.k.a. sign-in                                          |
+| **[session.destroy](methods/session.destroy.md)**     | Destroys an existing session, a.k.a sign-out                                 |
+| **[session.refresh](methods/session.refresh.md)**     | Refreshes an existing session that is about to expire or has already expired |
+| **[session.setCookie](methods/session.setCookie.md)** | Sets new session cookie for the designated user                              |
 
 ### Permission
 
@@ -79,6 +80,6 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 
 ### Email
 
-| Method                                                | Description                                    |
-| :---------------------------------------------------- | :--------------------------------------------- |
-| **[email.verify](methods/email.verify.md)**           | Verifies user email address by redeeming verification token |
+| Method                                      | Description                                                 |
+| :------------------------------------------ | :---------------------------------------------------------- |
+| **[email.verify](methods/email.verify.md)** | Verifies user email address by redeeming verification token |
