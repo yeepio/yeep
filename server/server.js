@@ -9,6 +9,7 @@ import helmet from 'koa-helmet';
 import bodyParser from 'koa-bodyparser';
 import compression from 'compression';
 import koaConnect from 'koa-connect';
+import cookie from 'koa-cookie';
 import Boom from 'boom';
 import mongoose from 'mongoose';
 import serveStatic from 'koa-static';
@@ -67,6 +68,9 @@ app.use(
     },
   })
 );
+
+// parse cookies
+app.use(cookie());
 
 // register router
 app.use(api.routes());
