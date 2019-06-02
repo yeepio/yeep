@@ -17,7 +17,19 @@ module.exports = {
   },
   cookie: {
     secret: process.env.COOKIE_SECRET,
-    lifetimeInSeconds: 900, // i.e. 15 mins
+    domain: (request) => {
+      if (process.env.NODE_ENV !== 'production') {
+        return request.hostname;
+      }
+
+      return '.yeep.io';
+    },
+    path: '/',
+    httpOnly: true,
+    secure: () => process.env.NODE_ENV === 'production',
+    lifetimeInSeconds: 30 * 24 * 60 * 60, // i.e. 30 days
+    autorenew: true,
+    renewIntervalInSeconds: 900, // i.e. 15 mins
   },
   mongo: {
     uri: process.env.MONGODB_URI,
