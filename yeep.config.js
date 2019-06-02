@@ -15,6 +15,10 @@ module.exports = {
   refreshToken: {
     lifetimeInSeconds: 3 * 24 * 60 * 60, // i.e. 3 days
   },
+  cookie: {
+    secret: process.env.COOKIE_SECRET,
+    lifetimeInSeconds: 900, // i.e. 15 mins
+  },
   mongo: {
     uri: process.env.MONGODB_URI,
     migrationDir: 'migrations/',
@@ -24,10 +28,7 @@ module.exports = {
     uploadDir: 'uploads/',
   },
   htmlTemplates: {
-    emailVerificationSuccess: path.resolve(
-      __dirname,
-      'server/views/emailVerificationSuccess.html'
-    ),
+    emailVerificationSuccess: path.resolve(__dirname, 'server/views/emailVerificationSuccess.html'),
     emailVerificationError: path.resolve(__dirname, 'server/views/emailVerificationError.html'),
   },
   mail: {
