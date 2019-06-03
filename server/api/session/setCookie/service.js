@@ -57,46 +57,50 @@ export async function setSessionCookie(
   // create authToken in db
   const secret = TokenModel.generateSecret({ length: 24 });
   const now = new Date();
+  const expiresAt = addSeconds(
+    now,
+    config.cookie.autorenew ? config.cookie.renewIntervalInSeconds : config.cookie.lifetimeInSeconds
+  );
   const authToken = await TokenModel.create({
     secret,
     type: AUTHENTICATION,
     payload: {},
     user: ObjectId(user.id),
-    expiresAt: addSeconds(
-      now,
-      config.cookie.autorenew
-        ? config.cookie.renewIntervalInSeconds
-        : config.cookie.lifetimeInSeconds
-    ),
+    expiresAt,
   });
 
-  // create payload object
-  const payload = {
+  // create body
+  const body = {
     user: {
       id: user.id,
     },
   };
 
   // compile cookie as JWT token
-  const cookie = await jwt.signAsync(payload, config.cookie.secret, {
-    jwtid: authToken.secret,
-    expiresIn: config.cookie.autorenew
-      ? config.cookie.renewIntervalInSeconds
-      : config.cookie.lifetimeInSeconds,
-  });
+  const cookie = await jwt.signAsync(
+    {
+      ...body,
+      iat: Math.floor(now.getTime() / 1000),
+      exp: Math.floor(expiresAt.getTime() / 1000),
+    },
+    config.cookie.secret,
+    {
+      jwtid: authToken.secret,
+    }
+  );
 
-  // decorate payload with user profile data
+  // decorate body with user profile data
   if (projection.profile) {
-    payload.user.username = user.username;
-    payload.user.fullName = user.fullName;
-    payload.user.picture = user.picture || undefined;
-    payload.user.primaryEmail = UserModel.getPrimaryEmailAddress(user.emails);
+    body.user.username = user.username;
+    body.user.fullName = user.fullName;
+    body.user.picture = user.picture || undefined;
+    body.user.primaryEmail = UserModel.getPrimaryEmailAddress(user.emails);
   }
 
-  // decorate payload with user permissions
+  // decorate body with user permissions
   if (projection.permissions) {
     const permissions = await getUserPermissions(ctx, { userId: user.id });
-    payload.user.permissions = permissions.map((e) => {
+    body.user.permissions = permissions.map((e) => {
       return {
         ...e,
         resourceId: e.resourceId || undefined, // remove resourceId if unspecified to save bandwidth
@@ -106,7 +110,7 @@ export async function setSessionCookie(
 
   return {
     cookie,
-    payload,
-    expiresAt: addSeconds(now, config.cookie.lifetimeInSeconds),
+    body,
+    eol: addSeconds(now, config.cookie.lifetimeInSeconds),
   };
 }

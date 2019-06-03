@@ -66,7 +66,7 @@ async function handler(ctx) {
     props.username = user;
   }
 
-  const { cookie, payload, expiresAt } = await setSessionCookie(ctx, props);
+  const { cookie, body, eol } = await setSessionCookie(ctx, props);
 
   ctx.cookies.set('session', cookie, {
     domain: isFunction(config.cookie.domain) ? config.cookie.domain(request) : config.cookie.domain,
@@ -75,12 +75,12 @@ async function handler(ctx) {
       ? config.cookie.httpOnly(request)
       : config.cookie.httpOnly,
     secure: isFunction(config.cookie.secure) ? config.cookie.secure(request) : config.cookie.secure,
-    expires: expiresAt,
+    expires: eol,
     overwrite: true,
   });
 
   response.status = 200; // OK
-  response.body = payload;
+  response.body = body;
 }
 
 export default compose([packJSONRPC, validateRequest(validationSchema), handler]);
