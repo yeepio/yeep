@@ -57,10 +57,7 @@ export async function setSessionCookie(
   // create authToken in db
   const secret = TokenModel.generateSecret({ length: 24 });
   const now = new Date();
-  const expiresAt = addSeconds(
-    now,
-    config.cookie.autorenew ? config.cookie.renewIntervalInSeconds : config.cookie.lifetimeInSeconds
-  );
+  const expiresAt = addSeconds(now, config.cookie.lifetimeInSeconds);
   const authToken = await TokenModel.create({
     secret,
     type: AUTHENTICATION,
@@ -77,11 +74,17 @@ export async function setSessionCookie(
   };
 
   // compile cookie as JWT token
+  const renewableAt = addSeconds(
+    now,
+    config.cookie.isAutoRenewEnabled
+      ? config.cookie.renewIntervalInSeconds
+      : config.cookie.lifetimeInSeconds
+  );
   const cookie = await jwt.signAsync(
     {
       ...body,
       iat: Math.floor(now.getTime() / 1000),
-      exp: Math.floor(expiresAt.getTime() / 1000),
+      exp: Math.floor(renewableAt.getTime() / 1000),
     },
     config.cookie.secret,
     {
@@ -113,6 +116,6 @@ export async function setSessionCookie(
   return {
     cookie,
     body,
-    cookieEndOfLife: addSeconds(now, config.cookie.lifetimeInSeconds),
+    expiresAt,
   };
 }
