@@ -7,8 +7,10 @@ import isString from 'lodash/isString';
 import isUndefined from 'lodash/isUndefined';
 import isNull from 'lodash/isNull';
 import binarySearch from 'binary-search';
+import jwt from '../utils/jwt';
 import { AuthorizationError } from '../constants/errors';
 import { getUserPermissions } from '../api/user/info/service';
+import { refreshSessionCookie } from '../api/session/refreshCookie/service';
 
 const parseAuthorizationPayload = async ({ request, jwt }) => {
   const [schema, accessToken] = request.headers.authorization.split(' ');
@@ -34,80 +36,135 @@ const parseAuthorizationPayload = async ({ request, jwt }) => {
   }
 };
 
-export const decorateSession = () => async ({ request, jwt, db }, next) => {
-  // check if authentication header exists
-  if (!request.headers.authorization) {
-    await next();
-    return; // exit
-  }
+async function decorateSessionByCookie(ctx, { cookie }) {
+  const { request, config } = ctx;
+  const now = new Date();
 
-  // parse authorization payload
-  const { secret, user, issuedAt, expiresAt } = await parseAuthorizationPayload({
-    request,
-    jwt,
-  });
-
-  // retrieve user info
-  const TokenModel = db.model('Token');
-  const records = await TokenModel.aggregate([
-    {
-      $match: { secret },
-    },
-    {
-      $lookup: {
-        from: 'users',
-        localField: 'user',
-        foreignField: '_id',
-        as: 'user',
-      },
-    },
-    {
-      $match: {
-        $or: [
-          { 'user.deactivatedAt': null }, // i.e. null or undefined
-          { 'user.deactivatedAt': { $gte: new Date() } }, // i.e. is not deactivated yet
-        ],
-      },
-    },
-    {
-      $project: {
-        'user._id': 1,
-        'user.username': 1,
-        'user.emails': 1,
-        'user.fullName': 1,
-        'user.picture': 1,
-        // 'user.orgs': 1,
-        // 'user.roles': 1,
-        'user.createdAt': 1,
-        'user.updatedAt': 1,
-      },
-    },
-    {
-      $unwind: '$user',
-    },
-  ]).exec();
-
-  // make sure authorization token is active
-  if (records.length === 0 || !records[0].user._id.equals(user.id)) {
-    await next();
-    return; // exit
+  // verify cookie
+  let cookiePayload;
+  try {
+    cookiePayload = await jwt.verifyAsync(cookie, config.cookie.secret, {
+      ignoreExpiration: true,
+    });
+  } catch (err) {
+    throw Boom.unauthorized('Invalid session cookie', 'Cookie', {
+      realm: config.name,
+    });
   }
 
   // decorate request with session data
   request.session = {
     token: {
-      id: records[0]._id.toHexString(),
-      issuedAt,
-      expiresAt,
+      id: cookiePayload.jti,
     },
-    user: {
-      ...records[0].user,
-      id: records[0].user._id.toHexString(),
-    },
+    user: cookiePayload.user,
   };
 
-  await next();
-};
+  // ensure cookie has not expired
+  if (cookiePayload.exp * 1000 >= now.getTime()) {
+    return; // exit
+  }
+
+  // throw error if autorenew is turned off
+  if (!config.cookie.isAutoRenewEnabled) {
+    throw Boom.unauthorized('Session cookie has expired', 'Cookie', {
+      realm: config.name,
+    });
+  }
+
+  // attempt to refresh the cookie
+  await refreshSessionCookie(ctx, { secret: cookiePayload.jti, userId: cookiePayload.user.id });
+}
+
+export function decorateSession() {
+  return async (ctx, next) => {
+    const cookie = ctx.cookies.get('session');
+    const authorizationHeader = ctx.request.headers.authorization;
+
+    if (cookie) {
+      await decorateSessionByCookie(ctx, { cookie });
+    } else if (authorizationHeader) {
+      // wip
+    }
+
+    await next();
+  };
+}
+
+// export const decorateSession = () => async ({ request, jwt, db }, next) => {
+//   // check if authentication header exists
+//   if (!request.headers.authorization) {
+//     await next();
+//     return; // exit
+//   }
+
+//   // parse authorization payload
+//   const { secret, user, issuedAt, expiresAt } = await parseAuthorizationPayload({
+//     request,
+//     jwt,
+//   });
+
+//   // retrieve user info
+//   const TokenModel = db.model('Token');
+//   const records = await TokenModel.aggregate([
+//     {
+//       $match: { secret },
+//     },
+//     {
+//       $lookup: {
+//         from: 'users',
+//         localField: 'user',
+//         foreignField: '_id',
+//         as: 'user',
+//       },
+//     },
+//     {
+//       $match: {
+//         $or: [
+//           { 'user.deactivatedAt': null }, // i.e. null or undefined
+//           { 'user.deactivatedAt': { $gte: new Date() } }, // i.e. is not deactivated yet
+//         ],
+//       },
+//     },
+//     {
+//       $project: {
+//         'user._id': 1,
+//         'user.username': 1,
+//         'user.emails': 1,
+//         'user.fullName': 1,
+//         'user.picture': 1,
+//         // 'user.orgs': 1,
+//         // 'user.roles': 1,
+//         'user.createdAt': 1,
+//         'user.updatedAt': 1,
+//       },
+//     },
+//     {
+//       $unwind: '$user',
+//     },
+//   ]).exec();
+
+//   // make sure authorization token is active
+//   if (records.length === 0 || !records[0].user._id.equals(user.id)) {
+//     await next();
+//     return; // exit
+//   }
+
+//   // decorate request with session data
+//   request.session = {
+//     token: {
+//       id: records[0]._id.toHexString(),
+//       issuedAt,
+//       expiresAt,
+//     },
+//     user: {
+//       ...records[0].user,
+//       id: records[0].user._id.toHexString(),
+//     },
+//   };
+
+//   await next();
+// };
 
 export const isUserAuthenticated = () => async ({ request }, next) => {
   if (!has(request, ['session', 'user'])) {
