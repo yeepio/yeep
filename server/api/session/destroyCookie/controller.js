@@ -5,9 +5,11 @@ import packJSONRPC from '../../../middleware/packJSONRPC';
 import { destroySessionCookie } from './service';
 
 async function handler(ctx) {
-  const { response, cookies } = ctx;
+  const { response, request, cookies } = ctx;
 
-  const isSessionCookieDestroyed = await destroySessionCookie(ctx, cookies.get('session'));
+  const isSessionCookieDestroyed = await destroySessionCookie(ctx, {
+    secret: request.session.token.id,
+  });
 
   if (!isSessionCookieDestroyed) {
     throw Boom.internal();

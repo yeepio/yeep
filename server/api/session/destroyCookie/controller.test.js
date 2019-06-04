@@ -6,6 +6,7 @@ import createUser from '../../user/create/service';
 import { setSessionCookie } from '../setCookie/service';
 import deleteUser from '../../user/delete/service';
 import { AUTHENTICATION } from '../../../constants/tokenTypes';
+import jwt from '../../../utils/jwt';
 
 describe('api/session.destroyCookie', () => {
   let ctx;
@@ -43,7 +44,7 @@ describe('api/session.destroyCookie', () => {
 
     const res = await request(server)
       .post('/api/session.destroyCookie')
-      .set('Cookie', cookie)
+      .set('Cookie', `session=${cookie}`)
       .send();
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
@@ -51,7 +52,11 @@ describe('api/session.destroyCookie', () => {
     });
 
     const TokenModel = ctx.db.model('Token');
-    const payload = await ctx.jwt.verify(cookie);
+    const payload = await jwt.verifyAsync(cookie, config.cookie.secret, {
+      issuer: config.name,
+      algorithm: 'HS512',
+    });
+
     expect(
       TokenModel.countDocuments({
         secret: payload.jti,
