@@ -2,7 +2,7 @@ import { InvalidAccessToken } from '../../../constants/errors';
 import { AUTHENTICATION } from '../../../constants/tokenTypes';
 import jwt from '../../../utils/jwt';
 
-export async function removeSessionCookie(ctx, { sessionCookie }) {
+export async function destroySessionCookie(ctx, { sessionCookie }) {
   const { db, config } = ctx;
   const TokenModel = db.model('Token');
 

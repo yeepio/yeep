@@ -35,13 +35,13 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 
 ### Session
 
-| Method                                                      | Description                                                                  |
-| :---------------------------------------------------------- | :--------------------------------------------------------------------------- |
-| **[session.create](methods/session.create.md)**             | Creates new session, a.k.a. sign-in                                          |
-| **[session.destroy](methods/session.destroy.md)**           | Destroys an existing session, a.k.a sign-out                                 |
-| **[session.refresh](methods/session.refresh.md)**           | Refreshes an existing session that is about to expire or has already expired |
-| **[session.setCookie](methods/session.setCookie.md)**       | Sets new session cookie for the designated user                              |
-| **[session.removeCookie](methods/session.removeCookie.md)** | Removes an existing session cookie                                           |
+| Method                                                        | Description                                                                  |
+| :------------------------------------------------------------ | :--------------------------------------------------------------------------- |
+| **[session.create](methods/session.create.md)**               | Creates new session, a.k.a. sign-in                                          |
+| **[session.destroy](methods/session.destroy.md)**             | Destroys an existing session, a.k.a sign-out                                 |
+| **[session.refresh](methods/session.refresh.md)**             | Refreshes an existing session that is about to expire or has already expired |
+| **[session.setCookie](methods/session.setCookie.md)**         | Sets new session cookie for the designated user                              |
+| **[session.destroyCookie](methods/session.destroyCookie.md)** | Destroys an existing session cookie                                          |
 
 ### Permission
 

@@ -7,7 +7,7 @@ import { setSessionCookie } from '../setCookie/service';
 import deleteUser from '../../user/delete/service';
 import { AUTHENTICATION } from '../../../constants/tokenTypes';
 
-describe('api/session.removeCookie', () => {
+describe('api/session.destroyCookie', () => {
   let ctx;
   let user;
 
@@ -42,7 +42,7 @@ describe('api/session.removeCookie', () => {
     });
 
     const res = await request(server)
-      .post('/api/session.removeCookie')
+      .post('/api/session.destroyCookie')
       .set('Cookie', cookie)
       .send();
     expect(res.status).toBe(200);

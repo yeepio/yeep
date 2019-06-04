@@ -1,12 +1,12 @@
-# session.removeCookie
+# session.destroyCookie
 
-`POST /api/session.removeCookie`
+`POST /api/session.destroyCookie`
 
 ## Description
 
 Removes the designated session cookie, a.k.a sign-out.
 
-After calling `session.removeCookie()` the user will not be able to perform authenticated actions against the platform until they sign-in again.
+After calling `session.destroyCookie()` the user will not be able to perform authenticated actions against the platform until they sign-in again.
 
 ---
 
@@ -34,7 +34,7 @@ Requestor must be authenticated with session cookie.
 **Request**
 
 ```
-POST /api/session.removeCookie
+POST /api/session.destroyCookie
 Authorization: `Cookie ${sessionCookie}`
 ```
 
