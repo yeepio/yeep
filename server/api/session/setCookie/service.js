@@ -111,6 +111,6 @@ export async function setSessionCookie(
   return {
     cookie,
     body,
-    eol: addSeconds(now, config.cookie.lifetimeInSeconds),
+    cookieEndOfLife: addSeconds(now, config.cookie.lifetimeInSeconds),
   };
 }
