@@ -86,6 +86,8 @@ export async function setSessionCookie(
     config.cookie.secret,
     {
       jwtid: authToken.secret,
+      issuer: config.name,
+      algorithm: 'HS512',
     }
   );
 
