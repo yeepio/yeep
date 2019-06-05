@@ -2,8 +2,9 @@ import Router from 'koa-router';
 import createSession from './create';
 import destroySession from './destroy';
 import refreshSession from './refresh';
-import setSessionCookie from './setCookie';
-import destroySessionCookie from './destroyCookie';
+import setCookie from './setCookie';
+import destroyCookie from './destroyCookie';
+import refreshCookie from './refreshCookie';
 
 const router = Router();
 
@@ -12,7 +13,8 @@ const router = Router();
 router.post('session.create', '/session.create', createSession);
 router.post('session.destroy', '/session.destroy', destroySession);
 router.post('session.refresh', '/session.refresh', refreshSession);
-router.post('session.setCookie', '/session.setCookie', setSessionCookie);
-router.post('session.destroyCookie', '/session.destroyCookie', destroySessionCookie);
+router.post('session.setCookie', '/session.setCookie', setCookie);
+router.post('session.refreshCookie', '/session.refreshCookie', refreshCookie);
+router.post('session.destroyCookie', '/session.destroyCookie', destroyCookie);
 
 export default router;
