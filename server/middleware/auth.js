@@ -54,6 +54,7 @@ async function decorateSessionByCookie(ctx, { cookie }) {
 
   // decorate request with session data
   request.session = {
+    protocol: 'cookie',
     token: {
       id: cookiePayload.jti,
     },
@@ -74,6 +75,16 @@ async function decorateSessionByCookie(ctx, { cookie }) {
 
   // attempt to refresh the cookie
   await refreshSessionCookie(ctx, { secret: cookiePayload.jti, userId: cookiePayload.user.id });
+}
+
+export async function isSessionCookie({ request, config }, next) {
+  if (get(request, ['session', 'protocol']) !== 'cookie') {
+    throw Boom.unauthorized('Session cookie not specified', 'Cookie', {
+      realm: config.name,
+    });
+  }
+
+  await next();
 }
 
 export function decorateSession() {
