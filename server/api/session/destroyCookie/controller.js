@@ -1,6 +1,6 @@
 import compose from 'koa-compose';
 import Boom from 'boom';
-import { decorateSession, isUserAuthenticated } from '../../../middleware/auth';
+import { decorateSession, isUserAuthenticated, isSessionCookie } from '../../../middleware/auth';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { destroySessionCookie } from './service';
 
@@ -22,4 +22,10 @@ async function handler(ctx) {
   });
 }
 
-export default compose([packJSONRPC, decorateSession(), isUserAuthenticated(), handler]);
+export default compose([
+  packJSONRPC,
+  decorateSession(),
+  isSessionCookie,
+  isUserAuthenticated(),
+  handler,
+]);

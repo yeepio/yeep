@@ -1,6 +1,6 @@
 import compose from 'koa-compose';
 import isFunction from 'lodash/isFunction';
-import { decorateSession, isUserAuthenticated } from '../../../middleware/auth';
+import { decorateSession, isUserAuthenticated, isSessionCookie } from '../../../middleware/auth';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { refreshSessionCookie } from './service';
 
@@ -27,4 +27,10 @@ async function handler(ctx) {
   response.body = body;
 }
 
-export default compose([packJSONRPC, decorateSession(), isUserAuthenticated(), handler]);
+export default compose([
+  packJSONRPC,
+  decorateSession(),
+  isSessionCookie,
+  isUserAuthenticated(),
+  handler,
+]);
