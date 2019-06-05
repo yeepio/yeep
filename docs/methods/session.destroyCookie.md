@@ -6,17 +6,13 @@
 
 Removes the designated session cookie, a.k.a sign-out.
 
-After calling `session.destroyCookie()` the user will not be able to perform authenticated actions against the platform until they sign-in again.
+After calling `session.destroyCookie()` the user will not be able to perform authenticated API requests until they sign-in again.
 
 ---
 
 ## Auth logic
 
 Requestor must be authenticated with session cookie.
-
-## Parameters
-
-### Body
 
 ---
 

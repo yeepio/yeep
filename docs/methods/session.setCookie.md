@@ -4,9 +4,9 @@
 
 ## Description
 
-Sets new session cookie, a.k.a. sign-in, for the designated user.
+Sets new session cookie (a.k.a. sign-in) for the designated user.
 
-The session cookie is used to authenticate the user identity in API requests that require authentication, e.g.
+The session cookie can be used to authenticate a user in API requests that require authentication, e.g.
 
 ```
 POST /api/user.info
