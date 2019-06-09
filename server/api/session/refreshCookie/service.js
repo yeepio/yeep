@@ -25,36 +25,20 @@ export async function refreshSessionCookie(ctx, { secret, userId }) {
     throw new TokenNotFoundError('Authentication token does not exist or has already expired');
   }
 
-  // redeem authentication token - client should use the new authentication token from now on
-  const r = await TokenModel.deleteOne({
-    secret,
-    type: AUTHENTICATION,
-  });
-
   // retrieve user by ID
   const user = await UserModel.findOne({
     _id: ObjectId(userId),
   });
 
-  // make sure user exists
+  // ensure user exists
   if (!user) {
     throw new UserNotFoundError(`User ${userId} not found`);
   }
 
-  // make sure user is active
+  // ensure user is active
   if (!!user.deactivatedAt && isBefore(user.deactivatedAt, new Date())) {
     throw new UserDeactivatedError(`User ${userId} is deactivated`);
   }
-
-  // issue new authentication token
-  const nextSecret = TokenModel.generateSecret({ length: 24 });
-  await TokenModel.create({
-    secret: nextSecret,
-    type: AUTHENTICATION,
-    payload: {},
-    user: authToken.user,
-    expiresAt: authToken.expiresAt,
-  });
 
   // create body
   const body = {
@@ -63,7 +47,7 @@ export async function refreshSessionCookie(ctx, { secret, userId }) {
     },
   };
 
-  // compile new cookie
+  // sign new cookie JWT
   const now = new Date();
   let exp = addSeconds(
     now,
@@ -82,7 +66,7 @@ export async function refreshSessionCookie(ctx, { secret, userId }) {
     },
     config.cookie.secret,
     {
-      jwtid: nextSecret,
+      jwtid: secret,
     }
   );
 
