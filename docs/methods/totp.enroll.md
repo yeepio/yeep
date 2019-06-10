@@ -41,7 +41,7 @@ Requestor must be authenticated and (a) assigned with the `yeep.user.write` perm
 
 ```
 POST /api/totp.enroll
-Authorization: `Bearer ${accessToken}`
+Authorization: `Bearer ${authToken}`
 ```
 
 ```json

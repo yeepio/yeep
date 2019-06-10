@@ -41,7 +41,7 @@ _Please note: one of `name`, `description` or `permissions` must be specified, o
 
 ```
 POST /api/role.update
-Authorization: `Bearer ${accessToken}`
+Authorization: `Bearer ${authToken}`
 ```
 
 ```json

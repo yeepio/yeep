@@ -5,7 +5,7 @@ import { AuthFactorRequired } from '../../../constants/errors';
 import { getUserPermissions } from '../../user/info/service';
 import { AUTHENTICATION } from '../../../constants/tokenTypes';
 import { PASSWORD } from '../../../constants/authFactorTypes';
-import { getUserAndVerifyPassword, verifyAuthFactor } from '../create/service';
+import { getUserAndVerifyPassword, verifyAuthFactor } from '../issueToken/service';
 
 export const defaultProjection = {
   permissions: false,
@@ -19,6 +19,7 @@ export async function setSessionCookie(
   const { db, config } = ctx;
   const TokenModel = db.model('Token');
   const UserModel = db.model('User');
+  const now = new Date();
 
   // retrieve user + verify password
   const user = await getUserAndVerifyPassword(ctx, {
@@ -56,37 +57,29 @@ export async function setSessionCookie(
 
   // create authToken in db
   const secret = TokenModel.generateSecret({ length: 24 });
-  const now = new Date();
-  const expiresAt = addSeconds(now, config.cookie.lifetimeInSeconds);
   const authToken = await TokenModel.create({
     secret,
     type: AUTHENTICATION,
     payload: {},
     user: ObjectId(user.id),
-    expiresAt,
+    expiresAt: addSeconds(now, config.session.lifetimeInSeconds),
   });
 
-  // create body
-  const body = {
+  // create payload
+  const payload = {
     user: {
       id: user.id,
     },
   };
 
-  // compile cookie as JWT token
-  const renewableAt = addSeconds(
-    now,
-    config.cookie.isAutoRenewEnabled
-      ? config.cookie.renewIntervalInSeconds
-      : config.cookie.lifetimeInSeconds
-  );
+  // sign cookie JWT
   const cookie = await jwt.signAsync(
     {
-      ...body,
+      ...payload,
       iat: Math.floor(now.getTime() / 1000),
-      exp: Math.floor(renewableAt.getTime() / 1000),
+      exp: Math.floor(addSeconds(now, config.session.cookie.expiresInSeconds).getTime() / 1000),
     },
-    config.cookie.secret,
+    config.session.cookie.secret,
     {
       jwtid: authToken.secret,
       issuer: config.name,
@@ -94,18 +87,18 @@ export async function setSessionCookie(
     }
   );
 
-  // decorate body with user profile data
+  // decorate payload with user profile data
   if (projection.profile) {
-    body.user.username = user.username;
-    body.user.fullName = user.fullName;
-    body.user.picture = user.picture || undefined;
-    body.user.primaryEmail = UserModel.getPrimaryEmailAddress(user.emails);
+    payload.user.username = user.username;
+    payload.user.fullName = user.fullName;
+    payload.user.picture = user.picture || undefined;
+    payload.user.primaryEmail = UserModel.getPrimaryEmailAddress(user.emails);
   }
 
-  // decorate body with user permissions
+  // decorate payload with user permissions
   if (projection.permissions) {
     const permissions = await getUserPermissions(ctx, { userId: user.id });
-    body.user.permissions = permissions.map((e) => {
+    payload.user.permissions = permissions.map((e) => {
       return {
         ...e,
         resourceId: e.resourceId || undefined, // remove resourceId if unspecified to save bandwidth
@@ -115,7 +108,7 @@ export async function setSessionCookie(
 
   return {
     cookie,
-    body,
-    expiresAt,
+    payload,
+    expiresAt: authToken.expiresAt,
   };
 }

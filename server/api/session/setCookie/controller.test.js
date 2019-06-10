@@ -147,7 +147,7 @@ describe('api/session.setCookie', () => {
       const cookieObj = cookie.parse(cookieStr);
       expect(cookieObj.session).toEqual(expect.any(String));
 
-      const cookiePayload = await jwt.verify(cookieObj.session, config.cookie.secret);
+      const cookiePayload = await jwt.verify(cookieObj.session, config.session.cookie.secret);
       const expiresIn = differenceInSeconds(new Date(cookiePayload.exp * 1000), new Date());
       expect(expiresIn).toBeGreaterThan(850);
       expect(expiresIn).toBeLessThan(900);

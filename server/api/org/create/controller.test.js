@@ -5,8 +5,8 @@ import server from '../../../server';
 import deleteOrg from '../delete/service';
 import createOrg from './service';
 import createUser from '../../user/create/service';
-import createSession from '../../session/create/service';
-import destroySession from '../../session/destroy/service';
+import createSession from '../../session/issueToken/service';
+import { destroySessionToken } from '../../session/destroyToken/service';
 import deleteUser from '../../user/delete/service';
 import getUserInfo from '../../user/info/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
@@ -68,14 +68,14 @@ describe('api/org.create', () => {
     });
 
     afterAll(async () => {
-      await destroySession(ctx, session);
+      await destroySessionToken(ctx, session);
       await deleteUser(ctx, wile);
     });
 
     test('returns error when `slug` contains invalid characters', async () => {
       const res = await request(server)
         .post('/api/org.create')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           name: 'ACME Inc.',
           slug: '@cme',
@@ -97,7 +97,7 @@ describe('api/org.create', () => {
     test('returns error when `slug` contains more than 30 characters', async () => {
       const res = await request(server)
         .post('/api/org.create')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           name: 'ACME Inc.',
           slug: '0123456789012345678901234567890',
@@ -119,7 +119,7 @@ describe('api/org.create', () => {
     test('returns error when `slug` contains less than 2 characters', async () => {
       const res = await request(server)
         .post('/api/org.create')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           name: 'ACME Inc.',
           slug: 'a',
@@ -141,7 +141,7 @@ describe('api/org.create', () => {
     test('returns error when `name` is unspecified', async () => {
       const res = await request(server)
         .post('/api/org.create')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({});
 
       expect(res.status).toBe(200);
@@ -160,7 +160,7 @@ describe('api/org.create', () => {
     test('returns error when `slug` is unspecified', async () => {
       const res = await request(server)
         .post('/api/org.create')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({ name: 'ACME Inc.' });
 
       expect(res.status).toBe(200);
@@ -179,7 +179,7 @@ describe('api/org.create', () => {
     test('returns error when payload contains unknown properties', async () => {
       const res = await request(server)
         .post('/api/org.create')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           name: 'ACME Inc.',
           slug: 'acme',
@@ -202,7 +202,7 @@ describe('api/org.create', () => {
     test('creates new org and returns expected response', async () => {
       const res = await request(server)
         .post('/api/org.create')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           name: 'ACME Inc.',
           slug: 'acme',
@@ -237,7 +237,7 @@ describe('api/org.create', () => {
 
       const res = await request(server)
         .post('/api/org.create')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           name: 'ACME S.A.',
           slug: 'acme',
@@ -284,7 +284,7 @@ describe('api/org.create', () => {
 
     afterAll(async () => {
       ctx.config.isOrgCreationOpen = true;
-      await destroySession(ctx, session);
+      await destroySessionToken(ctx, session);
       await deleteUser(ctx, user);
     });
 
@@ -292,7 +292,7 @@ describe('api/org.create', () => {
       test('returns authorization error', async () => {
         const res = await request(server)
           .post('/api/org.create')
-          .set('Authorization', `Bearer ${session.accessToken}`)
+          .set('Authorization', `Bearer ${session.token}`)
           .send({
             name: 'ACME Inc.',
             slug: 'acme',
@@ -330,7 +330,7 @@ describe('api/org.create', () => {
       test('creates new org and returns expected response', async () => {
         const res = await request(server)
           .post('/api/org.create')
-          .set('Authorization', `Bearer ${session.accessToken}`)
+          .set('Authorization', `Bearer ${session.token}`)
           .send({
             name: 'ACME Inc.',
             slug: 'acme',

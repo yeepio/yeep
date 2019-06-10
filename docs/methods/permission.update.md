@@ -40,7 +40,7 @@ _Please note: `name` or `description` must be specified, otherwise update makes 
 
 ```
 POST /api/permission.update
-Authorization: `Bearer ${accessToken}`
+Authorization: `Bearer ${authToken}`
 ```
 
 ```json

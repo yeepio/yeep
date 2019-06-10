@@ -49,7 +49,7 @@ Requestor must be authenticated. No explicit permissions required; retrieves use
 
 ```
 POST /api/user.list
-Authorization: `Bearer ${accessToken}`
+Authorization: `Bearer ${authToken}`
 ```
 
 ```json

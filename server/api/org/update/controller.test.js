@@ -7,8 +7,8 @@ import createPermission from '../../permission/create/service';
 import createOrg from '../create/service';
 import createUser from '../../user/create/service';
 // import createPermissionAssignment from '../../user/assignPermission/service';
-import createSession from '../../session/create/service';
-import destroySession from '../../session/destroy/service';
+import createSession from '../../session/issueToken/service';
+import { destroySessionToken } from '../../session/destroyToken/service';
 // import deletePermissionAssignment from '../../user/revokePermission/service';
 import deleteOrg from '../delete/service';
 import deleteUser from '../../user/delete/service';
@@ -63,7 +63,7 @@ describe('api/org.update', () => {
   });
 
   afterAll(async () => {
-    await destroySession(ctx, session);
+    await destroySessionToken(ctx, session);
     await deleteOrg(ctx, org);
     await deleteOrg(ctx, unauthorisedOrg);
     await deleteOrg(ctx, umbrella);
@@ -74,7 +74,7 @@ describe('api/org.update', () => {
   test('returns error when org does not exist', async () => {
     const res = await request(server)
       .post('/api/org.update')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         id: '5b2d5dd0cd86b77258e16d39', // some random objectid
         name: 'Acme Tost',
@@ -94,7 +94,7 @@ describe('api/org.update', () => {
 
     const res = await request(server)
       .post('/api/org.update')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         id: unauthorisedOrg.id,
         name: 'Acme Tost',
@@ -113,7 +113,7 @@ describe('api/org.update', () => {
   test('returns error when neither slug nor name are present on the request', async () => {
     const res = await request(server)
       .post('/api/org.update')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         id: org.id, // some random objectid
       });
@@ -124,7 +124,7 @@ describe('api/org.update', () => {
       error: {
         code: 400,
         details: [{
-          path: ['name'], 
+          path: ['name'],
           type: 'any.required',
         }],
         message: 'Invalid request body',
@@ -135,7 +135,7 @@ describe('api/org.update', () => {
   test('updates org and returns expected response', async () => {
     const res = await request(server)
       .post('/api/org.update')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         id: umbrella.id,
         name: 'Umbrella Tost',

@@ -10,8 +10,9 @@ import {
   InvalidAuthFactor,
 } from '../../../constants/errors';
 import { getUserPermissions } from '../../user/info/service';
-import { AUTHENTICATION, SESSION_REFRESH } from '../../../constants/tokenTypes';
-import { PASSWORD } from '../../../constants/authFactorTypes';
+import jwt from '../../../utils/jwt';
+import { AUTHENTICATION } from '../../../constants/tokenTypes';
+import { PASSWORD, TOTP } from '../../../constants/authFactorTypes';
 
 export const defaultProjection = {
   permissions: false,
@@ -38,7 +39,8 @@ const constructUserMatchQuery = (username, emailAddress) => {
  * @property {string} props.password
  * @returns {Promise}
  */
-export async function getUserAndVerifyPassword({ db }, { username, emailAddress, password }) {
+export async function getUserAndVerifyPassword(ctx, { username, emailAddress, password }) {
+  const { db } = ctx;
   const UserModel = db.model('User');
   const PasswordModel = db.model('Password');
   const normalizedEmailAddress = emailAddress && UserModel.normalizeEmailAddress(emailAddress);
@@ -91,7 +93,7 @@ export async function getUserAndVerifyPassword({ db }, { username, emailAddress,
 }
 
 /**
- * Issues access + refresh token pair for the designated user.
+ * Issues authentication token for the designated user.
  * @param {Object} ctx
  * @property {Object} ctx.db
  * @property {Object} ctx.jwt
@@ -101,8 +103,8 @@ export async function getUserAndVerifyPassword({ db }, { username, emailAddress,
  * @property {Object} [props.projection]
  * @return {Promise}
  */
-export async function issueAccessAndRefreshTokens(ctx, { user, projection }) {
-  const { db, jwt, config } = ctx;
+export async function issueAuthToken(ctx, { user, projection }) {
+  const { db, config } = ctx;
   const TokenModel = db.model('Token');
   const UserModel = db.model('User');
   const now = new Date();
@@ -114,17 +116,17 @@ export async function issueAccessAndRefreshTokens(ctx, { user, projection }) {
     type: AUTHENTICATION,
     payload: {},
     user: ObjectId(user.id),
-    expiresAt: addSeconds(now, config.accessToken.lifetimeInSeconds),
+    expiresAt: addSeconds(now, config.session.lifetimeInSeconds),
   });
 
-  // set accessToken payload
+  // create payload obj
   const payload = {
     user: {
       id: user.id,
     },
   };
 
-  // decorate accessToken payload with user profile data
+  // decorate payload obj with user profile data
   if (projection.profile) {
     payload.user.username = user.username;
     payload.user.fullName = user.fullName;
@@ -132,7 +134,7 @@ export async function issueAccessAndRefreshTokens(ctx, { user, projection }) {
     payload.user.primaryEmail = UserModel.getPrimaryEmailAddress(user.emails);
   }
 
-  // decorate accessToken payload with user permissions
+  // decorate payload obj with user permissions
   if (projection.permissions) {
     const permissions = await getUserPermissions(ctx, { userId: user.id });
     payload.user.permissions = permissions.map((e) => {
@@ -143,27 +145,24 @@ export async function issueAccessAndRefreshTokens(ctx, { user, projection }) {
     });
   }
 
-  const [accessToken, refreshToken] = await Promise.all([
-    // sign accessToken
-    jwt.sign(payload, {
+  // sign token
+  const token = await jwt.signAsync(
+    {
+      ...payload,
+      iat: Math.floor(now.getTime() / 1000),
+      exp: Math.floor(addSeconds(now, config.session.bearer.expiresInSeconds).getTime() / 1000),
+    },
+    config.session.bearer.secret,
+    {
       jwtid: authToken.secret,
-      expiresIn: config.accessToken.lifetimeInSeconds,
-    }),
-    // create refreshToken in db
-    TokenModel.create({
-      secret: TokenModel.generateSecret({ length: 60 }),
-      type: SESSION_REFRESH,
-      payload: {
-        accessTokenSecret: authToken.secret,
-      },
-      user: ObjectId(user.id),
-      expiresAt: addSeconds(now, config.refreshToken.lifetimeInSeconds),
-    }),
-  ]);
+      issuer: config.name,
+      algorithm: 'HS512',
+    }
+  );
 
   return {
-    accessToken,
-    refreshToken: refreshToken.secret,
+    token,
+    expiresAt: authToken.expiresAt,
   };
 }
 
@@ -194,7 +193,7 @@ export async function verifyAuthFactor({ db }, { type, token, user }) {
 
       break;
     }
-    case 'TOTP': {
+    case TOTP: {
       const isTokenVerified = await db.model('TOTP').verifyToken(token, authFactor.secret);
 
       if (!isTokenVerified) {
@@ -245,14 +244,9 @@ export default async function createSession(
     });
   }
 
-  // issue access + refresh tokens
-  const { accessToken, refreshToken } = await issueAccessAndRefreshTokens(ctx, {
+  // issue auth token
+  return issueAuthToken(ctx, {
     user,
     projection,
   });
-
-  return {
-    accessToken,
-    refreshToken,
-  };
 }

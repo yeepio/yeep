@@ -35,7 +35,7 @@ Requestor must be authenticated and assigned with the `yeep.permission.write` pe
 
 ```
 POST /api/permission.delete
-Authorization: `Bearer ${accessToken}`
+Authorization: `Bearer ${authToken}`
 ```
 
 ```json

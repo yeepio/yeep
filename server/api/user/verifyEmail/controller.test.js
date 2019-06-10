@@ -6,8 +6,8 @@ import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../create/service';
 import deleteUser from '../delete/service';
-import createSession from '../../session/create/service';
-import destroySession from '../../session/destroy/service';
+import createSession from '../../session/issueToken/service';
+import { destroySessionToken } from '../../session/destroyToken/service';
 import createPermissionAssignment from '../assignPermission/service';
 import deletePermissionAssignment from '../revokePermission/service';
 
@@ -88,7 +88,7 @@ describe('api/user.verifyEmail', () => {
     });
 
     afterAll(async () => {
-      await destroySession(ctx, wileSession);
+      await destroySessionToken(ctx, wileSession);
       await deleteUser(ctx, wile);
       await deleteUser(ctx, oswell);
     });
@@ -100,7 +100,7 @@ describe('api/user.verifyEmail', () => {
       const startDate = new Date();
       let res = await request(server)
         .post('/api/user.verifyEmail')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileSession.token}`)
         .send({
           id: wile.id,
           emailAddress: unverifiedEmail.address,
@@ -140,7 +140,7 @@ describe('api/user.verifyEmail', () => {
     test('returns error when user does not exist', async () => {
       const res = await request(server)
         .post('/api/user.verifyEmail')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileSession.token}`)
         .send({
           id: '507f1f77bcf86cd799439012', // i.e. some random ID
           emailAddress: 'random@email.com',
@@ -159,7 +159,7 @@ describe('api/user.verifyEmail', () => {
     test('returns error when emailAddress is invalid', async () => {
       const res = await request(server)
         .post('/api/user.verifyEmail')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileSession.token}`)
         .send({
           emailAddress: 'randomstring',
         });
@@ -178,7 +178,7 @@ describe('api/user.verifyEmail', () => {
     test('returns error when emailAddress does not exist', async () => {
       const res = await request(server)
         .post('/api/user.verifyEmail')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileSession.token}`)
         .send({
           id: wile.id,
           emailAddress: 'random@email.com',
@@ -197,7 +197,7 @@ describe('api/user.verifyEmail', () => {
     test('returns error when tokenExpiresInSeconds is invalid', async () => {
       const res = await request(server)
         .post('/api/user.verifyEmail')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileSession.token}`)
         .send({
           tokenExpiresInSeconds: 'NaN',
         });
@@ -215,7 +215,7 @@ describe('api/user.verifyEmail', () => {
     test('returns unauthorized error when trying to update user without permission', async () => {
       const res = await request(server)
         .post('/api/user.verifyEmail')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileSession.token}`)
         .send({
           id: oswell.id,
           emailAddress: unverifiedEmail.address,
@@ -289,7 +289,7 @@ describe('api/user.verifyEmail', () => {
     });
 
     afterAll(async () => {
-      await destroySession(ctx, superuserSession);
+      await destroySessionToken(ctx, superuserSession);
       await deletePermissionAssignment(ctx, permissionAssignment);
       await deleteUser(ctx, wile);
       await deleteUser(ctx, superuser);
@@ -302,7 +302,7 @@ describe('api/user.verifyEmail', () => {
       const startDate = new Date();
       let res = await request(server)
         .post('/api/user.verifyEmail')
-        .set('Authorization', `Bearer ${superuserSession.accessToken}`)
+        .set('Authorization', `Bearer ${superuserSession.token}`)
         .send({
           id: wile.id,
           emailAddress: unverifiedEmail.address,

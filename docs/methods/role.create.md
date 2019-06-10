@@ -41,7 +41,7 @@ _Please note: global roles can be applied to any org._
 
 ```
 POST /api/role.create
-Authorization: `Bearer ${accessToken}`
+Authorization: `Bearer ${authToken}`
 ```
 
 ```json

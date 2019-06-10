@@ -12,7 +12,7 @@ import deletePermission from '../../permission/delete/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 import { PASSWORD } from '../../../constants/authFactorTypes';
 
-describe('api/session.create', () => {
+describe('api/session.issueToken', () => {
   let ctx;
 
   beforeAll(async () => {
@@ -49,7 +49,7 @@ describe('api/session.create', () => {
 
     test('returns error when username is invalid', async () => {
       const res = await request(server)
-        .post('/api/session.create')
+        .post('/api/session.issueToken')
         .send({
           user: 'a',
           password: 'password',
@@ -68,7 +68,7 @@ describe('api/session.create', () => {
 
     test('returns error when email does not exist', async () => {
       const res = await request(server)
-        .post('/api/session.create')
+        .post('/api/session.issueToken')
         .send({
           user: 'unknown@email.com',
           password: 'password',
@@ -86,7 +86,7 @@ describe('api/session.create', () => {
 
     test('returns error when username does not exist', async () => {
       const res = await request(server)
-        .post('/api/session.create')
+        .post('/api/session.issueToken')
         .send({
           user: 'notuser',
           password: 'password',
@@ -104,7 +104,7 @@ describe('api/session.create', () => {
 
     test('returns error when password is invalid', async () => {
       const res = await request(server)
-        .post('/api/session.create')
+        .post('/api/session.issueToken')
         .send({
           user: 'wile',
           password: 'invalid-password',
@@ -122,7 +122,7 @@ describe('api/session.create', () => {
 
     test('creates new session with username + password', async () => {
       const res = await request(server)
-        .post('/api/session.create')
+        .post('/api/session.issueToken')
         .send({
           user: 'Wile', // this will be automaticaly lower-cased
           password: 'catch-the-b1rd$',
@@ -132,15 +132,15 @@ describe('api/session.create', () => {
       expect(res.body).toEqual(
         expect.objectContaining({
           ok: true,
-          accessToken: expect.any(String),
-          refreshToken: expect.any(String),
+          token: expect.any(String),
+          expiresAt: expect.any(String),
         })
       );
     });
 
     test('creates new session with email address + password', async () => {
       const res = await request(server)
-        .post('/api/session.create')
+        .post('/api/session.issueToken')
         .send({
           user: 'coyote@acme.com',
           password: 'catch-the-b1rd$',
@@ -150,15 +150,15 @@ describe('api/session.create', () => {
       expect(res.body).toEqual(
         expect.objectContaining({
           ok: true,
-          accessToken: expect.any(String),
-          refreshToken: expect.any(String),
+          token: expect.any(String),
+          expiresAt: expect.any(String),
         })
       );
     });
 
-    test('adds user profile data to accessToken payload when `projection.profile` is true', async () => {
+    test('adds user profile data to token payload when `projection.profile` is true', async () => {
       const res = await request(server)
-        .post('/api/session.create')
+        .post('/api/session.issueToken')
         .send({
           user: 'Wile', // this will be automaticaly lower-cased
           password: 'catch-the-b1rd$',
@@ -170,7 +170,7 @@ describe('api/session.create', () => {
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
 
-      const tokenPayload = await ctx.jwt.verify(res.body.accessToken);
+      const tokenPayload = await ctx.jwt.verify(res.body.token);
       expect(tokenPayload).toEqual(
         expect.objectContaining({
           user: {
@@ -184,9 +184,9 @@ describe('api/session.create', () => {
       );
     });
 
-    test('does not add user profile data to accessToken payload by default', async () => {
+    test('does not add user profile data to token payload by default', async () => {
       const res = await request(server)
-        .post('/api/session.create')
+        .post('/api/session.issueToken')
         .send({
           user: 'Wile', // this will be automaticaly lower-cased
           password: 'catch-the-b1rd$',
@@ -195,7 +195,7 @@ describe('api/session.create', () => {
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
 
-      const payload = await ctx.jwt.verify(res.body.accessToken);
+      const payload = await ctx.jwt.verify(res.body.token);
       expect(payload).toEqual(
         expect.objectContaining({
           user: {
@@ -257,9 +257,9 @@ describe('api/session.create', () => {
       await deletePermission(ctx, testPermission);
     });
 
-    test('adds permissions to accessToken payload when `projection.permissions` is true', async () => {
+    test('adds permissions to token payload when `projection.permissions` is true', async () => {
       const res = await request(server)
-        .post('/api/session.create')
+        .post('/api/session.issueToken')
         .send({
           user: 'Wile', // this will be automaticaly lower-cased
           password: 'catch-the-b1rd$',
@@ -271,7 +271,7 @@ describe('api/session.create', () => {
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
 
-      const tokenPayload = await ctx.jwt.verify(res.body.accessToken);
+      const tokenPayload = await ctx.jwt.verify(res.body.token);
       expect(tokenPayload).toEqual(
         expect.objectContaining({
           user: {
@@ -291,7 +291,7 @@ describe('api/session.create', () => {
 
     test('does not add permissions to token payload by default', async () => {
       const res = await request(server)
-        .post('/api/session.create')
+        .post('/api/session.issueToken')
         .send({
           user: 'Wile', // this will be automaticaly lower-cased
           password: 'catch-the-b1rd$',
@@ -300,7 +300,7 @@ describe('api/session.create', () => {
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
 
-      const tokenPayload = await ctx.jwt.verify(res.body.accessToken);
+      const tokenPayload = await ctx.jwt.verify(res.body.token);
       expect(tokenPayload).toEqual(
         expect.objectContaining({
           user: {
@@ -343,7 +343,7 @@ describe('api/session.create', () => {
 
     test('returns error when secondary auth factor is undefined', async () => {
       const res = await request(server)
-        .post('/api/session.create')
+        .post('/api/session.issueToken')
         .send({
           user: 'wile',
           password: 'catch-the-b1rd$',
@@ -362,7 +362,7 @@ describe('api/session.create', () => {
 
     test('does not accept password as secondary auth factor', async () => {
       const res = await request(server)
-        .post('/api/session.create')
+        .post('/api/session.issueToken')
         .send({
           user: 'wile',
           password: 'catch-the-b1rd$',
@@ -389,7 +389,7 @@ describe('api/session.create', () => {
       const TOTPModel = ctx.db.model('TOTP');
 
       const res = await request(server)
-        .post('/api/session.create')
+        .post('/api/session.issueToken')
         .send({
           user: 'wile',
           password: 'catch-the-b1rd$',
@@ -403,8 +403,8 @@ describe('api/session.create', () => {
       expect(res.body).toEqual(
         expect.objectContaining({
           ok: true,
-          accessToken: expect.any(String),
-          refreshToken: expect.any(String),
+          token: expect.any(String),
+          expiresAt: expect.any(String),
         })
       );
     });

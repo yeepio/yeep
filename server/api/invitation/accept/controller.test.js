@@ -10,8 +10,8 @@ import createOrg from '../../org/create/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 import deleteOrg from '../../org/delete/service';
-import createSession from '../../session/create/service';
-import destroySession from '../../session/destroy/service';
+import createSession from '../../session/issueToken/service';
+import { destroySessionToken } from '../../session/destroyToken/service';
 
 describe('api/invitation.accept', () => {
   let ctx;
@@ -330,7 +330,7 @@ describe('api/invitation.accept', () => {
     });
 
     afterAll(async () => {
-      await destroySession(ctx, wileSession);
+      await destroySessionToken(ctx, wileSession);
       await deletePermissionAssignment(ctx, permissionAssignment);
       await deleteUser(ctx, wile);
       await deleteOrg(ctx, org);
@@ -355,7 +355,7 @@ describe('api/invitation.accept', () => {
 
       const res = await request(server)
         .post('/api/invitation.accept')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileSession.token}`)
         .send({
           token,
         });
@@ -412,7 +412,7 @@ describe('api/invitation.accept', () => {
       });
 
       afterAll(async () => {
-        await destroySession(ctx, runnerSession);
+        await destroySessionToken(ctx, runnerSession);
         await deleteUser(ctx, runner);
       });
 
@@ -422,7 +422,7 @@ describe('api/invitation.accept', () => {
 
         const res = await request(server)
           .post('/api/invitation.accept')
-          .set('Authorization', `Bearer ${runnerSession.accessToken}`)
+          .set('Authorization', `Bearer ${runnerSession.token}`)
           .send({
             token,
           });
@@ -514,9 +514,9 @@ describe('api/invitation.accept', () => {
       });
 
       afterAll(async () => {
-        await destroySession(ctx, runnerSession);
+        await destroySessionToken(ctx, runnerSession);
         await deleteUser(ctx, runner);
-        await destroySession(ctx, porkySession);
+        await destroySessionToken(ctx, porkySession);
         await deleteUser(ctx, porky);
       });
 
@@ -526,7 +526,7 @@ describe('api/invitation.accept', () => {
 
         const res = await request(server)
           .post('/api/invitation.accept')
-          .set('Authorization', `Bearer ${runnerSession.accessToken}`)
+          .set('Authorization', `Bearer ${runnerSession.token}`)
           .send({
             token,
           });
@@ -556,7 +556,7 @@ describe('api/invitation.accept', () => {
       test('pretends token does not exist when requestor does not match the invitee', async () => {
         const res = await request(server)
           .post('/api/invitation.accept')
-          .set('Authorization', `Bearer ${porkySession.accessToken}`)
+          .set('Authorization', `Bearer ${porkySession.token}`)
           .send({
             token,
           });

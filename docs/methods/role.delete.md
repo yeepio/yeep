@@ -35,7 +35,7 @@ Requestor must be authenticated and assigned with the `yeep.role.write` permissi
 
 ```
 POST /api/role.delete
-Authorization: `Bearer ${accessToken}`
+Authorization: `Bearer ${authToken}`
 ```
 
 ```json

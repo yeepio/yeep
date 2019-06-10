@@ -10,7 +10,7 @@ The `accessToken` is used to authenticate the user identity in API requests that
 
 ```
 POST /api/user.info
-Authorization: `Bearer ${accessToken}`
+Authorization: `Bearer ${authToken}`
 ```
 
 The `refreshToken` can be used to refresh the `accessToken` after the latter has expired or is about to expire. Use this to extend a user's session. See [session.refresh()](./session.refresh.md) for further info.

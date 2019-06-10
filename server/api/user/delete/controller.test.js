@@ -5,8 +5,8 @@ import config from '../../../../yeep.config';
 import createUser from '../create/service';
 import createOrg from '../../org/create/service';
 import createPermissionAssignment from '../assignPermission/service';
-import createSession from '../../session/create/service';
-import destroySession from '../../session/destroy/service';
+import createSession from '../../session/issueToken/service';
+import { destroySessionToken } from '../../session/destroyToken/service';
 import deletePermissionAssignment from '../revokePermission/service';
 import deleteUser from './service';
 import deleteOrg from '../../org/delete/service';
@@ -56,7 +56,7 @@ describe('api/user.delete', () => {
     });
 
     afterAll(async () => {
-      await destroySession(ctx, session);
+      await destroySessionToken(ctx, session);
       await deleteUser(ctx, wile);
       await deleteOrg(ctx, acme);
     });
@@ -64,7 +64,7 @@ describe('api/user.delete', () => {
     test('returns error when `id` contains invalid characters', async () => {
       const res = await request(server)
         .post('/api/user.delete')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           id: '507f1f77bcf86cd79943901@',
         });
@@ -84,7 +84,7 @@ describe('api/user.delete', () => {
     test('returns error when `id` contains more than 24 characters', async () => {
       const res = await request(server)
         .post('/api/user.delete')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           id: '507f1f77bcf86cd7994390112',
         });
@@ -104,7 +104,7 @@ describe('api/user.delete', () => {
     test('returns error when `id` contains less than 24 characters', async () => {
       const res = await request(server)
         .post('/api/user.delete')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           id: '507f1f77bcf86cd79943901',
         });
@@ -124,7 +124,7 @@ describe('api/user.delete', () => {
     test('returns error when `id` is unspecified', async () => {
       const res = await request(server)
         .post('/api/user.delete')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({});
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -142,7 +142,7 @@ describe('api/user.delete', () => {
     test('returns error when payload contains unknown properties', async () => {
       const res = await request(server)
         .post('/api/user.delete')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           id: '507f1f77bcf86cd799439011',
           foo: 'bar',
@@ -178,7 +178,7 @@ describe('api/user.delete', () => {
 
       const res = await request(server)
         .post('/api/user.delete')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({ id: user.id });
 
       expect(res.status).toBe(200);
@@ -269,7 +269,7 @@ describe('api/user.delete', () => {
     });
 
     afterAll(async () => {
-      await destroySession(ctx, session);
+      await destroySessionToken(ctx, session);
       await deletePermissionAssignment(ctx, permissionAssignment);
       await deleteUser(ctx, requestor);
       await deleteUser(ctx, user);
@@ -281,7 +281,7 @@ describe('api/user.delete', () => {
     test('returns error when requested user is member of another org', async () => {
       const res = await request(server)
         .post('/api/user.delete')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({ id: user.id });
 
       expect(res.status).toBe(200);
@@ -299,7 +299,7 @@ describe('api/user.delete', () => {
     test('returns error when requested user is NOT member of any orgs (i.e. global user)', async () => {
       const res = await request(server)
         .post('/api/user.delete')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({ id: globalUser.id });
 
       expect(res.status).toBe(200);

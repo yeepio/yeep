@@ -7,24 +7,30 @@ import { refreshSessionCookie } from './service';
 async function handler(ctx) {
   const { request, response, config } = ctx;
 
-  const { cookie, body, expiresAt } = await await refreshSessionCookie(ctx, {
+  const { cookie, payload, expiresAt } = await await refreshSessionCookie(ctx, {
     secret: request.session.token.id,
     userId: request.session.user.id,
   });
 
   ctx.cookies.set('session', cookie, {
-    domain: isFunction(config.cookie.domain) ? config.cookie.domain(request) : config.cookie.domain,
-    path: isFunction(config.cookie.path) ? config.cookie.path(request) : config.cookie.path,
-    httpOnly: isFunction(config.cookie.httpOnly)
-      ? config.cookie.httpOnly(request)
-      : config.cookie.httpOnly,
-    secure: isFunction(config.cookie.secure) ? config.cookie.secure(request) : config.cookie.secure,
+    domain: isFunction(config.session.cookie.domain)
+      ? config.session.cookie.domain(request)
+      : config.session.cookie.domain,
+    path: isFunction(config.session.cookie.path)
+      ? config.session.cookie.path(request)
+      : config.session.cookie.path,
+    httpOnly: isFunction(config.session.cookie.httpOnly)
+      ? config.session.cookie.httpOnly(request)
+      : config.session.cookie.httpOnly,
+    secure: isFunction(config.session.cookie.secure)
+      ? config.session.cookie.secure(request)
+      : config.session.cookie.secure,
     expires: expiresAt,
     overwrite: true,
   });
 
   response.status = 200; // OK
-  response.body = body;
+  response.body = payload;
 }
 
 export default compose([

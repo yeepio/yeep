@@ -36,7 +36,7 @@ Requestor must be authenticated and assigned with the `yeep.role.read` permissio
 
 ```
 POST /api/role.info
-Authorization: `Bearer ${accessToken}`
+Authorization: `Bearer ${authToken}`
 ```
 
 ```json

@@ -46,7 +46,7 @@ Users are able to retrieve a list of their own pending invitations as long as us
 
 ```
 POST /api/invitation.list
-Authorization: `Bearer ${accessToken}`
+Authorization: `Bearer ${authToken}`
 ```
 
 ```json

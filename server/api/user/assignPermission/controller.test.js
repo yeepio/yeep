@@ -9,8 +9,8 @@ import deletePermission from '../../permission/delete/service';
 import createOrg from '../../org/create/service';
 import deleteOrg from '../../org/delete/service';
 import deletePermissionAssignment from '../revokePermission/service';
-import createSession from '../../session/create/service';
-import destroySession from '../../session/destroy/service';
+import createSession from '../../session/issueToken/service';
+import { destroySessionToken } from '../../session/destroyToken/service';
 
 describe('api/user.assignPermission', () => {
   let ctx;
@@ -84,7 +84,7 @@ describe('api/user.assignPermission', () => {
     });
 
     afterAll(async () => {
-      await destroySession(ctx, session);
+      await destroySessionToken(ctx, session);
       await deleteOrg(ctx, acme);
       await deleteUser(ctx, wile);
       await deletePermission(ctx, permission);
@@ -93,7 +93,7 @@ describe('api/user.assignPermission', () => {
     test('returns error when `userId` contains invalid characters', async () => {
       const res = await request(server)
         .post('/api/user.assignPermission')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           userId: '507f1f77bcf86cd79943901@',
         });
@@ -113,7 +113,7 @@ describe('api/user.assignPermission', () => {
     test('returns error when `userId` contains more than 24 characters', async () => {
       const res = await request(server)
         .post('/api/user.assignPermission')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           userId: '507f1f77bcf86cd7994390112',
         });
@@ -133,7 +133,7 @@ describe('api/user.assignPermission', () => {
     test('returns error when `userId` contains less than 24 characters', async () => {
       const res = await request(server)
         .post('/api/user.assignPermission')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           userId: '507f1f77bcf86cd79943901',
         });
@@ -153,7 +153,7 @@ describe('api/user.assignPermission', () => {
     test('returns error when `userId` is unspecified', async () => {
       const res = await request(server)
         .post('/api/user.assignPermission')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({});
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -171,7 +171,7 @@ describe('api/user.assignPermission', () => {
     test('returns error when `orgId` contains invalid characters', async () => {
       const res = await request(server)
         .post('/api/user.assignPermission')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           userId: wile.id,
           orgId: '507f1f77bcf86cd79943901@',
@@ -192,7 +192,7 @@ describe('api/user.assignPermission', () => {
     test('returns error when `orgId` contains more than 24 characters', async () => {
       const res = await request(server)
         .post('/api/user.assignPermission')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           userId: wile.id,
           orgId: '507f1f77bcf86cd7994390112',
@@ -213,7 +213,7 @@ describe('api/user.assignPermission', () => {
     test('returns error when `orgId` contains less than 24 characters', async () => {
       const res = await request(server)
         .post('/api/user.assignPermission')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           userId: wile.id,
           orgId: '507f1f77bcf86cd79943901',
@@ -234,7 +234,7 @@ describe('api/user.assignPermission', () => {
     test('returns error when `permissionId` contains invalid characters', async () => {
       const res = await request(server)
         .post('/api/user.assignPermission')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           userId: wile.id,
           orgId: '507f1f77bcf86cd799439012', // some random object id
@@ -256,7 +256,7 @@ describe('api/user.assignPermission', () => {
     test('returns error when `permissionId` contains more than 24 characters', async () => {
       const res = await request(server)
         .post('/api/user.assignPermission')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           userId: wile.id,
           orgId: '507f1f77bcf86cd799439012', // some random object id
@@ -278,7 +278,7 @@ describe('api/user.assignPermission', () => {
     test('returns error when `permissionId` contains less than 24 characters', async () => {
       const res = await request(server)
         .post('/api/user.assignPermission')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           userId: wile.id,
           orgId: '507f1f77bcf86cd799439012', // some random object id
@@ -300,7 +300,7 @@ describe('api/user.assignPermission', () => {
     test('returns error when `permissionId` is unspecified', async () => {
       const res = await request(server)
         .post('/api/user.assignPermission')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           userId: wile.id,
         });
@@ -320,7 +320,7 @@ describe('api/user.assignPermission', () => {
     test('returns error when payload contains unknown properties', async () => {
       const res = await request(server)
         .post('/api/user.assignPermission')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           userId: wile.id,
           permissionId: permission.id,
@@ -342,7 +342,7 @@ describe('api/user.assignPermission', () => {
     test('returns error when user does not exist', async () => {
       const res = await request(server)
         .post('/api/user.assignPermission')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           userId: '507f191e810c19729de860ea', // some random object id
           permissionId: permission.id,
@@ -362,7 +362,7 @@ describe('api/user.assignPermission', () => {
     test('returns error when permission does not exist', async () => {
       const res = await request(server)
         .post('/api/user.assignPermission')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           userId: wile.id,
           permissionId: '507f191e810c19729de860ea', // some random object id
@@ -382,7 +382,7 @@ describe('api/user.assignPermission', () => {
     test('creates permission assignment and returns expected response', async () => {
       const res = await request(server)
         .post('/api/user.assignPermission')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           userId: wile.id,
           permissionId: permission.id,
@@ -449,7 +449,7 @@ describe('api/user.assignPermission', () => {
     });
 
     afterAll(async () => {
-      await destroySession(ctx, session);
+      await destroySessionToken(ctx, session);
       await deleteOrg(ctx, acme);
       await deleteOrg(ctx, monsters);
       await deleteUser(ctx, wile);
@@ -459,7 +459,7 @@ describe('api/user.assignPermission', () => {
     test('returns error when permission scope does not match the designated org', async () => {
       const res = await request(server)
         .post('/api/user.assignPermission')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           userId: wile.id,
           permissionId: permission.id,
@@ -479,7 +479,7 @@ describe('api/user.assignPermission', () => {
     test('returns error when permission scope is global', async () => {
       const res = await request(server)
         .post('/api/user.assignPermission')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           userId: wile.id,
           permissionId: permission.id,

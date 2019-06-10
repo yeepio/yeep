@@ -6,8 +6,8 @@ import createPermission from '../create/service';
 import createOrg from '../../org/create/service';
 import createUser from '../../user/create/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
-import createSession from '../../session/create/service';
-import destroySession from '../../session/destroy/service';
+import createSession from '../../session/issueToken/service';
+import { destroySessionToken } from '../../session/destroyToken/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
@@ -59,7 +59,7 @@ describe('api/permission.delete', () => {
   });
 
   afterAll(async () => {
-    await destroySession(ctx, session);
+    await destroySessionToken(ctx, session);
     await deletePermissionAssignment(ctx, permissionAssignment);
     await deleteOrg(ctx, org);
     await deleteUser(ctx, user);
@@ -69,7 +69,7 @@ describe('api/permission.delete', () => {
   test('returns error when permission does not exist', async () => {
     const res = await request(server)
       .post('/api/permission.delete')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         id: '5b2d5dd0cd86b77258e16d39', // some random objectid
       });
@@ -94,7 +94,7 @@ describe('api/permission.delete', () => {
 
     const res = await request(server)
       .post('/api/permission.delete')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         id: permission.id,
       });
@@ -120,7 +120,7 @@ describe('api/permission.delete', () => {
 
     const res = await request(server)
       .post('/api/permission.delete')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         id: permission.id,
       });
@@ -140,7 +140,7 @@ describe('api/permission.delete', () => {
 
     const res = await request(server)
       .post('/api/permission.delete')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         id: permission.id,
       });

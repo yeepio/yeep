@@ -10,7 +10,7 @@ import { setSessionCookie } from '../setCookie/service';
 import { AUTHENTICATION } from '../../../constants/tokenTypes';
 import jwt from '../../../utils/jwt';
 
-describe('api/session.refresh', () => {
+describe('api/session.refreshCookie', () => {
   let ctx;
   let wile;
 
@@ -38,13 +38,13 @@ describe('api/session.refresh', () => {
     await server.teardown();
   });
 
-  test('refreshes accessToken and redeems refreshToken', async () => {
+  test('refreshes session cookie', async () => {
     const { cookie: sessionCookie } = await setSessionCookie(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
 
-    const payload = await jwt.verifyAsync(sessionCookie, config.cookie.secret);
+    const payload = await jwt.verifyAsync(sessionCookie, config.session.cookie.secret);
     await delay(1000); // let at least one second pass
 
     const res = await request(server)
@@ -65,7 +65,10 @@ describe('api/session.refresh', () => {
     const nextCookieProps = cookie.parse(nextCookie);
     expect(nextCookieProps.session).toEqual(expect.any(String));
 
-    const nextPayload = await jwt.verifyAsync(nextCookieProps.session, config.cookie.secret);
+    const nextPayload = await jwt.verifyAsync(
+      nextCookieProps.session,
+      config.session.cookie.secret
+    );
     expect(nextPayload.exp).toBeGreaterThan(payload.exp);
     expect(nextPayload.iat).toBeGreaterThan(payload.iat);
 

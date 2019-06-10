@@ -8,8 +8,8 @@ import createUser from '../../user/create/service';
 import createOrg from '../../org/create/service';
 import deleteUser from '../../user/delete/service';
 import deleteOrg from '../../org/delete/service';
-import createSession from '../../session/create/service';
-import destroySession from '../../session/destroy/service';
+import createSession from '../../session/issueToken/service';
+import { destroySessionToken } from '../../session/destroyToken/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 import deleteRole from '../delete/service';
@@ -66,7 +66,7 @@ describe('api/role.create', () => {
   });
 
   afterAll(async () => {
-    await destroySession(ctx, session);
+    await destroySessionToken(ctx, session);
     await deletePermissionAssignment(ctx, permissionAssignment);
     await deletePermission(ctx, permission);
     await deleteOrg(ctx, org);
@@ -77,7 +77,7 @@ describe('api/role.create', () => {
   test('returns error when role already exists', async () => {
     const res = await request(server)
       .post('/api/role.create')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         name: 'admin',
         description: 'This is a test',
@@ -98,7 +98,7 @@ describe('api/role.create', () => {
   test('creates new role and returns expected response', async () => {
     const res = await request(server)
       .post('/api/role.create')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         name: 'acme:manager',
         description: 'This is a test',

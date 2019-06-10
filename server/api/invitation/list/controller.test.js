@@ -6,8 +6,8 @@ import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
 import createOrg from '../../org/create/service';
-import createSession from '../../session/create/service';
-import destroySession from '../../session/destroy/service';
+import createSession from '../../session/issueToken/service';
+import { destroySessionToken } from '../../session/destroyToken/service';
 import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
@@ -165,8 +165,8 @@ describe('api/invitation.list', () => {
     });
 
     afterAll(async () => {
-      await destroySession(ctx, wileSession);
-      await destroySession(ctx, runnerSession);
+      await destroySessionToken(ctx, wileSession);
+      await destroySessionToken(ctx, runnerSession);
       await deleteUser(ctx, wile);
       await deleteUser(ctx, runner);
       await deleteOrg(ctx, acme);
@@ -190,7 +190,7 @@ describe('api/invitation.list', () => {
       test('returns list of invitations', async () => {
         const res = await request(server)
           .post('/api/invitation.list')
-          .set('Authorization', `Bearer ${wileSession.accessToken}`)
+          .set('Authorization', `Bearer ${wileSession.token}`)
           .send();
 
         expect(res.status).toBe(200);
@@ -228,7 +228,7 @@ describe('api/invitation.list', () => {
       test('limits number of invitations using `limit` param', async () => {
         const res = await request(server)
           .post('/api/invitation.list')
-          .set('Authorization', `Bearer ${wileSession.accessToken}`)
+          .set('Authorization', `Bearer ${wileSession.token}`)
           .send({
             limit: 1,
           });
@@ -240,7 +240,7 @@ describe('api/invitation.list', () => {
       test('paginates through invitations using `cursor` param', async () => {
         const res = await request(server)
           .post('/api/invitation.list')
-          .set('Authorization', `Bearer ${wileSession.accessToken}`)
+          .set('Authorization', `Bearer ${wileSession.token}`)
           .send({
             limit: 2,
           });
@@ -251,7 +251,7 @@ describe('api/invitation.list', () => {
 
         const res1 = await request(server)
           .post('/api/invitation.list')
-          .set('Authorization', `Bearer ${wileSession.accessToken}`)
+          .set('Authorization', `Bearer ${wileSession.token}`)
           .send({
             limit: 1,
           });
@@ -264,7 +264,7 @@ describe('api/invitation.list', () => {
 
         const res2 = await request(server)
           .post('/api/invitation.list')
-          .set('Authorization', `Bearer ${wileSession.accessToken}`)
+          .set('Authorization', `Bearer ${wileSession.token}`)
           .send({
             limit: 1,
             cursor: res1.body.nextCursor,
@@ -279,7 +279,7 @@ describe('api/invitation.list', () => {
       test('filters invitations using `user` param', async () => {
         const res = await request(server)
           .post('/api/invitation.list')
-          .set('Authorization', `Bearer ${wileSession.accessToken}`)
+          .set('Authorization', `Bearer ${wileSession.token}`)
           .send({
             user: runner.id,
           });
@@ -301,7 +301,7 @@ describe('api/invitation.list', () => {
       test('filters invitations using `org` param', async () => {
         const res = await request(server)
           .post('/api/invitation.list')
-          .set('Authorization', `Bearer ${wileSession.accessToken}`)
+          .set('Authorization', `Bearer ${wileSession.token}`)
           .send({
             org: acme.id,
           });
@@ -321,7 +321,7 @@ describe('api/invitation.list', () => {
       test('filters invitations using `user` + `org` params', async () => {
         const res = await request(server)
           .post('/api/invitation.list')
-          .set('Authorization', `Bearer ${wileSession.accessToken}`)
+          .set('Authorization', `Bearer ${wileSession.token}`)
           .send({
             user: runner.id,
             org: acme.id,

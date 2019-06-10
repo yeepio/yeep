@@ -1,22 +1,22 @@
 /* eslint-env jest */
 import request from 'supertest';
+import { delay } from 'awaiting';
 import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
-import { setSessionCookie } from '../setCookie/service';
 import deleteUser from '../../user/delete/service';
+import issueSessionToken from '../issueToken/service';
 import { AUTHENTICATION } from '../../../constants/tokenTypes';
-import jwt from '../../../utils/jwt';
 
-describe('api/session.destroyCookie', () => {
+describe('api/session.refreshToken', () => {
   let ctx;
-  let user;
+  let wile;
 
   beforeAll(async () => {
     await server.setup(config);
     ctx = server.getAppContext();
 
-    user = await createUser(ctx, {
+    wile = await createUser(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
       fullName: 'Wile E. Coyote',
@@ -32,36 +32,43 @@ describe('api/session.destroyCookie', () => {
   });
 
   afterAll(async () => {
-    await deleteUser(ctx, user);
+    await deleteUser(ctx, wile);
     await server.teardown();
   });
 
-  test('destroys session and responds as expected', async () => {
-    const { cookie } = await setSessionCookie(ctx, {
+  test('refreshes session token', async () => {
+    const { token } = await issueSessionToken(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
 
+    const prevPayload = await ctx.jwt.verify(token);
+    await delay(1000); // let at least one second pass
+
     const res = await request(server)
-      .post('/api/session.destroyCookie')
-      .set('Cookie', `session=${cookie}`)
-      .send();
+      .post('/api/session.refreshToken')
+      .send({
+        token,
+      });
+
     expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: true,
-    });
+    expect(res.body).toEqual(
+      expect.objectContaining({
+        ok: true,
+        token: expect.any(String),
+      })
+    );
+
+    const nextPayload = await ctx.jwt.verify(res.body.token);
+    expect(nextPayload.exp).toBeGreaterThan(prevPayload.exp);
+    expect(nextPayload.iat).toBeGreaterThan(prevPayload.iat);
 
     const TokenModel = ctx.db.model('Token');
-    const payload = await jwt.verifyAsync(cookie, config.session.cookie.secret, {
-      issuer: config.name,
-      algorithm: 'HS512',
-    });
-
     expect(
       TokenModel.countDocuments({
-        secret: payload.jti,
+        secret: prevPayload.jti,
         type: AUTHENTICATION,
       })
-    ).resolves.toBe(0);
+    ).resolves.toBe(1);
   });
 });

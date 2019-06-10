@@ -7,8 +7,8 @@ import createOrg from '../../org/create/service';
 import addMemberToOrg from '../../org/addMember/service';
 import listPermissions from '../../permission/list/service';
 import assignPermission from '../../user/assignPermission/service';
-import createSession from '../../session/create/service';
-import destroySession from '../../session/destroy/service';
+import createSession from '../../session/issueToken/service';
+import { destroySessionToken } from '../../session/destroyToken/service';
 import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
 
@@ -137,8 +137,8 @@ describe('api/org.list', () => {
   });
 
   afterAll(async () => {
-    await destroySession(ctx, session);
-    await destroySession(ctx, professorSession);
+    await destroySessionToken(ctx, session);
+    await destroySessionToken(ctx, professorSession);
     await deleteUser(ctx, wile);
     await deleteUser(ctx, oswell);
     await deleteUser(ctx, runner);
@@ -152,7 +152,7 @@ describe('api/org.list', () => {
   test('returns list of orgs the user has access to', async () => {
     const res = await request(server)
       .post('/api/org.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send();
 
     expect(res.status).toBe(200);
@@ -176,7 +176,7 @@ describe('api/org.list', () => {
   test('limits number of orgs using `limit` param', async () => {
     const res = await request(server)
       .post('/api/org.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         limit: 1,
       });
@@ -202,7 +202,7 @@ describe('api/org.list', () => {
   test('paginates through orgs using `cursor` param', async () => {
     const res = await request(server)
       .post('/api/org.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         limit: 2,
       });
@@ -213,7 +213,7 @@ describe('api/org.list', () => {
 
     const res1 = await request(server)
       .post('/api/org.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         limit: 1,
       });
@@ -226,7 +226,7 @@ describe('api/org.list', () => {
 
     const res2 = await request(server)
       .post('/api/org.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         limit: 1,
         cursor: res1.body.nextCursor,
@@ -241,7 +241,7 @@ describe('api/org.list', () => {
   test('filters orgs using `q` param', async () => {
     const res = await request(server)
       .post('/api/org.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         q: 'acme',
       });
@@ -263,7 +263,7 @@ describe('api/org.list', () => {
   test('filters orgs using `user` param', async () => {
     const res = await request(server)
       .post('/api/org.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         user: runner.id,
       });
@@ -286,7 +286,7 @@ describe('api/org.list', () => {
   test('throws AuthorisationError when requesting organisations of a user with no access', async () => {
     const res = await request(server)
       .post('/api/org.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${session.token}`)
       .send({
         user: oswell.id,
       });
@@ -304,7 +304,7 @@ describe('api/org.list', () => {
   test('throws AuthorisationError when requesting organisations of a user with yeep.user.read access but not assignment access', async () => {
     const res = await request(server)
       .post('/api/org.list')
-      .set('Authorization', `Bearer ${professorSession.accessToken}`)
+      .set('Authorization', `Bearer ${professorSession.token}`)
       .send({
         user: runner.id,
       });

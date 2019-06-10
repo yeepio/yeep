@@ -3,11 +3,11 @@ import request from 'supertest';
 import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
-import createSession from '../create/service';
+import issueSessionToken from '../issueToken/service';
 import deleteUser from '../../user/delete/service';
-import { AUTHENTICATION, SESSION_REFRESH } from '../../../constants/tokenTypes';
+import { AUTHENTICATION } from '../../../constants/tokenTypes';
 
-describe('api/session.destroy', () => {
+describe('api/session.destroyToken', () => {
   let ctx;
   let user;
 
@@ -36,17 +36,16 @@ describe('api/session.destroy', () => {
   });
 
   test('destroys session and responds as expected', async () => {
-    const { accessToken, refreshToken } = await createSession(ctx, {
+    const { token } = await issueSessionToken(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
-    const payload = await ctx.jwt.verify(accessToken);
+    const payload = await ctx.jwt.verify(token);
 
     const res = await request(server)
-      .post('/api/session.destroy')
+      .post('/api/session.destroyToken')
       .send({
-        accessToken,
-        refreshToken,
+        token,
       });
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
@@ -58,12 +57,6 @@ describe('api/session.destroy', () => {
       TokenModel.countDocuments({
         secret: payload.jti,
         type: AUTHENTICATION,
-      })
-    ).resolves.toBe(0);
-    expect(
-      TokenModel.countDocuments({
-        secret: refreshToken,
-        type: SESSION_REFRESH,
       })
     ).resolves.toBe(0);
   });

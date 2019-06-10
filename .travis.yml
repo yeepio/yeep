@@ -4,7 +4,7 @@ node_js:
 env:
   global:
     - MONGODB_URI=mongodb://localhost:27017/yeep
-    - JWT_SECRET="keep it safe, keep it hidden!"
+    - BEARER_SECRET="keep it safe, keep it hidden!"
     - COOKIE_SECRET="keep it safe, keep it hidden!"
     - STORAGE_TYPE="fs"
     - NODE_ENV=test

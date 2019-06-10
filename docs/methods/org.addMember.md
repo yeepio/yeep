@@ -47,7 +47,7 @@ When `roles` are specified (see body params below) then requestor must be additi
 
 ```
 POST /api/org.addMember
-Authorization: `Bearer ${accessToken}`
+Authorization: `Bearer ${authToken}`
 ```
 
 ```json

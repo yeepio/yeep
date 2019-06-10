@@ -40,8 +40,8 @@ export async function refreshSessionCookie(ctx, { secret, userId }) {
     throw new UserDeactivatedError(`User ${userId} is deactivated`);
   }
 
-  // create body
-  const body = {
+  // create payload obj
+  const payload = {
     user: {
       id: user.id,
     },
@@ -49,22 +49,17 @@ export async function refreshSessionCookie(ctx, { secret, userId }) {
 
   // sign new cookie JWT
   const now = new Date();
-  let exp = addSeconds(
-    now,
-    config.cookie.isAutoRenewEnabled
-      ? config.cookie.renewIntervalInSeconds
-      : config.cookie.lifetimeInSeconds
-  );
-  if (exp > authToken.expiresAt) {
-    exp = authToken.expiresAt;
+  let nextExpDate = addSeconds(now, config.session.cookie.expiresInSeconds);
+  if (nextExpDate > authToken.expiresAt) {
+    nextExpDate = authToken.expiresAt;
   }
   const cookie = await jwt.signAsync(
     {
-      ...body,
+      ...payload,
       iat: Math.floor(now.getTime() / 1000),
-      exp: Math.floor(exp.getTime() / 1000),
+      exp: Math.floor(nextExpDate.getTime() / 1000),
     },
-    config.cookie.secret,
+    config.session.cookie.secret,
     {
       jwtid: secret,
       issuer: config.name,
@@ -72,5 +67,5 @@ export async function refreshSessionCookie(ctx, { secret, userId }) {
     }
   );
 
-  return { cookie, body, expiresAt: authToken.expiresAt };
+  return { cookie, payload, expiresAt: authToken.expiresAt };
 }

@@ -22,7 +22,7 @@ async function decorateSessionByCookie(ctx, { cookie }) {
   // verify cookie JWT authenticity
   let cookiePayload;
   try {
-    cookiePayload = await jwt.verifyAsync(cookie, config.cookie.secret, {
+    cookiePayload = await jwt.verifyAsync(cookie, config.session.cookie.secret, {
       ignoreExpiration: true,
       issuer: config.name,
       algorithm: 'HS512',
@@ -50,7 +50,7 @@ async function decorateSessionByCookie(ctx, { cookie }) {
   // from here on JWT has expired...
 
   // check if autorenew is turned on
-  if (!config.cookie.isAutoRenewEnabled) {
+  if (!config.session.cookie.isAutoRenewEnabled) {
     cookies.set('session', '', {
       expires: new Date(0),
       overwrite: true,
@@ -81,12 +81,18 @@ async function decorateSessionByCookie(ctx, { cookie }) {
 
   // set new session cookie - overwrite the old one
   cookies.set('session', nextCookie, {
-    domain: isFunction(config.cookie.domain) ? config.cookie.domain(request) : config.cookie.domain,
-    path: isFunction(config.cookie.path) ? config.cookie.path(request) : config.cookie.path,
-    httpOnly: isFunction(config.cookie.httpOnly)
-      ? config.cookie.httpOnly(request)
-      : config.cookie.httpOnly,
-    secure: isFunction(config.cookie.secure) ? config.cookie.secure(request) : config.cookie.secure,
+    domain: isFunction(config.session.cookie.domain)
+      ? config.session.cookie.domain(request)
+      : config.session.cookie.domain,
+    path: isFunction(config.session.cookie.path)
+      ? config.session.cookie.path(request)
+      : config.session.cookie.path,
+    httpOnly: isFunction(config.session.cookie.httpOnly)
+      ? config.session.cookie.httpOnly(request)
+      : config.session.cookie.httpOnly,
+    secure: isFunction(config.session.cookie.secure)
+      ? config.session.cookie.secure(request)
+      : config.session.cookie.secure,
     expires: expiresAt,
     overwrite: true,
   });
@@ -109,7 +115,7 @@ async function decorateSessionByToken(ctx, { authorizationHeader }) {
   // verify authorization JWT authenticity
   let tokenPayload;
   try {
-    tokenPayload = await jwt.verifyAsync(token, config.accessToken.secret, {
+    tokenPayload = await jwt.verifyAsync(token, config.session.bearer.secret, {
       ignoreExpiration: true,
       issuer: config.name,
       algorithm: 'HS512',

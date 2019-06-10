@@ -5,8 +5,8 @@ import config from '../../../../yeep.config';
 import deleteUser from '../../user/delete/service';
 import createUser from '../../user/create/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
-import destroySession from '../../session/destroy/service';
-import createSession from '../../session/create/service';
+import { destroySessionToken } from '../../session/destroyToken/service';
+import createSession from '../../session/issueToken/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import createOrg from '../create/service';
 import deleteOrg from '../delete/service';
@@ -99,7 +99,7 @@ describe('api/org.removeMember', () => {
     });
 
     afterAll(async () => {
-      await destroySession(ctx, session);
+      await destroySessionToken(ctx, session);
       await deletePermissionAssignment(ctx, permissionAssignment);
       await deleteUser(ctx, wile);
       await deleteUser(ctx, runner);
@@ -109,7 +109,7 @@ describe('api/org.removeMember', () => {
     test('returns error when `orgId` is unknown', async () => {
       const res = await request(server)
         .post('/api/org.removeMember')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           orgId: '507f1f77bcf86cd799439012', // i.e. some random ID
           userId: runner.id,
@@ -128,7 +128,7 @@ describe('api/org.removeMember', () => {
     test('returns error when `userId` is unknown', async () => {
       const res = await request(server)
         .post('/api/org.removeMember')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           orgId: org.id,
           userId: '507f1f77bcf86cd799439012', // i.e. some random ID
@@ -147,7 +147,7 @@ describe('api/org.removeMember', () => {
     test('returns error when user is NOT a member of org', async () => {
       const res = await request(server)
         .post('/api/org.removeMember')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           orgId: org.id,
           userId: runner.id,
@@ -170,7 +170,7 @@ describe('api/org.removeMember', () => {
 
       const res = await request(server)
         .post('/api/org.removeMember')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${session.token}`)
         .send({
           userId: runner.id,
           orgId: org.id,

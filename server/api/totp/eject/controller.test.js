@@ -6,8 +6,8 @@ import createUser from '../../user/create/service';
 // import createOrg from '../../org/create/service';
 import deleteUser from '../../user/delete/service';
 // import deleteOrg from '../../org/delete/service';
-import createSession from '../../session/create/service';
-import destroySession from '../../session/destroy/service';
+import createSession from '../../session/issueToken/service';
+import { destroySessionToken } from '../../session/destroyToken/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 import { PASSWORD, TOTP } from '../../../constants/authFactorTypes';
@@ -66,14 +66,14 @@ describe('api/totp.eject', () => {
     });
 
     afterAll(async () => {
-      await destroySession(ctx, wileSession);
+      await destroySessionToken(ctx, wileSession);
       await deleteUser(ctx, wileUser);
     });
 
     test('returns error when `userId` body param is undefined', async () => {
       const res = await request(server)
         .post('/api/totp.eject')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileSession.token}`)
         .send({});
 
       expect(res.status).toBe(200);
@@ -92,7 +92,7 @@ describe('api/totp.eject', () => {
     test('returns error if user is not already enrolled to TOTP', async () => {
       const res = await request(server)
         .post('/api/totp.eject')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileSession.token}`)
         .send({
           userId: wileUser.id,
           secondaryAuthFactor: {
@@ -121,7 +121,7 @@ describe('api/totp.eject', () => {
 
       const res = await request(server)
         .post('/api/totp.eject')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileSession.token}`)
         .send({
           userId: wileUser.id,
         });
@@ -153,7 +153,7 @@ describe('api/totp.eject', () => {
 
       const res = await request(server)
         .post('/api/totp.eject')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileSession.token}`)
         .send({
           userId: wileUser.id,
           secondaryAuthFactor: {
@@ -178,7 +178,7 @@ describe('api/totp.eject', () => {
 
       const res = await request(server)
         .post('/api/totp.eject')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileSession.token}`)
         .send({
           userId: wileUser.id,
           secondaryAuthFactor: {
@@ -244,7 +244,7 @@ describe('api/totp.eject', () => {
     });
 
     afterAll(async () => {
-      await destroySession(ctx, suSession);
+      await destroySessionToken(ctx, suSession);
       await deletePermissionAssignment(ctx, permissionAssignment);
       await deleteUser(ctx, wileUser);
       await deleteUser(ctx, suUser);
@@ -260,7 +260,7 @@ describe('api/totp.eject', () => {
 
       const res = await request(server)
         .post('/api/totp.eject')
-        .set('Authorization', `Bearer ${suSession.accessToken}`)
+        .set('Authorization', `Bearer ${suSession.token}`)
         .send({
           userId: wileUser.id,
         });

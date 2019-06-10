@@ -39,7 +39,7 @@ Requestor must be authenticated and assigned with the `yeep.permission.assignmen
 
 ```
 POST /api/user.assignPermission
-Authorization: `Bearer ${accessToken}`
+Authorization: `Bearer ${authToken}`
 ```
 
 ```json
