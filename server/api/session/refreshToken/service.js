@@ -8,7 +8,6 @@ import {
   TokenNotFoundError,
   InvalidAccessToken,
 } from '../../../constants/errors';
-import { issueAuthToken } from '../issueToken/service';
 import { AUTHENTICATION } from '../../../constants/tokenTypes';
 import jwt from '../../../utils/jwt';
 
