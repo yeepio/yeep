@@ -7,6 +7,7 @@ import createUser from '../../user/create/service';
 import deleteUser from '../../user/delete/service';
 import { issueSessionToken } from '../issueToken/service';
 import { AUTHENTICATION } from '../../../constants/tokenTypes';
+import jwt from '../../../utils/jwt';
 
 describe('api/session.refreshToken', () => {
   let ctx;
@@ -42,7 +43,7 @@ describe('api/session.refreshToken', () => {
       password: 'catch-the-b1rd$',
     });
 
-    const prevPayload = await ctx.jwt.verify(token);
+    const prevPayload = await jwt.verifyAsync(token, ctx.config.session.bearer.secret);
     await delay(1000); // let at least one second pass
 
     const res = await request(server)
@@ -59,7 +60,7 @@ describe('api/session.refreshToken', () => {
       })
     );
 
-    const nextPayload = await ctx.jwt.verify(res.body.token);
+    const nextPayload = await jwt.verifyAsync(res.body.token, ctx.config.session.bearer.secret);
     expect(nextPayload.exp).toBeGreaterThan(prevPayload.exp);
     expect(nextPayload.iat).toBeGreaterThan(prevPayload.iat);
 

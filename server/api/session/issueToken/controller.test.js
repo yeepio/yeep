@@ -11,6 +11,7 @@ import createPermission from '../../permission/create/service';
 import deletePermission from '../../permission/delete/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 import { PASSWORD } from '../../../constants/authFactorTypes';
+import jwt from '../../../utils/jwt';
 
 describe('api/session.issueToken', () => {
   let ctx;
@@ -170,7 +171,7 @@ describe('api/session.issueToken', () => {
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
 
-      const tokenPayload = await ctx.jwt.verify(res.body.token);
+      const tokenPayload = await jwt.verifyAsync(res.body.token, ctx.config.session.bearer.secret);
       expect(tokenPayload).toEqual(
         expect.objectContaining({
           user: {
@@ -195,7 +196,7 @@ describe('api/session.issueToken', () => {
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
 
-      const payload = await ctx.jwt.verify(res.body.token);
+      const payload = await jwt.verifyAsync(res.body.token, ctx.config.session.bearer.secret);
       expect(payload).toEqual(
         expect.objectContaining({
           user: {
@@ -271,7 +272,7 @@ describe('api/session.issueToken', () => {
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
 
-      const tokenPayload = await ctx.jwt.verify(res.body.token);
+      const tokenPayload = await jwt.verifyAsync(res.body.token, ctx.config.session.bearer.secret);
       expect(tokenPayload).toEqual(
         expect.objectContaining({
           user: {
@@ -300,7 +301,7 @@ describe('api/session.issueToken', () => {
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
 
-      const tokenPayload = await ctx.jwt.verify(res.body.token);
+      const tokenPayload = await jwt.verifyAsync(res.body.token, ctx.config.session.bearer.secret);
       expect(tokenPayload).toEqual(
         expect.objectContaining({
           user: {

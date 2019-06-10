@@ -6,6 +6,7 @@ import createUser from '../../user/create/service';
 import { issueSessionToken } from '../issueToken/service';
 import deleteUser from '../../user/delete/service';
 import { AUTHENTICATION } from '../../../constants/tokenTypes';
+import jwt from '../../../utils/jwt';
 
 describe('api/session.destroyToken', () => {
   let ctx;
@@ -40,7 +41,7 @@ describe('api/session.destroyToken', () => {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
-    const payload = await ctx.jwt.verify(token);
+    const payload = await jwt.verifyAsync(token, ctx.config.session.bearer.secret);
 
     const res = await request(server)
       .post('/api/session.destroyToken')
