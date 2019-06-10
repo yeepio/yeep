@@ -103,13 +103,92 @@ export async function getUserAndVerifyPassword(ctx, { username, emailAddress, pa
  * @property {Object} [props.projection]
  * @return {Promise}
  */
-export async function issueAuthToken(ctx, { user, projection }) {
+export async function issueAuthToken(ctx, { user, projection }) {}
+
+export async function verifyAuthFactor({ db }, { type, token, user }) {
+  // retrieve auth factor by type
+  const authFactor = user.authFactors.find((authFactor) => authFactor.type === type);
+
+  // ensure auth factor exists
+  if (!authFactor) {
+    throw new AuthFactorNotFound(`User ${user.id} has not activated ${type} authentication`);
+  }
+
+  // verify token
+  switch (type) {
+    case PASSWORD: {
+      const isPasswordVerified = await db
+        .model('Password')
+        .verifyPassword(
+          token,
+          authFactor.salt.buffer,
+          authFactor.iterationCount,
+          authFactor.password.buffer
+        );
+
+      if (!isPasswordVerified) {
+        throw new InvalidAuthFactor(`The supplied password cannot be verified`);
+      }
+
+      break;
+    }
+    case TOTP: {
+      const isTokenVerified = await db.model('TOTP').verifyToken(token, authFactor.secret);
+
+      if (!isTokenVerified) {
+        throw new InvalidAuthFactor(`The supplied OTP token cannot be verified`);
+      }
+
+      break;
+    }
+    default:
+      throw new InvalidAuthFactor(`Unknown authentication factor type "${type}"`);
+  }
+}
+
+export async function issueSessionToken(
+  ctx,
+  { username, emailAddress, password, projection = defaultProjection, secondaryAuthFactor }
+) {
   const { db, config } = ctx;
   const TokenModel = db.model('Token');
   const UserModel = db.model('User');
-  const now = new Date();
+
+  // retrieve user + verify password
+  const user = await getUserAndVerifyPassword(ctx, {
+    username,
+    emailAddress,
+    password,
+  });
+
+  // check if user has enabled multi-factor authentication (MFA)
+  if (user.authFactors.length > 1) {
+    // ensure secondary auth factor has been specified
+    if (!secondaryAuthFactor) {
+      const availableAuthFactors = Array.from(
+        user.authFactors.reduce((accumulator, authFactor) => {
+          if (authFactor.type !== PASSWORD) {
+            accumulator.add(authFactor.type);
+          }
+          return accumulator;
+        }, new Set())
+      );
+      throw new AuthFactorRequired(
+        `User "${username ||
+          emailAddress}" has enabled MFA; please specify secondary authentication factor`,
+        availableAuthFactors
+      );
+    }
+
+    // verify secondary auth factor
+    await verifyAuthFactor(ctx, {
+      ...secondaryAuthFactor,
+      user,
+    });
+  }
 
   // create authToken in db
+  const now = new Date();
   const secret = TokenModel.generateSecret({ length: 24 });
   const authToken = await TokenModel.create({
     secret,
@@ -164,89 +243,4 @@ export async function issueAuthToken(ctx, { user, projection }) {
     token,
     expiresAt: authToken.expiresAt,
   };
-}
-
-export async function verifyAuthFactor({ db }, { type, token, user }) {
-  // retrieve auth factor by type
-  const authFactor = user.authFactors.find((authFactor) => authFactor.type === type);
-
-  // ensure auth factor exists
-  if (!authFactor) {
-    throw new AuthFactorNotFound(`User ${user.id} has not activated ${type} authentication`);
-  }
-
-  // verify token
-  switch (type) {
-    case PASSWORD: {
-      const isPasswordVerified = await db
-        .model('Password')
-        .verifyPassword(
-          token,
-          authFactor.salt.buffer,
-          authFactor.iterationCount,
-          authFactor.password.buffer
-        );
-
-      if (!isPasswordVerified) {
-        throw new InvalidAuthFactor(`The supplied password cannot be verified`);
-      }
-
-      break;
-    }
-    case TOTP: {
-      const isTokenVerified = await db.model('TOTP').verifyToken(token, authFactor.secret);
-
-      if (!isTokenVerified) {
-        throw new InvalidAuthFactor(`The supplied OTP token cannot be verified`);
-      }
-
-      break;
-    }
-    default:
-      throw new InvalidAuthFactor(`Unknown authentication factor type "${type}"`);
-  }
-}
-
-export default async function createSession(
-  ctx,
-  { username, emailAddress, password, projection = defaultProjection, secondaryAuthFactor }
-) {
-  // retrieve user + verify password
-  const user = await getUserAndVerifyPassword(ctx, {
-    username,
-    emailAddress,
-    password,
-  });
-
-  // check if user has enabled multi-factor authentication (MFA)
-  if (user.authFactors.length > 1) {
-    // ensure secondary auth factor has been specified
-    if (!secondaryAuthFactor) {
-      const availableAuthFactors = Array.from(
-        user.authFactors.reduce((accumulator, authFactor) => {
-          if (authFactor.type !== PASSWORD) {
-            accumulator.add(authFactor.type);
-          }
-          return accumulator;
-        }, new Set())
-      );
-      throw new AuthFactorRequired(
-        `User "${username ||
-          emailAddress}" has enabled MFA; please specify secondary authentication factor`,
-        availableAuthFactors
-      );
-    }
-
-    // verify secondary auth factor
-    await verifyAuthFactor(ctx, {
-      ...secondaryAuthFactor,
-      user,
-    });
-  }
-
-  // issue auth token
-  return issueAuthToken(ctx, {
-    user,
-    projection,
-  });
 }

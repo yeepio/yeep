@@ -9,7 +9,7 @@ import deleteOrg from '../../org/delete/service';
 import createPermission from '../../permission/create/service';
 import createOrg from '../../org/create/service';
 import createUser from '../create/service';
-import createSession from '../../session/issueToken/service';
+import { issueSessionToken } from '../../session/issueToken/service';
 import { destroySessionToken } from '../../session/destroyToken/service';
 import deletePermissionAssignment from './service';
 
@@ -81,7 +81,7 @@ describe('api/user.revokePermission', () => {
         permissionId: permission.id,
       });
 
-      session = await createSession(ctx, {
+      session = await issueSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
@@ -477,7 +477,7 @@ describe('api/user.revokePermission', () => {
       });
 
       // user "wile" is logged in
-      wileSession = await createSession(ctx, {
+      wileSession = await issueSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });

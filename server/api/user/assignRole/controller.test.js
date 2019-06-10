@@ -10,7 +10,7 @@ import createOrg from '../../org/create/service';
 import deleteOrg from '../../org/delete/service';
 import deletePermissionAssignment from '../revokePermission/service';
 import createPermissionAssignment from '../assignPermission/service';
-import createSession from '../../session/issueToken/service';
+import { issueSessionToken } from '../../session/issueToken/service';
 import { destroySessionToken } from '../../session/destroyToken/service';
 import createRole from '../../role/create/service';
 import deleteRole from '../../role/delete/service';
@@ -100,7 +100,7 @@ describe('api/user.assignRole', () => {
         scope: acme.id,
       });
 
-      session = await createSession(ctx, {
+      session = await issueSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
@@ -487,7 +487,7 @@ describe('api/user.assignRole', () => {
         permissionId: requiredpermission.id,
       });
 
-      session = await createSession(ctx, {
+      session = await issueSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });

@@ -6,7 +6,7 @@ import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../create/service';
 import deleteUser from '../delete/service';
-import createSession from '../../session/issueToken/service';
+import { issueSessionToken } from '../../session/issueToken/service';
 import { destroySessionToken } from '../../session/destroyToken/service';
 import createPermissionAssignment from '../assignPermission/service';
 import deletePermissionAssignment from '../revokePermission/service';
@@ -81,7 +81,7 @@ describe('api/user.verifyEmail', () => {
         }),
       ]);
 
-      wileSession = await createSession(ctx, {
+      wileSession = await issueSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
@@ -282,7 +282,7 @@ describe('api/user.verifyEmail', () => {
         permissionId: requiredPermission.id,
       });
 
-      superuserSession = await createSession(ctx, {
+      superuserSession = await issueSessionToken(ctx, {
         username: 'oswell',
         password: 'our-business-$s-l1f3-1ts3lf',
       });

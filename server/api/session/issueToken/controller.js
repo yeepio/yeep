@@ -4,7 +4,7 @@ import compose from 'koa-compose';
 import mapValues from 'lodash/mapValues';
 import { validateRequest } from '../../../middleware/validation';
 import packJSONRPC from '../../../middleware/packJSONRPC';
-import createSession, { defaultProjection } from './service';
+import { issueSessionToken, defaultProjection } from './service';
 import authFactorSchema from '../../../models/AuthFactor';
 import { PASSWORD } from '../../../constants/authFactorTypes';
 
@@ -62,7 +62,7 @@ async function handler(ctx) {
     props.username = user;
   }
 
-  const session = await createSession(ctx, props);
+  const session = await issueSessionToken(ctx, props);
 
   response.status = 200; // OK
   response.body = session;

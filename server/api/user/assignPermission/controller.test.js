@@ -9,7 +9,7 @@ import deletePermission from '../../permission/delete/service';
 import createOrg from '../../org/create/service';
 import deleteOrg from '../../org/delete/service';
 import deletePermissionAssignment from '../revokePermission/service';
-import createSession from '../../session/issueToken/service';
+import { issueSessionToken } from '../../session/issueToken/service';
 import { destroySessionToken } from '../../session/destroyToken/service';
 
 describe('api/user.assignPermission', () => {
@@ -77,7 +77,7 @@ describe('api/user.assignPermission', () => {
         scope: acme.id,
       });
 
-      session = await createSession(ctx, {
+      session = await issueSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
@@ -442,7 +442,7 @@ describe('api/user.assignPermission', () => {
         scope: monsters.id,
       });
 
-      session = await createSession(ctx, {
+      session = await issueSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });

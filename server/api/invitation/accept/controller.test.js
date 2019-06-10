@@ -10,7 +10,7 @@ import createOrg from '../../org/create/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 import deleteOrg from '../../org/delete/service';
-import createSession from '../../session/issueToken/service';
+import { issueSessionToken } from '../../session/issueToken/service';
 import { destroySessionToken } from '../../session/destroyToken/service';
 
 describe('api/invitation.accept', () => {
@@ -323,7 +323,7 @@ describe('api/invitation.accept', () => {
         permissionId: permission.id,
       });
 
-      wileSession = await createSession(ctx, {
+      wileSession = await issueSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
@@ -405,7 +405,7 @@ describe('api/invitation.accept', () => {
           ],
         });
 
-        runnerSession = await createSession(ctx, {
+        runnerSession = await issueSessionToken(ctx, {
           username: 'runner',
           password: 'fast+furry-ous',
         });
@@ -475,7 +475,7 @@ describe('api/invitation.accept', () => {
           ],
         });
 
-        runnerSession = await createSession(ctx, {
+        runnerSession = await issueSessionToken(ctx, {
           username: 'runner',
           password: 'fast+furry-ous',
         });
@@ -494,7 +494,7 @@ describe('api/invitation.accept', () => {
           ],
         });
 
-        porkySession = await createSession(ctx, {
+        porkySession = await issueSessionToken(ctx, {
           username: 'porky',
           password: "Th-th-th-that's all folks!",
         });

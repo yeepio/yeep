@@ -6,7 +6,7 @@ import createUser from '../../user/create/service';
 // import createOrg from '../../org/create/service';
 import deleteUser from '../../user/delete/service';
 // import deleteOrg from '../../org/delete/service';
-import createSession from '../../session/issueToken/service';
+import { issueSessionToken } from '../../session/issueToken/service';
 import { destroySessionToken } from '../../session/destroyToken/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
@@ -59,7 +59,7 @@ describe('api/totp.eject', () => {
         ],
       });
 
-      wileSession = await createSession(ctx, {
+      wileSession = await issueSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
@@ -237,7 +237,7 @@ describe('api/totp.eject', () => {
         permissionId: requiredPermission.id,
       });
 
-      suSession = await createSession(ctx, {
+      suSession = await issueSessionToken(ctx, {
         username: 'gl@d0s',
         password: 'h3r3-w3-g0-@g@1n',
       });

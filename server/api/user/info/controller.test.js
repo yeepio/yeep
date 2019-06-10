@@ -5,7 +5,7 @@ import config from '../../../../yeep.config';
 import createOrg from '../../org/create/service';
 import createUser from '../create/service';
 import createPermissionAssignment from '../assignPermission/service';
-import createSession from '../../session/issueToken/service';
+import { issueSessionToken } from '../../session/issueToken/service';
 import { destroySessionToken } from '../../session/destroyToken/service';
 import deletePermissionAssignment from '../revokePermission/service';
 import deleteUser from '../delete/service';
@@ -78,7 +78,7 @@ describe('api/user.info', () => {
         permissionId: permission.id,
       });
 
-      session = await createSession(ctx, {
+      session = await issueSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
@@ -328,7 +328,7 @@ describe('api/user.info', () => {
         permissionId: permission.id,
       });
 
-      session = await createSession(ctx, {
+      session = await issueSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });

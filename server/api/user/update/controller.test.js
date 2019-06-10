@@ -5,7 +5,7 @@ import config from '../../../../yeep.config';
 import createOrg from '../../org/create/service';
 import createUser from '../create/service';
 import createPermissionAssignment from '../assignPermission/service';
-import createSession from '../../session/issueToken/service';
+import { issueSessionToken } from '../../session/issueToken/service';
 import { destroySessionToken } from '../../session/destroyToken/service';
 import deletePermissionAssignment from '../revokePermission/service';
 import deleteOrg from '../../org/delete/service';
@@ -97,17 +97,17 @@ describe('api/user.update', () => {
       permissionId: requiredPermission.id,
     });
 
-    session = await createSession(ctx, {
+    session = await issueSessionToken(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
 
-    superuserSession = await createSession(ctx, {
+    superuserSession = await issueSessionToken(ctx, {
       username: 'gl@d0s',
       password: 'h3r3-w3-g0-@g@1n',
     });
 
-    unauthorisedSession = await createSession(ctx, {
+    unauthorisedSession = await issueSessionToken(ctx, {
       username: 'roadrunner',
       password: 'you-c@nt-t0utch-m3',
     });
@@ -378,7 +378,7 @@ describe('api/user.update', () => {
         });
 
       expect(res.status).toBe(200);
-      const newSession = await createSession(ctx, {
+      const newSession = await issueSessionToken(ctx, {
         username: 'wile',
         password: newPassword,
       });
@@ -552,7 +552,7 @@ describe('api/user.update', () => {
         });
 
       expect(res.status).toBe(200);
-      const newSession = await createSession(ctx, {
+      const newSession = await issueSessionToken(ctx, {
         username: user.username, // this was changed in an earlier test. How can we avoid it best?
         password: newPassword,
       });

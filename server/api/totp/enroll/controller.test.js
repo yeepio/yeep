@@ -6,7 +6,7 @@ import createUser from '../../user/create/service';
 // import createOrg from '../../org/create/service';
 import deleteUser from '../../user/delete/service';
 // import deleteOrg from '../../org/delete/service';
-import createSession from '../../session/issueToken/service';
+import { issueSessionToken } from '../../session/issueToken/service';
 import { destroySessionToken } from '../../session/destroyToken/service';
 
 describe('api/totp.enroll', () => {
@@ -56,7 +56,7 @@ describe('api/totp.enroll', () => {
         ],
       });
 
-      wileSession = await createSession(ctx, {
+      wileSession = await issueSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });

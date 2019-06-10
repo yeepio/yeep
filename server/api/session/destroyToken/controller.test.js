@@ -3,7 +3,7 @@ import request from 'supertest';
 import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
-import issueSessionToken from '../issueToken/service';
+import { issueSessionToken } from '../issueToken/service';
 import deleteUser from '../../user/delete/service';
 import { AUTHENTICATION } from '../../../constants/tokenTypes';
 

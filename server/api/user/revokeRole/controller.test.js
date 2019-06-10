@@ -9,7 +9,7 @@ import deleteOrg from '../../org/delete/service';
 import createPermission from '../../permission/create/service';
 import createOrg from '../../org/create/service';
 import createUser from '../create/service';
-import createSession from '../../session/issueToken/service';
+import { issueSessionToken } from '../../session/issueToken/service';
 import { destroySessionToken } from '../../session/destroyToken/service';
 import deletePermissionAssignment from '../revokePermission/service';
 import createRole from '../../role/create/service';
@@ -86,7 +86,7 @@ describe('api/user.revokeRole', () => {
         permissionId: requiredPermission.id,
       });
 
-      wileSession = await createSession(ctx, {
+      wileSession = await issueSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
@@ -477,7 +477,7 @@ describe('api/user.revokeRole', () => {
         adminId: wazowski.id,
       });
 
-      wileSession = await createSession(ctx, {
+      wileSession = await issueSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });

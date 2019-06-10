@@ -8,7 +8,7 @@ import createUser from '../../user/create/service';
 import createOrg from '../../org/create/service';
 import deleteUser from '../../user/delete/service';
 import deleteOrg from '../../org/delete/service';
-import createSession from '../../session/issueToken/service';
+import { issueSessionToken } from '../../session/issueToken/service';
 import { destroySessionToken } from '../../session/destroyToken/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
@@ -59,7 +59,7 @@ describe('api/role.create', () => {
       permissionId: requiredPermission.id,
     });
 
-    session = await createSession(ctx, {
+    session = await issueSessionToken(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });

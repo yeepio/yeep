@@ -5,7 +5,7 @@ import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../create/service';
 import createPermissionAssignment from '../assignPermission/service';
-import createSession from '../../session/issueToken/service';
+import { issueSessionToken } from '../../session/issueToken/service';
 import { destroySessionToken } from '../../session/destroyToken/service';
 import deletePermissionAssignment from '../revokePermission/service';
 import deleteUser from '../delete/service';
@@ -70,7 +70,7 @@ describe('api/user.deletePicture', () => {
         // global org
       });
 
-      wileSession = await createSession(ctx, {
+      wileSession = await issueSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
@@ -89,7 +89,7 @@ describe('api/user.deletePicture', () => {
         ],
       });
 
-      runnerSession = await createSession(ctx, {
+      runnerSession = await issueSessionToken(ctx, {
         username: 'runner',
         password: 'fast+furry-ous',
       });

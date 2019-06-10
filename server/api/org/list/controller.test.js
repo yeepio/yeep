@@ -7,7 +7,7 @@ import createOrg from '../../org/create/service';
 import addMemberToOrg from '../../org/addMember/service';
 import listPermissions from '../../permission/list/service';
 import assignPermission from '../../user/assignPermission/service';
-import createSession from '../../session/issueToken/service';
+import { issueSessionToken } from '../../session/issueToken/service';
 import { destroySessionToken } from '../../session/destroyToken/service';
 import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
@@ -105,7 +105,7 @@ describe('api/org.list', () => {
     });
 
     // user "wile" is logged-in
-    session = await createSession(ctx, {
+    session = await issueSessionToken(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
@@ -117,7 +117,7 @@ describe('api/org.list', () => {
     });
 
     // user professor is logged-in
-    professorSession = await createSession(ctx, {
+    professorSession = await issueSessionToken(ctx, {
       username: 'tyrant',
       password: 't-103MrX',
     });

@@ -6,7 +6,7 @@ import deleteUser from '../../user/delete/service';
 import createUser from '../../user/create/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 import { destroySessionToken } from '../../session/destroyToken/service';
-import createSession from '../../session/issueToken/service';
+import { issueSessionToken } from '../../session/issueToken/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import createOrg from '../create/service';
 import deleteOrg from '../delete/service';
@@ -92,7 +92,7 @@ describe('api/org.removeMember', () => {
         permissionId: permission.id,
       });
 
-      session = await createSession(ctx, {
+      session = await issueSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });

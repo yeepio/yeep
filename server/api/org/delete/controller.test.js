@@ -4,7 +4,7 @@ import server from '../../../server';
 import config from '../../../../yeep.config';
 import createOrg from '../create/service';
 import createUser from '../../user/create/service';
-import createSession from '../../session/issueToken/service';
+import { issueSessionToken } from '../../session/issueToken/service';
 import { destroySessionToken } from '../../session/destroyToken/service';
 import deleteUser from '../../user/delete/service';
 import getUserInfo from '../../user/info/service';
@@ -58,7 +58,7 @@ describe('api/org.delete', () => {
         ],
       });
 
-      session = await createSession(ctx, {
+      session = await issueSessionToken(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
