@@ -127,7 +127,7 @@ server.setup = async (config) => {
   // configure JWT
   const jwt = new JsonWebToken({
     secretKey: config.accessToken.secret,
-    issuer: 'Yeep',
+    issuer: config.name,
   });
 
   const mail = new MailService({

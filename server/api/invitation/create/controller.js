@@ -10,6 +10,7 @@ import {
   decorateUserPermissions,
   decorateSession,
   isUserAuthenticated,
+  decorateSessionUserProfile,
 } from '../../../middleware/auth';
 import { AuthorizationError } from '../../../constants/errors';
 
@@ -221,6 +222,7 @@ export default compose([
   packJSONRPC,
   decorateSession(),
   isUserAuthenticated(),
+  decorateSessionUserProfile,
   validateRequest(validationSchema),
   decorateUserPropType,
   isUserPropValid,

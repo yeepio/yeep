@@ -8,43 +8,24 @@ import isUndefined from 'lodash/isUndefined';
 import isNull from 'lodash/isNull';
 import binarySearch from 'binary-search';
 import jwt from '../utils/jwt';
-import { AuthorizationError } from '../constants/errors';
+import { AuthorizationError, UserNotFoundError, UserDeactivatedError } from '../constants/errors';
 import { getUserPermissions } from '../api/user/info/service';
 import { refreshSessionCookie } from '../api/session/refreshCookie/service';
-
-const parseAuthorizationPayload = async ({ request, jwt }) => {
-  const [schema, accessToken] = request.headers.authorization.split(' ');
-
-  if (schema !== 'Bearer') {
-    throw Boom.unauthorized('Invalid authorization schema', 'Bearer', {
-      realm: 'Yeep',
-    });
-  }
-
-  try {
-    const payload = await jwt.verify(accessToken);
-    return {
-      secret: payload.jti,
-      user: payload.user,
-      issuedAt: new Date(payload.iat * 1000),
-      expiresAt: new Date(payload.exp * 1000),
-    };
-  } catch (err) {
-    throw Boom.unauthorized('Invalid authorization token', 'Bearer', {
-      realm: 'Yeep',
-    });
-  }
-};
+import { isFunction } from 'util';
+import { ObjectId } from 'mongodb';
+import { isBefore } from 'date-fns';
 
 async function decorateSessionByCookie(ctx, { cookie }) {
-  const { request, config } = ctx;
+  const { request, config, cookies } = ctx;
   const now = new Date();
 
-  // verify cookie
+  // verify cookie JWT authenticity
   let cookiePayload;
   try {
     cookiePayload = await jwt.verifyAsync(cookie, config.cookie.secret, {
       ignoreExpiration: true,
+      issuer: config.name,
+      algorithm: 'HS512',
     });
   } catch (err) {
     throw Boom.unauthorized('Invalid session cookie', 'Cookie', {
@@ -61,20 +42,114 @@ async function decorateSessionByCookie(ctx, { cookie }) {
     user: cookiePayload.user,
   };
 
-  // ensure cookie has not expired
+  // ensure cookie JWT has not expired
   if (cookiePayload.exp * 1000 >= now.getTime()) {
     return; // exit
   }
 
-  // throw error if autorenew is turned off
+  // from here on JWT has expired...
+
+  // check if autorenew is turned on
   if (!config.cookie.isAutoRenewEnabled) {
+    cookies.set('session', '', {
+      expires: new Date(0),
+      overwrite: true,
+    });
+
     throw Boom.unauthorized('Session cookie has expired', 'Cookie', {
       realm: config.name,
     });
   }
 
-  // attempt to refresh the cookie
-  await refreshSessionCookie(ctx, { secret: cookiePayload.jti, userId: cookiePayload.user.id });
+  // attempt to refresh the cookie - will throw error if something goes wrong
+  let nextCookie, expiresAt;
+  try {
+    const session = await refreshSessionCookie(ctx, {
+      secret: cookiePayload.jti,
+      userId: cookiePayload.user.id,
+    });
+    nextCookie = session.cookie;
+    expiresAt = session.expiresAt;
+  } catch (err) {
+    cookies.set('session', '', {
+      expires: new Date(0),
+      overwrite: true,
+    });
+
+    throw err; // re-throw
+  }
+
+  // set new session cookie - overwrite the old one
+  cookies.set('session', nextCookie, {
+    domain: isFunction(config.cookie.domain) ? config.cookie.domain(request) : config.cookie.domain,
+    path: isFunction(config.cookie.path) ? config.cookie.path(request) : config.cookie.path,
+    httpOnly: isFunction(config.cookie.httpOnly)
+      ? config.cookie.httpOnly(request)
+      : config.cookie.httpOnly,
+    secure: isFunction(config.cookie.secure) ? config.cookie.secure(request) : config.cookie.secure,
+    expires: expiresAt,
+    overwrite: true,
+  });
+}
+
+async function decorateSessionByToken(ctx, { authorizationHeader }) {
+  const { config, request } = ctx;
+  const now = new Date();
+
+  // parse authorization header
+  const [protocol, token] = authorizationHeader.split(' ');
+
+  // ensure authorization protocol is "Bearer"
+  if (protocol.toLowerCase() !== 'bearer') {
+    throw Boom.unauthorized('Invalid authorization schema', 'Bearer', {
+      realm: 'Yeep',
+    });
+  }
+
+  // verify authorization JWT authenticity
+  let tokenPayload;
+  try {
+    tokenPayload = await jwt.verifyAsync(token, config.accessToken.secret, {
+      ignoreExpiration: true,
+      issuer: config.name,
+      algorithm: 'HS512',
+    });
+  } catch (err) {
+    throw Boom.unauthorized('Invalid authorization token', 'Bearer', {
+      realm: config.name,
+    });
+  }
+
+  // ensure cookie JWT has not expired
+  if (tokenPayload.exp * 1000 < now.getTime()) {
+    throw Boom.unauthorized('Session cookie has expired', 'Cookie', {
+      realm: config.name,
+    });
+  }
+
+  // decorate request with session data
+  request.session = {
+    protocol: 'bearer',
+    token: {
+      id: tokenPayload.jti,
+    },
+    user: tokenPayload.user,
+  };
+}
+
+export function decorateSession() {
+  return async (ctx, next) => {
+    const cookie = ctx.cookies.get('session');
+    const authorizationHeader = ctx.request.headers.authorization;
+
+    if (cookie) {
+      await decorateSessionByCookie(ctx, { cookie });
+    } else if (authorizationHeader) {
+      await decorateSessionByToken(ctx, { authorizationHeader });
+    }
+
+    await next();
+  };
 }
 
 export async function isSessionCookie({ request, config }, next) {
@@ -87,95 +162,15 @@ export async function isSessionCookie({ request, config }, next) {
   await next();
 }
 
-export function decorateSession() {
-  return async (ctx, next) => {
-    const cookie = ctx.cookies.get('session');
-    const authorizationHeader = ctx.request.headers.authorization;
+export async function isSessionToken({ request, config }, next) {
+  if (get(request, ['session', 'protocol']) !== 'bearer') {
+    throw Boom.unauthorized('Session token not specified', 'Bearer', {
+      realm: config.name,
+    });
+  }
 
-    if (cookie) {
-      await decorateSessionByCookie(ctx, { cookie });
-    } else if (authorizationHeader) {
-      // wip
-    }
-
-    await next();
-  };
+  await next();
 }
-
-// export const decorateSession = () => async ({ request, jwt, db }, next) => {
-//   // check if authentication header exists
-//   if (!request.headers.authorization) {
-//     await next();
-//     return; // exit
-//   }
-
-//   // parse authorization payload
-//   const { secret, user, issuedAt, expiresAt } = await parseAuthorizationPayload({
-//     request,
-//     jwt,
-//   });
-
-//   // retrieve user info
-//   const TokenModel = db.model('Token');
-//   const records = await TokenModel.aggregate([
-//     {
-//       $match: { secret },
-//     },
-//     {
-//       $lookup: {
-//         from: 'users',
-//         localField: 'user',
-//         foreignField: '_id',
-//         as: 'user',
-//       },
-//     },
-//     {
-//       $match: {
-//         $or: [
-//           { 'user.deactivatedAt': null }, // i.e. null or undefined
-//           { 'user.deactivatedAt': { $gte: new Date() } }, // i.e. is not deactivated yet
-//         ],
-//       },
-//     },
-//     {
-//       $project: {
-//         'user._id': 1,
-//         'user.username': 1,
-//         'user.emails': 1,
-//         'user.fullName': 1,
-//         'user.picture': 1,
-//         // 'user.orgs': 1,
-//         // 'user.roles': 1,
-//         'user.createdAt': 1,
-//         'user.updatedAt': 1,
-//       },
-//     },
-//     {
-//       $unwind: '$user',
-//     },
-//   ]).exec();
-
-//   // make sure authorization token is active
-//   if (records.length === 0 || !records[0].user._id.equals(user.id)) {
-//     await next();
-//     return; // exit
-//   }
-
-//   // decorate request with session data
-//   request.session = {
-//     token: {
-//       id: records[0]._id.toHexString(),
-//       issuedAt,
-//       expiresAt,
-//     },
-//     user: {
-//       ...records[0].user,
-//       id: records[0].user._id.toHexString(),
-//     },
-//   };
-
-//   await next();
-// };
 
 export const isUserAuthenticated = () => async ({ request }, next) => {
   if (!has(request, ['session', 'user'])) {
@@ -184,6 +179,47 @@ export const isUserAuthenticated = () => async ({ request }, next) => {
 
   await next();
 };
+
+export async function decorateSessionUserProfile(ctx, next) {
+  const { request, db } = ctx;
+  const UserModel = db.model('User');
+
+  // ensure user is authenticated
+  if (!has(request, ['session', 'user'])) {
+    throw new AuthorizationError('Unable to authorize non-authenticated user');
+  }
+
+  // retrieve user profile
+  const user = await UserModel.findOne({
+    _id: ObjectId(request.session.user.id),
+  });
+
+  // make sure user exists
+  if (!user) {
+    throw new UserNotFoundError(`User ${request.session.user.id} not found`);
+  }
+
+  // make sure user is active
+  if (!!user.deactivatedAt && isBefore(user.deactivatedAt, new Date())) {
+    throw new UserDeactivatedError(`User ${request.session.user.id} is deactivated`);
+  }
+
+  // decorate request.session with user profile
+  request.session = {
+    ...request.session,
+    user: {
+      ...request.session.user,
+      username: user.username,
+      emails: user.emails,
+      fullName: user.fullName,
+      picture: user.picture,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    },
+  };
+
+  await next();
+}
 
 export const decorateUserPermissions = () => async (ctx, next) => {
   const { request } = ctx;

@@ -67,6 +67,8 @@ export async function refreshSessionCookie(ctx, { secret, userId }) {
     config.cookie.secret,
     {
       jwtid: secret,
+      issuer: config.name,
+      algorithm: 'HS512',
     }
   );
 
