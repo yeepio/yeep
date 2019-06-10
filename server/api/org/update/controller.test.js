@@ -3,7 +3,7 @@ import request from 'supertest';
 import compareDesc from 'date-fns/compare_desc';
 import server from '../../../server';
 import config from '../../../../yeep.config';
-import createPermission from '../../permission/create/service';
+// import createPermission from '../../permission/create/service';
 import createOrg from '../create/service';
 import createUser from '../../user/create/service';
 // import createPermissionAssignment from '../../user/assignPermission/service';
@@ -39,7 +39,7 @@ describe('api/org.update', () => {
       ],
     });
 
-    [ org, unauthorisedOrg, umbrella ] = await Promise.all([
+    [org, unauthorisedOrg, umbrella] = await Promise.all([
       createOrg(ctx, {
         name: 'Acme Inc',
         slug: 'acme',
@@ -91,7 +91,6 @@ describe('api/org.update', () => {
   });
 
   test('returns error when requestor has no write permissions on requested org', async () => {
-
     const res = await request(server)
       .post('/api/org.update')
       .set('Authorization', `Bearer ${session.token}`)
@@ -123,10 +122,12 @@ describe('api/org.update', () => {
       ok: false,
       error: {
         code: 400,
-        details: [{
-          path: ['name'],
-          type: 'any.required',
-        }],
+        details: [
+          {
+            path: ['name'],
+            type: 'any.required',
+          },
+        ],
         message: 'Invalid request body',
       },
     });
