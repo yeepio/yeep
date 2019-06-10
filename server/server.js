@@ -15,7 +15,6 @@ import mongoose from 'mongoose';
 import serveStatic from 'koa-static';
 import mount from 'koa-mount';
 import { registerModels } from './models';
-import JsonWebToken from './utils/JsonWebToken';
 import FileStorage from './utils/FileStorage';
 import MailService from './utils/MailService';
 import errorHandler from './middleware/errorHandler';
@@ -124,12 +123,6 @@ server.setup = async (config) => {
     baseUrl: url.resolve(config.baseUrl, '/media/'),
   });
 
-  // configure JWT
-  const jwt = new JsonWebToken({
-    secretKey: config.session.bearer.secret,
-    issuer: config.name,
-  });
-
   const mail = new MailService({
     ...config.mail,
   });
@@ -138,7 +131,6 @@ server.setup = async (config) => {
   app.context.config = config;
   app.context.bus = bus;
   app.context.db = db;
-  app.context.jwt = jwt;
   app.context.storage = storage;
   app.context.mail = mail;
   app.context.router = api; // expose router to enable dynamic API docs
