@@ -6,7 +6,7 @@ import React from 'react';
 const Logo = () => {
   return (
     <React.Fragment>
-      <h1 className="ml-4 text-lg sm:text-2xl">CompanyName</h1>
+      <h1 className="font-bold ml-4 text-lg sm:text-2xl">CompanyName</h1>
       <style jsx>{`
         h1 {
           padding-left: 38px;

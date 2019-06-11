@@ -268,7 +268,7 @@ const UserEditMemberships = ({ userId }) => {
   useDocumentTitle(`Organization memberships for user Justine Singh`);
   return (
     <React.Fragment>
-      <h1 className="mb-6">&quot;USER_FULLNAME&quot;: Organization memberships</h1>
+      <h1 className="font-semibold text-3xl mb-6">&quot;USER_FULLNAME&quot;: Organization memberships</h1>
       <TabLinks
         className="mb-6"
         links={[

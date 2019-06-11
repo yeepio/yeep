@@ -10,7 +10,7 @@ const RoleCreatePage = () => {
   useDocumentTitle('Create role');
   return (
     <React.Fragment>
-      <h1 className="mb-6">Create new role</h1>
+      <h1 className="font-semibold text-3xl mb-6">Create new role</h1>
       <fieldset className="mb-6">
         <legend>Role details</legend>
         <div className="form-group mb-4">

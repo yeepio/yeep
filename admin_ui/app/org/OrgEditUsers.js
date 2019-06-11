@@ -54,7 +54,7 @@ const OrgEditUsers = ({ orgId }) => {
   useDocumentTitle(`Organization name: User memberships`);
   return (
     <React.Fragment>
-      <h1 className="mb-6">&quot;Organization name&quot;: User memberships</h1>
+      <h1 className="font-semibold text-3xl mb-6">&quot;Organization name&quot;: User memberships</h1>
       <TabLinks
         className="mb-6"
         links={[

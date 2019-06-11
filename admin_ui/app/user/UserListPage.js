@@ -116,7 +116,7 @@ const UserListPage = () => {
       <ButtonLink to="create" className="float-right">
         Create new
       </ButtonLink>
-      <h1 className="mb-6">Users</h1>
+      <h1 className="font-semibold text-3xl mb-6">Users</h1>
       <fieldset className="mb-6">
         <legend>Filters and quick search</legend>
         <div className="sm:flex items-center">

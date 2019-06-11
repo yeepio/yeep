@@ -25,7 +25,7 @@ const dummyOrgs = [
 const DashboardOrgCard = (props) => {
   return (
     <div className="border border-grey rounded p-4 flex-1 mb-4 sm:mr-4 relative">
-      <h2 className="mb-4">
+      <h2 className="mb-4 font-bold text-2xl">
         <Link to={`/organizations/${props.id}/edit`}>{props.name}</Link>
       </h2>
       <IconOrganisation className="absolute top-0 right-0 mt-4 mr-4" height={28} />
@@ -64,7 +64,7 @@ const DashboardPage = () => {
   useDocumentTitle('Dashboard');
   return (
     <div className="leading-normal p-4 sm:p-8 max-w-2xl sm:h-full">
-      <h1 className="mb-4">Dashboard</h1>
+      <h1 className="mb-4 font-semibold text-3xl">Dashboard</h1>
       <p className="mb-4">
         Welcome <strong>Jane Doe</strong>. You are managing <strong>40</strong> users across{' '}
         <strong>2</strong> organisations:

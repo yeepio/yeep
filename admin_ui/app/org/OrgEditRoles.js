@@ -52,7 +52,7 @@ const OrgEditRoles = ({ orgId }) => {
   return (
     <React.Fragment>
       <OrgEditRolesModals />
-      <h1 className="mb-6">&quot;Organization name&quot;: Roles</h1>
+      <h1 className="font-semibold text-3xl mb-6">&quot;Organization name&quot;: Roles</h1>
       <TabLinks
         className="mb-6"
         links={[

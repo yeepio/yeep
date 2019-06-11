@@ -11,7 +11,7 @@ const PermissionEditPage = ({ permissionId }) => {
   useDocumentTitle(`Edit permission #${permissionId}`);
   return (
     <React.Fragment>
-      <h1 className="mb-6">Edit permission #{permissionId}</h1>
+      <h1 className="font-semibold text-3xl mb-6">Edit permission #{permissionId}</h1>
       <fieldset className="mb-6">
         <legend>Permission fields</legend>
         <div className="form-group mb-4">

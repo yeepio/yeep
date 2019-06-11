@@ -31,7 +31,7 @@ function Modal(props) {
         'modalOverlay',
         'fixed',
         'flex',
-        'pin',
+        'inset-0',
         'w-full',
         'h-full',
         'items-center',

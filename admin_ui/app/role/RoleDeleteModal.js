@@ -12,7 +12,7 @@ const RoleDeleteModal = () => {
   if (deleteModal === 'DELETE') {
     return (
       <Modal onClose={() => dispatch(setDeleteModal(''))}>
-        <h2 className="mb-4">Delete role &quot;blog_admin&quot;?</h2>
+        <h2 className="font-bold text-2xl mb-4">Delete role &quot;blog_admin&quot;?</h2>
         <p className="mb-4">
           Please note that blog_admin has been associated with <Link to="/users">2</Link> users.
         </p>
