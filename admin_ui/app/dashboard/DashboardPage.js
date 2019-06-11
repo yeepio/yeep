@@ -28,7 +28,7 @@ const DashboardOrgCard = (props) => {
       <h2 className="mb-4">
         <Link to={`/organizations/${props.id}/edit`}>{props.name}</Link>
       </h2>
-      <IconOrganisation className="absolute pin-t pin-r mt-4 mr-4" height={28} />
+      <IconOrganisation className="absolute top-0 right-0 mt-4 mr-4" height={28} />
       <table className="w-full">
         <tbody>
           <tr>

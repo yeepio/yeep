@@ -62,8 +62,8 @@ function Modal(props) {
             'h-8',
             'sm:w-4',
             'sm:h-4',
-            'pin-r',
-            'pin-t',
+            'right-0',
+            'top-0',
             'mt-2',
             'mr-2'
           )}

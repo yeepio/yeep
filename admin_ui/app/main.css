@@ -1,4 +1,15 @@
-@tailwind preflight;
+@tailwind base;
+
+html {
+  line-height:1.15;
+}
+h1 {
+  @apply text-3xl;
+}
+h2 {
+  @apply text-xl;
+}
+
 @tailwind components;
 @tailwind utilities;
 

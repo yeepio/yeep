@@ -52,8 +52,8 @@ NavLink.propTypes = {
  */
 const AsideNav = () => {
   return (
-    <nav className="bg-grey-light w-64 flex-no-shrink hidden lg:block">
-      <ul className="list-reset">
+    <nav className="bg-grey-light w-64 flex-shrink-0 hidden lg:block">
+      <ul>
         <li>
           <NavLink to="/">
             <IconHome className="nav-icon" />
