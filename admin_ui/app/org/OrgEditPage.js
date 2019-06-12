@@ -10,7 +10,7 @@ const OrgEditPage = ({ orgId }) => {
   useDocumentTitle(`Edit organization #${orgId}`);
   return (
     <React.Fragment>
-      <h1 className="mb-6">Edit organization #{orgId}</h1>
+      <h1 className="mb-6 font-semibold text-3xl">Edit organization #{orgId}</h1>
       <TabLinks
         className="mb-6"
         links={[

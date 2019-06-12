@@ -10,7 +10,7 @@ const UserEditPage = ({ userId }) => {
   useDocumentTitle(`Edit user #${userId}`);
   return (
     <React.Fragment>
-      <h1 className="mb-6">Edit user &quot;USER_FULLNAME&quot;</h1>
+      <h1 className="font-semibold text-3xl mb-6">Edit user &quot;USER_FULLNAME&quot;</h1>
       <TabLinks
         className="mb-6"
         links={[

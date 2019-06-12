@@ -7,7 +7,7 @@ const TabLinks = ({ links, className }) => {
   // Iterate through the props.links array and for each element
   // create a <Link /> component and style as a tab
   return (
-    <ul className={classNames('list-reset', 'flex', 'border-grey', 'border-b', className)}>
+    <ul className={classNames('flex', 'border-grey', 'border-b', className)}>
       {links.map((link) => (
         <li key={`tab_${link.label}`} className="mr-1">
           <Link to={link.to} getProps={getTabStyle}>

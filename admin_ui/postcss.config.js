@@ -2,5 +2,5 @@ const tailwindcss = require('tailwindcss');
 const autoprefixer = require('autoprefixer');
 
 module.exports = {
-  plugins: [tailwindcss('./admin_ui/theme/tailwind.js'), autoprefixer],
+  plugins: [tailwindcss('./admin_ui/theme/tailwind.config.js'), autoprefixer],
 };

@@ -10,7 +10,7 @@ const PermissionCreatePage = () => {
   useDocumentTitle('Create permission');
   return (
     <React.Fragment>
-      <h1 className="mb-6">Create new permission</h1>
+      <h1 className="font-semibold text-3xl mb-6">Create new permission</h1>
       <fieldset className="mb-6">
         <legend>Permission fields</legend>
         <div className="form-group mb-4">

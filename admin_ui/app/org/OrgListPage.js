@@ -38,7 +38,7 @@ const OrgList = () => {
   return (
     <React.Fragment>
       <ButtonLink to="create" className="float-right">Create new</ButtonLink>
-      <h1 className="mb-6">Organizations</h1>
+      <h1 className="mb-6 font-semibold text-3xl">Organizations</h1>
       <fieldset className="mb-6">
         <legend>Quick search</legend>
         <Input id="quicksearch" placeholder="quicksearch" />

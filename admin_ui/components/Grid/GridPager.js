@@ -4,7 +4,7 @@ import React from 'react';
 const GridPager = () => {
   return (
     <React.Fragment>
-      <ul className="list-reset ml-auto whitespace-no-wrap">
+      <ul className="ml-auto whitespace-no-wrap">
         <li className="px-2 inline-block">
           <a href="/">&laquo; Previous</a>
         </li>

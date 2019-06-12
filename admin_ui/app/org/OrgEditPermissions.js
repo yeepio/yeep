@@ -44,7 +44,7 @@ const OrgEditPermissions = ({ orgId }) => {
   return (
     <React.Fragment>
       <OrgEditPermissionsModals />
-      <h1 className="mb-6">&quot;Organization name&quot;: Permissions</h1>
+      <h1 className="font-semibold text-3xl mb-6">&quot;Organization name&quot;: Permissions</h1>
       <TabLinks
         className="mb-6"
         links={[

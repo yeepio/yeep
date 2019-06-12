@@ -10,7 +10,7 @@ const ForgotPasswordPage = () => {
     <div className="w-screen min-h-screen bg-grey-light flex items-center justify-center">
       <form className="block text-center w-full p-3 sm:w-auto" action="/">
         <img src="/yeep-logo-horizontal.svg" alt="Yeep logo" className="mb-6 w-48" />
-        <h2 className="mb-6">Yeep administration - Forgot password</h2>
+        <h2 className="font-bold text-2xl mb-6">Yeep administration - Forgot password</h2>
         <div className="text-left mb-6">
           <label htmlFor="email" className="block mb-2">
             Username / email:

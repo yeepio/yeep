@@ -31,7 +31,7 @@ const PermissionDeleteModal = () => {
 
   return (
     <Modal onClose={modalClose}>
-      <h2 className="mb-4">Delete permission &quot;{permission.name}&quot;?</h2>
+      <h2 className="font-bold text-2xl mb-4">Delete permission &quot;{permission.name}&quot;?</h2>
       <p className="mb-4">
         Please note that blog.read is present in <Link to="/roles">XXX</Link> roles.
       </p>
