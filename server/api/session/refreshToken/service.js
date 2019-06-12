@@ -8,7 +8,7 @@ import {
   TokenNotFoundError,
   InvalidAccessToken,
 } from '../../../constants/errors';
-import { AUTHENTICATION } from '../../../constants/tokenTypes';
+import { AUTHENTICATION, EXCHANGE } from '../../../constants/tokenTypes';
 import jwt from '../../../utils/jwt';
 
 /**
@@ -49,6 +49,16 @@ export async function refreshSessionToken(ctx, props) {
 
   // ensure authentication token exists
   if (!authToken) {
+    // check if exchange token exists
+    const exchangeToken = await TokenModel.findOne({
+      secret: payload.jti,
+      type: EXCHANGE,
+    });
+
+    if (exchangeToken) {
+      return exchangeToken.payload.toJSON();
+    }
+
     throw new TokenNotFoundError('Authentication token does not exist or has already expired');
   }
 
@@ -69,18 +79,85 @@ export async function refreshSessionToken(ctx, props) {
 
   // sign new JWT
   const now = new Date();
-  let nextExpDate = addSeconds(now, config.session.bearer.expiresInSeconds);
-  if (nextExpDate > authToken.expiresAt) {
-    nextExpDate = authToken.expiresAt;
+  const secret = TokenModel.generateSecret({ length: 24 });
+  let expiresAt = addSeconds(now, config.session.bearer.expiresInSeconds);
+  if (expiresAt > authToken.expiresAt) {
+    expiresAt = authToken.expiresAt;
   }
   const token = await jwt.signAsync(
     {
-      ...payload,
+      user: payload.user,
       iat: Math.floor(now.getTime() / 1000),
-      exp: Math.floor(nextExpDate.getTime() / 1000),
+      exp: Math.floor(expiresAt.getTime() / 1000),
     },
-    config.session.bearer.secret
+    config.session.bearer.secret,
+    {
+      jwtid: authToken.secret,
+      issuer: config.name,
+      algorithm: 'HS512',
+    }
   );
 
-  return { token, expiresAt: authToken.expiresAt };
+  // update database
+  const session = await db.startSession();
+  session.startTransaction();
+  try {
+    // create new authentication token
+    await TokenModel.create(
+      [
+        {
+          secret,
+          type: AUTHENTICATION,
+          payload: {},
+          user: ObjectId(user.id),
+          expiresAt: authToken.expiresAt, // same as previous authToken
+        },
+      ],
+      {
+        session,
+      }
+    );
+
+    // set exchange token
+    let exchangeExpiresAt = addSeconds(now, 60);
+    if (exchangeExpiresAt > authToken.expiresAt) {
+      exchangeExpiresAt = authToken.expiresAt;
+    }
+    await TokenModel.create(
+      [
+        {
+          secret: authToken.secret,
+          type: EXCHANGE,
+          payload: {
+            token,
+            expiresAt,
+          },
+          user: ObjectId(user.id),
+          expiresAt: exchangeExpiresAt,
+        },
+      ],
+      {
+        session,
+      }
+    );
+
+    // delete previous authentication token
+    await TokenModel.deleteOne(
+      {
+        _id: authToken._id,
+      },
+      {
+        session,
+      }
+    );
+
+    await session.commitTransaction();
+  } catch (err) {
+    await session.abortTransaction();
+    throw err;
+  } finally {
+    session.endSession();
+  }
+
+  return { token, expiresAt };
 }
