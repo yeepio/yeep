@@ -4,7 +4,7 @@
 
 ## Description
 
-Refreshes the designated session cookie that is about to expire or has already expired.
+Refreshes the designated session cookie that is about to expire or has already expired. Use this method to extend a user's session.
 
 ---
 
@@ -30,12 +30,15 @@ Requestor must be authenticated with session cookie.
 
 ```
 POST /api/session.refreshCookie
-Authorization: `Cookie ${sessionCookie}`
+Authorization: `Cookie ${cookie}`
 ```
 
 **Response**
 
-`200 OK`
+```
+200 OK
+Set-Cookie eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImV4cCI6MTUzNTc2NjgwNn0.2XMBMAGmQv7xTP-tzXksXfpxlxD8ZvsIGOlCXfPZXq0
+```
 
 ```json
 {

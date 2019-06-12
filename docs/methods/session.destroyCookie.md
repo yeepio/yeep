@@ -4,9 +4,9 @@
 
 ## Description
 
-Removes the designated session cookie, a.k.a sign-out.
+Removes the designated session cookie, a.k.a sign-out. This method is a direct equivalent of _user sign-out_.
 
-After calling `session.destroyCookie()` the user will not be able to perform authenticated API requests until they sign-in again.
+After calling `session.destroyToken()` the user will not be able to use the specific cookie against the system until they create a new session cookie.
 
 ---
 
@@ -31,7 +31,7 @@ Requestor must be authenticated with session cookie.
 
 ```
 POST /api/session.destroyCookie
-Authorization: `Cookie ${sessionCookie}`
+Authorization: `Cookie ${cookie}`
 ```
 
 **Response**

@@ -1,19 +1,23 @@
-# session.create
+# session.issueToken
 
-`POST /api/session.create`
+`POST /api/session.issueToken`
 
 ## Description
 
-Creates new session, a.k.a. sign-in, for the designated user. Returns (1) an `accessToken` and (2) a `refreshToken`.
+Issues a new session token for the designated user. Session tokens are used to authenticate the user identity with subsequent API requests.
 
-The `accessToken` is used to authenticate the user identity in API requests that require authentication, e.g.
+This method is a direct equivalent to _user sign-in_. It is best suited for microservices and native applications. If you are building a web application or an SPA please consider using [session.setCookie()](./session.setCookie.md) instead, as there is no secure way for storing a session token in the browser.
+
+Here's a handy example of how to use the session token to authenticate against an API request:
 
 ```
 POST /api/user.info
-Authorization: `Bearer ${authToken}`
+Authorization: `Bearer ${token}`
 ```
 
-The `refreshToken` can be used to refresh the `accessToken` after the latter has expired or is about to expire. Use this to extend a user's session. See [session.refresh()](./session.refresh.md) for further info.
+All session tokens expire after specific time (as indicated by `yeep.config.js`) and require refreshing. Use [session.refreshToken()](./session.refreshToken.md) to extend a user's session after their token has expired or is about to expire.
+
+If you want to destroy a session token, a.k.a. _user sign-out_, use [session.destroyToken()](./session.destroyToken.md).
 
 ---
 
@@ -42,8 +46,8 @@ This method is publicly available.
 
 - **ok** _(boolean)_ — indicates whether the request was successfully completed
 - **error** _(Object)_ — contains error details in case of an error
-- **accessToken** _(string)_ — an access token, used to authenticate the user identity
-- **refreshToken** _(string)_ — a refresh token, used to refresh the accessToken above
+- **token** _(string)_ — session token, used to authenticate the user identity
+- **expiresAt** _(string)_ — a string representation of the date when the new session token expires
 
 ---
 
@@ -54,7 +58,7 @@ This method is publicly available.
 **Request**
 
 ```
-POST /api/session.create
+POST /api/session.issueToken
 ```
 
 ```json
@@ -71,8 +75,8 @@ POST /api/session.create
 ```json
 {
   "ok": true,
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ",
-  "refreshToken": "frpp2b3fesG3ZS3E9vqa3pm1"
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImV4cCI6MTUzNTc2MzIwNn0.rDEBkzfdLdm3RnkPpozWGZMF_VGvBHQfCk1-Q1oz2mg",
+  "expiresAt": "Sat Sep 01 2018 14:53:26 GMT+1400 (LINT)"
 }
 ```
 
@@ -81,7 +85,7 @@ POST /api/session.create
 **Request**
 
 ```
-POST /api/session.create
+POST /api/session.issueToken
 ```
 
 ```json
@@ -126,7 +130,7 @@ In which case the user should repeat the initial request, alongside their OTP to
 ```json
 {
   "ok": true,
-  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ",
-  "refreshToken": "frpp2b3fesG3ZS3E9vqa3pm1"
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWUsImV4cCI6MTUzNTc2MzIwNn0.rDEBkzfdLdm3RnkPpozWGZMF_VGvBHQfCk1-Q1oz2mg",
+  "expiresAt": "Sat Sep 01 2018 14:53:26 GMT+1400 (LINT)"
 }
 ```
