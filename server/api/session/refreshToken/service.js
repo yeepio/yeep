@@ -109,7 +109,7 @@ export async function refreshSessionToken(ctx, props) {
           secret,
           type: AUTHENTICATION,
           payload: {},
-          user: ObjectId(user.id),
+          user: user._id,
           expiresAt: authToken.expiresAt, // same as previous authToken
         },
       ],
@@ -132,7 +132,7 @@ export async function refreshSessionToken(ctx, props) {
             token,
             expiresAt,
           },
-          user: ObjectId(user.id),
+          user: user._id,
           expiresAt: exchangeExpiresAt,
         },
       ],
