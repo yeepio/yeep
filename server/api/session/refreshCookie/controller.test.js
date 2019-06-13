@@ -7,7 +7,7 @@ import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
 import deleteUser from '../../user/delete/service';
 import { setSessionCookie } from '../setCookie/service';
-import { AUTHENTICATION } from '../../../constants/tokenTypes';
+import { AUTHENTICATION, EXCHANGE } from '../../../constants/tokenTypes';
 import jwt from '../../../utils/jwt';
 
 describe('api/session.refreshCookie', () => {
@@ -76,6 +76,18 @@ describe('api/session.refreshCookie', () => {
     expect(
       TokenModel.countDocuments({
         secret: payload.jti,
+        type: AUTHENTICATION,
+      })
+    ).resolves.toBe(0);
+    expect(
+      TokenModel.countDocuments({
+        secret: payload.jti,
+        type: EXCHANGE,
+      })
+    ).resolves.toBe(1);
+    expect(
+      TokenModel.countDocuments({
+        secret: nextPayload.jti,
         type: AUTHENTICATION,
       })
     ).resolves.toBe(1);
