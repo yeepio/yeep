@@ -225,11 +225,12 @@ export async function issueSessionToken(
   }
 
   // sign token
+  const expiresAt = addSeconds(now, config.session.bearer.expiresInSeconds);
   const token = await jwt.signAsync(
     {
       ...payload,
       iat: Math.floor(now.getTime() / 1000),
-      exp: Math.floor(addSeconds(now, config.session.bearer.expiresInSeconds).getTime() / 1000),
+      exp: Math.floor(expiresAt.getTime() / 1000),
     },
     config.session.bearer.secret,
     {
@@ -241,6 +242,6 @@ export async function issueSessionToken(
 
   return {
     token,
-    expiresAt: authToken.expiresAt,
+    expiresAt,
   };
 }
