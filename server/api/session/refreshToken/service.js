@@ -92,7 +92,7 @@ export async function refreshSessionToken(ctx, props) {
     },
     config.session.bearer.secret,
     {
-      jwtid: authToken.secret,
+      jwtid: secret,
       issuer: config.name,
       algorithm: 'HS512',
     }
@@ -154,6 +154,19 @@ export async function refreshSessionToken(ctx, props) {
     await session.commitTransaction();
   } catch (err) {
     await session.abortTransaction();
+
+    if (err.code === 112) {
+      // check if exchange token exists
+      const exchangeToken = await TokenModel.findOne({
+        secret: payload.jti,
+        type: EXCHANGE,
+      });
+
+      if (exchangeToken) {
+        return exchangeToken.payload.toJSON();
+      }
+    }
+
     throw err;
   } finally {
     session.endSession();

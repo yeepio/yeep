@@ -37,30 +37,38 @@ describe('api/session.refreshToken', () => {
     await server.teardown();
   });
 
-  test('refreshes session token', async () => {
+  test('refreshes session token while avoiding race conditions', async () => {
     const { token } = await issueSessionToken(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
 
     const payload = await jwt.verifyAsync(token, ctx.config.session.bearer.secret);
-    await delay(1000); // wait at least for one second to pass
+    await delay(1000); // wait for 1 second
 
-    const res = await request(server)
-      .post('/api/session.refreshToken')
-      .send({
-        token,
-      });
+    const [res1, res2] = await Promise.all([
+      request(server)
+        .post('/api/session.refreshToken')
+        .send({
+          token,
+        }),
+      request(server)
+        .post('/api/session.refreshToken')
+        .send({
+          token,
+        }),
+    ]);
 
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual(
+    expect(res1.status).toBe(200);
+    expect(res1.body).toEqual(
       expect.objectContaining({
         ok: true,
         token: expect.any(String),
+        expiresAt: expect.any(String),
       })
     );
 
-    const nextPayload = await jwt.verifyAsync(res.body.token, ctx.config.session.bearer.secret);
+    const nextPayload = await jwt.verifyAsync(res1.body.token, ctx.config.session.bearer.secret);
     expect(nextPayload.exp).toBeGreaterThan(payload.exp);
     expect(nextPayload.iat).toBeGreaterThan(payload.iat);
 
@@ -77,38 +85,12 @@ describe('api/session.refreshToken', () => {
         type: EXCHANGE,
       })
     ).resolves.toBe(1);
-  });
-
-  test('handles concurrent requests', async () => {
-    const { token } = await issueSessionToken(ctx, {
-      username: 'wile',
-      password: 'catch-the-b1rd$',
-    });
-
-    await delay(1000); // wait at least for one second to pass
-
-    const res1 = await request(server)
-      .post('/api/session.refreshToken')
-      .send({
-        token,
-      });
-
-    expect(res1.status).toBe(200);
-    expect(res1.body).toEqual(
-      expect.objectContaining({
-        ok: true,
-        token: expect.any(String),
-        expiresAt: expect.any(String),
+    expect(
+      TokenModel.countDocuments({
+        secret: nextPayload.jti,
+        type: AUTHENTICATION,
       })
-    );
-
-    await delay(10);
-
-    const res2 = await request(server)
-      .post('/api/session.refreshToken')
-      .send({
-        token,
-      });
+    ).resolves.toBe(1);
 
     expect(res2.status).toBe(200);
     expect(res2.body).toEqual(
