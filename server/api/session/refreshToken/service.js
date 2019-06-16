@@ -10,7 +10,7 @@ import {
 } from '../../../constants/errors';
 import jwt, { omitJwtProps } from '../../../utils/jwt';
 
-async function issueJwtFromExchangeToken(ctx, exchangeToken) {
+async function issueBearerJwtFromExchangeToken(ctx, exchangeToken) {
   const { config } = ctx;
 
   const token = await jwt.signAsync(
@@ -74,7 +74,7 @@ export async function refreshSessionToken(ctx, props) {
 
     if (exchangeToken) {
       console.log('exit ab');
-      return issueJwtFromExchangeToken(ctx, exchangeToken);
+      return issueBearerJwtFromExchangeToken(ctx, exchangeToken);
     }
 
     throw new TokenNotFoundError('Authentication token does not exist or has already expired');
@@ -174,7 +174,7 @@ export async function refreshSessionToken(ctx, props) {
       const exchangeToken = await ExchangeTokenModel.findOne({ secret: payload.jti });
 
       if (exchangeToken) {
-        return issueJwtFromExchangeToken(ctx, exchangeToken);
+        return issueBearerJwtFromExchangeToken(ctx, exchangeToken);
       }
     }
 
