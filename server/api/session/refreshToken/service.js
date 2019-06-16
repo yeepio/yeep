@@ -73,7 +73,6 @@ export async function refreshSessionToken(ctx, props) {
     const exchangeToken = await ExchangeTokenModel.findOne({ secret: payload.jti });
 
     if (exchangeToken) {
-      console.log('exit ab');
       return issueBearerJwtFromExchangeToken(ctx, exchangeToken);
     }
 
