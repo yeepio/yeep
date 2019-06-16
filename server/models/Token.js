@@ -51,6 +51,7 @@ const tokenSchema = new Schema(
     validateBeforeSave: true,
     versionKey: '_v',
     timestamps: true,
+    discriminatorKey: 'type',
   }
 );
 
