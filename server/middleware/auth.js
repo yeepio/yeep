@@ -168,16 +168,6 @@ export async function isSessionCookie({ request, config }, next) {
   await next();
 }
 
-export async function isSessionToken({ request, config }, next) {
-  if (get(request, ['session', 'protocol']) !== 'bearer') {
-    throw Boom.unauthorized('Session token not specified', 'Bearer', {
-      realm: config.name,
-    });
-  }
-
-  await next();
-}
-
 export const isUserAuthenticated = () => async ({ request }, next) => {
   if (!has(request, ['session', 'user'])) {
     throw Boom.notFound('Resource does not exist'); // lie with 404
