@@ -1,10 +1,9 @@
-import { AUTHENTICATION } from '../../../constants/tokenTypes';
 import jwt from '../../../utils/jwt';
 import { InvalidAccessToken } from '../../../constants/errors';
 
 export async function destroySessionToken(ctx, { token }) {
   const { db, config } = ctx;
-  const TokenModel = db.model('Token');
+  const AuthenticationTokenModel = db.model('AuthenticationToken');
 
   // verify JWT authenticity
   let payload;
@@ -25,10 +24,7 @@ export async function destroySessionToken(ctx, { token }) {
   }
 
   // delete authentication token from db
-  const result = await TokenModel.deleteOne({
-    secret: payload.jti,
-    type: AUTHENTICATION,
-  });
+  const result = await AuthenticationTokenModel.deleteOne({ secret: payload.jti });
 
   return !!result.ok;
 }

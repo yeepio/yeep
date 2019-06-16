@@ -26,7 +26,7 @@ const tokenSchema = new Schema(
     payload: {
       type: Map,
       required: false,
-    },
+    }, // TODO: remove generic payload prop
     user: {
       type: Schema.Types.ObjectId,
       required: false,

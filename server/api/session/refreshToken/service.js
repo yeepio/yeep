@@ -8,8 +8,30 @@ import {
   TokenNotFoundError,
   InvalidAccessToken,
 } from '../../../constants/errors';
-import { AUTHENTICATION, EXCHANGE } from '../../../constants/tokenTypes';
-import jwt from '../../../utils/jwt';
+import jwt, { omitJwtProps } from '../../../utils/jwt';
+
+async function issueJwtFromExchangeToken(ctx, exchangeToken) {
+  const { config } = ctx;
+
+  const token = await jwt.signAsync(
+    {
+      ...exchangeToken.swapPayload,
+      iat: Math.floor(exchangeToken.createdAt.getTime() / 1000),
+      exp: Math.floor(exchangeToken.swapExpiresAt.getTime() / 1000),
+    },
+    config.session.bearer.secret,
+    {
+      jwtid: exchangeToken.swapSecret,
+      issuer: config.name,
+      algorithm: 'HS512',
+    }
+  );
+
+  return {
+    token,
+    expiresAt: exchangeToken.swapExpiresAt,
+  };
+}
 
 /**
  * Refreshes the supplied accessToken.
@@ -21,7 +43,8 @@ import jwt from '../../../utils/jwt';
  */
 export async function refreshSessionToken(ctx, props) {
   const { db, config } = ctx;
-  const TokenModel = db.model('Token');
+  const AuthenticationTokenModel = db.model('AuthenticationToken');
+  const ExchangeTokenModel = db.model('ExchangeToken');
   const UserModel = db.model('User');
 
   // parse token payload
@@ -42,30 +65,23 @@ export async function refreshSessionToken(ctx, props) {
   }
 
   // retrieve authentication token from db
-  const authToken = await TokenModel.findOne({
-    secret: payload.jti,
-    type: AUTHENTICATION,
-  });
+  const authToken = await AuthenticationTokenModel.findOne({ secret: payload.jti });
 
   // ensure authentication token exists
   if (!authToken) {
     // check if exchange token exists
-    const exchangeToken = await TokenModel.findOne({
-      secret: payload.jti,
-      type: EXCHANGE,
-    });
+    const exchangeToken = await ExchangeTokenModel.findOne({ secret: payload.jti });
 
     if (exchangeToken) {
-      return exchangeToken.payload.toJSON();
+      console.log('exit ab');
+      return issueJwtFromExchangeToken(ctx, exchangeToken);
     }
 
     throw new TokenNotFoundError('Authentication token does not exist or has already expired');
   }
 
   // retrieve user by ID
-  const user = await UserModel.findOne({
-    _id: ObjectId(payload.user.id),
-  });
+  const user = await UserModel.findOne({ _id: ObjectId(payload.user.id) });
 
   // ensure user exists
   if (!user) {
@@ -79,7 +95,7 @@ export async function refreshSessionToken(ctx, props) {
 
   // sign new JWT
   const now = new Date();
-  const secret = TokenModel.generateSecret({ length: 24 });
+  const secret = AuthenticationTokenModel.generateSecret({ length: 24 });
   let expiresAt = addSeconds(now, config.session.bearer.expiresInSeconds);
   if (expiresAt > authToken.expiresAt) {
     expiresAt = authToken.expiresAt;
@@ -103,13 +119,12 @@ export async function refreshSessionToken(ctx, props) {
   session.startTransaction();
   try {
     // create new authentication token
-    await TokenModel.create(
+    await AuthenticationTokenModel.create(
       [
         {
           secret,
-          type: AUTHENTICATION,
-          payload: {},
           user: user._id,
+          createsAt: now,
           expiresAt: authToken.expiresAt, // same as previous authToken
         },
       ],
@@ -123,16 +138,15 @@ export async function refreshSessionToken(ctx, props) {
     if (exchangeExpiresAt > authToken.expiresAt) {
       exchangeExpiresAt = authToken.expiresAt;
     }
-    await TokenModel.create(
+    await ExchangeTokenModel.create(
       [
         {
           secret: authToken.secret,
-          type: EXCHANGE,
-          payload: {
-            token,
-            expiresAt,
-          },
           user: user._id,
+          swapSecret: secret,
+          swapPayload: omitJwtProps(payload),
+          swapExpiresAt: expiresAt,
+          createsAt: now,
           expiresAt: exchangeExpiresAt,
         },
       ],
@@ -142,7 +156,7 @@ export async function refreshSessionToken(ctx, props) {
     );
 
     // delete previous authentication token
-    await TokenModel.deleteOne(
+    await AuthenticationTokenModel.deleteOne(
       {
         _id: authToken._id,
       },
@@ -157,13 +171,10 @@ export async function refreshSessionToken(ctx, props) {
 
     if (err.code === 112) {
       // check if exchange token exists
-      const exchangeToken = await TokenModel.findOne({
-        secret: payload.jti,
-        type: EXCHANGE,
-      });
+      const exchangeToken = await ExchangeTokenModel.findOne({ secret: payload.jti });
 
       if (exchangeToken) {
-        return exchangeToken.payload.toJSON();
+        return issueJwtFromExchangeToken(ctx, exchangeToken);
       }
     }
 
@@ -172,5 +183,6 @@ export async function refreshSessionToken(ctx, props) {
     session.endSession();
   }
 
+  console.log(token);
   return { token, expiresAt };
 }

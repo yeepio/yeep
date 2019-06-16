@@ -11,7 +11,6 @@ import {
 } from '../../../constants/errors';
 import { getUserPermissions } from '../../user/info/service';
 import jwt from '../../../utils/jwt';
-import { AUTHENTICATION } from '../../../constants/tokenTypes';
 import { PASSWORD, TOTP } from '../../../constants/authFactorTypes';
 
 export const defaultProjection = {
@@ -92,19 +91,6 @@ export async function getUserAndVerifyPassword(ctx, { username, emailAddress, pa
   };
 }
 
-/**
- * Issues authentication token for the designated user.
- * @param {Object} ctx
- * @property {Object} ctx.db
- * @property {Object} ctx.jwt
- * @property {Object} ctx.config
- * @param {Object} props
- * @property {Object} props.user
- * @property {Object} [props.projection]
- * @return {Promise}
- */
-export async function issueAuthToken(ctx, { user, projection }) {}
-
 export async function verifyAuthFactor({ db }, { type, token, user }) {
   // retrieve auth factor by type
   const authFactor = user.authFactors.find((authFactor) => authFactor.type === type);
@@ -151,7 +137,7 @@ export async function issueSessionToken(
   { username, emailAddress, password, projection = defaultProjection, secondaryAuthFactor }
 ) {
   const { db, config } = ctx;
-  const TokenModel = db.model('Token');
+  const AuthenticationTokenModel = db.model('AuthenticationToken');
   const UserModel = db.model('User');
 
   // retrieve user + verify password
@@ -189,11 +175,9 @@ export async function issueSessionToken(
 
   // create authToken in db
   const now = new Date();
-  const secret = TokenModel.generateSecret({ length: 24 });
-  const authToken = await TokenModel.create({
+  const secret = AuthenticationTokenModel.generateSecret({ length: 24 });
+  const authToken = await AuthenticationTokenModel.create({
     secret,
-    type: AUTHENTICATION,
-    payload: {},
     user: ObjectId(user.id),
     expiresAt: addSeconds(now, config.session.lifetimeInSeconds),
   });
