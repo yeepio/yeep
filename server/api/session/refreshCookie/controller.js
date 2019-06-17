@@ -9,7 +9,7 @@ async function handler(ctx) {
   const { request, response, config } = ctx;
 
   const session = await refreshSession(ctx, {
-    secret: request.session.token.id,
+    secret: request.session.token.secret,
     userId: request.session.user.id,
     projection: deriveProjection(request.session.user),
   });

@@ -8,7 +8,7 @@ async function handler(ctx) {
   const { response, request, cookies } = ctx;
 
   const isSessionCookieDestroyed = await destroySession(ctx, {
-    secret: request.session.token.id,
+    secret: request.session.token.secret,
   });
 
   if (!isSessionCookieDestroyed) {

@@ -27,7 +27,7 @@ async function decorateSessionByCookie(ctx, { cookie }) {
   request.session = {
     protocol: 'cookie',
     token: {
-      id: payload.jti,
+      secret: payload.jti,
     },
     user: payload.user,
   };
@@ -125,7 +125,7 @@ async function decorateSessionByToken(ctx, { authorizationHeader }) {
   request.session = {
     protocol: 'bearer',
     token: {
-      id: tokenPayload.jti,
+      secret: tokenPayload.jti,
     },
     user: tokenPayload.user,
   };
