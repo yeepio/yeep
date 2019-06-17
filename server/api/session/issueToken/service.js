@@ -1,6 +1,5 @@
 import addSeconds from 'date-fns/add_seconds';
 import isBefore from 'date-fns/is_before';
-import { ObjectId } from 'mongodb';
 import {
   UserNotFoundError,
   InvalidUserPasswordError,
@@ -12,13 +11,14 @@ import {
 import { getUserPermissions } from '../../user/info/service';
 import jwt from '../../../utils/jwt';
 import { PASSWORD, TOTP } from '../../../constants/authFactorTypes';
+import addSecondsWithCap from '../../../utils/addSecondsWithCap';
 
 export const defaultProjection = {
   permissions: false,
   profile: false,
 };
 
-const constructUserMatchQuery = (username, emailAddress) => {
+function constructUserMatchQuery(username, emailAddress) {
   if (username) {
     return { username };
   }
@@ -26,7 +26,7 @@ const constructUserMatchQuery = (username, emailAddress) => {
   return {
     emails: { $elemMatch: { address: emailAddress } },
   };
-};
+}
 
 /**
  * Verifies password and returns the designated user.
@@ -132,7 +132,33 @@ export async function verifyAuthFactor({ db }, { type, token, user }) {
   }
 }
 
-export async function issueSessionToken(
+export async function signBearerJWT(ctx, session) {
+  const { config } = ctx;
+
+  const expiresAt = addSecondsWithCap(
+    session.createdAt,
+    config.session.bearer.expiresInSeconds,
+    session.expiresAt
+  );
+
+  const token = await jwt.signAsync(
+    {
+      ...session.payload,
+      iat: Math.floor(session.createdAt.getTime() / 1000),
+      exp: Math.floor(expiresAt.getTime() / 1000),
+    },
+    config.session.bearer.secret,
+    {
+      jwtid: session.secret,
+      issuer: config.name,
+      algorithm: 'HS512',
+    }
+  );
+
+  return { token, expiresAt };
+}
+
+export async function createSession(
   ctx,
   { username, emailAddress, password, projection = defaultProjection, secondaryAuthFactor }
 ) {
@@ -178,7 +204,8 @@ export async function issueSessionToken(
   const secret = AuthenticationTokenModel.generateSecret({ length: 24 });
   const authToken = await AuthenticationTokenModel.create({
     secret,
-    user: ObjectId(user.id),
+    user: user._id,
+    createdAt: now,
     expiresAt: addSeconds(now, config.session.lifetimeInSeconds),
   });
 
@@ -208,24 +235,10 @@ export async function issueSessionToken(
     });
   }
 
-  // sign token
-  const expiresAt = addSeconds(now, config.session.bearer.expiresInSeconds);
-  const token = await jwt.signAsync(
-    {
-      ...payload,
-      iat: Math.floor(now.getTime() / 1000),
-      exp: Math.floor(expiresAt.getTime() / 1000),
-    },
-    config.session.bearer.secret,
-    {
-      jwtid: authToken.secret,
-      issuer: config.name,
-      algorithm: 'HS512',
-    }
-  );
-
   return {
-    token,
-    expiresAt,
+    secret: authToken.secret,
+    payload,
+    createdAt: now,
+    expiresAt: authToken.expiresAt,
   };
 }

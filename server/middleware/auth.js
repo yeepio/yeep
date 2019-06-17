@@ -10,7 +10,9 @@ import binarySearch from 'binary-search';
 import jwt from '../utils/jwt';
 import { AuthorizationError, UserNotFoundError, UserDeactivatedError } from '../constants/errors';
 import { getUserPermissions } from '../api/user/info/service';
-import { refreshSessionCookie } from '../api/session/refreshCookie/service';
+import { verifyCookieJWT } from '../api/session/refreshCookie/service';
+import { refreshSession, deriveProjection } from '../api/session/refreshToken/service';
+import { signCookieJWT } from '../api/session/setCookie/service';
 import { isFunction } from 'util';
 import { ObjectId } from 'mongodb';
 import { isBefore } from 'date-fns';
@@ -19,31 +21,19 @@ async function decorateSessionByCookie(ctx, { cookie }) {
   const { request, config, cookies } = ctx;
   const now = new Date();
 
-  // verify cookie JWT authenticity
-  let cookiePayload;
-  try {
-    cookiePayload = await jwt.verifyAsync(cookie, config.session.cookie.secret, {
-      ignoreExpiration: true,
-      issuer: config.name,
-      algorithm: 'HS512',
-    });
-  } catch (err) {
-    throw Boom.unauthorized('Invalid session cookie', 'Cookie', {
-      realm: config.name,
-    });
-  }
+  const payload = await verifyCookieJWT(ctx, { token: cookie });
 
   // decorate request with session data
   request.session = {
     protocol: 'cookie',
     token: {
-      id: cookiePayload.jti,
+      id: payload.jti,
     },
-    user: cookiePayload.user,
+    user: payload.user,
   };
 
   // ensure cookie JWT has not expired
-  if (cookiePayload.exp * 1000 >= now.getTime()) {
+  if (payload.exp * 1000 >= now.getTime()) {
     return; // exit
   }
 
@@ -62,14 +52,30 @@ async function decorateSessionByCookie(ctx, { cookie }) {
   }
 
   // attempt to refresh the cookie - will throw error if something goes wrong
-  let nextCookie, expiresAt;
   try {
-    const session = await refreshSessionCookie(ctx, {
-      secret: cookiePayload.jti,
-      userId: cookiePayload.user.id,
+    const session = await refreshSession(ctx, {
+      secret: payload.jti,
+      userId: payload.user.id,
+      projection: deriveProjection(payload.user),
     });
-    nextCookie = session.cookie;
-    expiresAt = session.expiresAt;
+    const { token } = await signCookieJWT(ctx, session);
+
+    cookies.set('session', token, {
+      domain: isFunction(config.session.cookie.domain)
+        ? config.session.cookie.domain(request)
+        : config.session.cookie.domain,
+      path: isFunction(config.session.cookie.path)
+        ? config.session.cookie.path(request)
+        : config.session.cookie.path,
+      httpOnly: isFunction(config.session.cookie.httpOnly)
+        ? config.session.cookie.httpOnly(request)
+        : config.session.cookie.httpOnly,
+      secure: isFunction(config.session.cookie.secure)
+        ? config.session.cookie.secure(request)
+        : config.session.cookie.secure,
+      expires: session.expiresAt,
+      overwrite: true,
+    });
   } catch (err) {
     cookies.set('session', '', {
       expires: new Date(0),
@@ -78,24 +84,6 @@ async function decorateSessionByCookie(ctx, { cookie }) {
 
     throw err; // re-throw
   }
-
-  // set new session cookie - overwrite the old one
-  cookies.set('session', nextCookie, {
-    domain: isFunction(config.session.cookie.domain)
-      ? config.session.cookie.domain(request)
-      : config.session.cookie.domain,
-    path: isFunction(config.session.cookie.path)
-      ? config.session.cookie.path(request)
-      : config.session.cookie.path,
-    httpOnly: isFunction(config.session.cookie.httpOnly)
-      ? config.session.cookie.httpOnly(request)
-      : config.session.cookie.httpOnly,
-    secure: isFunction(config.session.cookie.secure)
-      ? config.session.cookie.secure(request)
-      : config.session.cookie.secure,
-    expires: expiresAt,
-    overwrite: true,
-  });
 }
 
 async function decorateSessionByToken(ctx, { authorizationHeader }) {

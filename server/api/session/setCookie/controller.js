@@ -5,9 +5,10 @@ import mapValues from 'lodash/mapValues';
 import isFunction from 'lodash/isFunction';
 import { validateRequest } from '../../../middleware/validation';
 import packJSONRPC from '../../../middleware/packJSONRPC';
-import { setSessionCookie, defaultProjection } from './service';
+import { signCookieJWT } from './service';
 import authFactorSchema from '../../../models/AuthFactor';
 import { PASSWORD } from '../../../constants/authFactorTypes';
+import { createSession, defaultProjection } from '../issueToken/service';
 
 export const validationSchema = {
   body: {
@@ -66,9 +67,10 @@ async function handler(ctx) {
     props.username = user;
   }
 
-  const { cookie, payload, expiresAt } = await setSessionCookie(ctx, props);
+  const session = await createSession(ctx, props);
+  const { token } = await signCookieJWT(ctx, session);
 
-  ctx.cookies.set('session', cookie, {
+  ctx.cookies.set('session', token, {
     domain: isFunction(config.session.cookie.domain)
       ? config.session.cookie.domain(request)
       : config.session.cookie.domain,
@@ -81,12 +83,12 @@ async function handler(ctx) {
     secure: isFunction(config.session.cookie.secure)
       ? config.session.cookie.secure(request)
       : config.session.cookie.secure,
-    expires: expiresAt,
+    expires: session.expiresAt,
     overwrite: true,
   });
 
   response.status = 200; // OK
-  response.body = payload;
+  response.body = session.payload;
 }
 
 export default compose([packJSONRPC, validateRequest(validationSchema), handler]);

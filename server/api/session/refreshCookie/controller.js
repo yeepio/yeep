@@ -2,17 +2,20 @@ import compose from 'koa-compose';
 import isFunction from 'lodash/isFunction';
 import { decorateSession, isUserAuthenticated, isSessionCookie } from '../../../middleware/auth';
 import packJSONRPC from '../../../middleware/packJSONRPC';
-import { refreshSessionCookie } from './service';
+import { deriveProjection, refreshSession } from '../refreshToken/service';
+import { signCookieJWT } from '../setCookie/service';
 
 async function handler(ctx) {
   const { request, response, config } = ctx;
 
-  const { cookie, payload, expiresAt } = await await refreshSessionCookie(ctx, {
+  const session = await refreshSession(ctx, {
     secret: request.session.token.id,
     userId: request.session.user.id,
+    projection: deriveProjection(request.session.user),
   });
+  const { token } = await signCookieJWT(ctx, session);
 
-  ctx.cookies.set('session', cookie, {
+  ctx.cookies.set('session', token, {
     domain: isFunction(config.session.cookie.domain)
       ? config.session.cookie.domain(request)
       : config.session.cookie.domain,
@@ -25,12 +28,12 @@ async function handler(ctx) {
     secure: isFunction(config.session.cookie.secure)
       ? config.session.cookie.secure(request)
       : config.session.cookie.secure,
-    expires: expiresAt,
+    expires: session.expiresAt,
     overwrite: true,
   });
 
   response.status = 200; // OK
-  response.body = payload;
+  response.body = session.payload;
 }
 
 export default compose([

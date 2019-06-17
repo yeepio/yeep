@@ -3,7 +3,8 @@ import request from 'supertest';
 import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
-import { setSessionCookie } from '../setCookie/service';
+import { createSession } from '../issueToken/service';
+import { signCookieJWT } from '../setCookie/service';
 import deleteUser from '../../user/delete/service';
 import { AUTHENTICATION } from '../../../constants/tokenTypes';
 import jwt from '../../../utils/jwt';
@@ -37,10 +38,11 @@ describe('api/session.destroyCookie', () => {
   });
 
   test('destroys session and responds as expected', async () => {
-    const { cookie } = await setSessionCookie(ctx, {
+    const session = await createSession(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
+    const { token: cookie } = await signCookieJWT(ctx, session);
 
     const res = await request(server)
       .post('/api/session.destroyCookie')

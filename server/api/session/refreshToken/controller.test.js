@@ -5,7 +5,7 @@ import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
 import deleteUser from '../../user/delete/service';
-import { issueSessionToken } from '../issueToken/service';
+import { createSession, signBearerJWT } from '../issueToken/service';
 import { AUTHENTICATION, EXCHANGE } from '../../../constants/tokenTypes';
 import jwt from '../../../utils/jwt';
 
@@ -38,10 +38,11 @@ describe('api/session.refreshToken', () => {
   });
 
   test('refreshes session token while avoiding race conditions', async () => {
-    const { token } = await issueSessionToken(ctx, {
+    const session = await createSession(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
+    const { token } = await signBearerJWT(ctx, session);
 
     const payload = await jwt.verifyAsync(token, ctx.config.session.bearer.secret);
     await delay(1000); // wait for 1 second

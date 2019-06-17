@@ -6,19 +6,8 @@ import { Schema } from 'mongoose';
  */
 const exchangeTokenSchema = new Schema(
   {
-    swapSecret: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: 100,
-      minlength: 6,
-    },
-    swapPayload: {
+    session: {
       type: Schema.Types.Mixed,
-      required: true,
-    },
-    swapExpiresAt: {
-      type: Date,
       required: true,
     },
   },

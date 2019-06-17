@@ -1,57 +1,26 @@
 import { ObjectId } from 'mongodb';
 import has from 'lodash/has';
 import isBefore from 'date-fns/is_before';
-import addSeconds from 'date-fns/add_seconds';
 import {
   UserNotFoundError,
   UserDeactivatedError,
   TokenNotFoundError,
   InvalidAccessToken,
 } from '../../../constants/errors';
-import jwt, { omitJwtProps } from '../../../utils/jwt';
+import jwt from '../../../utils/jwt';
+import addSecondsWithCap from '../../../utils/addSecondsWithCap';
+import { getUserPermissions } from '../../user/info/service';
 
-async function issueBearerJwtFromExchangeToken(ctx, exchangeToken) {
+export async function verifyBearerJWT(ctx, { token }) {
   const { config } = ctx;
-
-  const token = await jwt.signAsync(
-    {
-      ...exchangeToken.swapPayload,
-      iat: Math.floor(exchangeToken.createdAt.getTime() / 1000),
-      exp: Math.floor(exchangeToken.swapExpiresAt.getTime() / 1000),
-    },
-    config.session.bearer.secret,
-    {
-      jwtid: exchangeToken.swapSecret,
-      issuer: config.name,
-      algorithm: 'HS512',
-    }
-  );
-
-  return {
-    token,
-    expiresAt: exchangeToken.swapExpiresAt,
-  };
-}
-
-/**
- * Refreshes the supplied accessToken.
- * @param {Object} ctx
- * @param {Object} props
- * @property {string} props.token
- * @property {string} props.refreshToken
- * @returns {Promise}
- */
-export async function refreshSessionToken(ctx, props) {
-  const { db, config } = ctx;
-  const AuthenticationTokenModel = db.model('AuthenticationToken');
-  const ExchangeTokenModel = db.model('ExchangeToken');
-  const UserModel = db.model('User');
 
   // parse token payload
   let payload;
   try {
-    payload = await jwt.verifyAsync(props.token, config.session.bearer.secret, {
+    payload = await jwt.verifyAsync(token, config.session.bearer.secret, {
       ignoreExpiration: true,
+      issuer: config.name,
+      algorithm: 'HS512',
     });
   } catch (err) {
     throw new InvalidAccessToken('Invalid access token; cannot be verified');
@@ -64,54 +33,85 @@ export async function refreshSessionToken(ctx, props) {
     );
   }
 
+  return payload;
+}
+
+export function deriveProjection(payload) {
+  return {
+    profile: has(payload, ['user', 'fullName']),
+    permissions: has(payload, ['user', 'permissions']),
+  };
+}
+
+export async function refreshSession(ctx, { secret, userId, projection }) {
+  const { db } = ctx;
+  const AuthenticationTokenModel = db.model('AuthenticationToken');
+  const ExchangeTokenModel = db.model('ExchangeToken');
+  const UserModel = db.model('User');
+
   // retrieve authentication token from db
-  const authToken = await AuthenticationTokenModel.findOne({ secret: payload.jti });
+  const authToken = await AuthenticationTokenModel.findOne({ secret });
 
   // ensure authentication token exists
   if (!authToken) {
     // check if exchange token exists
-    const exchangeToken = await ExchangeTokenModel.findOne({ secret: payload.jti });
+    const exchangeToken = await ExchangeTokenModel.findOne({ secret });
 
     if (exchangeToken) {
-      return issueBearerJwtFromExchangeToken(ctx, exchangeToken);
+      return exchangeToken.session;
     }
 
     throw new TokenNotFoundError('Authentication token does not exist or has already expired');
   }
 
   // retrieve user by ID
-  const user = await UserModel.findOne({ _id: ObjectId(payload.user.id) });
+  const user = await UserModel.findOne({ _id: ObjectId(userId) });
 
   // ensure user exists
   if (!user) {
-    throw new UserNotFoundError(`User ${payload.user.id} not found`);
+    throw new UserNotFoundError(`User ${userId} not found`);
   }
 
   // ensure user is active
   if (!!user.deactivatedAt && isBefore(user.deactivatedAt, new Date())) {
-    throw new UserDeactivatedError(`User ${payload.user.id} is deactivated`);
+    throw new UserDeactivatedError(`User ${userId} is deactivated`);
   }
 
-  // sign new JWT
-  const now = new Date();
-  const secret = AuthenticationTokenModel.generateSecret({ length: 24 });
-  let expiresAt = addSeconds(now, config.session.bearer.expiresInSeconds);
-  if (expiresAt > authToken.expiresAt) {
-    expiresAt = authToken.expiresAt;
-  }
-  const token = await jwt.signAsync(
-    {
-      user: payload.user,
-      iat: Math.floor(now.getTime() / 1000),
-      exp: Math.floor(expiresAt.getTime() / 1000),
+  // create payload obj
+  const payload = {
+    user: {
+      id: user.id,
     },
-    config.session.bearer.secret,
-    {
-      jwtid: secret,
-      issuer: config.name,
-      algorithm: 'HS512',
-    }
-  );
+  };
+
+  // decorate payload obj with user profile data
+  if (projection.profile) {
+    payload.user.username = user.username;
+    payload.user.fullName = user.fullName;
+    payload.user.picture = user.picture || undefined;
+    payload.user.primaryEmail = UserModel.getPrimaryEmailAddress(user.emails);
+  }
+
+  // decorate payload obj with user permissions
+  if (projection.permissions) {
+    const permissions = await getUserPermissions(ctx, { userId: user.id });
+    payload.user.permissions = permissions.map((e) => {
+      return {
+        ...e,
+        resourceId: e.resourceId || undefined, // remove resourceId if unspecified to save bandwidth
+      };
+    });
+  }
+
+  // create next session obj
+  const now = new Date();
+  const nextSecret = AuthenticationTokenModel.generateSecret({ length: 24 });
+  const nextSession = {
+    secret: nextSecret,
+    payload,
+    createdAt: now,
+    expiresAt: authToken.expiresAt, // same as previous authToken
+  };
 
   // update database
   const session = await db.startSession();
@@ -121,9 +121,9 @@ export async function refreshSessionToken(ctx, props) {
     await AuthenticationTokenModel.create(
       [
         {
-          secret,
+          secret: nextSecret,
           user: user._id,
-          createsAt: now,
+          createdAt: now,
           expiresAt: authToken.expiresAt, // same as previous authToken
         },
       ],
@@ -133,20 +133,14 @@ export async function refreshSessionToken(ctx, props) {
     );
 
     // set exchange token
-    let exchangeExpiresAt = addSeconds(now, 60);
-    if (exchangeExpiresAt > authToken.expiresAt) {
-      exchangeExpiresAt = authToken.expiresAt;
-    }
     await ExchangeTokenModel.create(
       [
         {
           secret: authToken.secret,
           user: user._id,
-          swapSecret: secret,
-          swapPayload: omitJwtProps(payload),
-          swapExpiresAt: expiresAt,
-          createsAt: now,
-          expiresAt: exchangeExpiresAt,
+          session: nextSession,
+          createdAt: now,
+          expiresAt: addSecondsWithCap(now, 60, authToken.expiresAt),
         },
       ],
       {
@@ -170,10 +164,10 @@ export async function refreshSessionToken(ctx, props) {
 
     if (err.code === 112) {
       // check if exchange token exists
-      const exchangeToken = await ExchangeTokenModel.findOne({ secret: payload.jti });
+      const exchangeToken = await ExchangeTokenModel.findOne({ secret: authToken.secret });
 
       if (exchangeToken) {
-        return issueBearerJwtFromExchangeToken(ctx, exchangeToken);
+        return exchangeToken.session;
       }
     }
 
@@ -182,6 +176,23 @@ export async function refreshSessionToken(ctx, props) {
     session.endSession();
   }
 
-  console.log(token);
-  return { token, expiresAt };
+  return nextSession;
 }
+
+// let expiresAt = addSeconds(now, config.session.bearer.expiresInSeconds);
+// if (expiresAt > authToken.expiresAt) {
+//   expiresAt = authToken.expiresAt;
+// }
+// const token = await jwt.signAsync(
+//   {
+//     user: payload.user,
+//     iat: Math.floor(now.getTime() / 1000),
+//     exp: Math.floor(expiresAt.getTime() / 1000),
+//   },
+//   config.session.bearer.secret,
+//   {
+//     jwtid: secret,
+//     issuer: config.name,
+//     algorithm: 'HS512',
+//   }
+// );

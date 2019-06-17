@@ -4,7 +4,7 @@ import compose from 'koa-compose';
 import mapValues from 'lodash/mapValues';
 import { validateRequest } from '../../../middleware/validation';
 import packJSONRPC from '../../../middleware/packJSONRPC';
-import { issueSessionToken, defaultProjection } from './service';
+import { defaultProjection, createSession, signBearerJWT } from './service';
 import authFactorSchema from '../../../models/AuthFactor';
 import { PASSWORD } from '../../../constants/authFactorTypes';
 
@@ -62,10 +62,14 @@ async function handler(ctx) {
     props.username = user;
   }
 
-  const session = await issueSessionToken(ctx, props);
+  const session = await createSession(ctx, props);
+  const { token, expiresAt } = await signBearerJWT(ctx, session);
 
   response.status = 200; // OK
-  response.body = session;
+  response.body = {
+    token,
+    expiresAt,
+  };
 }
 
 export default compose([packJSONRPC, validateRequest(validationSchema), handler]);

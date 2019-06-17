@@ -6,7 +6,8 @@ import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
 import deleteUser from '../../user/delete/service';
-import { setSessionCookie } from '../setCookie/service';
+import { createSession } from '../issueToken/service';
+import { signCookieJWT } from '../setCookie/service';
 import { AUTHENTICATION, EXCHANGE } from '../../../constants/tokenTypes';
 import jwt from '../../../utils/jwt';
 
@@ -38,28 +39,35 @@ describe('api/session.refreshCookie', () => {
     await server.teardown();
   });
 
-  test('refreshes session cookie', async () => {
-    const { cookie: sessionCookie } = await setSessionCookie(ctx, {
+  test('refreshes session cookie while avoiding race conditions', async () => {
+    const session = await createSession(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
+    const { token: sessionCookie } = await signCookieJWT(ctx, session);
 
     const payload = await jwt.verifyAsync(sessionCookie, config.session.cookie.secret);
     await delay(1000); // let at least one second pass
 
-    const res = await request(server)
-      .post('/api/session.refreshCookie')
-      .set('Cookie', `session=${sessionCookie}`)
-      .send();
+    const [res1, res2] = await Promise.all([
+      request(server)
+        .post('/api/session.refreshCookie')
+        .set('Cookie', `session=${sessionCookie}`)
+        .send(),
+      request(server)
+        .post('/api/session.refreshCookie')
+        .set('Cookie', `session=${sessionCookie}`)
+        .send(),
+    ]);
 
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual(
+    expect(res1.status).toBe(200);
+    expect(res1.body).toEqual(
       expect.objectContaining({
         ok: true,
       })
     );
 
-    const nextCookie = res.header['set-cookie'][0];
+    const nextCookie = res1.header['set-cookie'][0];
     expect(nextCookie).toEqual(expect.any(String));
 
     const nextCookieProps = cookie.parse(nextCookie);
@@ -91,5 +99,8 @@ describe('api/session.refreshCookie', () => {
         type: AUTHENTICATION,
       })
     ).resolves.toBe(1);
+
+    expect(res1.header['set-cookie'][0]).toBe(res2.header['set-cookie'][0]);
+    expect(res1.body).toEqual(res2.body);
   });
 });
