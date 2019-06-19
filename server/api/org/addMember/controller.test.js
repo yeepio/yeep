@@ -5,8 +5,8 @@ import config from '../../../../yeep.config';
 import deleteUser from '../../user/delete/service';
 import createUser from '../../user/create/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
-import { destroySessionToken } from '../../session/destroyToken/service';
-import { issueSessionToken } from '../../session/issueToken/service';
+import { destroySession } from '../../session/destroyToken/service';
+import { createSession, signBearerJWT } from '../../session/issueToken/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import createOrg from '../create/service';
 import deleteOrg from '../delete/service';
@@ -45,6 +45,7 @@ describe('api/org.addMember', () => {
     let runner;
     let permissionAssignment;
     let session;
+    let bearerToken;
 
     beforeAll(async () => {
       wile = await createUser(ctx, {
@@ -91,14 +92,15 @@ describe('api/org.addMember', () => {
         permissionId: permission.id,
       });
 
-      session = await issueSessionToken(ctx, {
+      session = await createSession(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
+      bearerToken = await signBearerJWT(ctx, session);
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx, session);
+      await destroySession(ctx, session);
       await deletePermissionAssignment(ctx, permissionAssignment);
       await deleteUser(ctx, wile);
       await deleteUser(ctx, runner);
@@ -108,7 +110,7 @@ describe('api/org.addMember', () => {
     test('returns error when `orgId` is unknown', async () => {
       const res = await request(server)
         .post('/api/org.addMember')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           orgId: '507f1f77bcf86cd799439012', // i.e. some random ID
           userId: runner.id,
@@ -127,7 +129,7 @@ describe('api/org.addMember', () => {
     test('returns error when `userId` is unknown', async () => {
       const res = await request(server)
         .post('/api/org.addMember')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           orgId: org.id,
           userId: '507f1f77bcf86cd799439012', // i.e. some random ID
@@ -146,7 +148,7 @@ describe('api/org.addMember', () => {
     test('returns error when user is already a member of org', async () => {
       const res = await request(server)
         .post('/api/org.addMember')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           orgId: org.id,
           userId: wile.id,
@@ -164,7 +166,7 @@ describe('api/org.addMember', () => {
     test('returns error when `permissions` array contains unknown permission id', async () => {
       const res = await request(server)
         .post('/api/org.addMember')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           orgId: org.id,
           userId: runner.id,
@@ -193,7 +195,7 @@ describe('api/org.addMember', () => {
 
       const res = await request(server)
         .post('/api/org.addMember')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           orgId: org.id,
           userId: runner.id,
@@ -217,7 +219,7 @@ describe('api/org.addMember', () => {
     test('returns error when `roles` array contains unknown roleId', async () => {
       const res = await request(server)
         .post('/api/org.addMember')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           userId: runner.id,
           orgId: org.id,
@@ -246,7 +248,7 @@ describe('api/org.addMember', () => {
 
       const res = await request(server)
         .post('/api/org.addMember')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           userId: runner.id,
           orgId: org.id,
@@ -270,7 +272,7 @@ describe('api/org.addMember', () => {
     test('creates new org membership', async () => {
       const res = await request(server)
         .post('/api/org.addMember')
-        .set('Authorization', `Bearer ${session.token}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           userId: runner.id,
           orgId: org.id,

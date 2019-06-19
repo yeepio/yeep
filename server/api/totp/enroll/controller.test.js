@@ -6,8 +6,8 @@ import createUser from '../../user/create/service';
 // import createOrg from '../../org/create/service';
 import deleteUser from '../../user/delete/service';
 // import deleteOrg from '../../org/delete/service';
-import { issueSessionToken } from '../../session/issueToken/service';
-import { destroySessionToken } from '../../session/destroyToken/service';
+import { createSession, signBearerJWT } from '../../session/issueToken/service';
+import { destroySession } from '../../session/destroyToken/service';
 
 describe('api/totp.enroll', () => {
   let ctx;
@@ -40,6 +40,7 @@ describe('api/totp.enroll', () => {
   describe('authorized user', () => {
     let wileUser;
     let wileSession;
+    let wileBearerToken;
 
     beforeAll(async () => {
       wileUser = await createUser(ctx, {
@@ -56,21 +57,22 @@ describe('api/totp.enroll', () => {
         ],
       });
 
-      wileSession = await issueSessionToken(ctx, {
+      wileSession = await createSession(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
+      wileBearerToken = await signBearerJWT(ctx, wileSession);
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx, wileSession);
+      await destroySession(ctx, wileSession);
       await deleteUser(ctx, wileUser);
     });
 
     test('enrols user to TOTP authentication and returns secret key', async () => {
       const res = await request(server)
         .post('/api/totp.enroll')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           userId: wileUser.id,
         });

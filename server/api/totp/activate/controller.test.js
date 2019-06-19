@@ -7,8 +7,8 @@ import createUser from '../../user/create/service';
 // import createOrg from '../../org/create/service';
 import deleteUser from '../../user/delete/service';
 // import deleteOrg from '../../org/delete/service';
-import { issueSessionToken } from '../../session/issueToken/service';
-import { destroySessionToken } from '../../session/destroyToken/service';
+import { createSession, signBearerJWT } from '../../session/issueToken/service';
+import { destroySession } from '../../session/destroyToken/service';
 import { addSeconds } from 'date-fns';
 import { TOTP_ENROLL } from '../../../constants/tokenTypes';
 
@@ -43,6 +43,7 @@ describe('api/totp.activate', () => {
   describe('authorized user', () => {
     let wileUser;
     let wileSession;
+    let wileBearerToken;
 
     beforeAll(async () => {
       wileUser = await createUser(ctx, {
@@ -59,21 +60,22 @@ describe('api/totp.activate', () => {
         ],
       });
 
-      wileSession = await issueSessionToken(ctx, {
+      wileSession = await createSession(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
+      wileBearerToken = await signBearerJWT(ctx, wileSession);
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx, wileSession);
+      await destroySession(ctx, wileSession);
       await deleteUser(ctx, wileUser);
     });
 
     test('returns error when `userId` body param is undefined', async () => {
       const res = await request(server)
         .post('/api/totp.activate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({});
 
       expect(res.status).toBe(200);
@@ -92,7 +94,7 @@ describe('api/totp.activate', () => {
     test('returns error when `secret` body param is undefined', async () => {
       const res = await request(server)
         .post('/api/totp.activate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           userId: wileUser.id,
         });
@@ -113,7 +115,7 @@ describe('api/totp.activate', () => {
     test('returns error when `secret` body param is invalid', async () => {
       const res = await request(server)
         .post('/api/totp.activate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           userId: wileUser.id,
           secret: 'invalid',
@@ -135,7 +137,7 @@ describe('api/totp.activate', () => {
     test('returns error when `token` body param is undefined', async () => {
       const res = await request(server)
         .post('/api/totp.activate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           userId: wileUser.id,
           secret: 'N34CXTAEDWWIETTGN7P7HGFVM2CPGAG2',
@@ -157,7 +159,7 @@ describe('api/totp.activate', () => {
     test('returns error when `token` body param is invalid', async () => {
       const res = await request(server)
         .post('/api/totp.activate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           userId: wileUser.id,
           secret: 'N34CXTAEDWWIETTGN7P7HGFVM2CPGAG2',
@@ -180,7 +182,7 @@ describe('api/totp.activate', () => {
     test('returns error when secret key does not exist in token collection', async () => {
       const res = await request(server)
         .post('/api/totp.activate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           userId: wileUser.id,
           secret: 'N34CXTAEDWWIETTGN7P7HGFVM2CPGAG2',
@@ -212,7 +214,7 @@ describe('api/totp.activate', () => {
 
       const res = await request(server)
         .post('/api/totp.activate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           userId: wileUser.id,
           secret,
@@ -248,7 +250,7 @@ describe('api/totp.activate', () => {
 
       const res = await request(server)
         .post('/api/totp.activate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           userId: wileUser.id,
           secret,
@@ -284,7 +286,7 @@ describe('api/totp.activate', () => {
 
       const res = await request(server)
         .post('/api/totp.activate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           userId: wileUser.id,
           secret,

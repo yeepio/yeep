@@ -7,8 +7,8 @@ import deletePermission from '../delete/service';
 import createUser from '../../user/create/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import createOrg from '../../org/create/service';
-import { issueSessionToken } from '../../session/issueToken/service';
-import { destroySessionToken } from '../../session/destroyToken/service';
+import { createSession, signBearerJWT } from '../../session/issueToken/service';
+import { destroySession } from '../../session/destroyToken/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
@@ -19,6 +19,7 @@ describe('api/permission.info', () => {
   let org;
   let permissionAssignment;
   let session;
+  let bearerToken;
 
   beforeAll(async () => {
     await server.setup(config);
@@ -52,14 +53,15 @@ describe('api/permission.info', () => {
       permissionId: permission.id,
     });
 
-    session = await issueSessionToken(ctx, {
+    session = await createSession(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
+    bearerToken = await signBearerJWT(ctx, session);
   });
 
   afterAll(async () => {
-    await destroySessionToken(ctx, session);
+    await destroySession(ctx, session);
     await deletePermissionAssignment(ctx, permissionAssignment);
     await deleteOrg(ctx, org);
     await deleteUser(ctx, user);
@@ -69,7 +71,7 @@ describe('api/permission.info', () => {
   test('returns error when permission does not exist', async () => {
     const res = await request(server)
       .post('/api/permission.info')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         id: '5b2d5dd0cd86b77258e16d39', // some random objectid
       });
@@ -93,7 +95,7 @@ describe('api/permission.info', () => {
 
     const res = await request(server)
       .post('/api/permission.info')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         id: permission.id,
       });
@@ -119,7 +121,7 @@ describe('api/permission.info', () => {
 
     const res = await request(server)
       .post('/api/permission.info')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         id: permission.id,
       });

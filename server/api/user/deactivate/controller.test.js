@@ -7,8 +7,8 @@ import config from '../../../../yeep.config';
 import createOrg from '../../org/create/service';
 import createUser from '../create/service';
 import createPermissionAssignment from '../assignPermission/service';
-import { issueSessionToken } from '../../session/issueToken/service';
-import { destroySessionToken } from '../../session/destroyToken/service';
+import { createSession, signBearerJWT } from '../../session/issueToken/service';
+import { destroySession } from '../../session/destroyToken/service';
 import deletePermissionAssignment from '../revokePermission/service';
 import deleteUser from '../delete/service';
 import deleteOrg from '../../org/delete/service';
@@ -48,6 +48,8 @@ describe('api/user.deactivate', () => {
     let permissionAssignment;
     let wileSession;
     let runnerSession;
+    let wileBearerToken;
+    let runnerBearerToken;
 
     beforeAll(async () => {
       wile = await createUser(ctx, {
@@ -74,10 +76,11 @@ describe('api/user.deactivate', () => {
         // global org
       });
 
-      wileSession = await issueSessionToken(ctx, {
+      wileSession = await createSession(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
+      wileBearerToken = await signBearerJWT(ctx, wileSession);
 
       runner = await createUser(ctx, {
         username: 'runner',
@@ -99,15 +102,16 @@ describe('api/user.deactivate', () => {
         adminId: runner.id,
       });
 
-      runnerSession = await issueSessionToken(ctx, {
+      runnerSession = await createSession(ctx, {
         username: 'runner',
         password: 'fast+furry-ous',
       });
+      runnerBearerToken = await signBearerJWT(ctx, runnerSession);
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx, wileSession);
-      await destroySessionToken(ctx, runnerSession);
+      await destroySession(ctx, wileSession);
+      await destroySession(ctx, runnerSession);
       await deletePermissionAssignment(ctx, permissionAssignment);
       await deleteUser(ctx, wile);
       await deleteUser(ctx, runner);
@@ -118,7 +122,7 @@ describe('api/user.deactivate', () => {
       const startDate = new Date();
       let res = await request(server)
         .post('/api/user.deactivate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           id: runner.id,
         });
@@ -158,7 +162,7 @@ describe('api/user.deactivate', () => {
       // deactivated user cannot use active session token
       res = await request(server)
         .post('/api/user.info')
-        .set('Authorization', `Bearer ${runnerSession.token}`);
+        .set('Authorization', `Bearer ${runnerBearerToken}`);
 
       expect(res.status).toBe(200);
       expect(res.body).toEqual(
@@ -172,7 +176,7 @@ describe('api/user.deactivate', () => {
       const startDate = new Date();
       let res = await request(server)
         .post('/api/user.deactivate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           id: runner.id,
           deactivateAfterSeconds: 3600, // deactivate after 1 hour, i.e. 3600 seconds
@@ -215,7 +219,7 @@ describe('api/user.deactivate', () => {
       // user can use active session token for the next hour
       res = await request(server)
         .post('/api/user.info')
-        .set('Authorization', `Bearer ${runnerSession.token}`)
+        .set('Authorization', `Bearer ${runnerBearerToken}`)
         .send({
           id: runner.id,
         });
@@ -231,7 +235,7 @@ describe('api/user.deactivate', () => {
     test('returns error when `id` contains invalid characters', async () => {
       const res = await request(server)
         .post('/api/user.deactivate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           id: '507f1f77bcf86cd79943901@',
         });
@@ -251,7 +255,7 @@ describe('api/user.deactivate', () => {
     test('returns error when `id` contains more than 24 characters', async () => {
       const res = await request(server)
         .post('/api/user.deactivate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           id: '507f1f77bcf86cd7994390112',
         });
@@ -271,7 +275,7 @@ describe('api/user.deactivate', () => {
     test('returns error when `id` contains less than 24 characters', async () => {
       const res = await request(server)
         .post('/api/user.deactivate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           id: '507f1f77bcf86cd79943901',
         });
@@ -291,7 +295,7 @@ describe('api/user.deactivate', () => {
     test('returns error when `id` is unspecified', async () => {
       const res = await request(server)
         .post('/api/user.deactivate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({});
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -309,7 +313,7 @@ describe('api/user.deactivate', () => {
     test('returns error when payload contains unknown properties', async () => {
       const res = await request(server)
         .post('/api/user.deactivate')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           id: '507f1f77bcf86cd799439011',
           foo: 'bar',
@@ -330,7 +334,7 @@ describe('api/user.deactivate', () => {
     test('returns error with invalid permission scope', async () => {
       const res = await request(server)
         .post('/api/user.deactivate')
-        .set('Authorization', `Bearer ${runnerSession.token}`)
+        .set('Authorization', `Bearer ${runnerBearerToken}`)
         .send({
           id: wile.id,
         });

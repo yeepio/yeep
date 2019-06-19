@@ -5,8 +5,8 @@ import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../create/service';
 import createPermissionAssignment from '../assignPermission/service';
-import { issueSessionToken } from '../../session/issueToken/service';
-import { destroySessionToken } from '../../session/destroyToken/service';
+import { createSession, signBearerJWT } from '../../session/issueToken/service';
+import { destroySession } from '../../session/destroyToken/service';
 import deletePermissionAssignment from '../revokePermission/service';
 import deleteUser from '../delete/service';
 import deleteUserPicture from '../deletePicture/service';
@@ -44,7 +44,9 @@ describe('api/user.uploadPicture', () => {
     let wile;
     let permissionAssignment;
     let wileSession;
+    let wileBearerToken;
     let runnerSession;
+    let runnerBearerToken;
 
     beforeAll(async () => {
       wile = await createUser(ctx, {
@@ -71,10 +73,11 @@ describe('api/user.uploadPicture', () => {
         // global org
       });
 
-      wileSession = await issueSessionToken(ctx, {
+      wileSession = await createSession(ctx, {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
+      wileBearerToken = await signBearerJWT(ctx, wileSession);
 
       runner = await createUser(ctx, {
         username: 'runner',
@@ -90,15 +93,16 @@ describe('api/user.uploadPicture', () => {
         ],
       });
 
-      runnerSession = await issueSessionToken(ctx, {
+      runnerSession = await createSession(ctx, {
         username: 'runner',
         password: 'fast+furry-ous',
       });
+      runnerBearerToken = await signBearerJWT(ctx, runnerSession);
     });
 
     afterAll(async () => {
-      await destroySessionToken(ctx, wileSession);
-      await destroySessionToken(ctx, runnerSession);
+      await destroySession(ctx, wileSession);
+      await destroySession(ctx, runnerSession);
       await deletePermissionAssignment(ctx, permissionAssignment);
       await deleteUser(ctx, wile);
       await deleteUser(ctx, runner);
@@ -107,7 +111,7 @@ describe('api/user.uploadPicture', () => {
     test('sets user profile picture', async () => {
       let res = await request(server)
         .post('/api/user.uploadPicture')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .attach('picture', path.resolve(__dirname, './__tests__/runner.png'))
         .field('id', runner.id);
 
@@ -130,7 +134,7 @@ describe('api/user.uploadPicture', () => {
     test('returns error when `id` contains invalid characters', async () => {
       const res = await request(server)
         .post('/api/user.uploadPicture')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .attach('picture', path.resolve(__dirname, './__tests__/coyote.jpg'))
         .field('id', '507f1f77bcf86cd79943901@');
       expect(res.status).toBe(200);
@@ -149,7 +153,7 @@ describe('api/user.uploadPicture', () => {
     test('returns error when `id` contains more than 24 characters', async () => {
       const res = await request(server)
         .post('/api/user.uploadPicture')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .attach('picture', path.resolve(__dirname, './__tests__/coyote.jpg'))
         .field('id', '507f1f77bcf86cd7994390112');
       expect(res.status).toBe(200);
@@ -168,7 +172,7 @@ describe('api/user.uploadPicture', () => {
     test('returns error when `id` contains less than 24 characters', async () => {
       const res = await request(server)
         .post('/api/user.uploadPicture')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .attach('picture', path.resolve(__dirname, './__tests__/coyote.jpg'))
         .field('id', '507f1f77bcf86cd79943901');
       expect(res.status).toBe(200);
@@ -187,7 +191,7 @@ describe('api/user.uploadPicture', () => {
     test('returns error when `id` is unspecified', async () => {
       const res = await request(server)
         .post('/api/user.uploadPicture')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .attach('picture', path.resolve(__dirname, './__tests__/coyote.jpg'));
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -205,7 +209,7 @@ describe('api/user.uploadPicture', () => {
     test('returns error when payload contains unknown properties', async () => {
       const res = await request(server)
         .post('/api/user.uploadPicture')
-        .set('Authorization', `Bearer ${wileSession.token}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .attach('picture', path.resolve(__dirname, './__tests__/coyote.jpg'))
         .field('id', '507f1f77bcf86cd799439011')
         .field('foo', 'bar');
@@ -225,7 +229,7 @@ describe('api/user.uploadPicture', () => {
     test('returns error with invalid permission scope', async () => {
       const res = await request(server)
         .post('/api/user.uploadPicture')
-        .set('Authorization', `Bearer ${runnerSession.token}`)
+        .set('Authorization', `Bearer ${runnerBearerToken}`)
         .attach('picture', path.resolve(__dirname, './__tests__/coyote.jpg'))
         .field('id', wile.id);
       expect(res.status).toBe(200);
@@ -241,7 +245,7 @@ describe('api/user.uploadPicture', () => {
     test('can set their own profile picture', async () => {
       let res = await request(server)
         .post('/api/user.uploadPicture')
-        .set('Authorization', `Bearer ${runnerSession.token}`)
+        .set('Authorization', `Bearer ${runnerBearerToken}`)
         .attach('picture', path.resolve(__dirname, './__tests__/runner.png'))
         .field('id', runner.id);
 

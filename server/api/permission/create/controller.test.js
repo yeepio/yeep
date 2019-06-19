@@ -5,11 +5,9 @@ import config from '../../../../yeep.config';
 import createPermission from './service';
 import deletePermission from '../delete/service';
 import createUser from '../../user/create/service';
-// import createOrg from '../../org/create/service';
 import deleteUser from '../../user/delete/service';
-// import deleteOrg from '../../org/delete/service';
-import { issueSessionToken } from '../../session/issueToken/service';
-import { destroySessionToken } from '../../session/destroyToken/service';
+import { createSession, signBearerJWT } from '../../session/issueToken/service';
+import { destroySession } from '../../session/destroyToken/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 
@@ -18,15 +16,11 @@ describe('api/permission.create', () => {
   let user;
   let permissionAssignment;
   let session;
+  let bearerToken;
 
   beforeAll(async () => {
     await server.setup(config);
     ctx = server.getAppContext();
-
-    // ctx.org = await createOrg(ctx, {
-    //   name: 'Acme Inc',
-    //   slug: 'acme',
-    // });
 
     user = await createUser(ctx, {
       username: 'wile',
@@ -46,20 +40,19 @@ describe('api/permission.create', () => {
     const permission = await PermissionModel.findOne({ name: 'yeep.permission.write' });
     permissionAssignment = await createPermissionAssignment(ctx, {
       userId: user.id,
-      // orgId: ctx.org.id,
       permissionId: permission.id,
     });
 
-    session = await issueSessionToken(ctx, {
+    session = await createSession(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
+    bearerToken = await signBearerJWT(ctx, session);
   });
 
   afterAll(async () => {
-    await destroySessionToken(ctx, session);
+    await destroySession(ctx, session);
     await deletePermissionAssignment(ctx, permissionAssignment);
-    // await deleteOrg(ctx, ctx.org);
     await deleteUser(ctx, user);
     await server.teardown();
   });
@@ -67,7 +60,7 @@ describe('api/permission.create', () => {
   test('returns error when permission name is reserved', async () => {
     const res = await request(server)
       .post('/api/permission.create')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         name: 'yeep.permission.test',
         description: 'This is a tost',
@@ -91,7 +84,7 @@ describe('api/permission.create', () => {
 
     const res = await request(server)
       .post('/api/permission.create')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         name: 'acme.test',
         description: 'This is a tost',
@@ -119,7 +112,7 @@ describe('api/permission.create', () => {
 
     const res = await request(server)
       .post('/api/permission.create')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         name: 'acme.test',
         description: 'This is a tost',
@@ -142,7 +135,7 @@ describe('api/permission.create', () => {
   test('creates new permission and returns expected response', async () => {
     const res = await request(server)
       .post('/api/permission.create')
-      .set('Authorization', `Bearer ${session.token}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         name: 'acme.test',
         description: 'This is a test',
