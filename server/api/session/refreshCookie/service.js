@@ -14,7 +14,7 @@ export async function verifyCookieJWT(ctx, { token }) {
       algorithm: 'HS512',
     });
   } catch (err) {
-    throw new InvalidAccessToken('Invalid access token; cannot be verified');
+    throw new InvalidAccessToken('Invalid session token; cannot be verified');
   }
 
   // ensure payload contains user.id prop
