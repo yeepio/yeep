@@ -9,9 +9,6 @@ const PermissionDeleteModal = () => {
   const permission = useSelector((state) => state.modal.permission);
   const dispatch = useDispatch();
 
-  // Memo-ize the stuff that need to be called when the modal is closed or submitted
-  // using useCallback()
-
   // modalClose will cancel and close the modal
   const modalClose = useCallback(() => {
     callbacks.onPermissionDeleteCancel();

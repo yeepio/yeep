@@ -123,9 +123,9 @@ const OrgEditUsers = ({ orgId }) => {
                 <td className="p-2 text-left">{invitationData.email}</td>
                 <td className="p-2">{invitationData.invitationSent}</td>
                 <td className="p-2 text-right">
-                  <button className="text-blue">Resend invitation</button>
+                  <button className="pseudolink">Resend invitation</button>
                   {' - '}
-                  <button className="text-blue">Cancel invitation</button>
+                  <button className="pseudolink">Cancel invitation</button>
                 </td>
               </tr>
             );
