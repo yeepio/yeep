@@ -4,19 +4,18 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 function Modal(props) {
-  // Invoke the `onClose` (required) prop when ESC key is pressed
-  const handleESC = (e) => {
-    if (e.key === 'Escape') {
-      props.onClose();
-    }
-  };
-
   // Hide the currently showing modal on ESC keypress
   // This will be an effect (with cleanup).
   // https://reactjs.org/docs/hooks-effect.html#tip-optimizing-performance-by-skipping-effects for details
   useEffect(() => {
+    const handleESC = (e) => {
+      if (e.key === 'Escape') {
+        props.onClose();
+      }
+    };
+
     console.log('useEffect called!!!');
-    window.document.addEventListener('keydown', handleESC);
+    window.addEventListener('keydown', handleESC);
     return () => {
       console.log('useEffect: removing listener');
       window.removeEventListener('keydown', handleESC);
