@@ -7,11 +7,14 @@ import isString from 'lodash/isString';
 import isUndefined from 'lodash/isUndefined';
 import isNull from 'lodash/isNull';
 import binarySearch from 'binary-search';
-import jwt from '../utils/jwt';
 import { AuthorizationError, UserNotFoundError, UserDeactivatedError } from '../constants/errors';
 import { getUserPermissions } from '../api/user/info/service';
 import { verifyCookieJWT } from '../api/session/refreshCookie/service';
-import { refreshSession, deriveProjection } from '../api/session/refreshToken/service';
+import {
+  refreshSession,
+  deriveProjection,
+  verifyBearerJWT,
+} from '../api/session/refreshToken/service';
 import { signCookieJWT } from '../api/session/setCookie/service';
 import { isFunction } from 'util';
 import { ObjectId } from 'mongodb';
@@ -101,18 +104,7 @@ async function decorateSessionByToken(ctx, { authorizationHeader }) {
   }
 
   // verify authorization JWT authenticity
-  let tokenPayload;
-  try {
-    tokenPayload = await jwt.verifyAsync(token, config.session.bearer.secret, {
-      ignoreExpiration: true,
-      issuer: config.name,
-      algorithm: 'HS512',
-    });
-  } catch (err) {
-    throw Boom.unauthorized('Invalid authorization token', 'Bearer', {
-      realm: config.name,
-    });
-  }
+  let tokenPayload = await verifyBearerJWT(ctx, { token });
 
   // ensure cookie JWT has not expired
   if (tokenPayload.exp * 1000 < now.getTime()) {
