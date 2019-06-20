@@ -6,6 +6,7 @@ import Button from '../../components/Button';
 import { callbacks, closePermissionDeleteModal, deletePermission } from './modalStore';
 
 const PermissionDeleteModal = () => {
+  const displayedModal = useSelector((state) => state.modal.displayedModal);
   const permission = useSelector((state) => state.modal.permission);
   const dispatch = useDispatch();
 
@@ -22,7 +23,7 @@ const PermissionDeleteModal = () => {
     dispatch(deletePermission(permission));
   }, [dispatch, permission]);
 
-  if (!permission.id) {
+  if (displayedModal !== 'PERMISSION_DELETE' || !permission.id) {
     return null;
   }
 
