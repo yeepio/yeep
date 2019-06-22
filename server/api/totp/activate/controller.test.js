@@ -10,7 +10,6 @@ import deleteUser from '../../user/delete/service';
 import { createSession, signBearerJWT } from '../../session/issueToken/service';
 import { destroySession } from '../../session/destroyToken/service';
 import { addSeconds } from 'date-fns';
-import { TOTP_ENROLL } from '../../../constants/tokenTypes';
 
 describe('api/totp.activate', () => {
   let ctx;
@@ -200,13 +199,12 @@ describe('api/totp.activate', () => {
     });
 
     test('returns error when secret key exists but is associated with another user', async () => {
-      const TokenModel = ctx.db.model('Token');
+      const TOTPEnrollTokenModel = ctx.db.model('TOTPEnrollToken');
       const TOTPModel = ctx.db.model('TOTP');
 
       const secret = TOTPModel.generateSecret();
-      const tokenRecord = await TokenModel.create({
+      const tokenRecord = await TOTPEnrollTokenModel.create({
         secret,
-        type: TOTP_ENROLL,
         user: ObjectId('507f191e810c19729de860ea'), // i.e. some random object ID
         org: null,
         expiresAt: addSeconds(new Date(), 1000),
@@ -230,19 +228,16 @@ describe('api/totp.activate', () => {
         },
       });
 
-      await TokenModel.deleteOne({
-        _id: tokenRecord._id,
-      });
+      await TOTPEnrollTokenModel.deleteOne({ _id: tokenRecord._id });
     });
 
     test('returns error when the supplied token cannot be verified', async () => {
-      const TokenModel = ctx.db.model('Token');
+      const TOTPEnrollTokenModel = ctx.db.model('TOTPEnrollToken');
       const TOTPModel = ctx.db.model('TOTP');
 
       const secret = TOTPModel.generateSecret();
-      const tokenRecord = await TokenModel.create({
+      const tokenRecord = await TOTPEnrollTokenModel.create({
         secret,
-        type: TOTP_ENROLL,
         user: ObjectId(wileUser.id),
         org: null,
         expiresAt: addSeconds(new Date(), 1000),
@@ -266,19 +261,16 @@ describe('api/totp.activate', () => {
         },
       });
 
-      await TokenModel.deleteOne({
-        _id: tokenRecord._id,
-      });
+      await TOTPEnrollTokenModel.deleteOne({ _id: tokenRecord._id });
     });
 
     test('activates TOTP authentication factor and returns proper response', async () => {
-      const TokenModel = ctx.db.model('Token');
+      const TOTPEnrollTokenModel = ctx.db.model('TOTPEnrollToken');
       const TOTPModel = ctx.db.model('TOTP');
 
       const secret = TOTPModel.generateSecret();
-      await TokenModel.create({
+      await TOTPEnrollTokenModel.create({
         secret,
-        type: TOTP_ENROLL,
         user: ObjectId(wileUser.id),
         org: null,
         expiresAt: addSeconds(new Date(), 1000),

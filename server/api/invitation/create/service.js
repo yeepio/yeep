@@ -11,7 +11,6 @@ import {
   RoleNotFoundError,
   InvalidRoleAssignmentError,
 } from '../../../constants/errors';
-import { INVITATION } from '../../../constants/tokenTypes';
 
 export const defaultTokenExpiresInSeconds = 7 * 24 * 60 * 60; // i.e. 1 week
 
@@ -35,7 +34,7 @@ const inviteUser = async (
   const PermissionModel = db.model('Permission');
   const RoleModel = db.model('Role');
   const UserModel = db.model('User');
-  const TokenModel = db.model('Token');
+  const InvitationTokenModel = db.model('InvitationToken');
 
   // acquire org from db
   const orgRecord = await OrgModel.findOne({
@@ -119,10 +118,9 @@ const inviteUser = async (
   }
 
   // create invitation token
-  const tokenRecord = await TokenModel.create({
-    secret: TokenModel.generateSecret({ length: 24 }),
-    type: INVITATION,
-    payload: {
+  const tokenRecord = await InvitationTokenModel.create({
+    secret: InvitationTokenModel.generateSecret({ length: 24 }),
+    invitee: {
       roles,
       permissions,
       emailAddress: userRecord ? userRecord.findPrimaryEmail() : inviteeEmailAddress,

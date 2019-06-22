@@ -10,6 +10,7 @@ import { createSession, signBearerJWT } from '../../session/issueToken/service';
 import { destroySession } from '../../session/destroyToken/service';
 import createPermissionAssignment from '../assignPermission/service';
 import deletePermissionAssignment from '../revokePermission/service';
+import { EMAIL_VERIFICATION } from '../../../constants/tokenTypes';
 
 describe('api/user.verifyEmail', () => {
   let ctx;
@@ -125,7 +126,7 @@ describe('api/user.verifyEmail', () => {
         token: expect.objectContaining({
           id: expect.any(String),
           secret: expect.any(String),
-          type: 'EMAIL_VERIFICATION',
+          type: EMAIL_VERIFICATION,
           createdAt: expect.any(Date),
           expiresAt: expect.any(Date),
         }),
@@ -330,7 +331,7 @@ describe('api/user.verifyEmail', () => {
         token: expect.objectContaining({
           id: expect.any(String),
           secret: expect.any(String),
-          type: 'EMAIL_VERIFICATION',
+          type: EMAIL_VERIFICATION,
           createdAt: expect.any(Date),
           expiresAt: expect.any(Date),
         }),

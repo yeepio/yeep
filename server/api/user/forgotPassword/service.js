@@ -1,11 +1,10 @@
 import addSeconds from 'date-fns/add_seconds';
 import isBefore from 'date-fns/is_before';
 import { UserNotFoundError, UserDeactivatedError } from '../../../constants/errors';
-import { PASSWORD_RESET } from '../../../constants/tokenTypes';
 
 async function initPasswordReset({ db, bus }, { username, emailAddress, tokenExpiresInSeconds }) {
   const UserModel = db.model('User');
-  const TokenModel = db.model('Token');
+  const PasswordResetTokenModel = db.model('PasswordResetToken');
 
   // acquire user from db
   const user = await UserModel.findOne(
@@ -27,10 +26,8 @@ async function initPasswordReset({ db, bus }, { username, emailAddress, tokenExp
   }
 
   // create password-reset token
-  const tokenRecord = await TokenModel.create({
-    secret: TokenModel.generateSecret({ length: 24 }),
-    type: PASSWORD_RESET,
-    payload: {},
+  const tokenRecord = await PasswordResetTokenModel.create({
+    secret: PasswordResetTokenModel.generateSecret({ length: 24 }),
     user: user._id,
     expiresAt: addSeconds(new Date(), tokenExpiresInSeconds), // i.e. in 1 hour
   });

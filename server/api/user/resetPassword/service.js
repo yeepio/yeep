@@ -4,18 +4,14 @@ import {
   UserDeactivatedError,
   TokenNotFoundError,
 } from '../../../constants/errors';
-import { PASSWORD_RESET } from '../../../constants/tokenTypes';
 
 async function resetPassword({ db, bus }, { token: secret, password }) {
-  const TokenModel = db.model('Token');
+  const PasswordResetTokenModel = db.model('PasswordResetToken');
   const UserModel = db.model('User');
   const PasswordModel = db.model('Password');
 
   // acquire token from db
-  const tokenRecord = await TokenModel.findOne({
-    secret,
-    type: PASSWORD_RESET,
-  });
+  const tokenRecord = await PasswordResetTokenModel.findOne({ secret });
 
   // ensure token exists
   if (!tokenRecord) {
@@ -62,9 +58,7 @@ async function resetPassword({ db, bus }, { token: secret, password }) {
     );
 
     // redeem token, i.e. delete from db
-    await TokenModel.deleteOne({
-      _id: tokenRecord._id,
-    });
+    await PasswordResetTokenModel.deleteOne({ _id: tokenRecord._id });
 
     await session.commitTransaction();
 

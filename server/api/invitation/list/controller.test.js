@@ -12,7 +12,6 @@ import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
-import { INVITATION } from '../../../constants/tokenTypes';
 // import createPermission from '../../permission/create/service';
 // import createRole from '../create/service';
 // import deleteRole from '../delete/service';
@@ -53,7 +52,7 @@ describe('api/invitation.list', () => {
     let wileBearerToken;
     let runner;
     let runnerSession;
-    let runnerBearerToken;
+    // let runnerBearerToken;
     let permission;
     let role;
 
@@ -102,7 +101,7 @@ describe('api/invitation.list', () => {
         username: 'runner',
         password: 'fast+furry-ous',
       });
-      runnerBearerToken = await signBearerJWT(ctx, runnerSession);
+      // runnerBearerToken = await signBearerJWT(ctx, runnerSession);
 
       const PermissionModel = ctx.db.model('Permission');
       permission = await PermissionModel.findOne({
@@ -115,12 +114,11 @@ describe('api/invitation.list', () => {
       });
 
       // create user invitation(s)
-      const TokenModel = ctx.db.model('Token');
-      await TokenModel.create([
+      const InvitationTokenModel = ctx.db.model('InvitationToken');
+      await InvitationTokenModel.create([
         {
-          secret: TokenModel.generateSecret({ length: 24 }),
-          type: INVITATION,
-          payload: {
+          secret: InvitationTokenModel.generateSecret({ length: 24 }),
+          invitee: {
             roles: [
               {
                 id: role._id.toHexString(),
@@ -134,9 +132,8 @@ describe('api/invitation.list', () => {
           expiresAt: addSeconds(new Date(), 60), // i.e. in 1 minute
         },
         {
-          secret: TokenModel.generateSecret({ length: 24 }),
-          type: INVITATION,
-          payload: {
+          secret: InvitationTokenModel.generateSecret({ length: 24 }),
+          invitee: {
             roles: [],
             permissions: [
               {
@@ -150,16 +147,15 @@ describe('api/invitation.list', () => {
           expiresAt: addSeconds(new Date(), 60), // i.e. in 1 minute
         },
         {
-          secret: TokenModel.generateSecret({ length: 24 }),
-          type: INVITATION,
-          payload: {
+          secret: InvitationTokenModel.generateSecret({ length: 24 }),
+          invitee: {
             roles: [
               {
                 id: role._id.toHexString(),
               },
             ],
             permissions: [],
-            emailAddress: null,
+            emailAddress: 'coyote@acme.com',
           },
           user: ObjectId(runner.id),
           org: ObjectId(acme.id),

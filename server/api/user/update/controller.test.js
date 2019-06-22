@@ -391,7 +391,9 @@ describe('api/user.update', () => {
       // destroying the session before asserting in case of test failing
       await destroySession(ctx, newSession);
       expect(newSession).toMatchObject({
-        token: expect.any(String),
+        secret: expect.any(String),
+        payload: expect.any(Object),
+        createdAt: expect.any(Date),
         expiresAt: expect.any(Date),
       });
     });
@@ -565,7 +567,9 @@ describe('api/user.update', () => {
       // destroying the session before asserting in case of test failing
       await destroySession(ctx, newSession);
       expect(newSession).toMatchObject({
-        token: expect.any(String),
+        secret: expect.any(String),
+        payload: expect.any(Object),
+        createdAt: expect.any(Date),
         expiresAt: expect.any(Date),
       });
     });

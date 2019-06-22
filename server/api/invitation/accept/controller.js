@@ -8,7 +8,6 @@ import { decorateSession } from '../../../middleware/auth';
 import createUser from '../../user/create/service';
 import getUserInfo from '../../user/info/service';
 import addMemberToOrg from '../../org/addMember/service';
-import { INVITATION } from '../../../constants/tokenTypes';
 
 export const validationSchema = {
   body: {
@@ -44,13 +43,10 @@ export const validationSchema = {
 };
 
 const decorateToken = async ({ request, db }, next) => {
-  const TokenModel = db.model('Token');
+  const InvitationTokenModel = db.model('InvitationToken');
 
   // acquire token from db
-  const tokenRecord = await TokenModel.findOne({
-    secret: request.body.token,
-    type: INVITATION,
-  });
+  const tokenRecord = await InvitationTokenModel.findOne({ secret: request.body.token });
 
   // ensure token exists
   if (!tokenRecord) {
@@ -135,7 +131,7 @@ async function handler(ctx) {
         fullName: request.body.fullName,
         emails: [
           {
-            address: invitationToken.payload.get('emailAddress'),
+            address: invitationToken.invitee.emailAddress,
             isVerified: true,
             isPrimary: true,
           },
@@ -146,8 +142,8 @@ async function handler(ctx) {
   await addMemberToOrg(ctx, {
     orgId: invitationToken.org.toHexString(),
     userId: user.id,
-    permissions: invitationToken.payload.get('permissions'),
-    roles: invitationToken.payload.get('roles'),
+    permissions: invitationToken.invitee.permissions,
+    roles: invitationToken.invitee.roles,
   });
 
   // redeem token, i.e. delete from db
@@ -165,7 +161,7 @@ async function handler(ctx) {
   response.body = {
     user: {
       ...user,
-      orgs: [...user.orgs, invitationToken.payload.orgId],
+      orgs: [...user.orgs, invitationToken.org],
     },
   };
 }
