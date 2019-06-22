@@ -3,6 +3,7 @@ import isemail from 'isemail';
 import compose from 'koa-compose';
 import mapValues from 'lodash/mapValues';
 import isFunction from 'lodash/isFunction';
+import pick from 'lodash/pick';
 import { validateRequest } from '../../../middleware/validation';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { signCookieJWT } from './service';
@@ -88,7 +89,7 @@ async function handler(ctx) {
   });
 
   response.status = 200; // OK
-  response.body = session.payload;
+  response.body = pick(session, 'user');
 }
 
 export default compose([packJSONRPC, validateRequest(validationSchema), handler]);

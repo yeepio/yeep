@@ -12,7 +12,7 @@ export async function signCookieJWT(ctx, session) {
 
   const token = await jwt.signAsync(
     {
-      ...session.payload,
+      user: session.user,
       iat: Math.floor(session.createdAt.getTime() / 1000),
       exp: Math.floor(expiresAt.getTime() / 1000),
     },

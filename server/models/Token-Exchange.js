@@ -7,8 +7,25 @@ import { Schema } from 'mongoose';
 const exchangeTokenSchema = new Schema(
   {
     session: {
-      type: Schema.Types.Mixed,
-      required: true,
+      secret: {
+        type: String,
+        required: true,
+        trim: true,
+        maxlength: 100,
+        minlength: 6,
+      },
+      user: {
+        type: Schema.Types.Mixed,
+        required: true,
+      },
+      createdAt: {
+        type: Date,
+        required: true,
+      },
+      expiresAt: {
+        type: Date,
+        required: true,
+      },
     },
   },
   {

@@ -1,5 +1,6 @@
 import compose from 'koa-compose';
 import isFunction from 'lodash/isFunction';
+import pick from 'lodash/pick';
 import { decorateSession, isUserAuthenticated, isSessionCookie } from '../../../middleware/auth';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { deriveProjection, refreshSession } from '../refreshToken/service';
@@ -33,7 +34,7 @@ async function handler(ctx) {
   });
 
   response.status = 200; // OK
-  response.body = session.payload;
+  response.body = pick(session, 'user');
 }
 
 export default compose([

@@ -143,7 +143,7 @@ export async function signBearerJWT(ctx, session) {
 
   const token = await jwt.signAsync(
     {
-      ...session.payload,
+      user: session.user,
       iat: Math.floor(session.createdAt.getTime() / 1000),
       exp: Math.floor(expiresAt.getTime() / 1000),
     },
@@ -209,25 +209,28 @@ export async function createSession(
     expiresAt: addSeconds(now, config.session.lifetimeInSeconds),
   });
 
-  // create payload obj
-  const payload = {
+  // create session obj
+  const session = {
+    secret: authToken.secret,
     user: {
       id: user.id,
     },
+    createdAt: now,
+    expiresAt: authToken.expiresAt,
   };
 
-  // decorate payload obj with user profile data
+  // decorate session obj with user profile data
   if (projection.profile) {
-    payload.user.username = user.username;
-    payload.user.fullName = user.fullName;
-    payload.user.picture = user.picture || undefined;
-    payload.user.primaryEmail = UserModel.getPrimaryEmailAddress(user.emails);
+    session.user.username = user.username;
+    session.user.fullName = user.fullName;
+    session.user.picture = user.picture || undefined;
+    session.user.primaryEmail = UserModel.getPrimaryEmailAddress(user.emails);
   }
 
-  // decorate payload obj with user permissions
+  // decorate session obj with user permissions
   if (projection.permissions) {
     const permissions = await getUserPermissions(ctx, { userId: user.id });
-    payload.user.permissions = permissions.map((e) => {
+    session.user.permissions = permissions.map((e) => {
       return {
         ...e,
         resourceId: e.resourceId || undefined, // remove resourceId if unspecified to save bandwidth
@@ -235,10 +238,5 @@ export async function createSession(
     });
   }
 
-  return {
-    secret: authToken.secret,
-    payload,
-    createdAt: now,
-    expiresAt: authToken.expiresAt,
-  };
+  return session;
 }

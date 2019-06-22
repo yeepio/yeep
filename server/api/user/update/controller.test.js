@@ -392,7 +392,7 @@ describe('api/user.update', () => {
       await destroySession(ctx, newSession);
       expect(newSession).toMatchObject({
         secret: expect.any(String),
-        payload: expect.any(Object),
+        user: expect.any(Object),
         createdAt: expect.any(Date),
         expiresAt: expect.any(Date),
       });
@@ -568,7 +568,7 @@ describe('api/user.update', () => {
       await destroySession(ctx, newSession);
       expect(newSession).toMatchObject({
         secret: expect.any(String),
-        payload: expect.any(Object),
+        user: expect.any(Object),
         createdAt: expect.any(Date),
         expiresAt: expect.any(Date),
       });

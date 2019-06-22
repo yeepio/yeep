@@ -77,41 +77,36 @@ export async function refreshSession(ctx, { secret, userId, projection }) {
     throw new UserDeactivatedError(`User ${userId} is deactivated`);
   }
 
-  // create payload obj
-  const payload = {
+  // create next session obj
+  const now = new Date();
+  const nextSecret = AuthenticationTokenModel.generateSecret({ length: 24 });
+  const nextSession = {
+    secret: nextSecret,
     user: {
       id: user.id,
     },
+    createdAt: now,
+    expiresAt: authToken.expiresAt, // same as previous authToken
   };
 
-  // decorate payload obj with user profile data
+  // decorate session obj with user profile data
   if (projection.profile) {
-    payload.user.username = user.username;
-    payload.user.fullName = user.fullName;
-    payload.user.picture = user.picture || undefined;
-    payload.user.primaryEmail = UserModel.getPrimaryEmailAddress(user.emails);
+    session.user.username = user.username;
+    session.user.fullName = user.fullName;
+    session.user.picture = user.picture || undefined;
+    session.user.primaryEmail = UserModel.getPrimaryEmailAddress(user.emails);
   }
 
-  // decorate payload obj with user permissions
+  // decorate session obj with user permissions
   if (projection.permissions) {
     const permissions = await getUserPermissions(ctx, { userId: user.id });
-    payload.user.permissions = permissions.map((e) => {
+    session.user.permissions = permissions.map((e) => {
       return {
         ...e,
         resourceId: e.resourceId || undefined, // remove resourceId if unspecified to save bandwidth
       };
     });
   }
-
-  // create next session obj
-  const now = new Date();
-  const nextSecret = AuthenticationTokenModel.generateSecret({ length: 24 });
-  const nextSession = {
-    secret: nextSecret,
-    payload,
-    createdAt: now,
-    expiresAt: authToken.expiresAt, // same as previous authToken
-  };
 
   // update database
   const session = await db.startSession();
@@ -178,21 +173,3 @@ export async function refreshSession(ctx, { secret, userId, projection }) {
 
   return nextSession;
 }
-
-// let expiresAt = addSeconds(now, config.session.bearer.expiresInSeconds);
-// if (expiresAt > authToken.expiresAt) {
-//   expiresAt = authToken.expiresAt;
-// }
-// const token = await jwt.signAsync(
-//   {
-//     user: payload.user,
-//     iat: Math.floor(now.getTime() / 1000),
-//     exp: Math.floor(expiresAt.getTime() / 1000),
-//   },
-//   config.session.bearer.secret,
-//   {
-//     jwtid: secret,
-//     issuer: config.name,
-//     algorithm: 'HS512',
-//   }
-// );
