@@ -4,6 +4,7 @@ import { validateRequest } from '../../../middleware/validation';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { refreshSession, verifyBearerJWT, deriveProjection } from './service';
 import { signBearerJWT } from '../issueToken/service';
+import jwt from '../../../utils/jwt';
 
 export const validationSchema = {
   body: {
@@ -25,12 +26,13 @@ async function handler(ctx) {
     userId: payload.user.id,
     projection: deriveProjection(payload),
   });
-  const { token, expiresAt } = await signBearerJWT(ctx, session);
+  const token = await signBearerJWT(ctx, session);
+  const decoded = jwt.decode(token);
 
   response.status = 200; // OK
   response.body = {
     token,
-    expiresAt,
+    expiresAt: new Date(decoded.exp * 1000),
   };
 }
 

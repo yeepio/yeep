@@ -42,7 +42,7 @@ describe('api/session.destroyCookie', () => {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
-    const { token: cookie } = await signCookieJWT(ctx, session);
+    const cookie = await signCookieJWT(ctx, session);
 
     const res = await request(server)
       .post('/api/session.destroyCookie')

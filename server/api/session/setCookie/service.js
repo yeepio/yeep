@@ -24,5 +24,5 @@ export async function signCookieJWT(ctx, session) {
     }
   );
 
-  return { token, expiresAt };
+  return token;
 }

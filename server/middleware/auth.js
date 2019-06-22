@@ -61,7 +61,7 @@ async function decorateSessionByCookie(ctx, { cookie }) {
       userId: payload.user.id,
       projection: deriveProjection(payload.user),
     });
-    const { token } = await signCookieJWT(ctx, session);
+    const token = await signCookieJWT(ctx, session);
 
     cookies.set('session', token, {
       domain: isFunction(config.session.cookie.domain)

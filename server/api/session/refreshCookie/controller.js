@@ -13,7 +13,7 @@ async function handler(ctx) {
     userId: request.session.user.id,
     projection: deriveProjection(request.session.user),
   });
-  const { token } = await signCookieJWT(ctx, session);
+  const token = await signCookieJWT(ctx, session);
 
   ctx.cookies.set('session', token, {
     domain: isFunction(config.session.cookie.domain)

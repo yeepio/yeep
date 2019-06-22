@@ -41,7 +41,7 @@ describe('api/session.destroyToken', () => {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
-    const { token } = await signBearerJWT(ctx, session);
+    const token = await signBearerJWT(ctx, session);
     const payload = await jwt.verifyAsync(token, ctx.config.session.bearer.secret);
 
     const res = await request(server)

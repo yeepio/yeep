@@ -155,7 +155,7 @@ export async function signBearerJWT(ctx, session) {
     }
   );
 
-  return { token, expiresAt };
+  return token;
 }
 
 export async function createSession(

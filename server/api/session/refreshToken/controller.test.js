@@ -42,7 +42,7 @@ describe('api/session.refreshToken', () => {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
-    const { token } = await signBearerJWT(ctx, session);
+    const token = await signBearerJWT(ctx, session);
 
     const payload = await jwt.verifyAsync(token, ctx.config.session.bearer.secret);
     await delay(1000); // wait for 1 second

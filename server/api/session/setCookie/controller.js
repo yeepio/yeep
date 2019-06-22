@@ -68,7 +68,7 @@ async function handler(ctx) {
   }
 
   const session = await createSession(ctx, props);
-  const { token } = await signCookieJWT(ctx, session);
+  const token = await signCookieJWT(ctx, session);
 
   ctx.cookies.set('session', token, {
     domain: isFunction(config.session.cookie.domain)

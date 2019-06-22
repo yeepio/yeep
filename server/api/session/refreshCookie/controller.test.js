@@ -44,7 +44,7 @@ describe('api/session.refreshCookie', () => {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
-    const { token: sessionCookie } = await signCookieJWT(ctx, session);
+    const sessionCookie = await signCookieJWT(ctx, session);
 
     const payload = await jwt.verifyAsync(sessionCookie, config.session.cookie.secret);
     await delay(1000); // let at least one second pass
