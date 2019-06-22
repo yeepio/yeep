@@ -23,10 +23,6 @@ const tokenSchema = new Schema(
       required: true,
       enum: [AUTHENTICATION, EXCHANGE, PASSWORD_RESET, INVITATION, TOTP_ENROLL, EMAIL_VERIFICATION],
     },
-    payload: {
-      type: Map,
-      required: false,
-    }, // TODO: remove generic payload prop
     user: {
       type: Schema.Types.ObjectId,
       required: false,
