@@ -100,7 +100,7 @@
     "supertest": "^4.0.0",
     "swagger-parser": "^6.0.5",
     "tailwindcss": "^1.0.4",
-    "url-loader": "^1.1.2",
+    "url-loader": "^2.0.1",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.2.3",
     "webpack-dev-server": "^3.2.1"
