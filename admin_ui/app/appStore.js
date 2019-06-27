@@ -5,21 +5,18 @@ import {
   initialState as sessionInitialState,
 } from './session/sessionStore';
 import { reducer as permissionModalsReducer, initialState as permissionModalsInitialState } from './modals/permissionModalsStore';
-import { reducer as orgReducer, initialState as orgInitialState } from './org/orgStore';
-import { reducer as roleReducer, initialState as roleInitialState } from './role/roleStore';
+import { reducer as roleModalsReducer, initialState as roleModalsInitialState } from './modals/roleModalsStore';
 
 const rootReducer = combineReducers({
   session: sessionReducer,
   permissionModals: permissionModalsReducer,
-  org: orgReducer,
-  role: roleReducer,
+  roleModals: roleModalsReducer,
 });
 
 const preloadedState = {
   session: sessionInitialState,
   permissionModals: permissionModalsInitialState,
-  org: orgInitialState,
-  role: roleInitialState,
+  roleModals: roleModalsInitialState,
 };
 
 const middleware = [

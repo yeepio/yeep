@@ -125,10 +125,7 @@ const OrgEditPermissions = ({ orgId }) => {
                       e.preventDefault();
                       dispatch(
                         openPermissionDeleteModal(
-                          {
-                            id: permissionData.id,
-                            name: permissionData.name,
-                          },
+                          permissionData,
                           () => {
                             console.log('Submit from permissionDelete modal!');
                           },

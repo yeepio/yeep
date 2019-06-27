@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useDispatch } from 'react-redux';
@@ -6,8 +6,8 @@ import ButtonLink from '../../components/ButtonLink';
 import Select from 'react-select';
 import Grid from '../../components/Grid';
 import Input from '../../components/Input';
-import RoleDeleteModal from './RoleDeleteModal';
-import { setDeleteModal } from './roleStore';
+import RoleDeleteModal from '../modals/RoleDeleteModal';
+import { openRoleDeleteModal } from '../modals/roleModalsStore';
 
 // Dummy data
 let roleHeadings = [
@@ -74,9 +74,25 @@ let roleData = [
 ];
 
 const RoleListPage = () => {
-  const dispatch = useDispatch();
-
   useDocumentTitle('Roles');
+
+  const dispatch = useDispatch();
+  const handleDelete = useCallback(() => {
+    dispatch(
+      openRoleDeleteModal(
+        {
+          id: 1,
+          name: 'role_name',
+        },
+        () => {
+          console.log('Submit from roleDelete modal!');
+        },
+        () => {
+          console.log('Cancel from roleDelete modal');
+        }
+      )
+    );
+  }, [dispatch]);
 
   return (
     <React.Fragment>
@@ -124,7 +140,7 @@ const RoleListPage = () => {
               </td>
               <td className="p-2 text-center">
                 <Link to={`${roleData.id}/edit`}>Edit</Link>{' '}
-                <button onClick={() => dispatch(setDeleteModal('DELETE'))} className="pseudolink">
+                <button onClick={handleDelete} className="pseudolink">
                   Delete
                 </button>
               </td>

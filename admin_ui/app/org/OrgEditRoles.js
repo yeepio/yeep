@@ -2,13 +2,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from '@reach/router';
 import { useDispatch } from 'react-redux';
-import OrgEditRolesModals from './OrgEditRolesModals';
 import useDocumentTitle from '@rehooks/document-title';
 import TabLinks from '../../components/TabLinks';
 import Button from '../../components/Button';
 import Grid from '../../components/Grid';
-import * as modalTypes from '../constants/modalTypes';
-import { setDisplayedModal } from './orgStore';
+import RoleCreateModal from '../modals/RoleCreateModal';
+import RoleEditModal from '../modals/RoleEditModal';
+import RoleDeleteModal from '../modals/RoleDeleteModal';
+import {
+  openRoleCreateModal,
+  openRoleEditModal,
+  openRoleDeleteModal,
+} from '../modals/roleModalsStore';
 
 // Dummy data
 let roleHeadings = [
@@ -51,7 +56,9 @@ const OrgEditRoles = ({ orgId }) => {
 
   return (
     <React.Fragment>
-      <OrgEditRolesModals />
+      <RoleCreateModal/>
+      <RoleEditModal/>
+      <RoleDeleteModal/>
       <h1 className="font-semibold text-3xl mb-6">&quot;Organization name&quot;: Roles</h1>
       <TabLinks
         className="mb-6"
@@ -78,7 +85,7 @@ const OrgEditRoles = ({ orgId }) => {
         <legend>New role</legend>
         <Button
           onClick={() => {
-            dispatch(setDisplayedModal(modalTypes.ROLE_CREATE));
+            dispatch(openRoleCreateModal());
           }}
         >
           Create new role
@@ -104,7 +111,17 @@ const OrgEditRoles = ({ orgId }) => {
                     className="pseudolink"
                     onClick={(e) => {
                       e.preventDefault();
-                      dispatch(setDisplayedModal(modalTypes.ROLE_EDIT));
+                      dispatch(
+                        openRoleEditModal(
+                          role,
+                          () => {
+                            console.log('Submit from roleEdit modal');
+                          },
+                          () => {
+                            console.log('Cancel from roleEdit modal');
+                          }
+                        )
+                      );
                     }}
                   >
                     Edit
@@ -113,7 +130,17 @@ const OrgEditRoles = ({ orgId }) => {
                     className="pseudolink"
                     onClick={(e) => {
                       e.preventDefault();
-                      dispatch(setDisplayedModal(modalTypes.ROLE_DELETE));
+                      dispatch(
+                        openRoleDeleteModal(
+                          role,
+                          () => {
+                            console.log('Submit from roleDelete modal');
+                          },
+                          () => {
+                            console.log('Cancel from roleDelete modal');
+                          }
+                        )
+                      );
                     }}
                   >
                     Delete

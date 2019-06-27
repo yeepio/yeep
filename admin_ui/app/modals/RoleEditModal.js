@@ -1,19 +1,37 @@
-import React from 'react';
-import { useDispatch } from 'react-redux';
-import Modal from '../../../components/Modal';
-import Input from '../../../components/Input';
-import Button from '../../../components/Button';
-import Textarea from '../../../components/Textarea';
+import React, { useCallback } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import Modal from '../../components/Modal';
+import Button from '../../components/Button';
+import Input from '../../components/Input';
+import Textarea from '../../components/Textarea';
 import Select from 'react-select';
-import { setDisplayedModal } from '../orgStore';
+import { callbacks, closeRoleEditModal, editRole } from './roleModalsStore';
 
-// The Create permission modal
-const RoleCreate = () => {
+const RoleEditModal = () => {
+  const displayedModal = useSelector((state) => state.roleModals.displayedModal);
+  const role = useSelector((state) => state.roleModals.role);
   const dispatch = useDispatch();
 
+  // modalClose will cancel and close the modal
+  const modalClose = useCallback(() => {
+    callbacks.onRoleEditCancel();
+    dispatch(closeRoleEditModal());
+  }, [dispatch]);
+
+  // modalSubmit will call the submit method, close and then perform the deletion
+  const modalSubmit = useCallback(() => {
+    callbacks.onRoleEditSubmit(role);
+    dispatch(closeRoleEditModal());
+    dispatch(editRole(role));
+  }, [dispatch, role]);
+
+  if (displayedModal !== 'ROLE_EDIT') {
+    return null;
+  }
+
   return (
-    <Modal onClose={() => dispatch(setDisplayedModal(''))} className="sm:w-4/5">
-      <h2 className="mb-4">Create new role</h2>
+    <Modal onClose={modalClose} className="sm:w-4/5">
+      <h2 className="mb-4">Edit role</h2>
       <div className="form-group mb-4">
         <label htmlFor="org-name">Organization scope:</label>
         <strong className="self-center">Our Tech Blog (org id: 1)</strong>
@@ -57,10 +75,10 @@ const RoleCreate = () => {
         </div>
       </div>
       <div className="form-submit">
-        <Button>Save changes</Button>
+        <Button onClick={modalSubmit}>Save changes</Button>
       </div>
     </Modal>
   );
 };
 
-export default RoleCreate;
+export default RoleEditModal;
