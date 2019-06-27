@@ -3,11 +3,11 @@ import { useSelector, useDispatch } from 'react-redux';
 import Modal from '../../components/Modal';
 import { Link } from '@reach/router';
 import Button from '../../components/Button';
-import { callbacks, closePermissionDeleteModal, deletePermission } from './modalStore';
+import { callbacks, closePermissionDeleteModal, deletePermission } from './permissionModalsStore';
 
 const PermissionDeleteModal = () => {
-  const displayedModal = useSelector((state) => state.modal.displayedModal);
-  const permission = useSelector((state) => state.modal.permission);
+  const displayedModal = useSelector((state) => state.permissionModals.displayedModal);
+  const permission = useSelector((state) => state.permissionModals.permission);
   const dispatch = useDispatch();
 
   // modalClose will cancel and close the modal

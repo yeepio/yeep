@@ -4,11 +4,11 @@ import Modal from '../../components/Modal';
 import Button from '../../components/Button';
 import Input from '../../components/Input';
 import Textarea from '../../components/Textarea';
-import { callbacks, closePermissionEditModal, editPermission } from './modalStore';
+import { callbacks, closePermissionEditModal, editPermission } from './permissionModalsStore';
 
 const PermissionEditModal = () => {
-  const displayedModal = useSelector((state) => state.modal.displayedModal);
-  const permission = useSelector((state) => state.modal.permission);
+  const displayedModal = useSelector((state) => state.permissionModals.displayedModal);
+  const permission = useSelector((state) => state.permissionModals.permission);
   const dispatch = useDispatch();
 
   // modalClose will cancel and close the modal

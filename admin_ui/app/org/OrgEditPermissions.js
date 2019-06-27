@@ -13,7 +13,7 @@ import {
   openPermissionCreateModal,
   openPermissionEditModal,
   openPermissionDeleteModal,
-} from '../modals/modalStore';
+} from '../modals/permissionModalsStore';
 
 // Dummy data
 let permissionHeadings = [
