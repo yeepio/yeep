@@ -48,10 +48,12 @@ async function listPermissions({ db }, { q, limit, cursor, scopes, role, isSyste
     });
   }
 
+  const $match = matchExpressions.length ? { $and: matchExpressions } : {};
+
   // retrieve permissions
   const permissions = await PermissionModel.aggregate([
     {
-      $match: { $and: matchExpressions },
+      $match,
     },
     {
       $lookup: {
