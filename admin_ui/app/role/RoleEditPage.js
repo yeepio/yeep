@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
@@ -7,20 +7,37 @@ import Input from '../../components/Input';
 import Textarea from '../../components/Textarea';
 import Button from '../../components/Button';
 import Select from 'react-select';
-import RoleDeleteModal from './RoleDeleteModal';
-import { setDeleteModal } from './roleStore';
+import RoleDeleteModal from '../modals/RoleDeleteModal';
+import { openRoleDeleteModal } from '../modals/roleModalsStore';
 
 const RoleEditPage = ({ roleId }) => {
-  const dispatch = useDispatch();
+  useDocumentTitle(`Edit role#${roleId}`);
 
-  // On componentDidUnmount close any open modals!
+  const dispatch = useDispatch();
+  const handleDelete = useCallback(() => {
+    dispatch(
+      openRoleDeleteModal(
+        {
+          id: 1,
+          name: 'role_name',
+        },
+        () => {
+          console.log('Submit from roleDelete modal!');
+        },
+        () => {
+          console.log('Cancel from roleDelete modal');
+
+        }
+      )
+    );
+  }, [dispatch]);
+
+  /*  // On componentDidUnmount close any open modals!
   React.useEffect(() => {
     return () => {
       dispatch(setDeleteModal(''));
     };
-  }, [dispatch]);
-
-  useDocumentTitle(`Edit role#${roleId}`);
+  }, [dispatch]);*/
 
   return (
     <React.Fragment>
@@ -76,7 +93,7 @@ const RoleEditPage = ({ roleId }) => {
       </fieldset>
       <fieldset className="mb-6">
         <legend>Danger zone</legend>
-        <Button danger={true} onClick={() => dispatch(setDeleteModal('DELETE'))}>
+        <Button danger={true} onClick={handleDelete}>
           Delete role
         </Button>
       </fieldset>

@@ -7,7 +7,7 @@ import Select from 'react-select';
 import Grid from '../../components/Grid';
 import Input from '../../components/Input';
 import PermissionDeleteModal from '../modals/PermissionDeleteModal';
-import { openPermissionDeleteModal } from '../modals/modalStore';
+import { openPermissionDeleteModal } from '../modals/permissionModalsStore';
 
 // Dummy data
 let permissionHeadings = [

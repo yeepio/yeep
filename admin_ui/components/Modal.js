@@ -13,11 +13,8 @@ function Modal(props) {
         props.onClose();
       }
     };
-
-    console.log('useEffect called!!!');
     window.addEventListener('keydown', handleESC);
     return () => {
-      console.log('useEffect: removing listener');
       window.removeEventListener('keydown', handleESC);
     };
   });

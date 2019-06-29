@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 const Input = ({ className, ...otherProps }) => {
-  console.log(otherProps.disabled);
   return (
     <input
       {...otherProps}

@@ -2,13 +2,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from '@reach/router';
 import { useDispatch } from 'react-redux';
-import OrgEditPermissionsModals from './OrgEditPermissionsModals';
 import useDocumentTitle from '@rehooks/document-title';
 import TabLinks from '../../components/TabLinks';
 import Button from '../../components/Button';
 import Grid from '../../components/Grid';
-import * as modalTypes from '../constants/modalTypes';
-import { setDisplayedModal } from './orgStore';
+import PermissionCreateModal from '../modals/PermissionCreateModal';
+import PermissionEditModal from '../modals/PermissionEditModal';
+import PermissionDeleteModal from '../modals/PermissionDeleteModal';
+import {
+  openPermissionCreateModal,
+  openPermissionEditModal,
+  openPermissionDeleteModal,
+} from '../modals/permissionModalsStore';
 
 // Dummy data
 let permissionHeadings = [
@@ -43,7 +48,9 @@ const OrgEditPermissions = ({ orgId }) => {
 
   return (
     <React.Fragment>
-      <OrgEditPermissionsModals />
+      <PermissionCreateModal />
+      <PermissionEditModal />
+      <PermissionDeleteModal />
       <h1 className="font-semibold text-3xl mb-6">&quot;Organization name&quot;: Permissions</h1>
       <TabLinks
         className="mb-6"
@@ -70,7 +77,7 @@ const OrgEditPermissions = ({ orgId }) => {
         <legend>New permissions</legend>
         <Button
           onClick={() => {
-            dispatch(setDisplayedModal(modalTypes.PERMISSION_CREATE));
+            dispatch(openPermissionCreateModal());
           }}
         >
           Create new permission
@@ -97,7 +104,17 @@ const OrgEditPermissions = ({ orgId }) => {
                     className="pseudolink"
                     onClick={(e) => {
                       e.preventDefault();
-                      dispatch(setDisplayedModal(modalTypes.PERMISSION_EDIT));
+                      dispatch(
+                        openPermissionEditModal(
+                          permissionData,
+                          () => {
+                            console.log('Submit from permissionEdit modal!');
+                          },
+                          () => {
+                            console.log('Cancel from permissionEdit modal');
+                          }
+                        )
+                      );
                     }}
                   >
                     Edit
@@ -106,7 +123,17 @@ const OrgEditPermissions = ({ orgId }) => {
                     className="pseudolink"
                     onClick={(e) => {
                       e.preventDefault();
-                      dispatch(setDisplayedModal(modalTypes.PERMISSION_DELETE));
+                      dispatch(
+                        openPermissionDeleteModal(
+                          permissionData,
+                          () => {
+                            console.log('Submit from permissionDelete modal!');
+                          },
+                          () => {
+                            console.log('Cancel from permissionDelete modal');
+                          }
+                        )
+                      );
                     }}
                   >
                     Delete

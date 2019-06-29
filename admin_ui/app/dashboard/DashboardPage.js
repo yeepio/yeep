@@ -74,8 +74,7 @@ const DashboardPage = () => {
         <DashboardOrgCard {...dummyOrgs[1]} />
       </div>
       <div className="bg-yellow-lighter rounded p-4">
-        <strong>Tip:</strong> Visit the <Link to="/sessions">Sessions</Link> page to see all the
-        currently active users across your oganisations
+        <strong>Tip:</strong> Some helpful message to appear here
       </div>
     </div>
   );
