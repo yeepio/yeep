@@ -79,7 +79,8 @@ module.exports = (env) => ({
         include: (pathname) => {
           return (
             pathname.indexOf('node_modules') === -1 ||
-            pathname.indexOf('node_modules/@rehooks') !== -1
+            pathname.indexOf('node_modules/@rehooks') !== -1 ||
+            pathname.indexOf('node_modules/query-string') !== -1
           );
         },
         use: [
