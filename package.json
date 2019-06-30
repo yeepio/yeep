@@ -109,7 +109,7 @@
     "@koa/cors": "^3.0.0",
     "@reach/router": "^1.2.1",
     "@rehooks/document-title": "^1.0.1",
-    "@yeep/client": "^1.1.0-beta.4",
+    "@yeep/client": "^1.1.0-beta.5",
     "ajv": "^6.9.2",
     "awaiting": "^3.0.0",
     "aws-sdk": "^2.413.0",
