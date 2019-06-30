@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import noop from 'lodash/noop';
 
-const Button = ({ children, secondary, danger, className, onClick }) => {
+const Button = ({ children, secondary, danger, className, ...props }) => {
   // Common classes for all buttons
   let styles = classNames('border', 'leading-tight', 'font-bold', 'py-2', 'px-4', 'rounded');
   if (secondary) {
@@ -45,7 +45,7 @@ const Button = ({ children, secondary, danger, className, onClick }) => {
   // Add any custom classes that come from the props
   styles = classNames(className, styles);
   return (
-    <button onClick={onClick} className={styles}>
+    <button {...props} className={styles}>
       {children}
     </button>
   );
@@ -58,8 +58,6 @@ Button.propTypes = {
   secondary: PropTypes.bool,
   // If set to true we'll show a red "Danger" button
   danger: PropTypes.bool,
-  // Click handler
-  onClick: PropTypes.func,
   // A custom className
   className: PropTypes.string,
 };
