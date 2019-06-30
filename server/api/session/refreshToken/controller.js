@@ -12,7 +12,6 @@ export const validationSchema = {
       .trim()
       .min(100)
       .max(10000)
-      // .regex(/^[A-Za-z0-9\\.\\-]*$/, { name: 'accessToken' }),
       .required(),
   },
 };
