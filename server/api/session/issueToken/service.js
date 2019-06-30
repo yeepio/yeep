@@ -1,6 +1,5 @@
 import addSeconds from 'date-fns/add_seconds';
 import isBefore from 'date-fns/is_before';
-import { ObjectId } from 'mongodb';
 import {
   UserNotFoundError,
   InvalidUserPasswordError,
@@ -10,15 +9,16 @@ import {
   InvalidAuthFactor,
 } from '../../../constants/errors';
 import { getUserPermissions } from '../../user/info/service';
-import { AUTHENTICATION, SESSION_REFRESH } from '../../../constants/tokenTypes';
-import { PASSWORD } from '../../../constants/authFactorTypes';
+import jwt from '../../../utils/jwt';
+import { PASSWORD, TOTP } from '../../../constants/authFactorTypes';
+import addSecondsWithCap from '../../../utils/addSecondsWithCap';
 
 export const defaultProjection = {
   permissions: false,
   profile: false,
 };
 
-const constructUserMatchQuery = (username, emailAddress) => {
+function constructUserMatchQuery(username, emailAddress) {
   if (username) {
     return { username };
   }
@@ -26,7 +26,7 @@ const constructUserMatchQuery = (username, emailAddress) => {
   return {
     emails: { $elemMatch: { address: emailAddress } },
   };
-};
+}
 
 /**
  * Verifies password and returns the designated user.
@@ -38,7 +38,8 @@ const constructUserMatchQuery = (username, emailAddress) => {
  * @property {string} props.password
  * @returns {Promise}
  */
-export async function getUserAndVerifyPassword({ db }, { username, emailAddress, password }) {
+export async function getUserAndVerifyPassword(ctx, { username, emailAddress, password }) {
+  const { db } = ctx;
   const UserModel = db.model('User');
   const PasswordModel = db.model('Password');
   const normalizedEmailAddress = emailAddress && UserModel.normalizeEmailAddress(emailAddress);
@@ -90,83 +91,6 @@ export async function getUserAndVerifyPassword({ db }, { username, emailAddress,
   };
 }
 
-/**
- * Issues access + refresh token pair for the designated user.
- * @param {Object} ctx
- * @property {Object} ctx.db
- * @property {Object} ctx.jwt
- * @property {Object} ctx.config
- * @param {Object} props
- * @property {Object} props.user
- * @property {Object} [props.projection]
- * @return {Promise}
- */
-export async function issueAccessAndRefreshTokens(ctx, { user, projection }) {
-  const { db, jwt, config } = ctx;
-  const TokenModel = db.model('Token');
-  const UserModel = db.model('User');
-  const now = new Date();
-
-  // create authToken in db
-  const secret = TokenModel.generateSecret({ length: 24 });
-  const authToken = await TokenModel.create({
-    secret,
-    type: AUTHENTICATION,
-    payload: {},
-    user: ObjectId(user.id),
-    expiresAt: addSeconds(now, config.accessToken.lifetimeInSeconds),
-  });
-
-  // set accessToken payload
-  const payload = {
-    user: {
-      id: user.id,
-    },
-  };
-
-  // decorate accessToken payload with user profile data
-  if (projection.profile) {
-    payload.user.username = user.username;
-    payload.user.fullName = user.fullName;
-    payload.user.picture = user.picture || undefined;
-    payload.user.primaryEmail = UserModel.getPrimaryEmailAddress(user.emails);
-  }
-
-  // decorate accessToken payload with user permissions
-  if (projection.permissions) {
-    const permissions = await getUserPermissions(ctx, { userId: user.id });
-    payload.user.permissions = permissions.map((e) => {
-      return {
-        ...e,
-        resourceId: e.resourceId || undefined, // remove resourceId if unspecified to save bandwidth
-      };
-    });
-  }
-
-  const [accessToken, refreshToken] = await Promise.all([
-    // sign accessToken
-    jwt.sign(payload, {
-      jwtid: authToken.secret,
-      expiresIn: config.accessToken.lifetimeInSeconds,
-    }),
-    // create refreshToken in db
-    TokenModel.create({
-      secret: TokenModel.generateSecret({ length: 60 }),
-      type: SESSION_REFRESH,
-      payload: {
-        accessTokenSecret: authToken.secret,
-      },
-      user: ObjectId(user.id),
-      expiresAt: addSeconds(now, config.refreshToken.lifetimeInSeconds),
-    }),
-  ]);
-
-  return {
-    accessToken,
-    refreshToken: refreshToken.secret,
-  };
-}
-
 export async function verifyAuthFactor({ db }, { type, token, user }) {
   // retrieve auth factor by type
   const authFactor = user.authFactors.find((authFactor) => authFactor.type === type);
@@ -194,7 +118,7 @@ export async function verifyAuthFactor({ db }, { type, token, user }) {
 
       break;
     }
-    case 'TOTP': {
+    case TOTP: {
       const isTokenVerified = await db.model('TOTP').verifyToken(token, authFactor.secret);
 
       if (!isTokenVerified) {
@@ -208,10 +132,40 @@ export async function verifyAuthFactor({ db }, { type, token, user }) {
   }
 }
 
-export default async function createSession(
+export async function signBearerJWT(ctx, session) {
+  const { config } = ctx;
+
+  const expiresAt = addSecondsWithCap(
+    session.createdAt,
+    config.session.bearer.expiresInSeconds,
+    session.expiresAt
+  );
+
+  const token = await jwt.signAsync(
+    {
+      user: session.user,
+      iat: Math.floor(session.createdAt.getTime() / 1000),
+      exp: Math.floor(expiresAt.getTime() / 1000),
+    },
+    config.session.bearer.secret,
+    {
+      jwtid: session.secret,
+      issuer: config.name,
+      algorithm: 'HS512',
+    }
+  );
+
+  return token;
+}
+
+export async function createSession(
   ctx,
   { username, emailAddress, password, projection = defaultProjection, secondaryAuthFactor }
 ) {
+  const { db, config } = ctx;
+  const AuthenticationTokenModel = db.model('AuthenticationToken');
+  const UserModel = db.model('User');
+
   // retrieve user + verify password
   const user = await getUserAndVerifyPassword(ctx, {
     username,
@@ -245,14 +199,44 @@ export default async function createSession(
     });
   }
 
-  // issue access + refresh tokens
-  const { accessToken, refreshToken } = await issueAccessAndRefreshTokens(ctx, {
-    user,
-    projection,
+  // create authToken in db
+  const now = new Date();
+  const secret = AuthenticationTokenModel.generateSecret({ length: 24 });
+  const authToken = await AuthenticationTokenModel.create({
+    secret,
+    user: user._id,
+    createdAt: now,
+    expiresAt: addSeconds(now, config.session.lifetimeInSeconds),
   });
 
-  return {
-    accessToken,
-    refreshToken,
+  // create session obj
+  const session = {
+    secret: authToken.secret,
+    user: {
+      id: user.id,
+    },
+    createdAt: now,
+    expiresAt: authToken.expiresAt,
   };
+
+  // decorate session obj with user profile data
+  if (projection.profile) {
+    session.user.username = user.username;
+    session.user.fullName = user.fullName;
+    session.user.picture = user.picture || undefined;
+    session.user.primaryEmail = UserModel.getPrimaryEmailAddress(user.emails);
+  }
+
+  // decorate session obj with user permissions
+  if (projection.permissions) {
+    const permissions = await getUserPermissions(ctx, { userId: user.id });
+    session.user.permissions = permissions.map((e) => {
+      return {
+        ...e,
+        resourceId: e.resourceId || undefined, // remove resourceId if unspecified to save bandwidth
+      };
+    });
+  }
+
+  return session;
 }

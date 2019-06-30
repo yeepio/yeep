@@ -4,8 +4,8 @@ import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
 import createOrg from '../../org/create/service';
-import createSession from '../../session/create/service';
-import destroySession from '../../session/destroy/service';
+import { createSession, signBearerJWT } from '../../session/issueToken/service';
+import { destroySession } from '../../session/destroyToken/service';
 import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
 // import createPermission from '../../permission/create/service';
@@ -49,6 +49,7 @@ describe('api/user.list', () => {
     let acme;
     let monsters;
     let session;
+    let bearerToken;
 
     beforeAll(async () => {
       wile = await createUser(ctx, {
@@ -129,6 +130,7 @@ describe('api/user.list', () => {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
+      bearerToken = await signBearerJWT(ctx, session);
     });
 
     afterAll(async () => {
@@ -144,7 +146,7 @@ describe('api/user.list', () => {
     test('returns list of users the requestor has access to', async () => {
       const res = await request(server)
         .post('/api/user.list')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send();
 
       expect(res.status).toBe(200);
@@ -179,7 +181,7 @@ describe('api/user.list', () => {
     test('limits number of users using `limit` param', async () => {
       const res = await request(server)
         .post('/api/user.list')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           limit: 1,
         });
@@ -213,7 +215,7 @@ describe('api/user.list', () => {
     test('paginates through users using `cursor` param', async () => {
       const res = await request(server)
         .post('/api/user.list')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           limit: 2,
         });
@@ -224,7 +226,7 @@ describe('api/user.list', () => {
 
       const res1 = await request(server)
         .post('/api/user.list')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           limit: 1,
         });
@@ -237,7 +239,7 @@ describe('api/user.list', () => {
 
       const res2 = await request(server)
         .post('/api/user.list')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           limit: 1,
           cursor: res1.body.nextCursor,
@@ -252,7 +254,7 @@ describe('api/user.list', () => {
     test('filters users using `q` param', async () => {
       const res = await request(server)
         .post('/api/user.list')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           q: 'por',
         });
@@ -283,7 +285,7 @@ describe('api/user.list', () => {
     test('filters users using `org` param', async () => {
       const res = await request(server)
         .post('/api/user.list')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           org: monsters.id,
         });
@@ -316,7 +318,7 @@ describe('api/user.list', () => {
     test('projects user props using `projection` param', async () => {
       const res = await request(server)
         .post('/api/user.list')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           projection: {
             emails: false,
@@ -344,6 +346,7 @@ describe('api/user.list', () => {
 
     describe('without permission', () => {
       let otherSession;
+      let otherBearerToken;
 
       beforeAll(async () => {
         // user "spongebob" is logged-in
@@ -351,6 +354,7 @@ describe('api/user.list', () => {
           username: 'spongebob',
           password: 'weeeeedddd',
         });
+        otherBearerToken = await signBearerJWT(ctx, otherSession);
       });
 
       afterAll(async () => {
@@ -360,7 +364,7 @@ describe('api/user.list', () => {
       test('returns empty list of users', async () => {
         const res = await request(server)
           .post('/api/user.list')
-          .set('Authorization', `Bearer ${otherSession.accessToken}`)
+          .set('Authorization', `Bearer ${otherBearerToken}`)
           .send();
 
         expect(res.status).toBe(200);
@@ -373,7 +377,7 @@ describe('api/user.list', () => {
       test('returns authorization error when trying to filter by org id', async () => {
         const res = await request(server)
           .post('/api/user.list')
-          .set('Authorization', `Bearer ${otherSession.accessToken}`)
+          .set('Authorization', `Bearer ${otherBearerToken}`)
           .send({
             org: monsters.id,
           });

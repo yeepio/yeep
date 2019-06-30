@@ -12,7 +12,7 @@ import {
 } from '../../../constants/errors';
 import deleteUserPicture from '../deletePicture/service';
 import commonNames from '../../../utils/commonNames';
-import { verifyAuthFactor } from '../../session/create/service';
+import { verifyAuthFactor } from '../../session/issueToken/service';
 
 export async function updateUser(
   ctx,

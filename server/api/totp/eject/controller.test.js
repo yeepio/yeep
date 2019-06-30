@@ -6,8 +6,8 @@ import createUser from '../../user/create/service';
 // import createOrg from '../../org/create/service';
 import deleteUser from '../../user/delete/service';
 // import deleteOrg from '../../org/delete/service';
-import createSession from '../../session/create/service';
-import destroySession from '../../session/destroy/service';
+import { createSession, signBearerJWT } from '../../session/issueToken/service';
+import { destroySession } from '../../session/destroyToken/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 import { PASSWORD, TOTP } from '../../../constants/authFactorTypes';
@@ -43,6 +43,7 @@ describe('api/totp.eject', () => {
   describe('authorized user', () => {
     let wileUser;
     let wileSession;
+    let wileBearerToken;
 
     beforeAll(async () => {
       wileUser = await createUser(ctx, {
@@ -63,6 +64,7 @@ describe('api/totp.eject', () => {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
+      wileBearerToken = await signBearerJWT(ctx, wileSession);
     });
 
     afterAll(async () => {
@@ -73,7 +75,7 @@ describe('api/totp.eject', () => {
     test('returns error when `userId` body param is undefined', async () => {
       const res = await request(server)
         .post('/api/totp.eject')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({});
 
       expect(res.status).toBe(200);
@@ -92,7 +94,7 @@ describe('api/totp.eject', () => {
     test('returns error if user is not already enrolled to TOTP', async () => {
       const res = await request(server)
         .post('/api/totp.eject')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           userId: wileUser.id,
           secondaryAuthFactor: {
@@ -121,7 +123,7 @@ describe('api/totp.eject', () => {
 
       const res = await request(server)
         .post('/api/totp.eject')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           userId: wileUser.id,
         });
@@ -153,7 +155,7 @@ describe('api/totp.eject', () => {
 
       const res = await request(server)
         .post('/api/totp.eject')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           userId: wileUser.id,
           secondaryAuthFactor: {
@@ -178,7 +180,7 @@ describe('api/totp.eject', () => {
 
       const res = await request(server)
         .post('/api/totp.eject')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           userId: wileUser.id,
           secondaryAuthFactor: {
@@ -199,6 +201,7 @@ describe('api/totp.eject', () => {
     let suSession;
     let permissionAssignment;
     let wileUser;
+    let suBearerToken;
 
     beforeAll(async () => {
       suUser = await createUser(ctx, {
@@ -241,6 +244,7 @@ describe('api/totp.eject', () => {
         username: 'gl@d0s',
         password: 'h3r3-w3-g0-@g@1n',
       });
+      suBearerToken = await signBearerJWT(ctx, suSession);
     });
 
     afterAll(async () => {
@@ -260,7 +264,7 @@ describe('api/totp.eject', () => {
 
       const res = await request(server)
         .post('/api/totp.eject')
-        .set('Authorization', `Bearer ${suSession.accessToken}`)
+        .set('Authorization', `Bearer ${suBearerToken}`)
         .send({
           userId: wileUser.id,
         });

@@ -4,20 +4,14 @@ import {
   TokenNotFoundError,
   EmailNotFoundError,
 } from '../../../constants/errors';
-import {
-  EMAIL_VERIFICATION,
-} from '../../../constants/tokenTypes';
 
 async function verify(ctx, { token: secret }) {
   const { db, bus } = ctx;
-  const TokenModel = db.model('Token');
+  const EmailVerificationTokenModel = db.model('EmailVerificationToken');
   const UserModel = db.model('User');
 
   // acquire token from db
-  const tokenRecord = await TokenModel.findOne({
-    secret,
-    type: EMAIL_VERIFICATION,
-  });
+  const tokenRecord = await EmailVerificationTokenModel.findOne({ secret });
 
   // ensure token exists
   if (!tokenRecord) {
@@ -31,9 +25,9 @@ async function verify(ctx, { token: secret }) {
   if (!user) {
     throw new UserNotFoundError('User does not exist');
   }
-  
+
   let didUpdateField = false;
-  const emailToVerify = tokenRecord.payload.get('emailAddress');
+  const emailToVerify = tokenRecord.emailAddress;
   const nextEmails = user.emails.map((email) => {
     if (email.address === emailToVerify) {
       email.isVerified = true;
@@ -67,7 +61,7 @@ async function verify(ctx, { token: secret }) {
       }
     );
     // redeem token, i.e. delete from db
-    await TokenModel.deleteOne({
+    await EmailVerificationTokenModel.deleteOne({
       _id: tokenRecord._id,
     });
 

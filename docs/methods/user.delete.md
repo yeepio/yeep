@@ -41,7 +41,7 @@ Users are able to delete their own account without explicit permissions.
 
 ```
 POST /api/user.delete
-Authorization: `Bearer ${accessToken}`
+Authorization: `Bearer ${authToken}`
 ```
 
 ```json

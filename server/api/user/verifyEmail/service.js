@@ -10,7 +10,7 @@ import {
 async function initEmailVerification(ctx, user, nextProps) {
   const { db, bus } = ctx;
   const { tokenExpiresInSeconds, emailAddress } = nextProps;
-  const TokenModel = db.model('Token');
+  const EmailVerificationTokenModel = db.model('EmailVerificationToken');
 
   const emailExists = user.emails.find((email) => emailAddress === email.address);
   if (!emailExists) {
@@ -23,16 +23,13 @@ async function initEmailVerification(ctx, user, nextProps) {
   }
 
   if (!!user.deactivatedAt && isBefore(user.deactivatedAt, new Date())) {
-   throw new UserDeactivatedError(`User ${tokenRecord.userId.toHexString()} is deactivated`);
+    throw new UserDeactivatedError(`User ${tokenRecord.userId.toHexString()} is deactivated`);
   }
   // create email verification token
-  const secret = TokenModel.generateSecret({ length: 24 });
-  const tokenRecord = await TokenModel.create({
+  const secret = EmailVerificationTokenModel.generateSecret({ length: 24 });
+  const tokenRecord = await EmailVerificationTokenModel.create({
     secret,
-    type: 'EMAIL_VERIFICATION',
-    payload: {
-      emailAddress,
-    },
+    emailAddress,
     user: ObjectId(user.id),
     expiresAt: addSeconds(new Date(), tokenExpiresInSeconds), // i.e. in 1 hour
   });

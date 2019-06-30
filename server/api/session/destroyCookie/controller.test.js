@@ -3,11 +3,13 @@ import request from 'supertest';
 import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
-import createSession from '../create/service';
+import { createSession } from '../issueToken/service';
+import { signCookieJWT } from '../setCookie/service';
 import deleteUser from '../../user/delete/service';
-import { AUTHENTICATION, SESSION_REFRESH } from '../../../constants/tokenTypes';
+import { AUTHENTICATION } from '../../../constants/tokenTypes';
+import jwt from '../../../utils/jwt';
 
-describe('api/session.destroy', () => {
+describe('api/session.destroyCookie', () => {
   let ctx;
   let user;
 
@@ -36,34 +38,31 @@ describe('api/session.destroy', () => {
   });
 
   test('destroys session and responds as expected', async () => {
-    const { accessToken, refreshToken } = await createSession(ctx, {
+    const session = await createSession(ctx, {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
-    const payload = await ctx.jwt.verify(accessToken);
+    const cookie = await signCookieJWT(ctx, session);
 
     const res = await request(server)
-      .post('/api/session.destroy')
-      .send({
-        accessToken,
-        refreshToken,
-      });
+      .post('/api/session.destroyCookie')
+      .set('Cookie', `session=${cookie}`)
+      .send();
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
       ok: true,
     });
 
     const TokenModel = ctx.db.model('Token');
+    const payload = await jwt.verifyAsync(cookie, config.session.cookie.secret, {
+      issuer: config.name,
+      algorithm: 'HS512',
+    });
+
     expect(
       TokenModel.countDocuments({
         secret: payload.jti,
         type: AUTHENTICATION,
-      })
-    ).resolves.toBe(0);
-    expect(
-      TokenModel.countDocuments({
-        secret: refreshToken,
-        type: SESSION_REFRESH,
       })
     ).resolves.toBe(0);
   });

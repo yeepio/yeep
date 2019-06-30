@@ -70,7 +70,8 @@ Let's get you started for development.
    PORT="5000"
    BASE_URL="http://localhost:5000/"
    MONGODB_URI="mongodb://localhost:27017/yeep"
-   JWT_SECRET="keep it safe, keep it hidden!"
+   BEARER_SECRET="keep it safe, keep it hidden!"
+   COOKIE_SECRET="keep it safe, keep it hidden!"
    ```
 
 5. Initialize the db schema;

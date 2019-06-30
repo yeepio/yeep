@@ -5,8 +5,8 @@ import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../create/service';
 import createPermissionAssignment from '../assignPermission/service';
-import createSession from '../../session/create/service';
-import destroySession from '../../session/destroy/service';
+import { createSession, signBearerJWT } from '../../session/issueToken/service';
+import { destroySession } from '../../session/destroyToken/service';
 import deletePermissionAssignment from '../revokePermission/service';
 import deleteUser from '../delete/service';
 
@@ -44,6 +44,8 @@ describe('api/user.deletePicture', () => {
     let permissionAssignment;
     let wileSession;
     let runnerSession;
+    let wileBearerToken;
+    let runnerBearerToken;
 
     beforeAll(async () => {
       wile = await createUser(ctx, {
@@ -74,6 +76,7 @@ describe('api/user.deletePicture', () => {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
+      wileBearerToken = await signBearerJWT(ctx, wileSession);
 
       runner = await createUser(ctx, {
         username: 'runner',
@@ -93,6 +96,7 @@ describe('api/user.deletePicture', () => {
         username: 'runner',
         password: 'fast+furry-ous',
       });
+      runnerBearerToken = await signBearerJWT(ctx, runnerSession);
     });
 
     afterAll(async () => {
@@ -106,7 +110,7 @@ describe('api/user.deletePicture', () => {
     test('deletes user profile picture', async () => {
       let res = await request(server)
         .post('/api/user.uploadPicture')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .attach('picture', path.resolve(__dirname, '../uploadPicture/__tests__/runner.png'))
         .field('id', runner.id);
 
@@ -117,7 +121,7 @@ describe('api/user.deletePicture', () => {
 
       res = await request(server)
         .post('/api/user.deletePicture')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           id: runner.id,
         });
@@ -136,7 +140,7 @@ describe('api/user.deletePicture', () => {
     test('returns error when `id` contains invalid characters', async () => {
       const res = await request(server)
         .post('/api/user.deletePicture')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           id: '507f1f77bcf86cd79943901@',
         });
@@ -156,7 +160,7 @@ describe('api/user.deletePicture', () => {
     test('returns error when `id` contains more than 24 characters', async () => {
       const res = await request(server)
         .post('/api/user.deletePicture')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           id: '507f1f77bcf86cd7994390112',
         });
@@ -176,7 +180,7 @@ describe('api/user.deletePicture', () => {
     test('returns error when `id` contains less than 24 characters', async () => {
       const res = await request(server)
         .post('/api/user.deletePicture')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           id: '507f1f77bcf86cd79943901',
         });
@@ -196,7 +200,7 @@ describe('api/user.deletePicture', () => {
     test('returns error when `id` is unspecified', async () => {
       const res = await request(server)
         .post('/api/user.deletePicture')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({});
       expect(res.status).toBe(200);
       expect(res.body).toMatchObject({
@@ -214,7 +218,7 @@ describe('api/user.deletePicture', () => {
     test('returns error when payload contains unknown properties', async () => {
       const res = await request(server)
         .post('/api/user.deletePicture')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           id: '507f1f77bcf86cd799439011',
           foo: 'bar',
@@ -235,7 +239,7 @@ describe('api/user.deletePicture', () => {
     test('returns error with invalid permission scope', async () => {
       const res = await request(server)
         .post('/api/user.deletePicture')
-        .set('Authorization', `Bearer ${runnerSession.accessToken}`)
+        .set('Authorization', `Bearer ${runnerBearerToken}`)
         .send({
           id: wile.id,
         });
@@ -253,7 +257,7 @@ describe('api/user.deletePicture', () => {
     test('can delete their own profile picture', async () => {
       const res = await request(server)
         .post('/api/user.deletePicture')
-        .set('Authorization', `Bearer ${runnerSession.accessToken}`)
+        .set('Authorization', `Bearer ${runnerBearerToken}`)
         .send({
           id: runner.id,
         });

@@ -6,7 +6,7 @@ import {
   UserDeactivatedError,
   AuthFactorRequired,
 } from '../../../constants/errors';
-import { verifyAuthFactor } from '../../session/create/service';
+import { verifyAuthFactor } from '../../session/issueToken/service';
 
 export const ejectTOTPAuthFactor = async (
   ctx,

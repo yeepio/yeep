@@ -7,11 +7,10 @@ import {
   UserNotFoundError,
   UserDeactivatedError,
 } from '../../../constants/errors';
-import { TOTP_ENROLL } from '../../../constants/tokenTypes';
 
 export const activateTOTPAuthFactor = async ({ db }, { secret, token, userId }) => {
   const UserModel = db.model('User');
-  const TokenModel = db.model('Token');
+  const TOTPEnrollTokenModel = db.model('TOTPEnrollToken');
   const TOTPModel = db.model('TOTP');
 
   // retrieve user from db
@@ -33,10 +32,7 @@ export const activateTOTPAuthFactor = async ({ db }, { secret, token, userId }) 
   }
 
   // acquire token from db
-  const tokenRecord = await TokenModel.findOne({
-    secret,
-    type: TOTP_ENROLL,
-  });
+  const tokenRecord = await TOTPEnrollTokenModel.findOne({ secret });
 
   // ensure token exists
   if (!tokenRecord) {
@@ -64,7 +60,7 @@ export const activateTOTPAuthFactor = async ({ db }, { secret, token, userId }) 
 
   try {
     // redeem token, i.e. delete from db
-    await TokenModel.deleteOne({ _id: tokenRecord._id });
+    await TOTPEnrollTokenModel.deleteOne({ _id: tokenRecord._id });
 
     // register TOTP Auth Factor for the designated user
     await TOTPModel.create({

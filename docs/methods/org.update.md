@@ -40,7 +40,7 @@ _Please note: one of `name` or `slug` must be specified, otherwise update makes 
 
 ```
 POST /api/org.update
-Authorization: `Bearer ${accessToken}`
+Authorization: `Bearer ${authToken}`
 ```
 
 ```json

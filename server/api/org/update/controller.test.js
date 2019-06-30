@@ -3,12 +3,12 @@ import request from 'supertest';
 import compareDesc from 'date-fns/compare_desc';
 import server from '../../../server';
 import config from '../../../../yeep.config';
-import createPermission from '../../permission/create/service';
+// import createPermission from '../../permission/create/service';
 import createOrg from '../create/service';
 import createUser from '../../user/create/service';
 // import createPermissionAssignment from '../../user/assignPermission/service';
-import createSession from '../../session/create/service';
-import destroySession from '../../session/destroy/service';
+import { createSession, signBearerJWT } from '../../session/issueToken/service';
+import { destroySession } from '../../session/destroyToken/service';
 // import deletePermissionAssignment from '../../user/revokePermission/service';
 import deleteOrg from '../delete/service';
 import deleteUser from '../../user/delete/service';
@@ -20,6 +20,7 @@ describe('api/org.update', () => {
   let unauthorisedOrg;
   let umbrella;
   let session;
+  let bearerToken;
 
   beforeAll(async () => {
     await server.setup(config);
@@ -39,7 +40,7 @@ describe('api/org.update', () => {
       ],
     });
 
-    [ org, unauthorisedOrg, umbrella ] = await Promise.all([
+    [org, unauthorisedOrg, umbrella] = await Promise.all([
       createOrg(ctx, {
         name: 'Acme Inc',
         slug: 'acme',
@@ -60,6 +61,7 @@ describe('api/org.update', () => {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
+    bearerToken = await signBearerJWT(ctx, session);
   });
 
   afterAll(async () => {
@@ -74,7 +76,7 @@ describe('api/org.update', () => {
   test('returns error when org does not exist', async () => {
     const res = await request(server)
       .post('/api/org.update')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         id: '5b2d5dd0cd86b77258e16d39', // some random objectid
         name: 'Acme Tost',
@@ -91,10 +93,9 @@ describe('api/org.update', () => {
   });
 
   test('returns error when requestor has no write permissions on requested org', async () => {
-
     const res = await request(server)
       .post('/api/org.update')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         id: unauthorisedOrg.id,
         name: 'Acme Tost',
@@ -113,7 +114,7 @@ describe('api/org.update', () => {
   test('returns error when neither slug nor name are present on the request', async () => {
     const res = await request(server)
       .post('/api/org.update')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         id: org.id, // some random objectid
       });
@@ -123,10 +124,12 @@ describe('api/org.update', () => {
       ok: false,
       error: {
         code: 400,
-        details: [{
-          path: ['name'], 
-          type: 'any.required',
-        }],
+        details: [
+          {
+            path: ['name'],
+            type: 'any.required',
+          },
+        ],
         message: 'Invalid request body',
       },
     });
@@ -135,7 +138,7 @@ describe('api/org.update', () => {
   test('updates org and returns expected response', async () => {
     const res = await request(server)
       .post('/api/org.update')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         id: umbrella.id,
         name: 'Umbrella Tost',

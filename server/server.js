@@ -9,12 +9,12 @@ import helmet from 'koa-helmet';
 import bodyParser from 'koa-bodyparser';
 import compression from 'compression';
 import koaConnect from 'koa-connect';
+import cookie from 'koa-cookie';
 import Boom from 'boom';
 import mongoose from 'mongoose';
 import serveStatic from 'koa-static';
 import mount from 'koa-mount';
 import { registerModels } from './models';
-import JsonWebToken from './utils/JsonWebToken';
 import FileStorage from './utils/FileStorage';
 import MailService from './utils/MailService';
 import errorHandler from './middleware/errorHandler';
@@ -68,6 +68,9 @@ app.use(
   })
 );
 
+// parse cookies
+app.use(cookie());
+
 // register router
 app.use(api.routes());
 app.use(publicRoutes.routes());
@@ -120,12 +123,6 @@ server.setup = async (config) => {
     baseUrl: url.resolve(config.baseUrl, '/media/'),
   });
 
-  // configure JWT
-  const jwt = new JsonWebToken({
-    secretKey: config.accessToken.secret,
-    issuer: 'Yeep',
-  });
-
   const mail = new MailService({
     ...config.mail,
   });
@@ -134,7 +131,6 @@ server.setup = async (config) => {
   app.context.config = config;
   app.context.bus = bus;
   app.context.db = db;
-  app.context.jwt = jwt;
   app.context.storage = storage;
   app.context.mail = mail;
   app.context.router = api; // expose router to enable dynamic API docs

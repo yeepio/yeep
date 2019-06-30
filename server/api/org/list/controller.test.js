@@ -7,8 +7,8 @@ import createOrg from '../../org/create/service';
 import addMemberToOrg from '../../org/addMember/service';
 import listPermissions from '../../permission/list/service';
 import assignPermission from '../../user/assignPermission/service';
-import createSession from '../../session/create/service';
-import destroySession from '../../session/destroy/service';
+import { createSession, signBearerJWT } from '../../session/issueToken/service';
+import { destroySession } from '../../session/destroyToken/service';
 import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
 
@@ -23,6 +23,8 @@ describe('api/org.list', () => {
   let umbrella;
   let session;
   let professorSession;
+  let bearerToken;
+  let professorBearerToken;
 
   beforeAll(async () => {
     await server.setup(config);
@@ -109,6 +111,7 @@ describe('api/org.list', () => {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
+    bearerToken = await signBearerJWT(ctx, session);
 
     const userReadPermissions = await listPermissions(ctx, {
       q: 'yeep.user.read',
@@ -121,6 +124,7 @@ describe('api/org.list', () => {
       username: 'tyrant',
       password: 't-103MrX',
     });
+    professorBearerToken = await signBearerJWT(ctx, professorSession);
 
     // we add professor to acme organisation
     await addMemberToOrg(ctx, {
@@ -152,7 +156,7 @@ describe('api/org.list', () => {
   test('returns list of orgs the user has access to', async () => {
     const res = await request(server)
       .post('/api/org.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send();
 
     expect(res.status).toBe(200);
@@ -176,7 +180,7 @@ describe('api/org.list', () => {
   test('limits number of orgs using `limit` param', async () => {
     const res = await request(server)
       .post('/api/org.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         limit: 1,
       });
@@ -202,7 +206,7 @@ describe('api/org.list', () => {
   test('paginates through orgs using `cursor` param', async () => {
     const res = await request(server)
       .post('/api/org.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         limit: 2,
       });
@@ -213,7 +217,7 @@ describe('api/org.list', () => {
 
     const res1 = await request(server)
       .post('/api/org.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         limit: 1,
       });
@@ -226,7 +230,7 @@ describe('api/org.list', () => {
 
     const res2 = await request(server)
       .post('/api/org.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         limit: 1,
         cursor: res1.body.nextCursor,
@@ -241,7 +245,7 @@ describe('api/org.list', () => {
   test('filters orgs using `q` param', async () => {
     const res = await request(server)
       .post('/api/org.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         q: 'acme',
       });
@@ -263,7 +267,7 @@ describe('api/org.list', () => {
   test('filters orgs using `user` param', async () => {
     const res = await request(server)
       .post('/api/org.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         user: runner.id,
       });
@@ -286,7 +290,7 @@ describe('api/org.list', () => {
   test('throws AuthorisationError when requesting organisations of a user with no access', async () => {
     const res = await request(server)
       .post('/api/org.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         user: oswell.id,
       });
@@ -304,7 +308,7 @@ describe('api/org.list', () => {
   test('throws AuthorisationError when requesting organisations of a user with yeep.user.read access but not assignment access', async () => {
     const res = await request(server)
       .post('/api/org.list')
-      .set('Authorization', `Bearer ${professorSession.accessToken}`)
+      .set('Authorization', `Bearer ${professorBearerToken}`)
       .send({
         user: runner.id,
       });

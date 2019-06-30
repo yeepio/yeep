@@ -7,10 +7,9 @@ import createUser from '../../user/create/service';
 // import createOrg from '../../org/create/service';
 import deleteUser from '../../user/delete/service';
 // import deleteOrg from '../../org/delete/service';
-import createSession from '../../session/create/service';
-import destroySession from '../../session/destroy/service';
+import { createSession, signBearerJWT } from '../../session/issueToken/service';
+import { destroySession } from '../../session/destroyToken/service';
 import { addSeconds } from 'date-fns';
-import { TOTP_ENROLL } from '../../../constants/tokenTypes';
 
 describe('api/totp.activate', () => {
   let ctx;
@@ -43,6 +42,7 @@ describe('api/totp.activate', () => {
   describe('authorized user', () => {
     let wileUser;
     let wileSession;
+    let wileBearerToken;
 
     beforeAll(async () => {
       wileUser = await createUser(ctx, {
@@ -63,6 +63,7 @@ describe('api/totp.activate', () => {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
+      wileBearerToken = await signBearerJWT(ctx, wileSession);
     });
 
     afterAll(async () => {
@@ -73,7 +74,7 @@ describe('api/totp.activate', () => {
     test('returns error when `userId` body param is undefined', async () => {
       const res = await request(server)
         .post('/api/totp.activate')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({});
 
       expect(res.status).toBe(200);
@@ -92,7 +93,7 @@ describe('api/totp.activate', () => {
     test('returns error when `secret` body param is undefined', async () => {
       const res = await request(server)
         .post('/api/totp.activate')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           userId: wileUser.id,
         });
@@ -113,7 +114,7 @@ describe('api/totp.activate', () => {
     test('returns error when `secret` body param is invalid', async () => {
       const res = await request(server)
         .post('/api/totp.activate')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           userId: wileUser.id,
           secret: 'invalid',
@@ -135,7 +136,7 @@ describe('api/totp.activate', () => {
     test('returns error when `token` body param is undefined', async () => {
       const res = await request(server)
         .post('/api/totp.activate')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           userId: wileUser.id,
           secret: 'N34CXTAEDWWIETTGN7P7HGFVM2CPGAG2',
@@ -157,7 +158,7 @@ describe('api/totp.activate', () => {
     test('returns error when `token` body param is invalid', async () => {
       const res = await request(server)
         .post('/api/totp.activate')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           userId: wileUser.id,
           secret: 'N34CXTAEDWWIETTGN7P7HGFVM2CPGAG2',
@@ -180,7 +181,7 @@ describe('api/totp.activate', () => {
     test('returns error when secret key does not exist in token collection', async () => {
       const res = await request(server)
         .post('/api/totp.activate')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           userId: wileUser.id,
           secret: 'N34CXTAEDWWIETTGN7P7HGFVM2CPGAG2',
@@ -198,13 +199,12 @@ describe('api/totp.activate', () => {
     });
 
     test('returns error when secret key exists but is associated with another user', async () => {
-      const TokenModel = ctx.db.model('Token');
+      const TOTPEnrollTokenModel = ctx.db.model('TOTPEnrollToken');
       const TOTPModel = ctx.db.model('TOTP');
 
       const secret = TOTPModel.generateSecret();
-      const tokenRecord = await TokenModel.create({
+      const tokenRecord = await TOTPEnrollTokenModel.create({
         secret,
-        type: TOTP_ENROLL,
         user: ObjectId('507f191e810c19729de860ea'), // i.e. some random object ID
         org: null,
         expiresAt: addSeconds(new Date(), 1000),
@@ -212,7 +212,7 @@ describe('api/totp.activate', () => {
 
       const res = await request(server)
         .post('/api/totp.activate')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           userId: wileUser.id,
           secret,
@@ -228,19 +228,16 @@ describe('api/totp.activate', () => {
         },
       });
 
-      await TokenModel.deleteOne({
-        _id: tokenRecord._id,
-      });
+      await TOTPEnrollTokenModel.deleteOne({ _id: tokenRecord._id });
     });
 
     test('returns error when the supplied token cannot be verified', async () => {
-      const TokenModel = ctx.db.model('Token');
+      const TOTPEnrollTokenModel = ctx.db.model('TOTPEnrollToken');
       const TOTPModel = ctx.db.model('TOTP');
 
       const secret = TOTPModel.generateSecret();
-      const tokenRecord = await TokenModel.create({
+      const tokenRecord = await TOTPEnrollTokenModel.create({
         secret,
-        type: TOTP_ENROLL,
         user: ObjectId(wileUser.id),
         org: null,
         expiresAt: addSeconds(new Date(), 1000),
@@ -248,7 +245,7 @@ describe('api/totp.activate', () => {
 
       const res = await request(server)
         .post('/api/totp.activate')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           userId: wileUser.id,
           secret,
@@ -264,19 +261,16 @@ describe('api/totp.activate', () => {
         },
       });
 
-      await TokenModel.deleteOne({
-        _id: tokenRecord._id,
-      });
+      await TOTPEnrollTokenModel.deleteOne({ _id: tokenRecord._id });
     });
 
     test('activates TOTP authentication factor and returns proper response', async () => {
-      const TokenModel = ctx.db.model('Token');
+      const TOTPEnrollTokenModel = ctx.db.model('TOTPEnrollToken');
       const TOTPModel = ctx.db.model('TOTP');
 
       const secret = TOTPModel.generateSecret();
-      await TokenModel.create({
+      await TOTPEnrollTokenModel.create({
         secret,
-        type: TOTP_ENROLL,
         user: ObjectId(wileUser.id),
         org: null,
         expiresAt: addSeconds(new Date(), 1000),
@@ -284,7 +278,7 @@ describe('api/totp.activate', () => {
 
       const res = await request(server)
         .post('/api/totp.activate')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           userId: wileUser.id,
           secret,

@@ -7,8 +7,8 @@ import config from '../../../../yeep.config';
 import deleteUser from '../../user/delete/service';
 import createUser from '../../user/create/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
-import destroySession from '../../session/destroy/service';
-import createSession from '../../session/create/service';
+import { destroySession } from '../../session/destroyToken/service';
+import { createSession, signBearerJWT } from '../../session/issueToken/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
 import createOrg from '../../org/create/service';
 import deleteOrg from '../../org/delete/service';
@@ -47,6 +47,7 @@ describe('api/invitation.create', () => {
     let requestor;
     let permissionAssignment;
     let session;
+    let bearerToken;
 
     beforeAll(async () => {
       requestor = await createUser(ctx, {
@@ -83,6 +84,7 @@ describe('api/invitation.create', () => {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
+      bearerToken = await signBearerJWT(ctx, session);
     });
 
     afterAll(async () => {
@@ -99,7 +101,7 @@ describe('api/invitation.create', () => {
       const startDate = new Date();
       const res = await request(server)
         .post('/api/invitation.create')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           user: 'beep-beep@acme.com',
           org: org.id,
@@ -143,7 +145,7 @@ describe('api/invitation.create', () => {
     test('returns error when `orgId` is unknown', async () => {
       const res = await request(server)
         .post('/api/invitation.create')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           user: 'beep-beep@acme.com',
           org: '507f1f77bcf86cd799439012', // i.e. some random ID
@@ -162,7 +164,7 @@ describe('api/invitation.create', () => {
     test('returns error when `permissions` array contains unknown permissionId', async () => {
       const res = await request(server)
         .post('/api/invitation.create')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           user: 'beep-beep@acme.com',
           org: org.id,
@@ -191,7 +193,7 @@ describe('api/invitation.create', () => {
 
       const res = await request(server)
         .post('/api/invitation.create')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           user: 'beep-beep@acme.com',
           org: org.id,
@@ -215,7 +217,7 @@ describe('api/invitation.create', () => {
     test('returns error when `roles` array contains unknown roleId', async () => {
       const res = await request(server)
         .post('/api/invitation.create')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           user: 'beep-beep@acme.com',
           org: org.id,
@@ -244,7 +246,7 @@ describe('api/invitation.create', () => {
 
       const res = await request(server)
         .post('/api/invitation.create')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           user: 'beep-beep@acme.com',
           org: org.id,
@@ -277,7 +279,7 @@ describe('api/invitation.create', () => {
       test('returns error when userKey is username', async () => {
         const res = await request(server)
           .post('/api/invitation.create')
-          .set('Authorization', `Bearer ${session.accessToken}`)
+          .set('Authorization', `Bearer ${bearerToken}`)
           .send({
             user: 'runner',
             org: org.id,

@@ -5,8 +5,8 @@ import config from '../../../../yeep.config';
 import createOrg from '../../org/create/service';
 import createUser from '../create/service';
 import createPermissionAssignment from '../assignPermission/service';
-import createSession from '../../session/create/service';
-import destroySession from '../../session/destroy/service';
+import { createSession, signBearerJWT } from '../../session/issueToken/service';
+import { destroySession } from '../../session/destroyToken/service';
 import deletePermissionAssignment from '../revokePermission/service';
 import deleteOrg from '../../org/delete/service';
 import deleteUser from '../delete/service';
@@ -20,8 +20,11 @@ describe('api/user.update', () => {
   let org;
   let permissionAssignment;
   let session;
+  let bearerToken;
   let unauthorisedSession;
+  let unauthorisedBearerToken;
   let superuserSession;
+  let superuserBearerToken;
 
   beforeAll(async () => {
     await server.setup(config);
@@ -101,16 +104,19 @@ describe('api/user.update', () => {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
+    bearerToken = await signBearerJWT(ctx, session);
 
     superuserSession = await createSession(ctx, {
       username: 'gl@d0s',
       password: 'h3r3-w3-g0-@g@1n',
     });
+    superuserBearerToken = await signBearerJWT(ctx, superuserSession);
 
     unauthorisedSession = await createSession(ctx, {
       username: 'roadrunner',
       password: 'you-c@nt-t0utch-m3',
     });
+    unauthorisedBearerToken = await signBearerJWT(ctx, unauthorisedSession);
   });
 
   afterAll(async () => {
@@ -129,7 +135,7 @@ describe('api/user.update', () => {
   test('returns unauthorized error when requestor does not have sufficient permissions', async () => {
     const res = await request(server)
       .post('/api/user.update')
-      .set('Authorization', `Bearer ${unauthorisedSession.accessToken}`)
+      .set('Authorization', `Bearer ${unauthorisedBearerToken}`)
       .send({
         id: user.id,
         fullName: 'Not My Full Name',
@@ -148,7 +154,7 @@ describe('api/user.update', () => {
   test('returns error when user does not exist', async () => {
     const res = await request(server)
       .post('/api/user.update')
-      .set('Authorization', `Bearer ${superuserSession.accessToken}`)
+      .set('Authorization', `Bearer ${superuserBearerToken}`)
       .send({
         id: '5b2d5dd0cd86b77258e16d39', // some random objectid
         fullName: 'Not My Full Name',
@@ -167,7 +173,7 @@ describe('api/user.update', () => {
   test('returns error when specified username already exists', async () => {
     const res = await request(server)
       .post('/api/user.update')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         id: user.id,
         username: existingUser.username,
@@ -189,7 +195,7 @@ describe('api/user.update', () => {
     badEmails[0].isPrimary = true;
     const res = await request(server)
       .post('/api/user.update')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         id: user.id,
         emails: badEmails,
@@ -208,7 +214,7 @@ describe('api/user.update', () => {
   test('returns error when trying to add an org to the user', async () => {
     const res = await request(server)
       .post('/api/user.update')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         id: user.id,
         orgs: ['5b2d5dd0cd86b77258e16d39'], //random id
@@ -228,7 +234,7 @@ describe('api/user.update', () => {
     const newPictureURL = 'https://www.acme.com/pictures/v2/coyote.png';
     const res = await request(server)
       .post('/api/user.update')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         id: user.id,
         picture: newPictureURL,
@@ -250,7 +256,7 @@ describe('api/user.update', () => {
   test('removes image from user if picture property is null', async () => {
     const res = await request(server)
       .post('/api/user.update')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         id: user.id,
         picture: null,
@@ -280,7 +286,7 @@ describe('api/user.update', () => {
       ];
       const res = await request(server)
         .post('/api/user.update')
-        .set('Authorization', `Bearer ${superuserSession.accessToken}`)
+        .set('Authorization', `Bearer ${superuserBearerToken}`)
         .send({
           id: unauthorisedUser.id,
           emails,
@@ -306,7 +312,7 @@ describe('api/user.update', () => {
       ];
       const res = await request(server)
         .post('/api/user.update')
-        .set('Authorization', `Bearer ${superuserSession.accessToken}`)
+        .set('Authorization', `Bearer ${superuserBearerToken}`)
         .send({
           id: unauthorisedUser.id,
           emails,
@@ -331,7 +337,7 @@ describe('api/user.update', () => {
       const newPictureURL = 'https://www.acme.com/pictures/v2/coyote.png';
       const res = await request(server)
         .post('/api/user.update')
-        .set('Authorization', `Bearer ${superuserSession.accessToken}`)
+        .set('Authorization', `Bearer ${superuserBearerToken}`)
         .send({
           id: unauthorisedUser.id,
           fullName: 'new Coyotee',
@@ -371,7 +377,7 @@ describe('api/user.update', () => {
       const newPassword = 'thi$-$s-$af3r';
       const res = await request(server)
         .post('/api/user.update')
-        .set('Authorization', `Bearer ${superuserSession.accessToken}`)
+        .set('Authorization', `Bearer ${superuserBearerToken}`)
         .send({
           id: user.id,
           password: newPassword,
@@ -385,8 +391,10 @@ describe('api/user.update', () => {
       // destroying the session before asserting in case of test failing
       await destroySession(ctx, newSession);
       expect(newSession).toMatchObject({
-        accessToken: expect.any(String),
-        refreshToken: expect.any(String),
+        secret: expect.any(String),
+        user: expect.any(Object),
+        createdAt: expect.any(Date),
+        expiresAt: expect.any(Date),
       });
     });
   });
@@ -403,7 +411,7 @@ describe('api/user.update', () => {
       ];
       const res = await request(server)
         .post('/api/user.update')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           id: user.id,
           emails: badEmails,
@@ -428,7 +436,7 @@ describe('api/user.update', () => {
       ];
       const res = await request(server)
         .post('/api/user.update')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           id: user.id,
           emails: badEmails,
@@ -448,7 +456,7 @@ describe('api/user.update', () => {
       const newPictureURL = 'https://www.acme.com/pictures/v2/coyote.png';
       const res = await request(server)
         .post('/api/user.update')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           id: user.id,
           fullName: 'new Coyotee',
@@ -496,7 +504,7 @@ describe('api/user.update', () => {
       const newPassword = 'thi$-$s-$af3r';
       const res = await request(server)
         .post('/api/user.update')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           id: user.id,
           password: newPassword,
@@ -517,7 +525,7 @@ describe('api/user.update', () => {
       const newPassword = 'thi$-$s-$af3r';
       const res = await request(server)
         .post('/api/user.update')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           id: user.id,
           password: newPassword,
@@ -541,7 +549,7 @@ describe('api/user.update', () => {
       const newPassword = 'thi$-$s-$af3r';
       const res = await request(server)
         .post('/api/user.update')
-        .set('Authorization', `Bearer ${session.accessToken}`)
+        .set('Authorization', `Bearer ${bearerToken}`)
         .send({
           id: user.id,
           password: newPassword,
@@ -559,8 +567,10 @@ describe('api/user.update', () => {
       // destroying the session before asserting in case of test failing
       await destroySession(ctx, newSession);
       expect(newSession).toMatchObject({
-        accessToken: expect.any(String),
-        refreshToken: expect.any(String),
+        secret: expect.any(String),
+        user: expect.any(Object),
+        createdAt: expect.any(Date),
+        expiresAt: expect.any(Date),
       });
     });
   });

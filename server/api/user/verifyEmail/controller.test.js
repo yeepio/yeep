@@ -6,10 +6,11 @@ import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../create/service';
 import deleteUser from '../delete/service';
-import createSession from '../../session/create/service';
-import destroySession from '../../session/destroy/service';
+import { createSession, signBearerJWT } from '../../session/issueToken/service';
+import { destroySession } from '../../session/destroyToken/service';
 import createPermissionAssignment from '../assignPermission/service';
 import deletePermissionAssignment from '../revokePermission/service';
+import { EMAIL_VERIFICATION } from '../../../constants/tokenTypes';
 
 describe('api/user.verifyEmail', () => {
   let ctx;
@@ -42,12 +43,14 @@ describe('api/user.verifyEmail', () => {
   describe('authorized user', () => {
     let wile;
     let wileSession;
+    let wileBearerToken;
     let oswell;
     let unverifiedEmail = {
       address: 'coyote-unverified@acme.com',
       isVerified: false,
       isPrimary: false,
     };
+
     beforeAll(async () => {
       [wile, oswell] = await Promise.all([
         createUser(ctx, {
@@ -85,6 +88,7 @@ describe('api/user.verifyEmail', () => {
         username: 'wile',
         password: 'catch-the-b1rd$',
       });
+      wileBearerToken = await signBearerJWT(ctx, wileSession);
     });
 
     afterAll(async () => {
@@ -100,7 +104,7 @@ describe('api/user.verifyEmail', () => {
       const startDate = new Date();
       let res = await request(server)
         .post('/api/user.verifyEmail')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           id: wile.id,
           emailAddress: unverifiedEmail.address,
@@ -122,7 +126,7 @@ describe('api/user.verifyEmail', () => {
         token: expect.objectContaining({
           id: expect.any(String),
           secret: expect.any(String),
-          type: 'EMAIL_VERIFICATION',
+          type: EMAIL_VERIFICATION,
           createdAt: expect.any(Date),
           expiresAt: expect.any(Date),
         }),
@@ -140,7 +144,7 @@ describe('api/user.verifyEmail', () => {
     test('returns error when user does not exist', async () => {
       const res = await request(server)
         .post('/api/user.verifyEmail')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           id: '507f1f77bcf86cd799439012', // i.e. some random ID
           emailAddress: 'random@email.com',
@@ -159,7 +163,7 @@ describe('api/user.verifyEmail', () => {
     test('returns error when emailAddress is invalid', async () => {
       const res = await request(server)
         .post('/api/user.verifyEmail')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           emailAddress: 'randomstring',
         });
@@ -178,7 +182,7 @@ describe('api/user.verifyEmail', () => {
     test('returns error when emailAddress does not exist', async () => {
       const res = await request(server)
         .post('/api/user.verifyEmail')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           id: wile.id,
           emailAddress: 'random@email.com',
@@ -197,7 +201,7 @@ describe('api/user.verifyEmail', () => {
     test('returns error when tokenExpiresInSeconds is invalid', async () => {
       const res = await request(server)
         .post('/api/user.verifyEmail')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           tokenExpiresInSeconds: 'NaN',
         });
@@ -215,7 +219,7 @@ describe('api/user.verifyEmail', () => {
     test('returns unauthorized error when trying to update user without permission', async () => {
       const res = await request(server)
         .post('/api/user.verifyEmail')
-        .set('Authorization', `Bearer ${wileSession.accessToken}`)
+        .set('Authorization', `Bearer ${wileBearerToken}`)
         .send({
           id: oswell.id,
           emailAddress: unverifiedEmail.address,
@@ -235,12 +239,14 @@ describe('api/user.verifyEmail', () => {
     let wile;
     let superuser;
     let superuserSession;
+    let superuserBearerToken;
     let permissionAssignment;
     let unverifiedEmail = {
       address: 'coyote-unverified@acme.com',
       isVerified: false,
       isPrimary: false,
     };
+
     beforeAll(async () => {
       [wile, superuser] = await Promise.all([
         createUser(ctx, {
@@ -286,6 +292,7 @@ describe('api/user.verifyEmail', () => {
         username: 'oswell',
         password: 'our-business-$s-l1f3-1ts3lf',
       });
+      superuserBearerToken = await signBearerJWT(ctx, superuserSession);
     });
 
     afterAll(async () => {
@@ -302,7 +309,7 @@ describe('api/user.verifyEmail', () => {
       const startDate = new Date();
       let res = await request(server)
         .post('/api/user.verifyEmail')
-        .set('Authorization', `Bearer ${superuserSession.accessToken}`)
+        .set('Authorization', `Bearer ${superuserBearerToken}`)
         .send({
           id: wile.id,
           emailAddress: unverifiedEmail.address,
@@ -324,7 +331,7 @@ describe('api/user.verifyEmail', () => {
         token: expect.objectContaining({
           id: expect.any(String),
           secret: expect.any(String),
-          type: 'EMAIL_VERIFICATION',
+          type: EMAIL_VERIFICATION,
           createdAt: expect.any(Date),
           expiresAt: expect.any(Date),
         }),

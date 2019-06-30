@@ -40,7 +40,7 @@ Requestor must be authenticated. No explicit permissions are required; only retr
 
 ```
 POST /api/org.list
-Authorization: `Bearer ${accessToken}`
+Authorization: `Bearer ${authToken}`
 ```
 
 ```json

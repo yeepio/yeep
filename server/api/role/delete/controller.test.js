@@ -6,8 +6,8 @@ import createPermission from '../../permission/create/service';
 import createOrg from '../../org/create/service';
 import createUser from '../../user/create/service';
 import createPermissionAssignment from '../../user/assignPermission/service';
-import createSession from '../../session/create/service';
-import destroySession from '../../session/destroy/service';
+import { createSession, signBearerJWT } from '../../session/issueToken/service';
+import { destroySession } from '../../session/destroyToken/service';
 import deletePermissionAssignment from '../../user/revokePermission/service';
 import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
@@ -22,6 +22,7 @@ describe('api/role.delete', () => {
   let permission;
   let permissionAssignment;
   let session;
+  let bearerToken;
 
   beforeAll(async () => {
     await server.setup(config);
@@ -65,6 +66,7 @@ describe('api/role.delete', () => {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
+    bearerToken = await signBearerJWT(ctx, session);
   });
 
   afterAll(async () => {
@@ -79,7 +81,7 @@ describe('api/role.delete', () => {
   test('returns error when role does not exist', async () => {
     const res = await request(server)
       .post('/api/role.delete')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         id: '5b2d5dd0cd86b77258e16d39', // some random objectid
       });
@@ -109,7 +111,7 @@ describe('api/role.delete', () => {
 
     const res = await request(server)
       .post('/api/role.delete')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         id: role.id,
       });
@@ -137,7 +139,7 @@ describe('api/role.delete', () => {
 
     const res = await request(server)
       .post('/api/role.delete')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         id: role.id,
       });
@@ -162,7 +164,7 @@ describe('api/role.delete', () => {
 
     const res = await request(server)
       .post('/api/role.delete')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         id: role.id,
       });

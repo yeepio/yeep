@@ -38,7 +38,7 @@ Requestor must be authenticated and assigned with `yeep.user.write` permission i
 
 ```
 POST /api/user.activate
-Authorization: `Bearer ${accessToken}`
+Authorization: `Bearer ${authToken}`
 ```
 
 ```json

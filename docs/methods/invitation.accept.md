@@ -45,7 +45,7 @@ Invitation token was sent to an existing yeep user. Please note authentication i
 
 ```
 POST /api/invitation.accept
-Authorization: `Bearer ${accessToken}`
+Authorization: `Bearer ${authToken}`
 ```
 
 ```json

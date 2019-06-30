@@ -50,7 +50,7 @@ Users are able to retrieve their own details without explicit permissions.
 
 ```
 POST /api/user.info
-Authorization: `Bearer ${accessToken}`
+Authorization: `Bearer ${authToken}`
 ```
 
 ```json

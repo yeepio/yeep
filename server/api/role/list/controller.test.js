@@ -4,8 +4,8 @@ import server from '../../../server';
 import config from '../../../../yeep.config';
 import createUser from '../../user/create/service';
 import createOrg from '../../org/create/service';
-import createSession from '../../session/create/service';
-import destroySession from '../../session/destroy/service';
+import { createSession, signBearerJWT } from '../../session/issueToken/service';
+import { destroySession } from '../../session/destroyToken/service';
 import deleteOrg from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
 import createPermission from '../../permission/create/service';
@@ -24,6 +24,7 @@ describe('api/role.list', () => {
   let roles;
   let globalRole;
   let session;
+  let bearerToken;
 
   beforeAll(async () => {
     await server.setup(config);
@@ -97,6 +98,7 @@ describe('api/role.list', () => {
       username: 'wile',
       password: 'catch-the-b1rd$',
     });
+    bearerToken = await signBearerJWT(ctx, session);
   });
 
   afterAll(async () => {
@@ -114,7 +116,7 @@ describe('api/role.list', () => {
   test('returns list of roles the user has access to', async () => {
     const res = await request(server)
       .post('/api/role.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send();
 
     expect(res.status).toBe(200);
@@ -146,7 +148,7 @@ describe('api/role.list', () => {
   test('limits number of roles using `limit` param', async () => {
     const res = await request(server)
       .post('/api/role.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         limit: 1,
       });
@@ -178,7 +180,7 @@ describe('api/role.list', () => {
   test('paginates through roles using `cursor` param', async () => {
     const res = await request(server)
       .post('/api/role.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         limit: 2,
       });
@@ -189,7 +191,7 @@ describe('api/role.list', () => {
 
     const res1 = await request(server)
       .post('/api/role.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         limit: 1,
       });
@@ -202,7 +204,7 @@ describe('api/role.list', () => {
 
     const res2 = await request(server)
       .post('/api/role.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         limit: 1,
         cursor: res1.body.nextCursor,
@@ -217,7 +219,7 @@ describe('api/role.list', () => {
   test('filters roles using `q` param', async () => {
     const res = await request(server)
       .post('/api/role.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         q: 'acme',
       });
@@ -241,7 +243,7 @@ describe('api/role.list', () => {
   test('filters roles using `scope` param', async () => {
     const res = await request(server)
       .post('/api/role.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         scope: acme.id,
       });
@@ -266,7 +268,7 @@ describe('api/role.list', () => {
   test('throws AuthorisationError when requesting a scope with no access', async () => {
     const res = await request(server)
       .post('/api/role.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         scope: umbrella.id,
       });
@@ -284,7 +286,7 @@ describe('api/role.list', () => {
   test('filters roles using `isSystemRole` param', async () => {
     const res = await request(server)
       .post('/api/role.list')
-      .set('Authorization', `Bearer ${session.accessToken}`)
+      .set('Authorization', `Bearer ${bearerToken}`)
       .send({
         isSystemRole: true,
       });

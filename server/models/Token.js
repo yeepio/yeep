@@ -4,7 +4,7 @@ import {
   TOTP_ENROLL,
   INVITATION,
   PASSWORD_RESET,
-  SESSION_REFRESH,
+  EXCHANGE,
   AUTHENTICATION,
   EMAIL_VERIFICATION,
 } from '../constants/tokenTypes';
@@ -21,11 +21,7 @@ const tokenSchema = new Schema(
     type: {
       type: String,
       required: true,
-      enum: [AUTHENTICATION, SESSION_REFRESH, PASSWORD_RESET, INVITATION, TOTP_ENROLL, EMAIL_VERIFICATION],
-    },
-    payload: {
-      type: Map,
-      required: false,
+      enum: [AUTHENTICATION, EXCHANGE, PASSWORD_RESET, INVITATION, TOTP_ENROLL, EMAIL_VERIFICATION],
     },
     user: {
       type: Schema.Types.ObjectId,
@@ -51,6 +47,7 @@ const tokenSchema = new Schema(
     validateBeforeSave: true,
     versionKey: '_v',
     timestamps: true,
+    discriminatorKey: 'type',
   }
 );
 

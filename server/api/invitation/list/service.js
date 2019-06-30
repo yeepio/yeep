@@ -1,5 +1,4 @@
 import { ObjectId } from 'mongodb';
-import { INVITATION } from '../../../constants/tokenTypes';
 
 export const stringifyCursor = ({ id }) => {
   return Buffer.from(JSON.stringify(id)).toString('base64');
@@ -11,11 +10,9 @@ export const parseCursor = (cursorStr) => {
 };
 
 async function listPendingInvitations({ db }, { orgId, userId, limit, cursor }) {
-  const TokenModel = db.model('Token');
+  const InvitationTokenModel = db.model('InvitationToken');
 
-  const query = {
-    type: INVITATION,
-  };
+  const query = {};
   if (orgId) {
     query.org = ObjectId(orgId);
   }
@@ -28,7 +25,7 @@ async function listPendingInvitations({ db }, { orgId, userId, limit, cursor }) 
     };
   }
 
-  const invitationRecords = await TokenModel.find(query, null, { limit });
+  const invitationRecords = await InvitationTokenModel.find(query, null, { limit });
 
   return invitationRecords.map((e) => {
     return {
@@ -39,10 +36,10 @@ async function listPendingInvitations({ db }, { orgId, userId, limit, cursor }) 
       },
       user: {
         id: e.user ? e.user.toHexString() : null,
-        emailAddress: e.payload.get('emailAddress'),
+        emailAddress: e.invitee.emailAddress,
       },
-      roles: e.payload.get('roles'),
-      permissions: e.payload.get('permissions'),
+      roles: e.invitee.roles,
+      permissions: e.invitee.permissions,
       createdAt: e.createdAt,
       updatedAt: e.updatedAt,
       expiresAt: e.expiresAt,
