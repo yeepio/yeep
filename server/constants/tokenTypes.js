@@ -1,5 +1,4 @@
 export const AUTHENTICATION = 'AUTHENTICATION';
-// export const SESSION_REFRESH = 'SESSION_REFRESH';
 export const EXCHANGE = 'EXCHANGE';
 export const PASSWORD_RESET = 'PASSWORD_RESET';
 export const INVITATION = 'INVITATION';
