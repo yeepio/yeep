@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import noop from 'lodash/noop';
 
 const Button = ({ children, secondary, danger, className, onClick }) => {
   // Common classes for all buttons
@@ -55,7 +56,7 @@ Button.propTypes = {
   children: PropTypes.node.isRequired,
   // If set to true we'll show a secondary / lower priority button
   secondary: PropTypes.bool,
-  // IF set to true we'll show a red "Danger" button
+  // If set to true we'll show a red "Danger" button
   danger: PropTypes.bool,
   // Click handler
   onClick: PropTypes.func,
@@ -67,11 +68,7 @@ Button.defaultProps = {
   children: 'Submit',
   secondary: false,
   danger: false,
-  onClick: () => {
-    console.log(
-      'Default click method. Please pass the `onClick` prop to this button instance with your own code'
-    );
-  },
+  onClick: noop,
 };
 
 export default Button;
