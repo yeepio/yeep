@@ -1,14 +1,28 @@
 import { combineReducers, createStore, applyMiddleware, compose } from 'redux';
 import ReduxThunk from 'redux-thunk';
+import { persistReducer } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
 import {
   reducer as sessionReducer,
   initialState as sessionInitialState,
 } from './session/sessionStore';
-import { reducer as permissionModalsReducer, initialState as permissionModalsInitialState } from './modals/permissionModalsStore';
-import { reducer as roleModalsReducer, initialState as roleModalsInitialState } from './modals/roleModalsStore';
+import {
+  reducer as permissionModalsReducer,
+  initialState as permissionModalsInitialState,
+} from './modals/permissionModalsStore';
+import {
+  reducer as roleModalsReducer,
+  initialState as roleModalsInitialState,
+} from './modals/roleModalsStore';
+
+const sessionPersistConfig = {
+  key: 'session',
+  storage,
+  whitelist: ['user'],
+};
 
 const rootReducer = combineReducers({
-  session: sessionReducer,
+  session: persistReducer(sessionPersistConfig, sessionReducer),
   permissionModals: permissionModalsReducer,
   roleModals: roleModalsReducer,
 });
