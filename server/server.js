@@ -55,6 +55,8 @@ app.use(
 
       return null;
     },
+    credentials: true,
+    maxAge: 300,
   })
 );
 
