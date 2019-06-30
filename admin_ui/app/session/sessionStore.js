@@ -14,6 +14,8 @@ const resolveLogin = createAction('LOGIN_RESOLVE', (user) => ({ user }));
 const rejectLogin = createAction('LOGIN_REJECT', (err) => {
   return { err };
 });
+const initLogout = createAction('LOGOUT_INIT');
+const resolveLogout = createAction('LOGOUT_RESOLVE');
 
 export const login = (user, password) => (dispatch) => {
   dispatch(initLogin());
@@ -29,7 +31,17 @@ export const login = (user, password) => (dispatch) => {
     });
 };
 
-export const logout = createAction('LOGOUT');
+export const logout = () => (dispatch) => {
+  dispatch(initLogout());
+  return yeepClient
+    .logout()
+    .catch((err) => {
+      console.error(err);
+    })
+    .then(() => {
+      dispatch(resolveLogout());
+    });
+};
 
 // reducer
 export const reducer = handleActions(
@@ -47,7 +59,7 @@ export const reducer = handleActions(
       isLoginPending: false,
       user: action.payload.user,
     }),
-    [logout]: () => initialState,
+    [resolveLogout]: () => initialState,
   },
   initialState
 );
