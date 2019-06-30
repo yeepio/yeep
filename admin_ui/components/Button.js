@@ -63,6 +63,7 @@ Button.propTypes = {
 };
 
 Button.defaultProps = {
+  type: 'button',
   children: 'Submit',
   secondary: false,
   danger: false,
