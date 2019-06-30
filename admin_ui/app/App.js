@@ -8,6 +8,7 @@ import { store } from './appStore';
 import LoginPage from './session/LoginPage';
 import ForgotPasswordPage from './session/ForgotPasswordPage';
 import AppInnerModule from './AppInnerModule';
+import PrivateRoute from '../components/PrivateRoute';
 
 const persistor = persistStore(store, {
   debounce: 200,
@@ -18,7 +19,7 @@ const App = () => {
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <Router>
-          <AppInnerModule path="/*" />
+          <PrivateRoute as={AppInnerModule} path="/*" />
           <LoginPage path="/login" />
           <ForgotPasswordPage path="/forgot-password" />
         </Router>
