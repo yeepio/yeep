@@ -46,6 +46,7 @@ module.exports = {
       passwordReset: path.resolve(__dirname, 'server/views/passwordResetInit.html'),
       emailVerification: path.resolve(__dirname, 'server/views/emailVerification.html'),
     },
+    transport: 'debug',
   },
   isUsernameEnabled: true,
   isOrgCreationOpen: true,

@@ -22,6 +22,10 @@ const renderHelp = () => `
     $ yeep validate --config=yeep.config.js
 `;
 
+const CLASSES = {
+  'Function': Function,
+};
+
 const handleValidate = (inputArr, flagsObj) => {
   if (flagsObj.help) {
     console.log(renderHelp());
@@ -36,6 +40,12 @@ const handleValidate = (inputArr, flagsObj) => {
       console.error(renderNativeError(err));
     }
     const ajv = new Ajv();
+    ajv.addKeyword('instanceof', {
+      compile: (schema) => {
+        const Class = CLASSES[schema];
+        return (data) => data instanceof Class;
+      }
+    });
     const validate = ajv.compile(schema);
     const valid = validate(config);
     if (!valid) {
