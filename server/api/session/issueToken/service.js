@@ -15,7 +15,7 @@ import addSecondsWithCap from '../../../utils/addSecondsWithCap';
 
 export const defaultProjection = {
   permissions: false,
-  profile: false,
+  profile: true,
 };
 
 function constructUserMatchQuery(username, emailAddress) {
