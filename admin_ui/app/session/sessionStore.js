@@ -20,7 +20,13 @@ const resolveLogout = createAction('LOGOUT_RESOLVE');
 export const login = (user, password) => (dispatch) => {
   dispatch(initLogin());
   return yeepClient
-    .login({ user, password })
+    .login({
+      user,
+      password,
+      projection: {
+        profile: true,
+      },
+    })
     .then(({ user }) => {
       dispatch(resolveLogin(user));
       return true;
