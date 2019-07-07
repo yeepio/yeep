@@ -1,5 +1,5 @@
 import { createAction, handleActions } from 'redux-actions';
-import yeepClient from '../../utilities/yeepClient';
+import yeepClient from '../yeepClient';
 
 // initial state
 export const initialState = {
