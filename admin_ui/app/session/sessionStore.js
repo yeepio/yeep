@@ -41,8 +41,8 @@ export const logout = () => (dispatch) => {
   dispatch(initLogout());
   return yeepClient
     .logout()
-    .catch((err) => {
-      console.error(err);
+    .catch(() => {
+      // do nothing
     })
     .then(() => {
       dispatch(resolveLogout());
@@ -65,7 +65,7 @@ export const reducer = handleActions(
       isLoginPending: false,
       user: action.payload.user,
     }),
-    [resolveLogout]: () => initialState,
+    [resolveLogout]: () => ({ ...initialState }),
   },
   initialState
 );
