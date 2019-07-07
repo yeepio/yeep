@@ -21,7 +21,7 @@ function getRedirectTo() {
 
 const PrivateRoute = ({ as: Component, ...props }) => {
   const user = useSelector((state) => state.session.user);
-  return has(user, 'id') ? <Component {...props} /> : <Redirect to={getRedirectTo()} />;
+  return has(user, 'id') ? <Component {...props} /> : <Redirect to={getRedirectTo()} noThrow />;
 };
 
 PrivateRoute.propTypes = {
