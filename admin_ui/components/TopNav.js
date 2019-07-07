@@ -14,11 +14,11 @@ const TopNav = () => {
           headless user management
         </h2>
         <ul className="ml-auto flex items-center">
-          <li className="hidden md:block">
+          {/* <li className="hidden md:block">
             <Link to="/feedback" className="text-white hover:text-grey ">
               Send feedback
             </Link>
-          </li>
+          </li> */}
           <li className="ml-4 hidden md:block">
             <Link to="/login" className="text-white hover:text-grey ">
               {user.fullName}
