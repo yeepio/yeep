@@ -157,15 +157,12 @@ describe('api/session.issueToken', () => {
       );
     });
 
-    test('adds user profile data to token payload when `projection.profile` is true', async () => {
+    test('adds user profile data to token payload by default', async () => {
       const res = await request(server)
         .post('/api/session.issueToken')
         .send({
           user: 'Wile', // this will be automaticaly lower-cased
           password: 'catch-the-b1rd$',
-          projection: {
-            profile: true,
-          },
         });
 
       expect(res.status).toBe(200);
@@ -185,12 +182,15 @@ describe('api/session.issueToken', () => {
       );
     });
 
-    test('does not add user profile data to token payload by default', async () => {
+    test('does not add user profile data to token payload when `projection.profile` is false', async () => {
       const res = await request(server)
         .post('/api/session.issueToken')
         .send({
           user: 'Wile', // this will be automaticaly lower-cased
           password: 'catch-the-b1rd$',
+          projection: {
+            profile: false,
+          },
         });
 
       expect(res.status).toBe(200);
@@ -265,6 +265,7 @@ describe('api/session.issueToken', () => {
           user: 'Wile', // this will be automaticaly lower-cased
           password: 'catch-the-b1rd$',
           projection: {
+            profile: false,
             permissions: true,
           },
         });
@@ -304,9 +305,9 @@ describe('api/session.issueToken', () => {
       const tokenPayload = await jwt.verifyAsync(res.body.token, ctx.config.session.bearer.secret);
       expect(tokenPayload).toEqual(
         expect.objectContaining({
-          user: {
+          user: expect.objectContaining({
             id: expect.any(String),
-          },
+          }),
         })
       );
       expect(tokenPayload.user.permissions).toBeUndefined();

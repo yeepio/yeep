@@ -155,6 +155,10 @@ describe('api/session.setCookie', () => {
         expect.objectContaining({
           user: {
             id: expect.any(String),
+            username: 'wile',
+            fullName: 'Wile E. Coyote',
+            picture: 'https://www.acme.com/pictures/coyote.png',
+            primaryEmail: 'coyote@acme.com',
           },
         })
       );
@@ -205,12 +209,15 @@ describe('api/session.setCookie', () => {
       );
     });
 
-    test('does not add user profile data to body payload by default', async () => {
+    test('does not add user profile data to body payload when `projection.profile` is false', async () => {
       const res = await request(server)
         .post('/api/session.setCookie')
         .send({
           user: 'Wile', // this will be automaticaly lower-cased
           password: 'catch-the-b1rd$',
+          projection: {
+            profile: false,
+          },
         });
 
       expect(res.status).toBe(200);
