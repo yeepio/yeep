@@ -6,14 +6,15 @@ import qs from 'query-string';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import { login } from './sessionStore';
+import classnames from 'classnames';
 
-function isUserKeyValid(userKey) {
+/*function isUserKeyValid(userKey) {
   return userKey.length >= 2;
 }
 
 function isPasswordValid(password) {
   return password.length >= 8;
-}
+}*/
 
 const LoginPage = () => {
   const isLoginPending = useSelector((state) => state.session.isLoginPending);
@@ -49,12 +50,19 @@ const LoginPage = () => {
   return (
     <div className="w-screen min-h-screen bg-grey-light flex items-center justify-center">
       <form className="block text-center w-full p-3 sm:w-auto" onSubmit={handleSubmit}>
-        <img src="/yeep-logo-horizontal.svg" alt="Yeep logo" className="mb-6 w-48" />
+        <img src="/yeep-logo-horizontal.svg" alt="Yeep logo" className="mb-6 mx-auto w-48" />
         <h2 className="font-bold text-2xl mb-6">Yeep administration - Sign in</h2>
-        {loginError && <p className="text-red">{loginError}</p>}
+        {loginError.generic && (
+          <div className="bg-red-lightest text-red rounded border border-red-lighter p-3 mb-4">
+            {loginError.generic}
+          </div>
+        )}
         <div className="text-left mb-6">
-          <label htmlFor="userKey" className="block mb-2">
-            Username / email:
+          <label
+            htmlFor="userKey"
+            className={classnames('block', 'mb-2', { 'text-red': loginError.user })}
+          >
+            {loginError.user || 'Username / email:'}
           </label>
           <Input
             id="userKey"
@@ -63,8 +71,11 @@ const LoginPage = () => {
             value={userKey}
             onChange={handleUserKeyChange}
           />
-          <label htmlFor="password" className="block mb-2">
-            Password:
+          <label
+            htmlFor="password"
+            className={classnames('block', 'mb-2', { 'text-red': loginError.password })}
+          >
+            {loginError.password || 'Password:'}
           </label>
           <Input
             id="password"
@@ -76,9 +87,10 @@ const LoginPage = () => {
           <Link to="/forgot-password">Forgot your password?</Link>
         </div>
         <Button
+          inProgress={isLoginPending}
           type="submit"
           className="w-4/5"
-          disabled={!isUserKeyValid(userKey) || !isPasswordValid(password)}
+          // disabled={!isUserKeyValid(userKey) || !isPasswordValid(password)}
         >
           Sign in
         </Button>
