@@ -24,14 +24,25 @@ const LoginPage = () => {
   const [userKey, setUserKey] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleUserKeyChange = useCallback((event) => {
-    dispatch(resetLoginErrors());
-    setUserKey(event.target.value);
-  }, []);
+  const handleUserKeyChange = useCallback(
+    (event) => {
+      if (loginError.generic || loginError.user || loginError.password) {
+        dispatch(resetLoginErrors());
+      }
+      setUserKey(event.target.value);
+    },
+    [loginError]
+  );
 
-  const handlePasswordChange = useCallback((event) => {
-    setPassword(event.target.value);
-  }, []);
+  const handlePasswordChange = useCallback(
+    (event) => {
+      if (loginError.generic || loginError.user || loginError.password) {
+        dispatch(resetLoginErrors());
+      }
+      setPassword(event.target.value);
+    },
+    [loginError]
+  );
 
   const handleSubmit = useCallback(
     (event) => {
