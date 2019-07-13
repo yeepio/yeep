@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import noop from 'lodash/noop';
 
-const Button = ({ children, secondary, danger, inProgress, className, ...props }) => {
+const Button = ({ children, secondary, danger, className, ...props }) => {
   // Common classes for all buttons
   let styles = classNames('border', 'leading-tight', 'font-bold', 'py-2', 'px-4', 'rounded');
   if (secondary) {
@@ -30,41 +30,22 @@ const Button = ({ children, secondary, danger, inProgress, className, ...props }
     );
   } else {
     // Normal buttons
-    if (inProgress) {
-      styles = classNames(
-        styles,
-        'border-blue-dark',
-        'bg-blue-dark',
-        'text-white',
-        'italic'
-      );
-    } else {
-      styles = classNames(
-        styles,
-        'border-blue',
-        'bg-blue',
-        'text-white',
-        'hover:bg-blue-dark',
-        'hover:text-white',
-        'hover:border-blue-dark',
-        'active:bg-blue-darker',
-        'active:border-blue-darker'
-      );
-    }
+    styles = classNames(
+      styles,
+      'border-blue',
+      'bg-blue',
+      'text-white',
+      'hover:bg-blue-dark',
+      'hover:text-white',
+      'hover:border-blue-dark',
+      'active:bg-blue-darker',
+      'active:border-blue-darker'
+    );
   }
   // Add any custom classes that come from the props
   styles = classNames(className, styles);
   return (
-    <button {...props} className={styles} disabled={inProgress}>
-      {inProgress && (
-        <img
-          src="/spinner.svg"
-          alt="*"
-          width={20}
-          height={20}
-          className="inline-block mr-3 align-middle"
-        />
-      )}
+    <button {...props} className={styles}>
       {children}
     </button>
   );
@@ -77,9 +58,6 @@ Button.propTypes = {
   secondary: PropTypes.bool,
   // If set to true we'll show a red "Danger" button
   danger: PropTypes.bool,
-  // If set to true we'll disable the button and show an animated preloader
-  // next to it's label (which will be italicised as well)
-  inProgress: PropTypes.bool,
   // A custom className
   className: PropTypes.string,
 };
@@ -89,7 +67,6 @@ Button.defaultProps = {
   children: 'Submit',
   secondary: false,
   danger: false,
-  inProgress: false,
   onClick: noop,
 };
 

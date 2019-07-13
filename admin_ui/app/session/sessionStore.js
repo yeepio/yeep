@@ -7,7 +7,7 @@ export const initialState = {
   loginError: {
     generic: '',
     user: '',
-    password: ''
+    password: '',
   },
   isLoginPending: false,
 };
@@ -16,8 +16,9 @@ export const initialState = {
 const initLogin = createAction('LOGIN_INIT');
 const resolveLogin = createAction('LOGIN_RESOLVE', (user) => ({ user }));
 const rejectLogin = createAction('LOGIN_REJECT', (err) => {
-  return { err }
+  return { err };
 });
+export const resetLoginErrors = createAction('LOGIN_RESET_ERRORS');
 const initLogout = createAction('LOGOUT_INIT');
 const resolveLogout = createAction('LOGOUT_RESOLVE');
 
@@ -56,11 +57,11 @@ export const login = (user, password) => (dispatch) => {
         // can provide some meaningful errors for the "user" and / or "password" fields
         // Since it's possible that we have _multiple_ errors per field (i.e. "user" field
         // can both be empty and not have a length of 2 characters) we'll only show the first one.
-        err.details.map(fieldError => {
-          if (fieldError.context.key === "user" && formattedError.user === "") {
+        err.details.map((fieldError) => {
+          if (fieldError.context.key === 'user' && formattedError.user === '') {
             // We have our first username / email error. we'll use it.
             formattedError.user = fieldError.message;
-          } else if (fieldError.context.key === "password" && formattedError.password === "") {
+          } else if (fieldError.context.key === 'password' && formattedError.password === '') {
             // We have our first password error. We'll use it.
             formattedError.password = fieldError.message;
           }
@@ -102,6 +103,12 @@ export const reducer = handleActions(
       user: action.payload.user,
     }),
     [resolveLogout]: () => ({ ...initialState }),
+    [resetLoginErrors]: (state) => {
+      return {
+        ...state,
+        loginError: initialState.loginError,
+      };
+    },
   },
   initialState
 );

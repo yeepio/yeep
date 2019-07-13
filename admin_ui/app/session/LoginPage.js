@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import qs from 'query-string';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
-import { login } from './sessionStore';
+import { login, resetLoginErrors } from './sessionStore';
 import classnames from 'classnames';
 
 /*function isUserKeyValid(userKey) {
@@ -25,6 +25,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
 
   const handleUserKeyChange = useCallback((event) => {
+    dispatch(resetLoginErrors());
     setUserKey(event.target.value);
   }, []);
 
@@ -87,11 +88,22 @@ const LoginPage = () => {
           <Link to="/forgot-password">Forgot your password?</Link>
         </div>
         <Button
-          inProgress={isLoginPending}
           type="submit"
           className="w-4/5"
+          disabled={isLoginPending}
           // disabled={!isUserKeyValid(userKey) || !isPasswordValid(password)}
         >
+          <React.Fragment>
+            {isLoginPending && (
+              <img
+                src="/spinner.svg"
+                alt="*"
+                width={20}
+                height={20}
+                className="inline-block mr-3 align-middle"
+              />
+            )}
+          </React.Fragment>
           Sign in
         </Button>
       </form>
