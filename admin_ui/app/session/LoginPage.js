@@ -3,22 +3,23 @@ import { Link, navigate } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useSelector, useDispatch } from 'react-redux';
 import qs from 'query-string';
+import isEmpty from 'lodash/isEmpty';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import { login, resetLoginErrors } from './sessionStore';
 import classnames from 'classnames';
 
-/*function isUserKeyValid(userKey) {
+function isUserKeyValid(userKey) {
   return userKey.length >= 2;
 }
 
 function isPasswordValid(password) {
   return password.length >= 8;
-}*/
+}
 
 const LoginPage = () => {
   const isLoginPending = useSelector((state) => state.session.isLoginPending);
-  const loginError = useSelector((state) => state.session.loginError);
+  const loginErrors = useSelector((state) => state.session.loginErrors);
   const dispatch = useDispatch();
 
   const [userKey, setUserKey] = useState('');
@@ -26,22 +27,22 @@ const LoginPage = () => {
 
   const handleUserKeyChange = useCallback(
     (event) => {
-      if (loginError.generic || loginError.user || loginError.password) {
+      if (!isEmpty(loginErrors)) {
         dispatch(resetLoginErrors());
       }
       setUserKey(event.target.value);
     },
-    [loginError]
+    [dispatch, loginErrors]
   );
 
   const handlePasswordChange = useCallback(
     (event) => {
-      if (loginError.generic || loginError.user || loginError.password) {
+      if (!isEmpty(loginErrors)) {
         dispatch(resetLoginErrors());
       }
       setPassword(event.target.value);
     },
-    [loginError]
+    [dispatch, loginErrors]
   );
 
   const handleSubmit = useCallback(
@@ -64,17 +65,17 @@ const LoginPage = () => {
       <form className="block text-center w-full p-3 sm:w-auto" onSubmit={handleSubmit}>
         <img src="/yeep-logo-horizontal.svg" alt="Yeep logo" className="mb-6 mx-auto w-48" />
         <h2 className="font-bold text-2xl mb-6">Yeep administration - Sign in</h2>
-        {loginError.generic && (
+        {loginErrors.generic && (
           <div className="bg-red-lightest text-red rounded border border-red-lighter p-3 mb-4">
-            {loginError.generic}
+            {loginErrors.generic}
           </div>
         )}
         <div className="text-left mb-6">
           <label
             htmlFor="userKey"
-            className={classnames('block', 'mb-2', { 'text-red': loginError.user })}
+            className={classnames('block', 'mb-2', { 'text-red': loginErrors.user })}
           >
-            {loginError.user || 'Username / email:'}
+            {loginErrors.user || 'Username / email:'}
           </label>
           <Input
             id="userKey"
@@ -85,9 +86,9 @@ const LoginPage = () => {
           />
           <label
             htmlFor="password"
-            className={classnames('block', 'mb-2', { 'text-red': loginError.password })}
+            className={classnames('block', 'mb-2', { 'text-red': loginErrors.password })}
           >
-            {loginError.password || 'Password:'}
+            {loginErrors.password || 'Password:'}
           </label>
           <Input
             id="password"
@@ -101,8 +102,7 @@ const LoginPage = () => {
         <Button
           type="submit"
           className="w-4/5"
-          disabled={isLoginPending}
-          // disabled={!isUserKeyValid(userKey) || !isPasswordValid(password)}
+          disabled={isLoginPending || !isUserKeyValid(userKey) || !isPasswordValid(password)}
         >
           <React.Fragment>
             {isLoginPending && (
