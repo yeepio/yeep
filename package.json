@@ -163,7 +163,7 @@
     "redux-thunk": "^2.3.0",
     "rxjs": "^6.4.0",
     "rxjs-hooks": "^0.4.0",
-    "sharp": "^0.21.3",
+    "sharp": "^0.22.0",
     "styled-jsx": "^3.2.1",
     "thirty-two": "^1.0.2",
     "typeof": "^1.0.0"
