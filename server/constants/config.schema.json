@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/schema#",
   "title": "Yeep Configuration",
   "type": "object",
-  "required": ["name", "baseUrl", "jwt", "mongo", "storage"],
+  "required": ["name", "baseUrl", "mongo", "storage", "session"],
   "properties": {
     "name": {
       "type": "string",
@@ -19,25 +19,6 @@
       "type": "number",
       "minimum": 0,
       "maximum": 65535
-    },
-    "jwt": {
-      "type": "object",
-      "required": ["type", "secret"],
-      "properties": {
-        "type": {
-          "type": "string",
-          "enum": ["hmac"]
-        },
-        "secret": {
-          "type": "string",
-          "minLength": 8
-        },
-        "expiresIn": {
-          "type": "integer",
-          "minimum": 60
-        }
-      },
-      "description": "JWT configuration object"
     },
     "mongo": {
       "type": "object",
@@ -76,6 +57,68 @@
         },
         "emailVerificationError": {
           "type": "string"
+        }
+      }
+    },
+    "session": {
+      "type": "object",
+      "required": ["cookie", "lifetimeInSeconds", "bearer"],
+      "properties": {
+        "cookie": {
+          "type": "object",
+          "required": ["domain", "secret", "expiresInSeconds", "httpOnly", "secure"],
+          "properties": {
+            "domain": {
+              "anyOf": [
+                {
+                  "instanceof": "Function"
+                }, 
+                {
+                  "type": "string"
+                }
+              ]
+            },
+            "secret": {
+              "type": "string"
+            },
+            "isAutoRenewEnabled": {
+              "type": "boolean"
+            },
+            "expiresInSeconds": {
+              "type": "number"
+            },
+            "path": {
+              "type": "string"
+            },
+            "httpOnly": {
+              "type": "boolean"
+            },
+            "secure": {
+              "anyOf": [
+                {
+                  "instanceof": "Function"
+                }, 
+               {
+                "type": "boolean"
+                }
+              ]
+            }
+          }
+        },
+        "lifetimeInSeconds": {
+          "type": "number"
+        },
+        "bearer": {
+          "type": "object",
+          "required": ["secret", "expiresInSeconds"],
+          "properties": {
+            "secret": {
+              "type": "string"
+            },
+            "expiresInSeconds": {
+              "type": "number"
+            }
+          }
         }
       }
     },
