@@ -189,7 +189,8 @@
       "*.spec.js",
       "*.test.js",
       "__tests__",
-      "dist"
+      "dist",
+      "admin_ui"
     ]
   }
 }
