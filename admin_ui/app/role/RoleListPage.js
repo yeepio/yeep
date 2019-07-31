@@ -1,13 +1,14 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import ButtonLink from '../../components/ButtonLink';
 import Select from 'react-select';
 import Grid from '../../components/Grid';
 import Input from '../../components/Input';
 import RoleDeleteModal from '../modals/RoleDeleteModal';
 import { openRoleDeleteModal } from '../modals/roleModalsStore';
+import { listRoles } from './roleStore';
 
 // Dummy data
 let roleHeadings = [
@@ -74,9 +75,18 @@ let roleData = [
 ];
 
 const RoleListPage = () => {
+  const isRoleListLoading = useSelector((state) => state.role.isRoleListLoading);
+  const roles = useSelector((state) => state.role.roles);
+  // const loginErrors = useSelector((state) => state.session.loginErrors);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    console.log('abs');
+    dispatch(listRoles({}));
+  }, [dispatch]);
+
   useDocumentTitle('Roles');
 
-  const dispatch = useDispatch();
   const handleDelete = useCallback(() => {
     dispatch(
       openRoleDeleteModal(

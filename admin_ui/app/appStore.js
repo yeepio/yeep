@@ -6,6 +6,7 @@ import {
   reducer as sessionReducer,
   initialState as sessionInitialState,
 } from './session/sessionStore';
+import { reducer as roleReducer, initialState as roleInitialState } from './role/roleStore';
 import {
   reducer as permissionModalsReducer,
   initialState as permissionModalsInitialState,
@@ -23,12 +24,14 @@ const sessionPersistConfig = {
 
 const rootReducer = combineReducers({
   session: persistReducer(sessionPersistConfig, sessionReducer),
+  role: roleReducer,
   permissionModals: permissionModalsReducer,
   roleModals: roleModalsReducer,
 });
 
 const preloadedState = {
   session: sessionInitialState,
+  role: roleInitialState,
   permissionModals: permissionModalsInitialState,
   roleModals: roleModalsInitialState,
 };
