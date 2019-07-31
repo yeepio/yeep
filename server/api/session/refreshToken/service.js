@@ -91,16 +91,16 @@ export async function refreshSession(ctx, { secret, userId, projection }) {
 
   // decorate session obj with user profile data
   if (projection.profile) {
-    session.user.username = user.username;
-    session.user.fullName = user.fullName;
-    session.user.picture = user.picture || undefined;
-    session.user.primaryEmail = UserModel.getPrimaryEmailAddress(user.emails);
+    nextSession.user.username = user.username;
+    nextSession.user.fullName = user.fullName;
+    nextSession.user.picture = user.picture || undefined;
+    nextSession.user.primaryEmail = UserModel.getPrimaryEmailAddress(user.emails);
   }
 
   // decorate session obj with user permissions
   if (projection.permissions) {
     const permissions = await getUserPermissions(ctx, { userId: user.id });
-    session.user.permissions = permissions.map((e) => {
+    nextSession.user.permissions = permissions.map((e) => {
       return {
         ...e,
         resourceId: e.resourceId || undefined, // remove resourceId if unspecified to save bandwidth

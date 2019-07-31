@@ -8,6 +8,7 @@ const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const SizePlugin = require('size-plugin');
 const PurgecssPlugin = require('purgecss-webpack-plugin');
 const glob = require('glob');
+const config = require('../yeep.config'); // TODO: pass this as env from server
 
 module.exports = (env) => ({
   entry: [
@@ -79,7 +80,8 @@ module.exports = (env) => ({
         include: (pathname) => {
           return (
             pathname.indexOf('node_modules') === -1 ||
-            pathname.indexOf('node_modules/@rehooks') !== -1
+            pathname.indexOf('node_modules/@rehooks') !== -1 ||
+            pathname.indexOf('node_modules/query-string') !== -1
           );
         },
         use: [
@@ -178,7 +180,10 @@ module.exports = (env) => ({
       env: env.production ? 'production' : 'development',
     }),
     // Make some environment variables available to the JS code
-    new webpack.EnvironmentPlugin(['NODE_ENV']),
+    new webpack.DefinePlugin({
+      'process.env.API_BASE_URL': JSON.stringify(config.baseUrl),
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+    }),
     // This helps ensure the builds are consistent if source hasn't changed:
     new webpack.optimize.OccurrenceOrderPlugin(),
     // Watcher doesn't work well if you mistype casing in a path so we use
@@ -238,6 +243,7 @@ module.exports = (env) => ({
       ignored: /node_modules/,
     },
     // watchContentBase: true,
+    allowedHosts: ['localhost'],
     port: 9000,
     inline: true,
     open: false,

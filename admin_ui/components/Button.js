@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import noop from 'lodash/noop';
 
-const Button = ({ children, secondary, danger, className, onClick }) => {
+const Button = ({ children, secondary, danger, className, ...props }) => {
   // Common classes for all buttons
   let styles = classNames('border', 'leading-tight', 'font-bold', 'py-2', 'px-4', 'rounded');
   if (secondary) {
@@ -44,7 +45,7 @@ const Button = ({ children, secondary, danger, className, onClick }) => {
   // Add any custom classes that come from the props
   styles = classNames(className, styles);
   return (
-    <button onClick={onClick} className={styles}>
+    <button {...props} className={styles}>
       {children}
     </button>
   );
@@ -55,23 +56,18 @@ Button.propTypes = {
   children: PropTypes.node.isRequired,
   // If set to true we'll show a secondary / lower priority button
   secondary: PropTypes.bool,
-  // IF set to true we'll show a red "Danger" button
+  // If set to true we'll show a red "Danger" button
   danger: PropTypes.bool,
-  // Click handler
-  onClick: PropTypes.func,
   // A custom className
   className: PropTypes.string,
 };
 
 Button.defaultProps = {
+  type: 'button',
   children: 'Submit',
   secondary: false,
   danger: false,
-  onClick: () => {
-    console.log(
-      'Default click method. Please pass the `onClick` prop to this button instance with your own code'
-    );
-  },
+  onClick: noop,
 };
 
 export default Button;

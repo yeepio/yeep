@@ -55,8 +55,13 @@ app.use(
 
       return null;
     },
+    credentials: true,
+    maxAge: 3600,
   })
 );
+
+// parse cookies
+app.use(cookie());
 
 // parse application/json
 app.use(
@@ -67,9 +72,6 @@ app.use(
     },
   })
 );
-
-// parse cookies
-app.use(cookie());
 
 // register router
 app.use(api.routes());
