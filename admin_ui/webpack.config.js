@@ -243,6 +243,7 @@ module.exports = (env) => ({
       ignored: /node_modules/,
     },
     // watchContentBase: true,
+    allowedHosts: ['localhost'],
     port: 9000,
     inline: true,
     open: false,
