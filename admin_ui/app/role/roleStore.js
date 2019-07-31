@@ -14,7 +14,7 @@ const initListRoles = createAction('ROLE_LIST_INIT');
 const resolveListRoles = createAction('ROLE_LIST_RESOLVE');
 const rejectListRoles = createAction('ROLE_LIST_REJECT');
 
-const changeRoleListLimit = createAction('ROLE_LIST_LIMIT_CHANGE');
+export const setRoleListLimit = createAction('ROLE_LIST_LIMIT_SET');
 
 export const listRoles = (props) => (dispatch) => {
   dispatch(initListRoles());
@@ -31,22 +31,6 @@ export const listRoles = (props) => (dispatch) => {
     });
 };
 
-export const updateRoleListLimit = (props) => (dispatch) => {
-  dispatch(changeRoleListLimit(props))
-  dispatch(initListRoles());
-  return yeepClient
-    .api()
-    .then((api) => api.role.list(props))
-    .then((data) => {
-      dispatch(resolveListRoles(data));
-      return true;
-    })
-    .catch((err) => {
-      dispatch(rejectListRoles(err));
-      return false;
-    });
-}
-
 export const reducer = handleActions(
   {
     [initListRoles]: (state) => ({ ...state, isRoleListLoading: true }),
@@ -57,7 +41,7 @@ export const reducer = handleActions(
       previousRoleListCursor: '', // TODO: missing currentCursor / previousCursor logic
       nextRoleListCursor: action.payload.nextCursor,
     }),
-    [changeRoleListLimit]: (state, action) => ({
+    [setRoleListLimit]: (state, action) => ({
       ...state,
       roleListLimit: action.payload.limit,
     })

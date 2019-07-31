@@ -4,8 +4,7 @@ import { navigate } from '@reach/router';
 import { resolveLogout } from './session/sessionStore';
 
 const yeepClient = new YeepClient({
-  baseURL: 'http://localhost:5000',
-  // baseURL: process.env.API_BASE_URL,
+  baseURL: process.env.API_BASE_URL,
   onError: (err) => {
     switch (err.code) {
       case 10012: {

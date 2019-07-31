@@ -8,7 +8,7 @@ import Grid from '../../components/Grid';
 import Input from '../../components/Input';
 import RoleDeleteModal from '../modals/RoleDeleteModal';
 import { openRoleDeleteModal } from '../modals/roleModalsStore';
-import { listRoles, updateRoleListLimit } from './roleStore';
+import { listRoles, setRoleListLimit } from './roleStore';
 
 // Dummy data
 let roleHeadings = [
@@ -30,8 +30,8 @@ const RoleListPage = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(listRoles({ limit: 10 }));
-  }, [dispatch]);
+    dispatch(listRoles({ limit: roleListLimit }));
+  }, [dispatch, roleListLimit]);
 
   useDocumentTitle('Roles');
 
@@ -62,7 +62,7 @@ const RoleListPage = () => {
 
   const handleLimitChange = useCallback((event) => {
     const newLimit = event.value;
-    dispatch(updateRoleListLimit({ limit: newLimit }));
+    dispatch(setRoleListLimit({ limit: newLimit }));
   }, [dispatch, previousRoleListCursor, roleListLimit]);
 
   return (
