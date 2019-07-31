@@ -8,81 +8,29 @@ import Grid from '../../components/Grid';
 import Input from '../../components/Input';
 import RoleDeleteModal from '../modals/RoleDeleteModal';
 import { openRoleDeleteModal } from '../modals/roleModalsStore';
-import { listRoles } from './roleStore';
+import { listRoles, updateRoleListLimit } from './roleStore';
 
 // Dummy data
 let roleHeadings = [
-  { label: 'Role name', className: 'text-left' },
-  { label: 'Permissions' },
-  { label: 'System role?' },
-  { label: 'Users' },
-  { label: 'Org scope' },
+  { label: 'Role name', className: 'text-left', isSortable: false},
+  { label: 'Permissions', isSortable: false},
+  { label: 'System role?', isSortable: false},
+  { label: 'Users', isSortable: false},
+  { label: 'Org scope', isSortable: false },
   { label: 'Actions', isSortable: false },
-];
-let roleData = [
-  {
-    id: 1,
-    name: 'admin',
-    permissions: 10,
-    systemRole: true,
-    users: 1,
-    orgScope: null,
-  },
-  {
-    id: 2,
-    name: 'blog_user',
-    permissions: 1,
-    systemRole: false,
-    users: 10,
-    orgScope: {
-      orgId: 1,
-      orgLabel: 'blog',
-    },
-  },
-  {
-    id: 3,
-    name: 'blog_admin',
-    permissions: 4,
-    systemRole: false,
-    users: 2,
-    orgScope: {
-      orgId: 1,
-      orgLabel: 'blog',
-    },
-  },
-  {
-    id: 4,
-    name: 'crm_user',
-    permissions: 1,
-    systemRole: false,
-    users: 50,
-    orgScope: {
-      orgId: 2,
-      orgLabel: 'zoho_crm',
-    },
-  },
-  {
-    id: 5,
-    name: 'crm_admin',
-    permissions: 5,
-    systemRole: false,
-    users: 2,
-    orgScope: {
-      orgId: 2,
-      orgLabel: 'zoho_crm',
-    },
-  },
 ];
 
 const RoleListPage = () => {
   const isRoleListLoading = useSelector((state) => state.role.isRoleListLoading);
-  const roles = useSelector((state) => state.role.roles);
+  const roleData = useSelector((state) => state.role.roles);
+  const nextRoleListCursor = useSelector((state) => state.role.nextRoleListCursor);
+  const previousRoleListCursor = useSelector((state) => state.role.previousRoleListCursor);
+  const roleListLimit = useSelector((state) => state.role.roleListLimit);
   // const loginErrors = useSelector((state) => state.session.loginErrors);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    console.log('abs');
-    dispatch(listRoles({}));
+    dispatch(listRoles({ limit: 10 }));
   }, [dispatch]);
 
   useDocumentTitle('Roles');
@@ -103,6 +51,19 @@ const RoleListPage = () => {
       )
     );
   }, [dispatch]);
+
+  const handleNext = useCallback(() => {
+    dispatch(listRoles({ limit: roleListLimit, cursor: nextRoleListCursor }));
+  }, [dispatch, nextRoleListCursor, roleListLimit]);
+
+  const handlePrevious = useCallback(() => {
+    dispatch(listRoles({ limit: roleListLimit, cursor: previousRoleListCursor }));
+  }, [dispatch, previousRoleListCursor, roleListLimit]);
+
+  const handleLimitChange = useCallback((event) => {
+    const newLimit = event.value;
+    dispatch(updateRoleListLimit({ limit: newLimit }));
+  }, [dispatch, previousRoleListCursor, roleListLimit]);
 
   return (
     <React.Fragment>
@@ -136,17 +97,23 @@ const RoleListPage = () => {
         className="mb-6"
         headings={roleHeadings}
         data={roleData}
+        hasNext={!!nextRoleListCursor}
+        hasPrevious={!!previousRoleListCursor}
+        onNextClick={handleNext}
+        onPreviousClick={handlePrevious}
+        onLimitChange={handleLimitChange}
+        isLoading={isRoleListLoading}
         renderer={(roleData, index) => {
           return (
             <tr key={`roleRow${index}`} className={index % 2 ? `bg-grey-lightest` : ``}>
               <td className="p-2">
                 <Link to={`${roleData.id}/edit`}>{roleData.name}</Link>
               </td>
-              <td className="p-2 text-center">{roleData.permissions}</td>
-              <td className="p-2 text-center">{roleData.systemRole ? 'Yes' : '-'}</td>
-              <td className="p-2 text-center">{roleData.users}</td>
+              <td className="p-2 text-center">{roleData.permissions.length}</td>
+              <td className="p-2 text-center">{roleData.isSystemRole ? 'Yes' : '-'}</td>
+              <td className="p-2 text-center">{roleData.usersCount}</td>
               <td className="p-2 text-center">
-                {roleData.orgScope ? roleData.orgScope.orgLabel : '-'}
+                {roleData.org ? roleData.org : '-'}
               </td>
               <td className="p-2 text-center">
                 <Link to={`${roleData.id}/edit`}>Edit</Link>{' '}

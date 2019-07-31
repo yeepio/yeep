@@ -8,7 +8,18 @@ import GridPerPage from './GridPerPage';
 import GridHeadingCell from './GridHeadingCell';
 import GridLoadingOverlay from './GridLoadingOverlay';
 
-const Grid = ({ headings, data, renderer, isLoading, className }) => {
+const Grid = ({
+  headings,
+  data,
+  renderer,
+  isLoading,
+  className,
+  hasNext,
+  hasPrevious,
+  onNextClick,
+  onPreviousClick,
+  onLimitChange,
+}) => {
   return (
     <div className={classNames("grid relative",className)}>
       {isLoading && <GridLoadingOverlay />}
@@ -16,7 +27,12 @@ const Grid = ({ headings, data, renderer, isLoading, className }) => {
         <p>
           Showing entities <strong>1</strong> to <strong>X</strong> of <strong>TOTAL</strong>:
         </p>
-        <GridPager />
+        <GridPager
+          hasNext={hasNext}
+          hasPrevious={hasPrevious}
+          onNextClick={onNextClick}
+          onPreviousClick={onPreviousClick} 
+        />
       </div>
       <style jsx>{`
         .grid-wrapper {
@@ -46,8 +62,13 @@ const Grid = ({ headings, data, renderer, isLoading, className }) => {
         </table>
       </div>
       <div className="sm:flex flex-row text-center items-center py-2">
-        <GridPerPage />
-        <GridPager />
+        <GridPerPage onChange={onLimitChange} />
+        <GridPager
+          hasNext={hasNext}
+          hasPrevious={hasPrevious}
+          onNextClick={onNextClick}
+          onPreviousClick={onPreviousClick} 
+        />
       </div>
     </div>
   );
@@ -81,6 +102,11 @@ Grid.propTypes = {
   isLoading: PropTypes.bool,
   // A custom className
   className: PropTypes.string,
+  hasNext: PropTypes.bool,
+  hasPrevious: PropTypes.bool,
+  onNextClick: PropTypes.func,
+  onPreviousClick: PropTypes.func,
+  onLimitChange: PropTypes.func,
 };
 
 Grid.defaultProps = {
