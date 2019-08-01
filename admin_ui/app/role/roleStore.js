@@ -26,7 +26,12 @@ export const listRoles = (props) => (dispatch) => {
   dispatch(initListRoles());
   return yeepClient
     .api()
-    .then((api) => api.role.list(props))
+    .then((api) =>
+      api.role.list({
+        ...props,
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(api.role.list),
+      })
+    )
     .then((data) => {
       dispatch(resolveListRoles(data));
       return true;
