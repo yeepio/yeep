@@ -22,7 +22,7 @@ export const resolveLogout = createAction('LOGOUT_RESOLVE');
 export const login = (user, password) => (dispatch) => {
   dispatch(initLogin());
   return yeepClient
-    .login({
+    .createSession({
       user,
       password,
       projection: {
@@ -42,7 +42,7 @@ export const login = (user, password) => (dispatch) => {
 export const logout = () => (dispatch) => {
   dispatch(initLogout());
   return yeepClient
-    .logout()
+    .destroySession()
     .catch(() => {
       // do nothing
     })
