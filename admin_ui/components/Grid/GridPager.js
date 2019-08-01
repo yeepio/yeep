@@ -13,6 +13,7 @@ const GridPager = ({ hasNext, hasPrevious, onNextClick, onPreviousClick }) => {
             className={classnames({
               'opacity-50 cursor-not-allowed': !hasPrevious,
             })}
+            disabled={!hasPrevious}
             onClick={onPreviousClick}
           >
             &laquo; Previous
@@ -33,6 +34,7 @@ const GridPager = ({ hasNext, hasPrevious, onNextClick, onPreviousClick }) => {
             className={classnames({
               'opacity-50 cursor-not-allowed': !hasNext,
             })}
+            disabled={!hasNext}
             onClick={onNextClick}
           >
             Next &raquo;

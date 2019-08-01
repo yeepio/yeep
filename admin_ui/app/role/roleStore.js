@@ -6,8 +6,12 @@ export const initialState = {
   roles: [],
   roleListLimit: 10,
   isRoleListLoading: false,
-  nextRoleListCursor: '',
-  previousRoleListCursor: '',
+  cursors: [],
+  nextCursor: undefined,
+  filters: {
+    isSystemRole: false,
+    queryText: '',
+  },
 };
 
 const initListRoles = createAction('ROLE_LIST_INIT');
@@ -15,6 +19,8 @@ const resolveListRoles = createAction('ROLE_LIST_RESOLVE');
 const rejectListRoles = createAction('ROLE_LIST_REJECT');
 
 export const setRoleListLimit = createAction('ROLE_LIST_LIMIT_SET');
+export const setRoleListCursors = createAction('ROLE_LIST_CURSORS_SET');
+export const setRoleListFilters = createAction('ROLE_LIST_FILTERS_SET');
 
 export const listRoles = (props) => (dispatch) => {
   dispatch(initListRoles());
@@ -38,13 +44,24 @@ export const reducer = handleActions(
       ...state,
       isRoleListLoading: false,
       roles: action.payload.roles,
-      previousRoleListCursor: '', // TODO: missing currentCursor / previousCursor logic
-      nextRoleListCursor: action.payload.nextCursor,
+      nextCursor: action.payload.nextCursor,
     }),
     [setRoleListLimit]: (state, action) => ({
       ...state,
+      cursors: [],
       roleListLimit: action.payload.limit,
-    })
+    }),
+    [setRoleListCursors]: (state, action) => ({
+      ...state,
+      cursors: action.payload.cursors,
+    }),
+    [setRoleListFilters]: (state, action) => ({
+      ...state,
+      filters: {
+        ...state.filters,
+        ...action.payload,
+      },
+    }),
   },
   initialState
 );
