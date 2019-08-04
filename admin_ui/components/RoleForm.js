@@ -71,8 +71,8 @@ const RoleForm = ({ onSubmit, onCancel, defaultValues }) => {
       onSubmit({
         name,
         description,
-        scope,
-        permissions,
+        scope: scope.value,
+        permissions: permissions.map((e) => e.value),
       });
     },
     [onSubmit, name, description, scope, permissions]

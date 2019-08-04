@@ -7,6 +7,7 @@ export const initialState = {
   totalRoles: 0,
   roleListLimit: 10,
   isRoleListLoading: false,
+  isRoleCreationPending: false,
   cursors: [],
   nextCursor: undefined,
   filters: {
@@ -19,6 +20,10 @@ const initListRoles = createAction('ROLE_LIST_INIT');
 const resolveListRoles = createAction('ROLE_LIST_RESOLVE');
 const rejectListRoles = createAction('ROLE_LIST_REJECT');
 
+const initCreateRole = createAction('ROLE_CREATE_INIT');
+const resolveCreateRole = createAction('ROLE_CREATE_RESOLVE');
+const rejectCreateRole = createAction('ROLE_CREATE_REJECT');
+
 export const setRoleListLimit = createAction('ROLE_LIST_LIMIT_SET');
 export const setRoleListCursors = createAction('ROLE_LIST_CURSORS_SET');
 export const setRoleListFilters = createAction('ROLE_LIST_FILTERS_SET');
@@ -30,7 +35,7 @@ export const listRoles = (props) => (dispatch) => {
     .then((api) =>
       api.role.list({
         ...props,
-        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(api.role.list),
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(listRoles),
       })
     )
     .then((data) => {
@@ -43,15 +48,46 @@ export const listRoles = (props) => (dispatch) => {
     });
 };
 
+export const createRole = (props) => (dispatch) => {
+  dispatch(initCreateRole());
+  return yeepClient
+    .api()
+    .then((api) =>
+      api.role.create({
+        ...props,
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(createRole),
+      })
+    )
+    .then((data) => {
+      dispatch(resolveCreateRole(data));
+      return true;
+    })
+    .catch((err) => {
+      dispatch(rejectCreateRole(err));
+      return false;
+    });
+};
+
 export const reducer = handleActions(
   {
-    [initListRoles]: (state) => ({ ...state, isRoleListLoading: true }),
+    [initListRoles]: (state) => ({
+      ...state,
+      isRoleListLoading: true,
+    }),
     [resolveListRoles]: (state, action) => ({
       ...state,
       isRoleListLoading: false,
       roles: action.payload.roles,
       totalCount: action.payload.totalCount,
       nextCursor: action.payload.nextCursor,
+    }),
+    [initCreateRole]: (state) => ({
+      ...state,
+      isRoleCreationPending: true,
+    }),
+    [resolveCreateRole]: (state) => ({
+      ...state,
+      isRoleCreationPending: false,
     }),
     [setRoleListLimit]: (state, action) => ({
       ...state,
