@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useSelector, useDispatch } from 'react-redux';
@@ -33,8 +33,8 @@ const RoleListPage = () => {
   const roleListCursors = useSelector((state) => state.role.cursors);
   const roleListFilters = useSelector((state) => state.role.filters);
   const nextCursor = useSelector((state) => state.role.nextCursor);
-
   // const loginErrors = useSelector((state) => state.session.loginErrors);
+
   const dispatch = useDispatch();
 
   useEffect(() => {
