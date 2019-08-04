@@ -37,7 +37,7 @@ const RoleListPage = () => {
   // const loginErrors = useSelector((state) => state.session.loginErrors);
 
   const entitiesStart = (roleListCursors.length * roleListLimit )+ 1;
-  const entitiesEnd = (roleListCursors.length + 1) * roleListLimit;
+  const entitiesEnd = roleData.length > roleListLimit ? (roleListCursors.length + 1) * roleListLimit: roleData.length;
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -98,7 +98,7 @@ const RoleListPage = () => {
   const handleSearch = useCallback((event) => {
     const searchTerm = event.target.value;
     throttledHandleSearch(searchTerm);
-  }, [dispatch]);
+  }, [throttledHandleSearch]);
 
   return (
     <React.Fragment>
