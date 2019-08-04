@@ -37,7 +37,7 @@ const RoleListPage = () => {
   // const loginErrors = useSelector((state) => state.session.loginErrors);
 
   const entitiesStart = (roleListCursors.length * roleListLimit )+ 1;
-  const entitiesEnd = roleData.length > roleListLimit ? (roleListCursors.length + 1) * roleListLimit: roleData.length;
+  const entitiesEnd = (roleData.length >= roleListLimit) ? (roleListCursors.length + 1) * roleListLimit: roleData.length;
   const dispatch = useDispatch();
 
   useEffect(() => {
