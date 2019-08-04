@@ -50,7 +50,7 @@ export const reducer = handleActions(
       ...state,
       isRoleListLoading: false,
       roles: action.payload.roles,
-      totalRoles: action.payload.totalRoles,
+      totalCount: action.payload.totalCount,
       nextCursor: action.payload.nextCursor,
     }),
     [setRoleListLimit]: (state, action) => ({

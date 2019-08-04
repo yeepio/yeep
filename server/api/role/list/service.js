@@ -124,15 +124,18 @@ async function listRoles({ db }, { q, limit, cursor, scopes, isSystemRole }) {
     });
   }
 
-  if (cursor) {
-    matchExpressions.push({
-      _id: { $gt: ObjectId(cursor.id) },
-    });
-  }
-
   if (isSystemRole) {
     matchExpressions.push({
       isSystemRole: { $eq: isSystemRole },
+    });
+  }
+
+  // we don't want the cursor to be taken into account when counting
+  const $countMatch = matchExpressions.length ? { $and: matchExpressions } : {};
+
+  if (cursor) {
+    matchExpressions.push({
+      _id: { $gt: ObjectId(cursor.id) },
     });
   }
 
@@ -140,7 +143,7 @@ async function listRoles({ db }, { q, limit, cursor, scopes, isSystemRole }) {
 
   const [roles, totalCountAggregate] = await Promise.all([
     getRoles(RoleModel, db, $match, limit),
-    getTotalCount(RoleModel, db, $match),
+    getTotalCount(RoleModel, db, $countMatch),
   ]);
 
   const totalCount = get(totalCountAggregate, '[0].totalCount');

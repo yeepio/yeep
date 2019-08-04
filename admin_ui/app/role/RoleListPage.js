@@ -29,12 +29,15 @@ let roleHeadings = [
 const RoleListPage = () => {
   const isRoleListLoading = useSelector((state) => state.role.isRoleListLoading);
   const roleData = useSelector((state) => state.role.roles);
+  const totalCount = useSelector((state) => state.role.totalCount);
   const roleListLimit = useSelector((state) => state.role.roleListLimit);
   const roleListCursors = useSelector((state) => state.role.cursors);
   const roleListFilters = useSelector((state) => state.role.filters);
   const nextCursor = useSelector((state) => state.role.nextCursor);
   // const loginErrors = useSelector((state) => state.session.loginErrors);
 
+  const entitiesStart = (roleListCursors.length * roleListLimit )+ 1;
+  const entitiesEnd = (roleListCursors.length + 1) * roleListLimit;
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -97,7 +100,6 @@ const RoleListPage = () => {
     throttledHandleSearch(searchTerm);
   }, [dispatch]);
 
-
   return (
     <React.Fragment>
       <RoleDeleteModal />
@@ -134,6 +136,9 @@ const RoleListPage = () => {
         className="mb-6"
         headings={roleHeadings}
         data={roleData}
+        entitiesStart={entitiesStart}
+        entitiesEnd={entitiesEnd}
+        totalCount={totalCount}
         hasNext={!!nextCursor}
         hasPrevious={roleListCursors.length > 0}
         onNextClick={handleNext}

@@ -14,6 +14,9 @@ const Grid = ({
   renderer,
   isLoading,
   className,
+  entitiesStart,
+  entitiesEnd,
+  totalCount,
   hasNext,
   hasPrevious,
   onNextClick,
@@ -25,7 +28,7 @@ const Grid = ({
       {isLoading && <GridLoadingOverlay />}
       <div className="py-2 text-center sm:flex sm:text-left">
         <p>
-          Showing entities <strong>1</strong> to <strong>X</strong> of <strong>TOTAL</strong>:
+          Showing entities <strong>{entitiesStart}</strong> to <strong>{entitiesEnd}</strong> of <strong>{totalCount}</strong>:
         </p>
         <GridPager
           hasNext={hasNext}
@@ -102,15 +105,20 @@ Grid.propTypes = {
   isLoading: PropTypes.bool,
   // A custom className
   className: PropTypes.string,
+  totalCount: PropTypes.number,
   hasNext: PropTypes.bool,
   hasPrevious: PropTypes.bool,
   onNextClick: PropTypes.func,
   onPreviousClick: PropTypes.func,
   onLimitChange: PropTypes.func,
+
+  entitiesStart: PropTypes.number,
+  entitiesEnd: PropTypes.number,
 };
 
 Grid.defaultProps = {
   isLoading: false,
+  totalCount: 0,
 };
 
 export default Grid;
