@@ -147,11 +147,11 @@ const RoleForm = ({ onSubmit, onCancel, defaultValues }) => {
       </div>
       <div className="my-4 flex">
         <div className="w-1/4 flex-shrink-0">&nbsp;</div>
-        <div>
+        <div className="flex items-center">
           <Button type="submit">Save</Button>
-          <Button type="button" className="ml-4" onClick={onCancel}>
+          <button type="button" className="p-0 ml-4" onClick={onCancel}>
             Cancel
-          </Button>
+          </button>
         </div>
       </div>
     </form>
