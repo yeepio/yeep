@@ -52,13 +52,9 @@ const RoleListPage = () => {
 
   useDocumentTitle('Roles');
 
-  const handleDelete = useCallback(() => {
+  const handleDelete = useCallback((roleData) => {
     dispatch(
-      openRoleDeleteModal(
-        {
-          id: 1,
-          name: 'role_name',
-        },
+      openRoleDeleteModal(roleData,
         () => {
           console.log('Submit from roleDelete modal!');
         },
@@ -155,7 +151,7 @@ const RoleListPage = () => {
               </td>
               <td className="p-2 text-center">
                 <Link to={`${roleData.id}/edit`}>Edit</Link>{' '}
-                <button onClick={handleDelete} className="pseudolink">
+                <button onClick={() => handleDelete(roleData)} className="pseudolink">
                   Delete
                 </button>
               </td>

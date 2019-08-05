@@ -1,5 +1,6 @@
 import { createAction, handleActions } from 'redux-actions';
 import noop from 'lodash/noop';
+import yeepClient from '../yeepClient';
 
 // initial state of the modal store
 export const initialState = {
@@ -115,20 +116,33 @@ const resolveRoleDelete = createAction('ROLE_DELETE_RESOLVE');
 const rejectRoleDelete = createAction('ROLE_DELETE_REJECT', (err) => {
   return { err };
 });
-const mockRoleDeleteApiRequest = (id) => {
-  return new Promise((resolve) => {
-    // Fake async
-    setTimeout(() => {
-      console.log(`Deleted role ${id}`);
-      resolve();
-    }, 2000);
-  });
-};
-export const deleteRole = (role) => (dispatch) => {
+// const mockRoleDeleteApiRequest = (id) => {
+//   return new Promise((resolve) => {
+//     // Fake async
+//     setTimeout(() => {
+//       console.log(`Deleted role ${id}`);
+//       resolve();
+//     }, 2000);
+//   });
+// };
+export const deleteRole = (props) => (dispatch) => {
   dispatch(initRoleDelete());
-  mockRoleDeleteApiRequest(role.id)
-    .then(() => dispatch(resolveRoleDelete()))
-    .catch((err) => dispatch(rejectRoleDelete(err)));
+  return yeepClient
+    .api()
+    .then((api) =>
+      api.role.delete({
+        ...props,
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(deleteRole),
+      })
+    )
+    .then((data) => {
+      dispatch(resolveRoleDelete(data));
+      return true;
+    })
+    .catch((err) => {
+      dispatch(rejectRoleDelete(err));
+      return false;
+    });
 };
 
 // reducer
