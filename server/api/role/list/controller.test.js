@@ -125,7 +125,7 @@ describe('api/role.list', () => {
     expect(res.body.roles.length).toBe(2);
     expect(res.body).toMatchObject({
       ok: true,
-      totalCount: 2,
+      rolesCount: 2,
       roles: expect.arrayContaining([
         expect.objectContaining({
           id: expect.any(String),
@@ -157,7 +157,7 @@ describe('api/role.list', () => {
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
       ok: true,
-      totalCount: 2,
+      rolesCount: 2,
       roles: expect.arrayContaining([
         expect.objectContaining({
           id: expect.any(String),

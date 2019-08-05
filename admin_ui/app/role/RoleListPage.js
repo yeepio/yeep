@@ -3,8 +3,6 @@ import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useSelector, useDispatch } from 'react-redux';
 import Select from 'react-select';
-import last from 'lodash/last';
-import dropRight from 'lodash/dropRight';
 import isUndefined from 'lodash/isUndefined';
 import isEmpty from 'lodash/isEmpty';
 import pickBy from 'lodash/pickBy';
@@ -14,7 +12,7 @@ import Grid from '../../components/Grid';
 import Input from '../../components/Input';
 import RoleDeleteModal from '../modals/RoleDeleteModal';
 import { openRoleDeleteModal } from '../modals/roleModalsStore';
-import { listRoles, setRoleListLimit, setRoleListCursors, setRoleListFilters } from './roleStore';
+import { listRoles, setRoleListLimit, setRoleListPage, setRoleListFilters } from './roleStore';
 
 // Dummy data
 let roleHeadings = [
@@ -29,28 +27,28 @@ let roleHeadings = [
 const RoleListPage = () => {
   const isRoleListLoading = useSelector((state) => state.role.isRoleListLoading);
   const roleData = useSelector((state) => state.role.roles);
-  const totalCount = useSelector((state) => state.role.totalCount);
+  const rolesCount = useSelector((state) => state.role.rolesCount);
   const roleListLimit = useSelector((state) => state.role.roleListLimit);
   const roleListCursors = useSelector((state) => state.role.cursors);
   const roleListFilters = useSelector((state) => state.role.filters);
-  const nextCursor = useSelector((state) => state.role.nextCursor);
+  const currentPage = useSelector((state) => state.role.page);
   // const loginErrors = useSelector((state) => state.session.loginErrors);
 
-  const entitiesStart = (roleListCursors.length * roleListLimit )+ 1;
-  const entitiesEnd = (roleData.length >= roleListLimit) ? (roleListCursors.length + 1) * roleListLimit: roleData.length;
+  const entitiesStart = (currentPage * roleListLimit ) + 1;
+  const entitiesEnd = (roleData.length >= roleListLimit) ? (currentPage + 1) * roleListLimit : roleData.length;
   const dispatch = useDispatch();
 
   useEffect(() => {
     const data = {
       limit: roleListLimit,
-      cursor: last(roleListCursors),
+      cursor: roleListCursors[currentPage - 1],
       isSystemRole: roleListFilters.isSystemRole,
       // the API does not allow for empty strings as an input
       q: !isEmpty(roleListFilters.queryText) ? roleListFilters.queryText : undefined,
     };
     const sanitizedData = pickBy(data, value => !isUndefined(value));
     dispatch(listRoles(sanitizedData));
-  }, [dispatch, roleListLimit, roleListCursors, roleListFilters]);
+  }, [dispatch, roleListLimit, currentPage, roleListFilters]);
 
   useDocumentTitle('Roles');
 
@@ -72,19 +70,17 @@ const RoleListPage = () => {
   }, [dispatch]);
 
   const handleNext = useCallback(() => {
-    dispatch(setRoleListCursors({ cursors: [...roleListCursors, nextCursor] }));
-  }, [dispatch, roleListLimit, roleListCursors, nextCursor]);
+    dispatch(setRoleListPage({ page: currentPage + 1 }));
+  }, [dispatch, currentPage]);
 
   const handlePrevious = useCallback(() => {
-    const newCursors = dropRight(roleListCursors);
-    dispatch(setRoleListCursors({ cursors: newCursors }));
-  }, [dispatch, roleListLimit, roleListCursors, nextCursor]);
+    dispatch(setRoleListPage({ page: currentPage - 1 }));
+  }, [dispatch, currentPage]);
 
   const handleLimitChange = useCallback((event) => {
     const newLimit = event.value;
-    // dispatch(setRoleListCursors({ cursors: [] })); // we can be explicit if we want
     dispatch(setRoleListLimit({ limit: newLimit }));
-  }, [dispatch, roleListLimit, roleListCursors]);
+  }, [dispatch]);
 
   const handleSystemRoleFilter = useCallback((event) => {
     const { checked } = event.target;
@@ -93,7 +89,7 @@ const RoleListPage = () => {
 
   const throttledHandleSearch = useCallback(throttle((searchTerm) => {
     dispatch(setRoleListFilters({ queryText: searchTerm }));
-  }, 1000), [dispatch]);
+  }, 600), [dispatch]);
 
   const handleSearch = useCallback((event) => {
     const searchTerm = event.target.value;
@@ -138,9 +134,9 @@ const RoleListPage = () => {
         data={roleData}
         entitiesStart={entitiesStart}
         entitiesEnd={entitiesEnd}
-        totalCount={totalCount}
-        hasNext={!!nextCursor}
-        hasPrevious={roleListCursors.length > 0}
+        totalCount={rolesCount}
+        hasNext={roleData.length >= roleListLimit}
+        hasPrevious={currentPage > 0}
         onNextClick={handleNext}
         onPreviousClick={handlePrevious}
         onLimitChange={handleLimitChange}

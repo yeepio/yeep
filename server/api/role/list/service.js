@@ -59,49 +59,7 @@ const getRoles = (model, db, $match, limit) => {
 };
 
 const getTotalCount = (model, db, $match) => {
-  return model.aggregate([
-    {
-      $match,
-    },
-    {
-      $lookup: {
-        from: 'orgMemberships',
-        let: { roleId: '$_id' },
-        pipeline: [
-          {
-            $match: {
-              $expr: {
-                $eq: ['$roles.id', '$$roleId'],
-              },
-            },
-          },
-          {
-            $group: {
-              _id: '$userId',
-            },
-          },
-        ],
-        as: 'users',
-      },
-    },
-    {
-      $lookup: {
-        from: 'orgs',
-        localField: 'scope',
-        foreignField: '_id',
-        as: 'org',
-      },
-    },
-    {
-      $unwind: {
-        path: '$org',
-        preserveNullAndEmptyArrays: true,
-      },
-    },
-    {
-      $count: 'totalCount',
-    },
-  ]);
+  return model.countDocuments($match);
 };
 
 async function listRoles({ db }, { q, limit, cursor, scopes, isSystemRole }) {
@@ -141,12 +99,11 @@ async function listRoles({ db }, { q, limit, cursor, scopes, isSystemRole }) {
 
   const $match = matchExpressions.length ? { $and: matchExpressions } : {};
 
-  const [roles, totalCountAggregate] = await Promise.all([
+  const [roles, rolesCount] = await Promise.all([
     getRoles(RoleModel, db, $match, limit),
     getTotalCount(RoleModel, db, $countMatch),
   ]);
 
-  const totalCount = get(totalCountAggregate, '[0].totalCount');
   const sanitizedRoles = roles.map((role) => ({
     id: role._id.toHexString(),
     name: role.name,
@@ -166,7 +123,7 @@ async function listRoles({ db }, { q, limit, cursor, scopes, isSystemRole }) {
 
   return {
     roles: sanitizedRoles,
-    totalCount,
+    rolesCount,
   };
 }
 
