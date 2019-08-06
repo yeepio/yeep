@@ -113,6 +113,7 @@ describe('api/permission.list', () => {
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
       ok: true,
+      permissionCount: 2,
       permissions: expect.arrayContaining([
         expect.objectContaining({
           id: expect.any(String),
@@ -140,6 +141,7 @@ describe('api/permission.list', () => {
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
       ok: true,
+      permissionCount: 2,
       permissions: expect.arrayContaining([
         expect.objectContaining({
           id: expect.any(String),

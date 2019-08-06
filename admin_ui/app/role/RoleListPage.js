@@ -9,8 +9,7 @@ import { openRoleDeleteModal } from '../modals/roleModalsStore';
 import { listRoles, setRoleListLimit, setRoleListPage } from './roleStore';
 import RoleListFilters from './RoleListFilters';
 
-// Dummy data
-let roleHeadings = [
+const roleHeadings = [
   { label: 'Role name', className: 'text-left', isSortable: false },
   { label: 'Permissions', isSortable: false },
   { label: 'System role?', isSortable: false },
@@ -99,10 +98,16 @@ const RoleListPage = () => {
               <td className="p-2 text-center">{role.isSystemRole ? 'Yes' : '-'}</td>
               <td className="p-2 text-center">{role.org ? role.org.name : '-'}</td>
               <td className="p-2 text-center">
-                <Link to={`${role.id}/edit`}>Edit</Link>{' '}
-                <button onClick={() => onRoleDelete(role)} className="pseudolink">
-                  Delete
-                </button>
+                {role.isSystemRole ? (
+                  <span className="text-grey">Cannot modify</span>
+                ) : (
+                  <React.Fragment>
+                    <Link to={`${role.id}/edit`}>Edit</Link>{' '}
+                    <button onClick={() => onRoleDelete(role)} className="pseudolink">
+                      Delete
+                    </button>
+                  </React.Fragment>
+                )}
               </td>
             </tr>
           );
