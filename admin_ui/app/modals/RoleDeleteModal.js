@@ -1,50 +1,50 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
+import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
-import isEmpty from 'lodash/isEmpty';
+import noop from 'lodash/noop';
 import classnames from 'classnames';
 import Modal from '../../components/Modal';
 import { Link } from '@reach/router';
 import Button from '../../components/Button';
 import LoadingIndicator from '../../components/LoadingIndicator';
-import { callbacks, closeRoleDeleteModal, deleteRole } from './roleModalsStore';
+import { closeRoleDeleteModal, deleteRole } from './roleModalsStore';
 
-const RoleDeleteModal = () => {
+const RoleDeleteModal = ({ onSuccess, onError, onCancel }) => {
   const displayedModal = useSelector((state) => state.roleModals.displayedModal);
   const role = useSelector((state) => state.roleModals.role);
-
-  const roleDeleteError = useSelector((state) => state.roleModals.roleDeleteError);
+  // const roleDeleteError = useSelector((state) => state.roleModals.roleDeleteError);
   const isRoleDeletePending = useSelector((state) => state.roleModals.isRoleDeletePending);
 
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    // i have issues with this logic. I dont expect its correct. Lets revisit
-    if (displayedModal === 'ROLE_DELETE' && !isRoleDeletePending && isEmpty(roleDeleteError)) {
-      dispatch(closeRoleDeleteModal());
-    }
-  }, [dispatch, isRoleDeletePending, roleDeleteError]);
-
   // modalClose will cancel and close the modal
-  const modalClose = useCallback(() => {
-    callbacks.onRoleDeleteCancel();
+  const onModalClose = useCallback(() => {
+    onCancel();
     dispatch(closeRoleDeleteModal());
-  }, [dispatch]);
+  }, [dispatch, onCancel]);
 
   // modalSubmit will call the submit method, close and then perform the deletion
-  const modalSubmit = useCallback(() => {
-    callbacks.onRoleDeleteSubmit();
-    dispatch(deleteRole({ id: role.id }));
-  }, [dispatch, role]);
+  const onModalSubmit = useCallback(() => {
+    dispatch(deleteRole({ id: role.id })).then((isRoleDeleted) => {
+      dispatch(closeRoleDeleteModal());
+      if (isRoleDeleted) {
+        onSuccess();
+      } else {
+        onError();
+      }
+    });
+  }, [dispatch, role, onSuccess, onError]);
 
   if (displayedModal !== 'ROLE_DELETE' || !role.id) {
     return null;
   }
 
   return (
-    <Modal onClose={modalClose}>
+    <Modal onClose={onModalClose}>
       <h2 className="mb-4">Delete role &quot;{role.name}&quot;?</h2>
       <p className="mb-4">
-        Please note <Link to="/users">{role.usersCount}</Link> users have this role assigned to them.
+        Please note <Link to="/users">{role.usersCount}</Link> users have this role assigned to
+        them.
       </p>
       <p className="mb-4">
         <strong>Warning: This action cannot be undone!</strong>
@@ -52,10 +52,10 @@ const RoleDeleteModal = () => {
       <p className="text-center">
         <Button
           danger
-          onClick={modalSubmit}
+          onClick={onModalSubmit}
           disabled={isRoleDeletePending}
           className={classnames({
-          'opacity-50 cursor-not-allowed': isRoleDeletePending,
+            'opacity-50 cursor-not-allowed': isRoleDeletePending,
           })}
         >
           {isRoleDeletePending && <LoadingIndicator />}
@@ -64,6 +64,18 @@ const RoleDeleteModal = () => {
       </p>
     </Modal>
   );
+};
+
+RoleDeleteModal.propTypes = {
+  onSuccess: PropTypes.func,
+  onError: PropTypes.func,
+  onCancel: PropTypes.func,
+};
+
+RoleDeleteModal.defaultProps = {
+  onSuccess: noop,
+  onError: noop,
+  onCancel: noop,
 };
 
 export default RoleDeleteModal;

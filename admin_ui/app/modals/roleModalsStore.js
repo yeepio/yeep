@@ -100,16 +100,7 @@ export const editRole = (role) => (dispatch) => {
 // ****************************************************************************
 // ROLE DELETE
 // ****************************************************************************
-export const openRoleDeleteModal = createAction(
-  'ROLE_DELETE_MODAL_OPEN',
-  (role, onSubmit = noop, onCancel = noop) => {
-    return {
-      role,
-      onSubmit,
-      onCancel,
-    };
-  }
-);
+export const openRoleDeleteModal = createAction('ROLE_DELETE_MODAL_OPEN');
 export const closeRoleDeleteModal = createAction('ROLE_DELETE_MODAL_CLOSE');
 const initRoleDelete = createAction('ROLE_DELETE_INIT');
 const resolveRoleDelete = createAction('ROLE_DELETE_RESOLVE');
@@ -154,7 +145,7 @@ export const reducer = handleActions(
       callbacks.onRoleCreateSubmit = action.payload.onSubmit;
       return {
         ...state,
-        displayedModal: 'ROLE_CREATE'
+        displayedModal: 'ROLE_CREATE',
       };
     },
     [closeRoleCreateModal]: (state) => {
@@ -231,8 +222,6 @@ export const reducer = handleActions(
     },
     // Delete role
     [openRoleDeleteModal]: (state, action) => {
-      callbacks.onRoleDeleteCancel = action.payload.onCancel;
-      callbacks.onRoleDeleteSubmit = action.payload.onSubmit;
       return {
         ...state,
         displayedModal: 'ROLE_DELETE',
@@ -240,8 +229,6 @@ export const reducer = handleActions(
       };
     },
     [closeRoleDeleteModal]: (state) => {
-      callbacks.onRoleDeleteCancel = noop;
-      callbacks.onRoleDeleteSubmit = noop;
       return {
         ...state,
         displayedModal: '',

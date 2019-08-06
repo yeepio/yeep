@@ -35,23 +35,19 @@ const RoleListPage = () => {
     roleData.length >= roleListLimit ? (currentPage + 1) * roleListLimit : roleData.length;
   const dispatch = useDispatch();
 
-  useEffect(() => dispatch(listRoles()), [dispatch, roleListLimit, currentPage, roleListFilters]);
+  useEffect(() => {
+    dispatch(listRoles());
+  }, [dispatch, roleListLimit, currentPage, roleListFilters]);
 
   useDocumentTitle('Roles');
 
+  const reload = useCallback(() => {
+    dispatch(listRoles());
+  }, [dispatch]);
+
   const handleDelete = useCallback(
-    (roleData) => {
-      dispatch(
-        openRoleDeleteModal(
-          roleData,
-          () => {
-            console.log('Submit from roleDelete modal!');
-          },
-          () => {
-            console.log('Cancel from roleDelete modal');
-          }
-        )
-      );
+    (role) => {
+      dispatch(openRoleDeleteModal({ role }));
     },
     [dispatch]
   );
@@ -97,7 +93,7 @@ const RoleListPage = () => {
 
   return (
     <React.Fragment>
-      <RoleDeleteModal />
+      <RoleDeleteModal onSuccess={reload} onError={(err) => console.error(err)} />
       <ButtonLink to="create" className="float-right">
         Create new
       </ButtonLink>
