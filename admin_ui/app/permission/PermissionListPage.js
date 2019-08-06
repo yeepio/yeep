@@ -101,7 +101,7 @@ const PermissionListPage = () => {
 
   return (
     <React.Fragment>
-      <PermissionDeleteModal />
+      <PermissionDeleteModal onSuccess={reload} onError={(err) => console.error(err)} />
       <ButtonLink to="create" className="float-right">
         Create new
       </ButtonLink>
@@ -166,15 +166,15 @@ const PermissionListPage = () => {
                 {permissionData.orgScope ? permissionData.orgScope.orgLabel : '-'}
               </td>
               <td className="p-2 text-center">
-                {permissionData.isSystemPermission && (
+                {!permissionData.isSystemPermission && (
                   <React.Fragment>
                     <Link to={`${permissionData.id}/edit`}>Edit</Link>{' '}
-                    <button onClick={handleDelete} className="pseudolink">
+                    <button onClick={() => handleDelete(permissionData)} className="pseudolink">
                       Delete
                     </button>
                   </React.Fragment>
                 )}
-                {!permissionData.isSystemPermission && <span className="text-grey">Cannot modify</span>}
+                {permissionData.isSystemPermission && <span className="text-grey">Cannot modify</span>}
               </td>
             </tr>
           );
