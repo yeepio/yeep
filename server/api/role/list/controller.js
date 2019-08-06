@@ -60,7 +60,7 @@ async function handler(ctx) {
   const { request, response } = ctx;
   const { q, limit, cursor, isSystemRole, scope } = request.body;
 
-  const { roles, rolesCount } = await listRoles(ctx, {
+  const { roles, roleCount } = await listRoles(ctx, {
     q,
     limit,
     cursor: cursor ? parseCursor(cursor) : null,
@@ -71,7 +71,7 @@ async function handler(ctx) {
   response.status = 200; // OK
   response.body = {
     roles,
-    rolesCount,
+    roleCount,
     nextCursor: roles.length < limit ? undefined : stringifyCursor(last(roles)),
   };
 }
