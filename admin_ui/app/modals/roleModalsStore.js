@@ -12,9 +12,9 @@ export const initialState = {
   roleCreateError: '',
   roleEditError: '',
   roleDeleteError: '',
-  isroleCreatePending: false,
-  isroleEditPending: false,
-  isroleDeletePending: false,
+  isRoleCreatePending: false,
+  isRoleEditPending: false,
+  isRoleDeletePending: false,
 };
 
 export const callbacks = {

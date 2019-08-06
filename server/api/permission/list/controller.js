@@ -97,7 +97,7 @@ async function handler(ctx) {
   const { request, response } = ctx;
   const { q, limit, cursor, scope, isSystemPermission } = request.body;
 
-  const permissions = await listPermissions(ctx, {
+  const { permissions, permissionCount } = await listPermissions(ctx, {
     q,
     limit,
     cursor: cursor ? parseCursor(cursor) : null,
@@ -109,6 +109,7 @@ async function handler(ctx) {
   response.status = 200; // OK
   response.body = {
     permissions,
+    permissionCount,
     nextCursor: permissions.length < limit ? undefined : stringifyCursor(last(permissions)),
   };
 }

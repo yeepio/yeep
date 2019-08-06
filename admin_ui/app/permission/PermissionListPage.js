@@ -1,110 +1,103 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import ButtonLink from '../../components/ButtonLink';
+import throttle from 'lodash/throttle';
 import Select from 'react-select';
 import Grid from '../../components/Grid';
 import Input from '../../components/Input';
 import PermissionDeleteModal from '../modals/PermissionDeleteModal';
 import { openPermissionDeleteModal } from '../modals/permissionModalsStore';
+import {
+  listPermissions,
+  setPermissionListLimit,
+  setPermissionListPage,
+  setPermissionListFilters,
+} from './permissionStore';
 
 // Dummy data
-let permissionHeadings = [
+const permissionHeadings = [
   {
     label: 'Name',
     className: 'text-left',
+    isSortable: false,
   },
-  { label: 'Is system?' },
-  { label: 'Role assignments' },
-  { label: 'Org scope' },
+  { label: 'System permission', isSortable: false },
+  { label: 'Role assignments', isSortable: false },
+  { label: 'Org scope', isSortable: false },
   { label: 'Actions', isSortable: false },
-];
-let permissionData = [
-  {
-    id: 1,
-    name: 'yeep.org.write',
-    systemPermission: true,
-    roles: 1,
-    orgScope: null,
-  },
-  {
-    id: 2,
-    name: 'yeep.org.read',
-    systemPermission: true,
-    roles: 1,
-    orgScope: null,
-  },
-  {
-    id: 3,
-    name: 'yeep.user.write',
-    systemPermission: true,
-    roles: 1,
-    orgScope: null,
-  },
-  {
-    id: 4,
-    name: 'yeep.user.read',
-    systemPermission: true,
-    roles: 1,
-    orgScope: null,
-  },
-  {
-    id: 5,
-    name: 'yeep.permission.write',
-    systemPermission: true,
-    roles: 1,
-    orgScope: null,
-  },
-  {
-    id: 6,
-    name: 'yeep.permission.read',
-    systemPermission: true,
-    roles: 1,
-    orgScope: null,
-  },
-  {
-    id: 7,
-    name: 'blog.read',
-    systemPermission: false,
-    roles: 1,
-    orgScope: {
-      ordId: 1,
-      orgLabel: 'blog',
-    },
-  },
-  {
-    id: 8,
-    name: 'blog.modify',
-    systemPermission: false,
-    roles: 1,
-    orgScope: {
-      ordId: 1,
-      orgLabel: 'blog',
-    },
-  },
 ];
 
 const PermissionListPage = () => {
+  const isPermissionListLoading = useSelector((state) => state.permission.isPermissionListLoading);
+  const permissionData = useSelector((state) => state.permission.permissions);
+  const permissionCount = useSelector((state) => state.permission.permissionCount);
+  const permissionListLimit = useSelector((state) => state.permission.permissionListLimit);
+  const permissionListFilters = useSelector((state) => state.permission.filters);
+  const currentPage = useSelector((state) => state.permission.page);
+
   useDocumentTitle('Permissions');
 
   const dispatch = useDispatch();
-  const handleDelete = useCallback(() => {
-    dispatch(
-      openPermissionDeleteModal(
-        {
-          id: 1,
-          name: 'blog.read',
-        },
-        () => {
-          console.log('Submit from permissionDelete modal!');
-        },
-        () => {
-          console.log('Cancel from permissionDelete modal');
-        }
-      )
-    );
+
+  const entitiesStart = currentPage * permissionListLimit + 1;
+  const entitiesEnd =
+    permissionData.length >= permissionListLimit ? (currentPage + 1) * permissionListLimit : permissionData.length;
+
+  useEffect(() => {
+    dispatch(listPermissions());
+  }, [dispatch, permissionListLimit, currentPage, permissionListFilters]);
+
+  const reload = useCallback(() => {
+    dispatch(listPermissions());
   }, [dispatch]);
+
+  const handleDelete = useCallback(
+    (permission) => {
+      dispatch(openPermissionDeleteModal({ permission }));
+    },
+    [dispatch]
+  );
+
+  const handleNext = useCallback(() => {
+    dispatch(setPermissionListPage({ page: currentPage + 1 }));
+  }, [dispatch, currentPage]);
+
+  const handlePrevious = useCallback(() => {
+    dispatch(setPermissionListPage({ page: currentPage - 1 }));
+  }, [dispatch, currentPage]);
+
+  const handleLimitChange = useCallback(
+    (event) => {
+      const newLimit = event.value;
+      dispatch(setPermissionListLimit({ limit: newLimit }));
+    },
+    [dispatch]
+  );
+
+  const handleSystemPermissionFilter = useCallback(
+    (event) => {
+      const { checked } = event.target;
+      dispatch(setPermissionListFilters({ isSystemPermission: checked }));
+    },
+    [dispatch]
+  );
+
+  const throttledHandleSearch = useCallback(
+    throttle((searchTerm) => {
+      dispatch(setPermissionListFilters({ queryText: searchTerm }));
+    }, 600),
+    [dispatch]
+  );
+
+  const handleSearch = useCallback(
+    (event) => {
+      const searchTerm = event.target.value;
+      throttledHandleSearch(searchTerm);
+    },
+    [throttledHandleSearch]
+  );
 
   return (
     <React.Fragment>
@@ -142,29 +135,38 @@ const PermissionListPage = () => {
             htmlFor="showSystemPermissions"
             className="block flex-initial mb-3 sm:mb-0 sm:mr-3"
           >
-            <input type="checkbox" id="showSystemPermissions" className="mr-2" />
+            <input type="checkbox" id="showSystemPermissions" className="mr-2" onChange={handleSystemPermissionFilter} />
             Show system permissions
           </label>
-          <Input placeholder="quicksearch" className="w-full sm:w-1/4" />
+          <Input placeholder="quicksearch" className="w-full sm:w-1/4" onKeyUp={handleSearch} />
         </div>
       </fieldset>
       <Grid
         className="mb-6"
         headings={permissionHeadings}
         data={permissionData}
+        entitiesStart={entitiesStart}
+        entitiesEnd={entitiesEnd}
+        totalCount={permissionCount}
+        hasNext={permissionData.length >= permissionListLimit}
+        hasPrevious={currentPage > 0}
+        onNextClick={handleNext}
+        onPreviousClick={handlePrevious}
+        onLimitChange={handleLimitChange}
+        isLoading={isPermissionListLoading}
         renderer={(permissionData, index) => {
           return (
             <tr key={`permissionRow${index}`} className={index % 2 ? `bg-grey-lightest` : ``}>
               <td className="p-2">
                 <Link to={`${permissionData.id}/edit`}>{permissionData.name}</Link>
               </td>
-              <td className="p-2 text-center">{permissionData.systemPermission ? 'Yes' : '-'}</td>
-              <td className="p-2 text-center">{permissionData.roles}</td>
+              <td className="p-2 text-center">{permissionData.isSystemPermission ? 'Yes' : '-'}</td>
+              <td className="p-2 text-center">{permissionData.rolesCount}</td>
               <td className="p-2 text-center">
                 {permissionData.orgScope ? permissionData.orgScope.orgLabel : '-'}
               </td>
               <td className="p-2 text-center">
-                {permissionData.orgScope && (
+                {permissionData.isSystemPermission && (
                   <React.Fragment>
                     <Link to={`${permissionData.id}/edit`}>Edit</Link>{' '}
                     <button onClick={handleDelete} className="pseudolink">
@@ -172,7 +174,7 @@ const PermissionListPage = () => {
                     </button>
                   </React.Fragment>
                 )}
-                {!permissionData.orgScope && <span className="text-grey">Cannot modify</span>}
+                {!permissionData.isSystemPermission && <span className="text-grey">Cannot modify</span>}
               </td>
             </tr>
           );
