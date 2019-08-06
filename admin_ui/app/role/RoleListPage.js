@@ -3,9 +3,6 @@ import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useSelector, useDispatch } from 'react-redux';
 import Select from 'react-select';
-import isUndefined from 'lodash/isUndefined';
-import isEmpty from 'lodash/isEmpty';
-import pickBy from 'lodash/pickBy';
 import throttle from 'lodash/throttle';
 import ButtonLink from '../../components/ButtonLink';
 import Grid from '../../components/Grid';
@@ -29,7 +26,6 @@ const RoleListPage = () => {
   const roleData = useSelector((state) => state.role.roles);
   const roleCount = useSelector((state) => state.role.roleCount);
   const roleListLimit = useSelector((state) => state.role.roleListLimit);
-  const roleListCursors = useSelector((state) => state.role.cursors);
   const roleListFilters = useSelector((state) => state.role.filters);
   const currentPage = useSelector((state) => state.role.page);
   // const loginErrors = useSelector((state) => state.session.loginErrors);
@@ -39,17 +35,7 @@ const RoleListPage = () => {
     roleData.length >= roleListLimit ? (currentPage + 1) * roleListLimit : roleData.length;
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    const data = {
-      limit: roleListLimit,
-      cursor: roleListCursors[currentPage - 1],
-      isSystemRole: roleListFilters.isSystemRole,
-      // the API does not allow for empty strings as an input
-      q: !isEmpty(roleListFilters.queryText) ? roleListFilters.queryText : undefined,
-    };
-    const sanitizedData = pickBy(data, (value) => !isUndefined(value));
-    dispatch(listRoles(sanitizedData));
-  }, [dispatch, roleListLimit, currentPage, roleListFilters]);
+  useEffect(() => dispatch(listRoles()), [dispatch, roleListLimit, currentPage, roleListFilters]);
 
   useDocumentTitle('Roles');
 

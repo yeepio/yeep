@@ -28,14 +28,20 @@ export const setRoleListLimit = createAction('ROLE_LIST_LIMIT_SET');
 export const setRoleListPage = createAction('ROLE_LIST_PAGE_SET');
 export const setRoleListFilters = createAction('ROLE_LIST_FILTERS_SET');
 
-export const listRoles = (props) => (dispatch) => {
+export const listRoles = (props = {}) => (dispatch, getState) => {
+  const { role: store } = getState();
+
   dispatch(initListRoles());
   return yeepClient
     .api()
     .then((api) =>
       api.role.list({
-        ...props,
+        limit: store.roleListLimit,
+        cursor: store.cursors[store.page - 1],
+        isSystemRole: store.filters.isSystemRole,
+        q: store.filters.queryText || undefined,
         cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(listRoles),
+        ...props,
       })
     )
     .then((data) => {
