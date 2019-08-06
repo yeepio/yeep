@@ -31,7 +31,7 @@ Requestor must be authenticated. No explicit permissions are required; only retr
 - **ok** _(boolean)_ — indicates whether the request was successfully completed
 - **error** _(Object)_ — contains error details in case of an error
 - **roles** _(Array\<Object>)_ — array of roles
-- **rolesCount** _(Number)_ — The total number of roles
+- **roleCount** _(Number)_ — total number of roles
 - **nextCursor** _(string)_ — use this `cursor` to facilitate pagination
 
 ---
@@ -76,7 +76,7 @@ Authorization: `Bearer ${authToken}`
       "updatedAt": "2017-07-13T05:42:42.222Z"
     }
   ],
-  "rolesCount": 1000,
+  "roleCount": 1000,
   "nextCursor": "IjViN2QwZGIyMzg1YzcyNWY5ZjNkODkwYSI="
 }
 ```

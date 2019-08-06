@@ -1,6 +1,5 @@
 import { ObjectId } from 'mongodb';
 import has from 'lodash/has';
-import get from 'lodash/get';
 import escapeRegExp from 'lodash/escapeRegExp';
 
 export const stringifyCursor = ({ id }) => {
@@ -12,8 +11,8 @@ export const parseCursor = (cursorStr) => {
   return { id };
 };
 
-const getRoles = (model, db, $match, limit) => {
-  return model.aggregate([
+function getRoles({ db }, $match, limit) {
+  return db.model('Role').aggregate([
     {
       $match,
     },
@@ -56,15 +55,33 @@ const getRoles = (model, db, $match, limit) => {
       $limit: limit,
     },
   ]);
-};
+}
 
-const getTotalCount = (model, db, $match) => {
-  return model.countDocuments($match);
-};
+function getRoleCount({ db }, $match) {
+  return db.model('Role').countDocuments($match);
+}
 
-async function listRoles({ db }, { q, limit, cursor, scopes, isSystemRole }) {
-  const RoleModel = db.model('Role');
+function formatRoles(roles) {
+  return roles.map((role) => ({
+    id: role._id.toHexString(),
+    name: role.name,
+    org: has(role, ['org', '_id'])
+      ? {
+          id: role.org._id.toHexString(),
+          name: role.org.name,
+        }
+      : null,
+    description: role.description,
+    isSystemRole: role.isSystemRole,
+    permissions: role.permissions,
+    usersCount: role.users.length,
+    createdAt: role.createdAt,
+    updatedAt: role.updatedAt,
+  }));
+}
 
+async function listRoles(ctx, { q, limit, cursor, scopes, isSystemRole }) {
+  // decorate match expressions
   const matchExpressions = [];
 
   if (!scopes.includes(null)) {
@@ -88,42 +105,32 @@ async function listRoles({ db }, { q, limit, cursor, scopes, isSystemRole }) {
     });
   }
 
-  // we don't want the cursor to be taken into account when counting
-  const $countMatch = matchExpressions.length ? { $and: matchExpressions } : {};
+  // get role count promise
+  const getRoleCountPromise = getRoleCount(
+    ctx,
+    matchExpressions.length ? { $and: matchExpressions } : {}
+  );
 
+  // we don't want the cursor to be taken into account when counting
   if (cursor) {
     matchExpressions.push({
       _id: { $gt: ObjectId(cursor.id) },
     });
   }
 
-  const $match = matchExpressions.length ? { $and: matchExpressions } : {};
+  // get roles promise
+  const getRolesPromise = getRoles(
+    ctx,
+    matchExpressions.length ? { $and: matchExpressions } : {},
+    limit
+  );
 
-  const [roles, rolesCount] = await Promise.all([
-    getRoles(RoleModel, db, $match, limit),
-    getTotalCount(RoleModel, db, $countMatch),
-  ]);
-
-  const sanitizedRoles = roles.map((role) => ({
-    id: role._id.toHexString(),
-    name: role.name,
-    org: has(role, ['org', '_id'])
-      ? {
-          id: role.org._id.toHexString(),
-          name: role.org.name,
-        }
-      : null,
-    description: role.description,
-    isSystemRole: role.isSystemRole,
-    permissions: role.permissions,
-    usersCount: role.users.length,
-    createdAt: role.createdAt,
-    updatedAt: role.updatedAt,
-  }));
+  // resolve both promises
+  const [roles, roleCount] = await Promise.all([getRolesPromise, getRoleCountPromise]);
 
   return {
-    roles: sanitizedRoles,
-    rolesCount,
+    roles: formatRoles(roles),
+    roleCount,
   };
 }
 

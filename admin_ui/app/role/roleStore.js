@@ -4,7 +4,7 @@ import yeepClient from '../yeepClient';
 // initial state
 export const initialState = {
   roles: [],
-  totalRoles: 0,
+  roleCount: 0,
   roleListLimit: 10,
   isRoleListLoading: false,
   isRoleCreationPending: false,
@@ -79,7 +79,7 @@ export const reducer = handleActions(
       isRoleListLoading: false,
       roles: action.payload.roles,
       cursors: [...state.cursors, action.payload.nextCursor],
-      rolesCount: action.payload.rolesCount,
+      roleCount: action.payload.roleCount,
     }),
     [initCreateRole]: (state) => ({
       ...state,

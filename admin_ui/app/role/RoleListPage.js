@@ -16,10 +16,10 @@ import { listRoles, setRoleListLimit, setRoleListPage, setRoleListFilters } from
 
 // Dummy data
 let roleHeadings = [
-  { label: 'Role name', className: 'text-left', isSortable: false},
-  { label: 'Permissions', isSortable: false},
-  { label: 'System role?', isSortable: false},
-  { label: 'Users', isSortable: false},
+  { label: 'Role name', className: 'text-left', isSortable: false },
+  { label: 'Permissions', isSortable: false },
+  { label: 'System role?', isSortable: false },
+  { label: 'Users', isSortable: false },
   { label: 'Org scope', isSortable: false },
   { label: 'Actions', isSortable: false },
 ];
@@ -27,15 +27,16 @@ let roleHeadings = [
 const RoleListPage = () => {
   const isRoleListLoading = useSelector((state) => state.role.isRoleListLoading);
   const roleData = useSelector((state) => state.role.roles);
-  const rolesCount = useSelector((state) => state.role.rolesCount);
+  const roleCount = useSelector((state) => state.role.roleCount);
   const roleListLimit = useSelector((state) => state.role.roleListLimit);
   const roleListCursors = useSelector((state) => state.role.cursors);
   const roleListFilters = useSelector((state) => state.role.filters);
   const currentPage = useSelector((state) => state.role.page);
   // const loginErrors = useSelector((state) => state.session.loginErrors);
 
-  const entitiesStart = (currentPage * roleListLimit ) + 1;
-  const entitiesEnd = (roleData.length >= roleListLimit) ? (currentPage + 1) * roleListLimit : roleData.length;
+  const entitiesStart = currentPage * roleListLimit + 1;
+  const entitiesEnd =
+    roleData.length >= roleListLimit ? (currentPage + 1) * roleListLimit : roleData.length;
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -46,24 +47,28 @@ const RoleListPage = () => {
       // the API does not allow for empty strings as an input
       q: !isEmpty(roleListFilters.queryText) ? roleListFilters.queryText : undefined,
     };
-    const sanitizedData = pickBy(data, value => !isUndefined(value));
+    const sanitizedData = pickBy(data, (value) => !isUndefined(value));
     dispatch(listRoles(sanitizedData));
   }, [dispatch, roleListLimit, currentPage, roleListFilters]);
 
   useDocumentTitle('Roles');
 
-  const handleDelete = useCallback((roleData) => {
-    dispatch(
-      openRoleDeleteModal(roleData,
-        () => {
-          console.log('Submit from roleDelete modal!');
-        },
-        () => {
-          console.log('Cancel from roleDelete modal');
-        }
-      )
-    );
-  }, [dispatch]);
+  const handleDelete = useCallback(
+    (roleData) => {
+      dispatch(
+        openRoleDeleteModal(
+          roleData,
+          () => {
+            console.log('Submit from roleDelete modal!');
+          },
+          () => {
+            console.log('Cancel from roleDelete modal');
+          }
+        )
+      );
+    },
+    [dispatch]
+  );
 
   const handleNext = useCallback(() => {
     dispatch(setRoleListPage({ page: currentPage + 1 }));
@@ -73,24 +78,36 @@ const RoleListPage = () => {
     dispatch(setRoleListPage({ page: currentPage - 1 }));
   }, [dispatch, currentPage]);
 
-  const handleLimitChange = useCallback((event) => {
-    const newLimit = event.value;
-    dispatch(setRoleListLimit({ limit: newLimit }));
-  }, [dispatch]);
+  const handleLimitChange = useCallback(
+    (event) => {
+      const newLimit = event.value;
+      dispatch(setRoleListLimit({ limit: newLimit }));
+    },
+    [dispatch]
+  );
 
-  const handleSystemRoleFilter = useCallback((event) => {
-    const { checked } = event.target;
-    dispatch(setRoleListFilters({ isSystemRole: checked }));
-  }, [dispatch]);
+  const handleSystemRoleFilter = useCallback(
+    (event) => {
+      const { checked } = event.target;
+      dispatch(setRoleListFilters({ isSystemRole: checked }));
+    },
+    [dispatch]
+  );
 
-  const throttledHandleSearch = useCallback(throttle((searchTerm) => {
-    dispatch(setRoleListFilters({ queryText: searchTerm }));
-  }, 600), [dispatch]);
+  const throttledHandleSearch = useCallback(
+    throttle((searchTerm) => {
+      dispatch(setRoleListFilters({ queryText: searchTerm }));
+    }, 600),
+    [dispatch]
+  );
 
-  const handleSearch = useCallback((event) => {
-    const searchTerm = event.target.value;
-    throttledHandleSearch(searchTerm);
-  }, [throttledHandleSearch]);
+  const handleSearch = useCallback(
+    (event) => {
+      const searchTerm = event.target.value;
+      throttledHandleSearch(searchTerm);
+    },
+    [throttledHandleSearch]
+  );
 
   return (
     <React.Fragment>
@@ -114,14 +131,15 @@ const RoleListPage = () => {
             isClearable={true}
           />
           <label htmlFor="showSystemRoles" className="block flex-initial mb-3 sm:mb-0 sm:mr-3">
-            <input type="checkbox" id="showSystemRoles" className="mr-2" onChange={handleSystemRoleFilter} />
+            <input
+              type="checkbox"
+              id="showSystemRoles"
+              className="mr-2"
+              onChange={handleSystemRoleFilter}
+            />
             Show system roles
           </label>
-          <Input
-            placeholder="quicksearch"
-            className="w-full sm:w-1/3"
-            onKeyUp={handleSearch}
-          />
+          <Input placeholder="quicksearch" className="w-full sm:w-1/3" onKeyUp={handleSearch} />
         </div>
       </fieldset>
       <Grid
@@ -130,7 +148,7 @@ const RoleListPage = () => {
         data={roleData}
         entitiesStart={entitiesStart}
         entitiesEnd={entitiesEnd}
-        totalCount={rolesCount}
+        totalCount={roleCount}
         hasNext={roleData.length >= roleListLimit}
         hasPrevious={currentPage > 0}
         onNextClick={handleNext}
@@ -146,9 +164,7 @@ const RoleListPage = () => {
               <td className="p-2 text-center">{roleData.permissions.length}</td>
               <td className="p-2 text-center">{roleData.isSystemRole ? 'Yes' : '-'}</td>
               <td className="p-2 text-center">{roleData.usersCount}</td>
-              <td className="p-2 text-center">
-                {roleData.org ? roleData.org : '-'}
-              </td>
+              <td className="p-2 text-center">{roleData.org ? roleData.org : '-'}</td>
               <td className="p-2 text-center">
                 <Link to={`${roleData.id}/edit`}>Edit</Link>{' '}
                 <button onClick={() => handleDelete(roleData)} className="pseudolink">
