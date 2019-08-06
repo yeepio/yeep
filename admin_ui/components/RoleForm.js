@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import AsyncSelect from 'react-select/lib/Async';
 import noop from 'lodash/noop';
@@ -7,49 +7,111 @@ import Textarea from './Textarea';
 import yeepClient from '../app/yeepClient';
 import Button from './Button';
 
-function fetchScopeOptionsAsync(inputValue) {
-  return yeepClient.api().then((api) => {
-    return api.org
-      .list({
-        q: inputValue || undefined,
-        limit: 10,
-        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(fetchScopeOptionsAsync),
-      })
-      .then((data) =>
-        data.orgs.map((org) => {
-          return {
-            label: org.name,
-            value: org.id,
-          };
-        })
-      );
-  });
-}
-
-function fetchPermissionOptionsAsync(inputValue) {
-  return yeepClient.api().then((api) => {
-    return api.permission
-      .list({
-        q: inputValue || undefined,
-        limit: 10,
-        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(fetchPermissionOptionsAsync),
-      })
-      .then((data) =>
-        data.permissions.map((permission) => {
-          return {
-            label: permission.name,
-            value: permission.id,
-          };
-        })
-      );
-  });
+function formatOptionDefaultValue(value) {
+  return {
+    label: value,
+    value: value,
+  };
 }
 
 const RoleForm = ({ onSubmit, onCancel, defaultValues }) => {
   const [name, setName] = useState(defaultValues.name || '');
   const [description, setDescription] = useState(defaultValues.description || '');
-  const [scope, setScope] = useState(defaultValues.scope || '');
-  const [permissions, setPermissions] = useState(defaultValues.permissions || []);
+  const [scope, setScope] = useState(
+    defaultValues.scope ? formatOptionDefaultValue(defaultValues.scope) : null
+  );
+  const [permissions, setPermissions] = useState(
+    (defaultValues.permissions || []).map(formatOptionDefaultValue)
+  );
+
+  const fetchScopeOptionsAsync = useMemo(() => {
+    let isInitialCall = true;
+    return (inputValue) => {
+      return yeepClient.api().then((api) => {
+        return api.org
+          .list({
+            q: inputValue || undefined,
+            limit: 10,
+            cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(fetchScopeOptionsAsync),
+          })
+          .then((data) => {
+            const options = data.orgs.map((org) => {
+              return {
+                label: org.name,
+                value: org.id,
+              };
+            });
+
+            // check if initial call
+            if (isInitialCall) {
+              isInitialCall = false;
+
+              // Populate default values with data from server
+              // i.e. including labels, not just values
+              if (defaultValues.scope) {
+                const selectedOptions = options.filter(
+                  (option) => option.value === defaultValues.scope
+                );
+
+                if (selectedOptions.length) {
+                  setScope(selectedOptions[0]);
+                }
+              }
+            }
+
+            return options;
+          });
+      });
+    };
+  }, [setScope, defaultValues]);
+
+  const fetchPermissionOptionsAsync = useMemo(() => {
+    let isInitialCall = true;
+    return (inputValue) => {
+      return yeepClient.api().then((api) => {
+        return api.permission
+          .list({
+            q: inputValue || undefined,
+            limit: 10,
+            cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(fetchPermissionOptionsAsync),
+          })
+          .then((data) => {
+            const options = data.permissions.map((permission) => {
+              return {
+                label: permission.name,
+                value: permission.id,
+              };
+            });
+
+            // check if initial call
+            if (isInitialCall) {
+              isInitialCall = false;
+
+              // Populate default values with data from server
+              // i.e. including labels, not just values
+              if (
+                Array.isArray(defaultValues.permissions) &&
+                defaultValues.permissions.length !== 0
+              ) {
+                const defaultPermissions = defaultValues.permissions.reduce((accumulator, e) => {
+                  accumulator[e] = true;
+                  return accumulator;
+                }, {});
+                const selectedOptions = options.filter(
+                  (option) => defaultPermissions[option.value]
+                );
+
+                if (selectedOptions.length) {
+                  setPermissions(selectedOptions);
+                }
+              }
+            }
+
+            return options;
+          });
+      });
+    };
+  }, [setPermissions, defaultValues]);
 
   const onChangeName = useCallback(
     (event) => {
