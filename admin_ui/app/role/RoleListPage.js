@@ -25,19 +25,18 @@ const RoleListPage = () => {
   const isRoleListLoading = useSelector((state) => state.role.isRoleListLoading);
   const roleData = useSelector((state) => state.role.roles);
   const roleCount = useSelector((state) => state.role.roleCount);
-  const roleListLimit = useSelector((state) => state.role.roleListLimit);
+  const limit = useSelector((state) => state.role.limit);
   const roleListFilters = useSelector((state) => state.role.filters);
   const currentPage = useSelector((state) => state.role.page);
   // const loginErrors = useSelector((state) => state.session.loginErrors);
 
-  const entitiesStart = currentPage * roleListLimit + 1;
-  const entitiesEnd =
-    roleData.length >= roleListLimit ? (currentPage + 1) * roleListLimit : roleData.length;
+  const entitiesStart = currentPage * limit + 1;
+  const entitiesEnd = roleData.length >= limit ? (currentPage + 1) * limit : roleData.length;
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(listRoles());
-  }, [dispatch, roleListLimit, currentPage, roleListFilters]);
+  }, [dispatch, limit, currentPage, roleListFilters]);
 
   useDocumentTitle('Roles');
 
@@ -131,7 +130,7 @@ const RoleListPage = () => {
         entitiesStart={entitiesStart}
         entitiesEnd={entitiesEnd}
         totalCount={roleCount}
-        hasNext={roleData.length >= roleListLimit}
+        hasNext={roleData.length >= limit}
         hasPrevious={currentPage > 0}
         onNextClick={handleNext}
         onPreviousClick={handlePrevious}

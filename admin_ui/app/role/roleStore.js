@@ -5,15 +5,15 @@ import yeepClient from '../yeepClient';
 export const initialState = {
   roles: [],
   roleCount: 0,
-  roleListLimit: 10,
-  isRoleListLoading: false,
-  isRoleCreationPending: false,
   cursors: [],
   page: 0,
+  limit: 10,
   filters: {
     isSystemRole: false,
     queryText: '',
   },
+  isRoleListLoading: false,
+  isRoleCreationPending: false,
 };
 
 const initListRoles = createAction('ROLE_LIST_INIT');
@@ -36,7 +36,7 @@ export const listRoles = (props = {}) => (dispatch, getState) => {
     .api()
     .then((api) =>
       api.role.list({
-        limit: store.roleListLimit,
+        limit: store.limit,
         cursor: store.cursors[store.page - 1],
         isSystemRole: store.filters.isSystemRole,
         q: store.filters.queryText || undefined,
@@ -99,7 +99,7 @@ export const reducer = handleActions(
       ...state,
       cursors: [],
       page: 0,
-      roleListLimit: action.payload.limit,
+      limit: action.payload.limit,
     }),
     [setRoleListPage]: (state, action) => ({
       ...state,
