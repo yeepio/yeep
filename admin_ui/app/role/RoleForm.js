@@ -6,22 +6,16 @@ import Input from '../../components/Input';
 import Textarea from '../../components/Textarea';
 import yeepClient from '../yeepClient';
 import Button from '../../components/Button';
-
-function formatOptionDefaultValue(value) {
-  return {
-    label: value,
-    value: value,
-  };
-}
+import formatOptionFromString from '../../utilities/formatOptionFromString';
 
 const RoleForm = ({ onSubmit, onCancel, defaultValues }) => {
   const [name, setName] = useState(defaultValues.name || '');
   const [description, setDescription] = useState(defaultValues.description || '');
   const [scope, setScope] = useState(
-    defaultValues.scope ? formatOptionDefaultValue(defaultValues.scope) : null
+    defaultValues.scope ? formatOptionFromString(defaultValues.scope) : null
   );
   const [permissions, setPermissions] = useState(
-    (defaultValues.permissions || []).map(formatOptionDefaultValue)
+    (defaultValues.permissions || []).map(formatOptionFromString)
   );
 
   const fetchScopeOptionsAsync = useMemo(() => {
