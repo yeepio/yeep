@@ -5,15 +5,15 @@ import yeepClient from '../yeepClient';
 export const initialState = {
   permissions: [],
   permissionCount: 0,
-  permissionListLimit: 10,
-  isPermissionListLoading: false,
-  isPermissionCreationPending: false,
+  limit: 10,
   cursors: [],
   page: 0,
   filters: {
     isSystemPermission: false,
     queryText: '',
   },
+  isPermissionListLoading: false,
+  isPermissionCreationPending: false,
 };
 
 const initListPermissions = createAction('PERMISSION_LIST_INIT');
@@ -32,7 +32,7 @@ export const listPermissions = (props = {}) => (dispatch, getState) => {
     .api()
     .then((api) =>
       api.permission.list({
-        limit: store.permissionListLimit,
+        limit: store.limit,
         cursor: store.cursors[store.page - 1],
         isSystemPermission: store.filters.isSystemPermission,
         q: store.filters.queryText || undefined,
@@ -67,7 +67,7 @@ export const reducer = handleActions(
       ...state,
       cursors: [],
       page: 0,
-      permissionListLimit: action.payload.limit,
+      limit: action.payload.limit,
     }),
     [setPermissionListPage]: (state, action) => ({
       ...state,
