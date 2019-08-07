@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { navigate } from '@reach/router';
 import { useDispatch } from 'react-redux';
 import useDocumentTitle from '@rehooks/document-title';
-import RoleForm from '../../components/RoleForm';
+import RoleForm from './RoleForm';
 import { createRole } from './roleStore';
 
 const RoleCreatePage = () => {
