@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useSelector, useDispatch } from 'react-redux';
@@ -22,21 +22,20 @@ let roleHeadings = [
 ];
 
 const RoleListPage = () => {
-  const isRoleListLoading = useSelector((state) => state.role.isRoleListLoading);
-  const roleData = useSelector((state) => state.role.roles);
-  const roleCount = useSelector((state) => state.role.roleCount);
+  const isLoading = useSelector((state) => state.role.isRoleListLoading);
+  const roles = useSelector((state) => state.role.roles);
+  const totalCount = useSelector((state) => state.role.roleCount);
   const limit = useSelector((state) => state.role.limit);
-  const roleListFilters = useSelector((state) => state.role.filters);
+  const filters = useSelector((state) => state.role.filters);
   const currentPage = useSelector((state) => state.role.page);
-  // const loginErrors = useSelector((state) => state.session.loginErrors);
 
   const entitiesStart = currentPage * limit + 1;
-  const entitiesEnd = roleData.length >= limit ? (currentPage + 1) * limit : roleData.length;
+  const entitiesEnd = roles.length >= limit ? (currentPage + 1) * limit : roles.length;
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(listRoles());
-  }, [dispatch, limit, currentPage, roleListFilters]);
+  }, [dispatch, limit, currentPage, filters]);
 
   useDocumentTitle('Roles');
 
@@ -126,16 +125,16 @@ const RoleListPage = () => {
       <Grid
         className="mb-6"
         headings={roleHeadings}
-        data={roleData}
+        data={roles}
         entitiesStart={entitiesStart}
         entitiesEnd={entitiesEnd}
-        totalCount={roleCount}
-        hasNext={roleData.length >= limit}
+        totalCount={totalCount}
+        hasNext={roles.length >= limit}
         hasPrevious={currentPage > 0}
         onNextClick={handleNext}
         onPreviousClick={handlePrevious}
         onLimitChange={handleLimitChange}
-        isLoading={isRoleListLoading}
+        isLoading={isLoading}
         renderer={(roleData, index) => {
           return (
             <tr key={`roleRow${index}`} className={index % 2 ? `bg-grey-lightest` : ``}>
