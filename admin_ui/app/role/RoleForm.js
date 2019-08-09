@@ -40,7 +40,7 @@ const RoleForm = ({ onSubmit, onCancel, defaultValues }) => {
             if (isInitialCall) {
               isInitialCall = false;
 
-              // Populate default values with data from server
+              // Populate default value with data from server
               // i.e. including labels, not just values
               if (defaultValues.scope) {
                 const selectedOptions = options.filter(

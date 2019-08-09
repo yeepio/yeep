@@ -99,7 +99,7 @@ const RoleListPage = () => {
               <td className="p-2 text-center">{role.permissions.length}</td>
               <td className="p-2 text-center">{role.isSystemRole ? 'Yes' : '-'}</td>
               <td className="p-2 text-center">{role.usersCount}</td>
-              <td className="p-2 text-center">{role.org ? role.org : '-'}</td>
+              <td className="p-2 text-center">{role.org ? role.org.name : '-'}</td>
               <td className="p-2 text-center">
                 <Link to={`${role.id}/edit`}>Edit</Link>{' '}
                 <button onClick={() => onRoleDelete(role)} className="pseudolink">

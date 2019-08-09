@@ -9,6 +9,7 @@ export const initialState = {
   page: 0,
   limit: 10,
   filters: {
+    scope: '',
     isSystemRole: false,
     queryText: '',
   },
@@ -40,6 +41,7 @@ export const listRoles = (props = {}) => (dispatch, getState) => {
         cursor: store.cursors[store.page - 1],
         isSystemRole: store.filters.isSystemRole,
         q: store.filters.queryText || undefined,
+        scope: store.filters.scope || undefined,
         cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(listRoles),
         ...props,
       })
