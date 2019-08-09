@@ -38,11 +38,13 @@ export const validationSchema = {
 const isUserAuthorised = async ({ request }, next) => {
   // verify a user has access to the requested org
   if (request.body.scope) {
-    const isScopeAccessible =
-      findUserPermissionIndex(request.session.user.permissions, {
-        name: 'yeep.role.read',
-        orgId: request.body.scope,
-      }) !== -1;
+    const isScopeAccessible = [request.body.scope, null].some(
+      (orgId) =>
+        findUserPermissionIndex(request.session.user.permissions, {
+          name: 'yeep.role.read',
+          orgId,
+        }) !== -1
+    );
 
     if (!isScopeAccessible) {
       throw new AuthorizationError(
