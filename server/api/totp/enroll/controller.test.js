@@ -22,7 +22,7 @@ describe('api/totp.enroll', () => {
   });
 
   describe('unauthorized user', () => {
-    test('returns error pretending resource does not exist', async () => {
+    test('throws authentication error', async () => {
       const res = await request(server)
         .post('/api/totp.enroll')
         .send();
@@ -30,8 +30,8 @@ describe('api/totp.enroll', () => {
       expect(res.body).toMatchObject({
         ok: false,
         error: {
-          code: 404,
-          message: 'Resource does not exist',
+          code: 10000,
+          message: 'Access denied; invalid or missing credentials',
         },
       });
     });
