@@ -7,7 +7,12 @@ import isString from 'lodash/isString';
 import isUndefined from 'lodash/isUndefined';
 import isNull from 'lodash/isNull';
 import binarySearch from 'binary-search';
-import { AuthorizationError, UserNotFoundError, UserDeactivatedError } from '../constants/errors';
+import {
+  AuthorizationError,
+  UserNotFoundError,
+  UserDeactivatedError,
+  AuthenticationError,
+} from '../constants/errors';
 import { getUserPermissions } from '../api/user/info/service';
 import { verifyCookieJWT } from '../api/session/refreshCookie/service';
 import {
@@ -150,7 +155,7 @@ export async function isSessionCookie({ request, config }, next) {
 
 export const isUserAuthenticated = () => async ({ request }, next) => {
   if (!has(request, ['session', 'user'])) {
-    throw Boom.notFound('Resource does not exist'); // lie with 404
+    throw new AuthenticationError('Access denied; invalid or missing credentials'); // lie with 404
   }
 
   await next();
