@@ -1,3 +1,10 @@
+export class AuthenticationError extends Error {
+  constructor(message) {
+    super(message);
+    this.code = 10000;
+  }
+}
+
 export class UserNotFoundError extends Error {
   constructor(message) {
     super(message);
