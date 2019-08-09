@@ -24,17 +24,18 @@ const Grid = ({
   onLimitChange,
 }) => {
   return (
-    <div className={classNames("grid relative",className)}>
+    <div className={classNames('grid relative', className)}>
       {isLoading && <GridLoadingOverlay />}
       <div className="py-2 text-center sm:flex sm:text-left">
         <p>
-          Showing entities <strong>{entitiesStart}</strong> to <strong>{entitiesEnd}</strong> of <strong>{totalCount}</strong>:
+          Showing entities <strong>{entitiesStart}</strong> to <strong>{entitiesEnd}</strong> of{' '}
+          <strong>{totalCount}</strong>:
         </p>
         <GridPager
           hasNext={hasNext}
           hasPrevious={hasPrevious}
           onNextClick={onNextClick}
-          onPreviousClick={onPreviousClick} 
+          onPreviousClick={onPreviousClick}
         />
       </div>
       <style jsx>{`
@@ -70,7 +71,7 @@ const Grid = ({
           hasNext={hasNext}
           hasPrevious={hasPrevious}
           onNextClick={onNextClick}
-          onPreviousClick={onPreviousClick} 
+          onPreviousClick={onPreviousClick}
         />
       </div>
     </div>
