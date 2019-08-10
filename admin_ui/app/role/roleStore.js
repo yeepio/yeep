@@ -15,19 +15,24 @@ export const initialState = {
   },
   isRoleListLoading: false,
   isRoleCreationPending: false,
+  isRoleUpdatePending: false,
 };
 
 const initListRoles = createAction('ROLE_LIST_INIT');
 const resolveListRoles = createAction('ROLE_LIST_RESOLVE');
 const rejectListRoles = createAction('ROLE_LIST_REJECT');
 
+export const setRoleListLimit = createAction('ROLE_LIST_LIMIT_SET');
+export const setRoleListPage = createAction('ROLE_LIST_PAGE_SET');
+export const setRoleListFilters = createAction('ROLE_LIST_FILTERS_SET');
+
 const initCreateRole = createAction('ROLE_CREATE_INIT');
 const resolveCreateRole = createAction('ROLE_CREATE_RESOLVE');
 const rejectCreateRole = createAction('ROLE_CREATE_REJECT');
 
-export const setRoleListLimit = createAction('ROLE_LIST_LIMIT_SET');
-export const setRoleListPage = createAction('ROLE_LIST_PAGE_SET');
-export const setRoleListFilters = createAction('ROLE_LIST_FILTERS_SET');
+const initUpdateRole = createAction('ROLE_UPDATE_INIT');
+const resolveUpdateRole = createAction('ROLE_UPDATE_RESOLVE');
+const rejectUpdateRole = createAction('ROLE_UPDATE_REJECT');
 
 export const listRoles = (props = {}) => (dispatch, getState) => {
   const { role: store } = getState();
@@ -76,6 +81,26 @@ export const createRole = (props) => (dispatch) => {
     });
 };
 
+export const updateRole = (props) => (dispatch) => {
+  dispatch(initUpdateRole());
+  return yeepClient
+    .api()
+    .then((api) =>
+      api.role.update({
+        ...props,
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(updateRole),
+      })
+    )
+    .then((data) => {
+      dispatch(resolveUpdateRole(data));
+      return true;
+    })
+    .catch((err) => {
+      dispatch(rejectUpdateRole(err));
+      return false;
+    });
+};
+
 export const reducer = handleActions(
   {
     [initListRoles]: (state) => ({
@@ -88,14 +113,6 @@ export const reducer = handleActions(
       roles: action.payload.roles,
       cursors: [...state.cursors, action.payload.nextCursor],
       roleCount: action.payload.roleCount,
-    }),
-    [initCreateRole]: (state) => ({
-      ...state,
-      isRoleCreationPending: true,
-    }),
-    [resolveCreateRole]: (state) => ({
-      ...state,
-      isRoleCreationPending: false,
     }),
     [setRoleListLimit]: (state, action) => ({
       ...state,
@@ -114,6 +131,22 @@ export const reducer = handleActions(
         ...state.filters,
         ...action.payload,
       },
+    }),
+    [initCreateRole]: (state) => ({
+      ...state,
+      isRoleCreationPending: true,
+    }),
+    [resolveCreateRole]: (state) => ({
+      ...state,
+      isRoleCreationPending: false,
+    }),
+    [initUpdateRole]: (state) => ({
+      ...state,
+      isRoleUpdatePending: true,
+    }),
+    [resolveUpdateRole]: (state) => ({
+      ...state,
+      isRoleUpdatePending: false,
     }),
   },
   initialState
