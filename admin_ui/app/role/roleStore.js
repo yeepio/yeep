@@ -16,6 +16,7 @@ export const initialState = {
   isRoleListLoading: false,
   isRoleCreationPending: false,
   isRoleUpdatePending: false,
+  isRoleInfoLoading: false,
 };
 
 const initListRoles = createAction('ROLE_LIST_INIT');
@@ -33,6 +34,10 @@ const rejectCreateRole = createAction('ROLE_CREATE_REJECT');
 const initUpdateRole = createAction('ROLE_UPDATE_INIT');
 const resolveUpdateRole = createAction('ROLE_UPDATE_RESOLVE');
 const rejectUpdateRole = createAction('ROLE_UPDATE_REJECT');
+
+const initGetRoleInfo = createAction('ROLE_INFO_INIT');
+const resolveGetRoleInfo = createAction('ROLE_INFO_RESOLVE');
+const rejectGetRoleInfo = createAction('ROLE_INFO_REJECT');
 
 export const listRoles = (props = {}) => (dispatch, getState) => {
   const { role: store } = getState();
@@ -53,11 +58,11 @@ export const listRoles = (props = {}) => (dispatch, getState) => {
     )
     .then((data) => {
       dispatch(resolveListRoles(data));
-      return true;
+      return data.roles;
     })
     .catch((err) => {
       dispatch(rejectListRoles(err));
-      return false;
+      return null;
     });
 };
 
@@ -98,6 +103,26 @@ export const updateRole = (props) => (dispatch) => {
     .catch((err) => {
       dispatch(rejectUpdateRole(err));
       return false;
+    });
+};
+
+export const getRoleInfo = (props) => (dispatch) => {
+  dispatch(initGetRoleInfo());
+  return yeepClient
+    .api()
+    .then((api) =>
+      api.role.info({
+        ...props,
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(getRoleInfo),
+      })
+    )
+    .then((data) => {
+      dispatch(resolveGetRoleInfo(data));
+      return data.role;
+    })
+    .catch((err) => {
+      dispatch(rejectGetRoleInfo(err));
+      return null;
     });
 };
 
@@ -147,6 +172,14 @@ export const reducer = handleActions(
     [resolveUpdateRole]: (state) => ({
       ...state,
       isRoleUpdatePending: false,
+    }),
+    [initGetRoleInfo]: (state) => ({
+      ...state,
+      isRoleInfoLoading: true,
+    }),
+    [resolveGetRoleInfo]: (state) => ({
+      ...state,
+      isRoleInfoLoading: false,
     }),
   },
   initialState

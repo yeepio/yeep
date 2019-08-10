@@ -127,6 +127,7 @@ async function listRoles(ctx, { q, limit, cursor, scopes, isSystemRole }) {
 
   // resolve both promises
   const [roles, roleCount] = await Promise.all([getRolesPromise, getRoleCountPromise]);
+  console.log(JSON.stringify(roles, null, 2));
 
   return {
     roles: formatRoles(roles),

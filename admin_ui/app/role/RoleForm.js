@@ -8,7 +8,7 @@ import yeepClient from '../yeepClient';
 import Button from '../../components/Button';
 import formatOptionFromString from '../../utilities/formatOptionFromString';
 
-const RoleForm = ({ onSubmit, onCancel, defaultValues }) => {
+const RoleForm = ({ onSubmit, onCancel, onDelete, defaultValues, withDangerZone }) => {
   const [name, setName] = useState(defaultValues.name || '');
   const [description, setDescription] = useState(defaultValues.description || '');
   const [scope, setScope] = useState(
@@ -210,19 +210,31 @@ const RoleForm = ({ onSubmit, onCancel, defaultValues }) => {
           </button>
         </div>
       </div>
+      {withDangerZone && (
+        <fieldset className="mb-6">
+          <legend>Danger zone</legend>
+          <Button type="button" danger={true} onClick={() => onDelete(defaultValues)}>
+            Delete role
+          </Button>
+        </fieldset>
+      )}
     </form>
   );
 };
 
 RoleForm.propTypes = {
+  withDangerZone: PropTypes.bool,
   onSubmit: PropTypes.func,
   onCancel: PropTypes.func,
+  onDelete: PropTypes.func,
   defaultValues: PropTypes.object,
 };
 
 RoleForm.defaultProps = {
+  withDangerZone: false,
   onSubmit: noop,
   onCancel: noop,
+  onDelete: noop,
   defaultValues: {},
 };
 
