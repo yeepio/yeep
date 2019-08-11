@@ -91,7 +91,7 @@ describe('api/role.info', () => {
       ok: false,
       error: {
         code: 10017,
-        message: 'Role 5b2d5dd0cd86b77258e16d39 cannot be found',
+        message: 'Role 5b2d5dd0cd86b77258e16d39 not found',
       },
     });
   });
@@ -120,6 +120,21 @@ describe('api/role.info', () => {
       ok: true,
       role: {
         id: role.id,
+        name: expect.any(String),
+        description: expect.any(String),
+        isSystemRole: expect.any(Boolean),
+        org: expect.objectContaining({
+          id: expect.any(String),
+          name: expect.any(String),
+        }),
+        permissions: expect.arrayContaining([
+          expect.objectContaining({
+            id: expect.any(String),
+            name: expect.any(String),
+          }),
+        ]),
+        createdAt: expect.any(String),
+        updatedAt: expect.any(String),
       },
     });
 

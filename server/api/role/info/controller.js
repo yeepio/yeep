@@ -34,7 +34,7 @@ const decorateRequestedRole = async (ctx, next) => {
 };
 
 const isUserAuthorized = async ({ request }, next) => {
-  const hasPermission = Array.from(new Set([request.session.role.scope, null])).some(
+  const hasPermission = Array.from(new Set([request.session.role.org.id, null])).some(
     (orgId) =>
       findUserPermissionIndex(request.session.user.permissions, {
         name: 'yeep.role.read',
