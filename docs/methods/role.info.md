@@ -56,9 +56,17 @@ Authorization: `Bearer ${authToken}`
     "id": "507f191e810c19729de860ea",
     "name": "acme:manager",
     "description": "Manager role",
-    "permissions": ["327f191e810c19729de76232"],
-    "scope": "5b2d649ce248cb779e7f26e2",
     "isSystemRole": false,
+    "permissions": [
+      {
+        "id": "5b969dc9901e2af192780a34",
+        "name": "acme.user.write"
+      }
+    ],
+    "org": {
+      "id": "8a9295c9901e7af196785a34",
+      "name": "acme"
+    },
     "createdAt": "2017-07-13T05:00:42.145Z",
     "updatedAt": "2017-07-13T05:42:42.222Z"
   }
