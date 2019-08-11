@@ -1,5 +1,4 @@
 import { ObjectId } from 'mongodb';
-import has from 'lodash/has';
 import escapeRegExp from 'lodash/escapeRegExp';
 
 export const stringifyCursor = ({ id }) => {
@@ -96,7 +95,6 @@ function formatRole(role) {
         name: permission.name,
       };
     }),
-    usersCount: 0,
     createdAt: role.createdAt,
     updatedAt: role.updatedAt,
   };

@@ -14,7 +14,6 @@ let roleHeadings = [
   { label: 'Role name', className: 'text-left', isSortable: false },
   { label: 'Permissions', isSortable: false },
   { label: 'System role?', isSortable: false },
-  { label: 'Users', isSortable: false },
   { label: 'Org scope', isSortable: false },
   { label: 'Actions', isSortable: false },
 ];
@@ -98,7 +97,6 @@ const RoleListPage = () => {
               </td>
               <td className="p-2 text-center">{role.permissions.length}</td>
               <td className="p-2 text-center">{role.isSystemRole ? 'Yes' : '-'}</td>
-              <td className="p-2 text-center">{role.usersCount}</td>
               <td className="p-2 text-center">{role.org ? role.org.name : '-'}</td>
               <td className="p-2 text-center">
                 <Link to={`${role.id}/edit`}>Edit</Link>{' '}
