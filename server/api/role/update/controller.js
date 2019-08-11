@@ -10,8 +10,8 @@ import {
   findUserPermissionIndex,
 } from '../../../middleware/auth';
 import updateRole from './service';
-import getRoleInfo from '../info/service';
 import { AuthorizationError } from '../../../constants/errors';
+import { getRole } from '../middleware';
 
 export const validationSchema = {
   body: {
@@ -42,19 +42,6 @@ export const validationSchema = {
       .unique()
       .optional(),
   },
-};
-
-const decorateRequestedRole = async (ctx, next) => {
-  const { request } = ctx;
-  const role = await getRoleInfo(ctx, request.body);
-
-  // decorate session object with requested role data
-  request.session = {
-    ...request.session,
-    role,
-  };
-
-  await next();
 };
 
 const isUserAuthorized = async ({ request }, next) => {
@@ -108,7 +95,7 @@ export default compose([
   decorateSession(),
   isUserAuthenticated(),
   validateRequest(validationSchema),
-  decorateRequestedRole,
+  getRole,
   decorateUserPermissions(),
   isUserAuthorized,
   handler,

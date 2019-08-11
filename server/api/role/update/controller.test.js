@@ -93,144 +93,177 @@ describe('api/role.update', () => {
       ok: false,
       error: {
         code: 10017,
-        message: 'Role 5b2d5dd0cd86b77258e16d39 cannot be found',
+        message: 'Role 5b2d5dd0cd86b77258e16d39 not found',
       },
     });
   });
 
-  test('returns error when role is system-defined', async () => {
-    // explicitely assign permission to global scope
-    const globalPermission = await ctx.db.model('Permission').findOne({ name: 'yeep.role.write' });
-    const globalPermissionAssignment = await createPermissionAssignment(ctx, {
-      userId: user.id,
-      permissionId: globalPermission.id,
-    });
+  describe('role is system-defined', () => {
+    let globalPermissionAssignment;
 
-    // acquire global role
-    const role = await ctx.db.model('Role').findOne({ name: 'admin' });
-
-    const res = await request(server)
-      .post('/api/role.update')
-      .set('Authorization', `Bearer ${bearerToken}`)
-      .send({
-        id: role.id,
-        name: 'foo',
+    beforeAll(async () => {
+      // explicitely assign permission to global scope
+      const globalPermission = await ctx.db
+        .model('Permission')
+        .findOne({ name: 'yeep.role.write' });
+      globalPermissionAssignment = await createPermissionAssignment(ctx, {
+        userId: user.id,
+        permissionId: globalPermission.id,
       });
-
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: false,
-      error: {
-        code: 10018,
-        message: `Role ${role.id} is a system role and thus cannot be updated`,
-      },
     });
 
-    await deletePermissionAssignment(ctx, globalPermissionAssignment);
-  });
-
-  test('returns error when specified permission does not exist', async () => {
-    const role = await createRole(ctx, {
-      name: 'acme:manager',
-      description: 'This is a test',
-      permissions: [permission.id],
-      scope: org.id,
+    afterAll(async () => {
+      await deletePermissionAssignment(ctx, globalPermissionAssignment);
     });
 
-    const res = await request(server)
-      .post('/api/role.update')
-      .set('Authorization', `Bearer ${bearerToken}`)
-      .send({
-        id: role.id,
-        name: 'acme:developer',
-        permissions: [
-          '5b2d5dd0cd86b77258e16d39', // some random objectid
-        ],
+    test('returns error', async () => {
+      // acquire global role
+      const role = await ctx.db.model('Role').findOne({ name: 'admin' });
+
+      const res = await request(server)
+        .post('/api/role.update')
+        .set('Authorization', `Bearer ${bearerToken}`)
+        .send({
+          id: role.id,
+          name: 'foo',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 10018,
+          message: `Role ${role.id} is a system role and thus cannot be updated`,
+        },
       });
-
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: false,
-      error: {
-        code: 10008,
-        message: 'Permission 5b2d5dd0cd86b77258e16d39 does not exist or is not accessible',
-      },
     });
-
-    const isRoleDeleted = await deleteRole(ctx, {
-      id: role.id,
-    });
-    expect(isRoleDeleted).toBe(true);
   });
 
-  test('updates role and returns expected response', async () => {
-    const role = await createRole(ctx, {
-      name: 'acme:manager',
-      description: 'This is a test',
-      permissions: [permission.id],
-      scope: org.id,
-    });
+  describe('permission does not exist', () => {
+    let role;
 
-    const res = await request(server)
-      .post('/api/role.update')
-      .set('Authorization', `Bearer ${bearerToken}`)
-      .send({
-        id: role.id,
-        name: 'acme:developer',
-        description: 'This is a tost',
+    beforeAll(async () => {
+      role = await createRole(ctx, {
+        name: 'acme:manager',
+        description: 'You know, for testing...',
         permissions: [permission.id],
+        scope: org.id,
       });
+    });
 
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: true,
-      role: {
+    afterAll(async () => {
+      await deleteRole(ctx, {
         id: role.id,
-        name: 'acme:developer',
-        description: 'This is a tost',
-        scope: role.scope,
-        permissions: [permission.id],
-        isSystemRole: role.isSystemRole,
-      },
+      });
     });
-    expect(compareDesc(role.createdAt, res.body.role.createdAt)).toBe(0);
-    expect(compareDesc(role.updatedAt, res.body.role.updatedAt)).toBe(1);
 
-    const isRoleDeleted = await deleteRole(ctx, {
-      id: role.id,
+    test('returns error', async () => {
+      const res = await request(server)
+        .post('/api/role.update')
+        .set('Authorization', `Bearer ${bearerToken}`)
+        .send({
+          id: role.id,
+          name: 'acme:developer',
+          permissions: [
+            '5b2d5dd0cd86b77258e16d39', // some random objectid
+          ],
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 10008,
+          message: 'Permission 5b2d5dd0cd86b77258e16d39 does not exist or is not accessible',
+        },
+      });
     });
-    expect(isRoleDeleted).toBe(true);
   });
 
-  test('returns error when role is out of scope', async () => {
-    const globalPermission = await ctx.db.model('Permission').findOne({ name: 'yeep.role.write' });
-    const role = await createRole(ctx, {
-      // note the absence of scope to denote global permission
-      name: 'developer',
-      description: 'This is a test',
-      permissions: [globalPermission.id],
-    });
+  describe('successful request', () => {
+    let role;
 
-    const res = await request(server)
-      .post('/api/role.update')
-      .set('Authorization', `Bearer ${bearerToken}`)
-      .send({
-        id: role.id,
-        name: 'dev',
+    beforeAll(async () => {
+      role = await createRole(ctx, {
+        name: 'acme:manager',
+        description: 'You know, for testing...',
+        permissions: [permission.id],
+        scope: org.id,
       });
-
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: false,
-      error: {
-        code: 10012,
-        message: `User ${user.id} does not have sufficient permissions to access this resource`,
-      },
     });
 
-    const isRoleDeleted = await deleteRole(ctx, {
-      id: role.id,
+    afterAll(async () => {
+      await deleteRole(ctx, {
+        id: role.id,
+      });
     });
-    expect(isRoleDeleted).toBe(true);
+
+    test('updates role and returns expected response', async () => {
+      const res = await request(server)
+        .post('/api/role.update')
+        .set('Authorization', `Bearer ${bearerToken}`)
+        .send({
+          id: role.id,
+          name: 'acme:developer',
+          description: 'This is a tost',
+          permissions: [permission.id],
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: true,
+        role: {
+          id: role.id,
+          name: 'acme:developer',
+          description: 'This is a tost',
+          scope: role.scope,
+          permissions: [permission.id],
+          isSystemRole: role.isSystemRole,
+        },
+      });
+      expect(compareDesc(role.createdAt, res.body.role.createdAt)).toBe(0);
+      expect(compareDesc(role.updatedAt, res.body.role.updatedAt)).toBe(1);
+    });
+  });
+
+  describe('role out of scope', () => {
+    let role;
+
+    beforeAll(async () => {
+      const globalPermission = await ctx.db
+        .model('Permission')
+        .findOne({ name: 'yeep.role.write' });
+      role = await createRole(ctx, {
+        // note the absence of scope to denote global permission
+        name: 'developer',
+        description: 'You know, for testing...',
+        permissions: [globalPermission.id],
+      });
+    });
+
+    afterAll(async () => {
+      await deleteRole(ctx, {
+        id: role.id,
+      });
+    });
+
+    test('returns error', async () => {
+      const res = await request(server)
+        .post('/api/role.update')
+        .set('Authorization', `Bearer ${bearerToken}`)
+        .send({
+          id: role.id,
+          name: 'dev',
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 10012,
+          message: `User ${user.id} does not have sufficient permissions to access this resource`,
+        },
+      });
+    });
   });
 });
