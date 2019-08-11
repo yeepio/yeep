@@ -96,81 +96,95 @@ describe('api/role.info', () => {
     });
   });
 
-  test('retrieves role info', async () => {
-    const globalPermission = await ctx.db
-      .model('Permission')
-      .findOne({ name: 'yeep.permission.read' });
+  describe('successful request', () => {
+    let role;
 
-    const role = await createRole(ctx, {
-      name: 'acme:manager',
-      description: 'This is a test',
-      permissions: [permission.id, globalPermission.id],
-      scope: org.id,
+    beforeAll(async () => {
+      const globalPermission = await ctx.db
+        .model('Permission')
+        .findOne({ name: 'yeep.permission.read' });
+
+      role = await createRole(ctx, {
+        name: 'acme:manager',
+        description: 'You know, for testing...',
+        permissions: [permission.id, globalPermission.id],
+        scope: org.id,
+      });
     });
 
-    const res = await request(server)
-      .post('/api/role.info')
-      .set('Authorization', `Bearer ${bearerToken}`)
-      .send({
-        id: role.id,
-      });
+    afterAll(async () => {
+      await deleteRole(ctx, role);
+    });
 
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: true,
-      role: {
-        id: role.id,
-        name: expect.any(String),
-        description: expect.any(String),
-        isSystemRole: expect.any(Boolean),
-        org: expect.objectContaining({
-          id: expect.any(String),
+    test('retrieves role info', async () => {
+      const res = await request(server)
+        .post('/api/role.info')
+        .set('Authorization', `Bearer ${bearerToken}`)
+        .send({
+          id: role.id,
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: true,
+        role: {
+          id: role.id,
           name: expect.any(String),
-        }),
-        permissions: expect.arrayContaining([
-          expect.objectContaining({
+          description: expect.any(String),
+          isSystemRole: expect.any(Boolean),
+          org: expect.objectContaining({
             id: expect.any(String),
             name: expect.any(String),
           }),
-        ]),
-        createdAt: expect.any(String),
-        updatedAt: expect.any(String),
-      },
+          permissions: expect.arrayContaining([
+            expect.objectContaining({
+              id: expect.any(String),
+              name: expect.any(String),
+            }),
+          ]),
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        },
+      });
     });
-
-    const isRoleDeleted = await deleteRole(ctx, role);
-    expect(isRoleDeleted).toBe(true);
   });
 
-  test('returns error when role is out of scope', async () => {
-    const globalPermission = await ctx.db
-      .model('Permission')
-      .findOne({ name: 'yeep.permission.read' });
+  describe('role is out of scope', () => {
+    let role;
 
-    const role = await createRole(ctx, {
-      // note the absence of scope to denote global role
-      name: 'manager',
-      description: 'This is a test',
-      permissions: [globalPermission.id],
-    });
+    beforeAll(async () => {
+      const globalPermission = await ctx.db
+        .model('Permission')
+        .findOne({ name: 'yeep.permission.read' });
 
-    const res = await request(server)
-      .post('/api/role.info')
-      .set('Authorization', `Bearer ${bearerToken}`)
-      .send({
-        id: role.id,
+      role = await createRole(ctx, {
+        // note the absence of scope to denote global role
+        name: 'global:manager',
+        description: 'You know, for testing...',
+        permissions: [globalPermission.id],
       });
-
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: false,
-      error: {
-        code: 10012,
-        message: `User ${user.id} does not have sufficient permissions to access this resource`,
-      },
     });
 
-    const isRoleDeleted = await deleteRole(ctx, role);
-    expect(isRoleDeleted).toBe(true);
+    afterAll(async () => {
+      await deleteRole(ctx, role);
+    });
+
+    test('returns error', async () => {
+      const res = await request(server)
+        .post('/api/role.info')
+        .set('Authorization', `Bearer ${bearerToken}`)
+        .send({
+          id: role.id,
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 10012,
+          message: `User ${user.id} does not have sufficient permissions to access this resource`,
+        },
+      });
+    });
   });
 });
