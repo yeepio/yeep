@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import AsyncSelect from 'react-select/lib/Async';
 import debounce from 'lodash/debounce';
@@ -8,13 +8,13 @@ import Checkbox from '../../components/Checkbox';
 import yeepClient from '../yeepClient';
 import OrgOption from '../../utilities/OrgOption';
 
-function fetchScopeOptionsAsync(inputValue) {
+function fetchOrgOptionsAsync(inputValue) {
   return yeepClient.api().then((api) => {
     return api.org
       .list({
         q: inputValue || undefined,
         limit: 10,
-        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(fetchScopeOptionsAsync),
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(fetchOrgOptionsAsync),
       })
       .then((data) => {
         return data.orgs.map((e) => OrgOption.fromRecord(e).toOption());
@@ -24,18 +24,12 @@ function fetchScopeOptionsAsync(inputValue) {
 
 const RoleListFilters = () => {
   const filters = useSelector((state) => state.role.filters);
-  const [scope, setScope] = useState(
-    filters.scope
-      ? OrgOption.fromRecord({ id: filters.scope, name: filters.scope }).toOption()
-      : null
-  );
-
   const dispatch = useDispatch();
 
   useEffect(() => {
     return () => {
       // on unmount cancel in-flight request
-      yeepClient.redeemCancelToken(fetchScopeOptionsAsync);
+      yeepClient.redeemCancelToken(fetchOrgOptionsAsync);
     };
   });
 
@@ -46,7 +40,7 @@ const RoleListFilters = () => {
     [dispatch]
   );
 
-  const applyQueryText = useMemo(() => {
+  const setQueryText = useCallback(() => {
     return debounce((queryText) => {
       dispatch(setRoleListFilters({ queryText }));
     }, 600);
@@ -54,36 +48,36 @@ const RoleListFilters = () => {
 
   const onQueryTextChange = useCallback(
     (event) => {
-      applyQueryText(event.target.value);
+      setQueryText(event.target.value);
     },
-    [applyQueryText]
+    [setQueryText]
   );
 
-  const onScopeChange = useCallback(
+  const onOrgChange = useCallback(
     (selectedOption) => {
-      setScope(selectedOption);
-      dispatch(setRoleListFilters({ scope: selectedOption ? selectedOption.value : '' }));
+      dispatch(
+        setRoleListFilters({
+          org: OrgOption.fromOption(selectedOption).toRecord(),
+        })
+      );
     },
-    [setScope, dispatch]
+    [dispatch]
   );
 
   return (
     <fieldset className="mb-6">
       <legend>Filters and quick search</legend>
       <div className="sm:flex items-center">
-        {/* Async select is controlled by design
-        We need to retrieve data from server on mount and update the component */}
         <AsyncSelect
-          id="scope"
+          id="org"
           className="flex-auto mb-3 sm:mb-0 sm:mr-3"
           placeholder="All organisations"
-          loadOptions={fetchScopeOptionsAsync}
+          loadOptions={fetchOrgOptionsAsync}
           isClearable={true}
           defaultOptions={true}
-          value={scope}
-          onChange={onScopeChange}
+          onChange={onOrgChange}
+          defaultValue={filters.org.id ? OrgOption.fromRecord(filters.org).toOption() : null}
         />
-        {/* Checkbox and Input need NOT be controlled */}
         <label htmlFor="isSystemRole" className="block flex-initial mb-3 sm:mb-0 sm:mr-3">
           <Checkbox
             id="isSystemRole"

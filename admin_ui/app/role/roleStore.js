@@ -9,7 +9,7 @@ export const initialState = {
   page: 0,
   limit: 10,
   filters: {
-    scope: '',
+    org: {},
     isSystemRole: false,
     queryText: '',
   },
@@ -51,7 +51,7 @@ export const listRoles = (props = {}) => (dispatch, getState) => {
         cursor: store.cursors[store.page - 1],
         isSystemRole: store.filters.isSystemRole,
         q: store.filters.queryText || undefined,
-        scope: store.filters.scope || undefined,
+        scope: store.filters.org.id || undefined,
         cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(listRoles),
         ...props,
       })
