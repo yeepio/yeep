@@ -18,12 +18,7 @@ function fetchOrgOptionsAsync(inputValue) {
         cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(fetchOrgOptionsAsync),
       })
       .then((data) => {
-        return data.orgs.map((org) => {
-          return {
-            label: org.name,
-            value: org.id,
-          };
-        });
+        return data.orgs.map((e) => OrgOption.fromRecord(e).toOption());
       });
   });
 }
@@ -37,12 +32,7 @@ function fetchPermissionOptionsAsync(inputValue) {
         cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(fetchPermissionOptionsAsync),
       })
       .then((data) => {
-        return data.permissions.map((permission) => {
-          return {
-            label: permission.name,
-            value: permission.id,
-          };
-        });
+        return data.permissions.map((e) => PermissionOption.fromRecord(e).toOption());
       });
   });
 }

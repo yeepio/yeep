@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import AsyncSelect from 'react-select/lib/Async';
 import debounce from 'lodash/debounce';
@@ -6,13 +6,38 @@ import Input from '../../components/Input';
 import { setRoleListFilters } from './roleStore';
 import Checkbox from '../../components/Checkbox';
 import yeepClient from '../yeepClient';
-import formatOptionFromString from '../../utilities/formatOptionFromString';
+import OrgOption from '../../utilities/OrgOption';
+
+function fetchScopeOptionsAsync(inputValue) {
+  return yeepClient.api().then((api) => {
+    return api.org
+      .list({
+        q: inputValue || undefined,
+        limit: 10,
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(fetchScopeOptionsAsync),
+      })
+      .then((data) => {
+        return data.orgs.map((e) => OrgOption.fromRecord(e).toOption());
+      });
+  });
+}
 
 const RoleListFilters = () => {
   const filters = useSelector((state) => state.role.filters);
-  const [scope, setScope] = useState(filters.scope ? formatOptionFromString(filters.scope) : null);
+  const [scope, setScope] = useState(
+    filters.scope
+      ? OrgOption.fromRecord({ id: filters.scope, name: filters.scope }).toOption()
+      : null
+  );
 
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    return () => {
+      // on unmount cancel in-flight request
+      yeepClient.redeemCancelToken(fetchScopeOptionsAsync);
+    };
+  });
 
   const onSystemRoleChage = useCallback(
     (event) => {
@@ -41,45 +66,6 @@ const RoleListFilters = () => {
     },
     [setScope, dispatch]
   );
-
-  const fetchScopeOptionsAsync = useMemo(() => {
-    let isInitialCall = true;
-    return (inputValue) => {
-      return yeepClient.api().then((api) => {
-        return api.org
-          .list({
-            q: inputValue || undefined,
-            limit: 10,
-            cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(fetchScopeOptionsAsync),
-          })
-          .then((data) => {
-            const options = data.orgs.map((org) => {
-              return {
-                label: org.name,
-                value: org.id,
-              };
-            });
-
-            // check if initial call
-            if (isInitialCall) {
-              isInitialCall = false;
-
-              // Populate default value with data from server
-              // i.e. including labels, not just values
-              if (filters.scope) {
-                const selectedOptions = options.filter((option) => option.value === filters.scope);
-
-                if (selectedOptions.length) {
-                  setScope(selectedOptions[0]);
-                }
-              }
-            }
-
-            return options;
-          });
-      });
-    };
-  }, [setScope]); // eslint-disable-line
 
   return (
     <fieldset className="mb-6">
