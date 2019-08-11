@@ -11,8 +11,12 @@ import { updateRole, getRoleInfo } from './roleStore';
 import LoadingIndicator from '../../components/LoadingIndicator';
 import yeepClient from '../yeepClient';
 
+function gotoRoleList() {
+  navigate('/roles');
+}
+
 const RoleEditPage = ({ roleId }) => {
-  const [currentRole, setCurrentRole] = useState(null);
+  const [editedRole, setEditedRole] = useState(null);
   const roles = useSelector((state) => state.role.roles);
   const dispatch = useDispatch();
 
@@ -23,49 +27,61 @@ const RoleEditPage = ({ roleId }) => {
     const role = find(roles, (role) => role.id === roleId);
 
     if (role) {
-      setCurrentRole(role);
+      setEditedRole(role);
     } else {
       // role does not exist in memory - retrieve from API
       dispatch(getRoleInfo({ id: roleId })).then((role) => {
-        setCurrentRole(role);
+        setEditedRole(role);
       });
     }
 
     return () => {
       yeepClient.redeemCancelToken(getRoleInfo);
     };
-  }, [roleId, roles, setCurrentRole, dispatch]);
+  }, [roleId, roles, setEditedRole, dispatch]);
 
   const onRoleDelete = useCallback(
-    (role) => {
-      dispatch(openRoleDeleteModal({ role }));
+    (values) => {
+      dispatch(
+        openRoleDeleteModal({
+          role: {
+            id: roleId,
+            ...values,
+          },
+        })
+      );
     },
-    [dispatch]
+    [dispatch, roleId]
   );
-
-  const gotoRoleList = useCallback(() => {
-    navigate('/roles');
-  }, []);
 
   const submitForm = useCallback(
     (values) => {
-      dispatch(updateRole(values));
+      dispatch(
+        updateRole({
+          id: roleId,
+          name: values.name,
+          description: values.description,
+          permissions: values.permissions.map((e) => e.id),
+        })
+      ).then(() => {
+        gotoRoleList();
+      });
     },
-    [dispatch]
+    [dispatch, roleId]
   );
 
   return (
     <React.Fragment>
       <RoleDeleteModal onSuccess={gotoRoleList} onError={(err) => console.error(err)} />
       <h1 className="font-semibold text-3xl mb-6">Edit role #{roleId}</h1>
-      {currentRole == null ? (
+      {editedRole == null ? (
         <LoadingIndicator />
       ) : (
         <RoleForm
           onCancel={gotoRoleList}
           onSubmit={submitForm}
           onDelete={onRoleDelete}
-          defaultValues={currentRole}
+          defaultValues={editedRole}
           withDangerZone
         />
       )}

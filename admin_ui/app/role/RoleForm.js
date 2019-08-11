@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import AsyncSelect from 'react-select/lib/Async';
 import noop from 'lodash/noop';
@@ -6,106 +6,65 @@ import Input from '../../components/Input';
 import Textarea from '../../components/Textarea';
 import yeepClient from '../yeepClient';
 import Button from '../../components/Button';
-import formatOptionFromString from '../../utilities/formatOptionFromString';
+import OrgOption from '../../utilities/OrgOption';
+import PermissionOption from '../../utilities/PermissionOption';
+
+function fetchOrgOptionsAsync(inputValue) {
+  return yeepClient.api().then((api) => {
+    return api.org
+      .list({
+        q: inputValue || undefined,
+        limit: 10,
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(fetchOrgOptionsAsync),
+      })
+      .then((data) => {
+        return data.orgs.map((org) => {
+          return {
+            label: org.name,
+            value: org.id,
+          };
+        });
+      });
+  });
+}
+
+function fetchPermissionOptionsAsync(inputValue) {
+  return yeepClient.api().then((api) => {
+    return api.permission
+      .list({
+        q: inputValue || undefined,
+        limit: 10,
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(fetchPermissionOptionsAsync),
+      })
+      .then((data) => {
+        return data.permissions.map((permission) => {
+          return {
+            label: permission.name,
+            value: permission.id,
+          };
+        });
+      });
+  });
+}
 
 const RoleForm = ({ onSubmit, onCancel, onDelete, defaultValues, withDangerZone }) => {
   const [name, setName] = useState(defaultValues.name || '');
   const [description, setDescription] = useState(defaultValues.description || '');
-  const [scope, setScope] = useState(
-    defaultValues.scope ? formatOptionFromString(defaultValues.scope) : null
+  const [org, setOrg] = useState(
+    defaultValues.org ? OrgOption.fromRecord(defaultValues.org).toOption() : null
   );
   const [permissions, setPermissions] = useState(
-    (defaultValues.permissions || []).map(formatOptionFromString)
+    (defaultValues.permissions || []).map((e) => PermissionOption.fromRecord(e).toOption())
   );
 
-  const fetchScopeOptionsAsync = useMemo(() => {
-    let isInitialCall = true;
-    return (inputValue) => {
-      return yeepClient.api().then((api) => {
-        return api.org
-          .list({
-            q: inputValue || undefined,
-            limit: 10,
-            cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(fetchScopeOptionsAsync),
-          })
-          .then((data) => {
-            const options = data.orgs.map((org) => {
-              return {
-                label: org.name,
-                value: org.id,
-              };
-            });
-
-            // check if initial call
-            if (isInitialCall) {
-              isInitialCall = false;
-
-              // Populate default value with data from server
-              // i.e. including labels, not just values
-              if (defaultValues.scope) {
-                const selectedOptions = options.filter(
-                  (option) => option.value === defaultValues.scope
-                );
-
-                if (selectedOptions.length) {
-                  setScope(selectedOptions[0]);
-                }
-              }
-            }
-
-            return options;
-          });
-      });
+  const getValue = useCallback(() => {
+    return {
+      name,
+      description,
+      org: org ? OrgOption.fromOption(org).toRecord() : null,
+      permissions: permissions.map((e) => PermissionOption.fromOption(e).toRecord()),
     };
-  }, [setScope, defaultValues]);
-
-  const fetchPermissionOptionsAsync = useMemo(() => {
-    let isInitialCall = true;
-    return (inputValue) => {
-      return yeepClient.api().then((api) => {
-        return api.permission
-          .list({
-            q: inputValue || undefined,
-            limit: 10,
-            cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(fetchPermissionOptionsAsync),
-          })
-          .then((data) => {
-            const options = data.permissions.map((permission) => {
-              return {
-                label: permission.name,
-                value: permission.id,
-              };
-            });
-
-            // check if initial call
-            if (isInitialCall) {
-              isInitialCall = false;
-
-              // Populate default values with data from server
-              // i.e. including labels, not just values
-              if (
-                Array.isArray(defaultValues.permissions) &&
-                defaultValues.permissions.length !== 0
-              ) {
-                const defaultPermissions = defaultValues.permissions.reduce((accumulator, e) => {
-                  accumulator[e] = true;
-                  return accumulator;
-                }, {});
-                const selectedOptions = options.filter(
-                  (option) => defaultPermissions[option.value]
-                );
-
-                if (selectedOptions.length) {
-                  setPermissions(selectedOptions);
-                }
-              }
-            }
-
-            return options;
-          });
-      });
-    };
-  }, [setPermissions, defaultValues]);
+  }, [name, description, org, permissions]);
 
   const onChangeName = useCallback(
     (event) => {
@@ -124,14 +83,9 @@ const RoleForm = ({ onSubmit, onCancel, onDelete, defaultValues, withDangerZone 
   const onFormSubmit = useCallback(
     (event) => {
       event.preventDefault();
-      onSubmit({
-        name,
-        description,
-        scope: scope.value,
-        permissions: permissions.map((e) => e.value),
-      });
+      onSubmit(getValue());
     },
-    [onSubmit, name, description, scope, permissions]
+    [onSubmit, getValue]
   );
 
   return (
@@ -164,20 +118,21 @@ const RoleForm = ({ onSubmit, onCancel, onDelete, defaultValues, withDangerZone 
       </div>
       <div className="my-4 flex">
         <div className="flex items-center w-1/4 h-10 flex-shrink-0 pr-4">
-          <label htmlFor="scope" className="">
+          <label htmlFor="org" className="">
             Organization scope (optional)
           </label>
         </div>
         <div className="flex-grow">
           <AsyncSelect
-            id="scope"
+            id="org"
             className="w-full"
             placeholder="Choose an organization"
-            loadOptions={fetchScopeOptionsAsync}
+            loadOptions={fetchOrgOptionsAsync}
             isClearable={true}
             defaultOptions={true}
-            value={scope}
-            onChange={setScope}
+            value={org}
+            onChange={setOrg}
+            isDisabled={defaultValues.org != null}
           />
         </div>
       </div>
@@ -213,7 +168,7 @@ const RoleForm = ({ onSubmit, onCancel, onDelete, defaultValues, withDangerZone 
       {withDangerZone && (
         <fieldset className="mb-6">
           <legend>Danger zone</legend>
-          <Button type="button" danger={true} onClick={() => onDelete(defaultValues)}>
+          <Button type="button" danger={true} onClick={() => onDelete(getValue())}>
             Delete role
           </Button>
         </fieldset>
@@ -227,7 +182,21 @@ RoleForm.propTypes = {
   onSubmit: PropTypes.func,
   onCancel: PropTypes.func,
   onDelete: PropTypes.func,
-  defaultValues: PropTypes.object,
+  defaultValues: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    org: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+    }).isRequired,
+    permissions: PropTypes.arrayOf(
+      PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        name: PropTypes.string.isRequired,
+      })
+    ).isRequired,
+  }),
 };
 
 RoleForm.defaultProps = {
