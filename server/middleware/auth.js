@@ -4,8 +4,6 @@ import has from 'lodash/has';
 import get from 'lodash/get';
 import uniq from 'lodash/uniq';
 import isString from 'lodash/isString';
-import isUndefined from 'lodash/isUndefined';
-import isNull from 'lodash/isNull';
 import binarySearch from 'binary-search';
 import {
   AuthorizationError,
@@ -232,7 +230,7 @@ export const decorateUserPermissions = () => async (ctx, next) => {
  * @param {Array<Object>} userPermissions array of user permissions to inspect
  * @param {Object} props matching properties
  * @prop {string} props.name permission name
- * @prop {string} [props.orgId] permission orgId (optional)
+ * @prop {string|ObjectId} [props.orgId] permission orgId (optional)
  * @returns {Number}
  */
 export const findUserPermissionIndex = (userPermissions, { name, orgId }) => {
@@ -240,8 +238,14 @@ export const findUserPermissionIndex = (userPermissions, { name, orgId }) => {
     throw new TypeError(`Invalid name prop; expected string, received ${typeOf(name)}`);
   }
 
-  if (!(isNull(orgId) || isUndefined(orgId) || isString(orgId))) {
-    throw new TypeError(`Invalid orgId prop; expected string, received ${typeOf(orgId)}`);
+  if (orgId != null) {
+    if (orgId instanceof ObjectId) {
+      orgId = orgId.toHexString(); // convert to string
+    } else if (!isString(orgId)) {
+      throw new TypeError(
+        `Invalid orgId prop; expected string or ObjectId, received ${typeOf(orgId)}`
+      );
+    }
   }
 
   const index = binarySearch(
