@@ -66,8 +66,12 @@ Authorization: `Bearer ${authToken}`
       "name": "acme:developer",
       "description": "Developer role",
       "isSystemRole": false,
-      "usersCount": 5,
-      "permissions": ["5b969dc9901e2af192780a34"],
+      "permissions": [
+        {
+          "id": "5b969dc9901e2af192780a34",
+          "name": "acme.repo.write"
+        }
+      ],
       "org": {
         "id": "8a9295c9901e7af196785a34",
         "name": "acme"
