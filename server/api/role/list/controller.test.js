@@ -132,8 +132,12 @@ describe('api/role.list', () => {
           name: expect.any(String),
           description: expect.any(String),
           isSystemRole: expect.any(Boolean),
-          usersCount: expect.any(Number),
-          permissions: expect.arrayContaining([expect.any(String)]),
+          permissions: expect.arrayContaining([
+            expect.objectContaining({
+              id: expect.any(String),
+              name: expect.any(String),
+            }),
+          ]),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
           org: expect.objectContaining({
@@ -164,8 +168,12 @@ describe('api/role.list', () => {
           name: expect.any(String),
           description: expect.any(String),
           isSystemRole: expect.any(Boolean),
-          usersCount: expect.any(Number),
-          permissions: expect.arrayContaining([expect.any(String)]),
+          permissions: expect.arrayContaining([
+            expect.objectContaining({
+              id: expect.any(String),
+              name: expect.any(String),
+            }),
+          ]),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
           org: expect.objectContaining({
@@ -233,8 +241,12 @@ describe('api/role.list', () => {
           name: expect.any(String),
           description: expect.any(String),
           isSystemRole: expect.any(Boolean),
-          usersCount: expect.any(Number),
-          permissions: expect.arrayContaining([expect.any(String)]),
+          permissions: expect.arrayContaining([
+            expect.objectContaining({
+              id: expect.any(String),
+              name: expect.any(String),
+            }),
+          ]),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
         }),
@@ -257,8 +269,16 @@ describe('api/role.list', () => {
           name: expect.any(String),
           description: expect.any(String),
           isSystemRole: expect.any(Boolean),
-          usersCount: expect.any(Number),
-          permissions: expect.arrayContaining([expect.any(String)]),
+          org: expect.objectContaining({
+            id: acme.id,
+            name: expect.any(String),
+          }),
+          permissions: expect.arrayContaining([
+            expect.objectContaining({
+              id: expect.any(String),
+              name: expect.any(String),
+            }),
+          ]),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
         }),
