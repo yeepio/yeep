@@ -11,7 +11,7 @@ import {
   findUserPermissionIndex,
 } from '../../../middleware/auth';
 import { AuthorizationError } from '../../../constants/errors';
-import getRoleInfo from '../../role/info/service';
+import { getRoleIfExists } from '../middleware';
 import listPermissions, { parseCursor, stringifyCursor } from './service';
 
 const validation = validateRequest({
@@ -38,21 +38,6 @@ const validation = validateRequest({
     isSystemPermission: Joi.boolean().optional(),
   },
 });
-
-const decorateRequestedRole = async (ctx, next) => {
-  const { request } = ctx;
-  const roleId = request.body.role;
-  if (roleId) {
-    const role = await getRoleInfo(ctx, { id: roleId });
-
-    // decorate session with requested role data
-    request.session = {
-      ...request.session,
-      role,
-    };
-  }
-  await next();
-};
 
 const isUserAuthorised = async ({ request }, next) => {
   // verify user has access to the requested org
@@ -119,7 +104,7 @@ export default compose([
   isUserAuthenticated(),
   validation,
   decorateUserPermissions(),
-  decorateRequestedRole,
+  getRoleIfExists,
   isUserAuthorised,
   handler,
 ]);
