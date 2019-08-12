@@ -1,7 +1,7 @@
 import { RoleNotFoundError } from '../../constants/errors';
 import { ObjectId } from 'mongodb';
 
-export async function getRole(ctx, next) {
+export async function populateRole(ctx, next) {
   const { request, db } = ctx;
   const RoleModel = db.model('Role');
 

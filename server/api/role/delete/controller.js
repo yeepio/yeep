@@ -11,7 +11,7 @@ import {
 } from '../../../middleware/auth';
 import deleteRole from './service';
 import { AuthorizationError } from '../../../constants/errors';
-import { getRole } from '../middleware';
+import { populateRole } from '../middleware';
 
 export const validationSchema = {
   body: {
@@ -56,7 +56,7 @@ export default compose([
   decorateSession(),
   isUserAuthenticated(),
   validateRequest(validationSchema),
-  getRole,
+  populateRole,
   decorateUserPermissions(),
   isUserAuthorized,
   handler,
