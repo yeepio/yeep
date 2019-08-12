@@ -113,7 +113,7 @@ describe('api/org.list', () => {
     });
     bearerToken = await signBearerJWT(ctx, session);
 
-    const userReadPermissions = await listPermissions(ctx, {
+    const { permissions: userReadPermissions } = await listPermissions(ctx, {
       q: 'yeep.user.read',
       scopes: [null],
       limit: 1,
