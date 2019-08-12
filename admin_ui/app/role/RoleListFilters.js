@@ -57,7 +57,7 @@ const RoleListFilters = () => {
     (selectedOption) => {
       dispatch(
         setRoleListFilters({
-          org: OrgOption.fromOption(selectedOption).toRecord(),
+          org: selectedOption ? OrgOption.fromOption(selectedOption).toRecord() : {},
         })
       );
     },
