@@ -40,11 +40,12 @@ const RoleListFilters = () => {
     [dispatch]
   );
 
-  const setQueryText = useCallback(() => {
-    return debounce((queryText) => {
+  const setQueryText = useCallback(
+    debounce((queryText) => {
       dispatch(setRoleListFilters({ queryText }));
-    }, 600);
-  }, [dispatch]);
+    }, 600),
+    [dispatch]
+  );
 
   const onQueryTextChange = useCallback(
     (event) => {
@@ -91,7 +92,7 @@ const RoleListFilters = () => {
           placeholder="quicksearch"
           defaultValue={filters.queryText}
           className="w-full sm:w-1/3"
-          onKeyUp={onQueryTextChange}
+          onChange={onQueryTextChange}
         />
       </div>
     </fieldset>
