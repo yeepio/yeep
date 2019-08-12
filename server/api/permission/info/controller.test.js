@@ -81,61 +81,85 @@ describe('api/permission.info', () => {
       ok: false,
       error: {
         code: 10008,
-        message: 'Permission 5b2d5dd0cd86b77258e16d39 cannot be found',
+        message: 'Permission 5b2d5dd0cd86b77258e16d39 not found',
       },
     });
   });
 
-  test('retrieves permission info', async () => {
-    const permission = await createPermission(ctx, {
-      name: 'acme.test',
-      description: 'This is a test',
-      scope: org.id,
-    });
+  describe('successful request', () => {
+    let permission;
 
-    const res = await request(server)
-      .post('/api/permission.info')
-      .set('Authorization', `Bearer ${bearerToken}`)
-      .send({
-        id: permission.id,
+    beforeAll(async () => {
+      permission = await createPermission(ctx, {
+        name: 'acme.test',
+        description: 'This is a test',
+        scope: org.id,
       });
-
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: true,
-      permission: {
-        id: permission.id,
-      },
     });
 
-    const isPermissionDeleted = await deletePermission(ctx, permission);
-    expect(isPermissionDeleted).toBe(true);
+    afterAll(async () => {
+      await deletePermission(ctx, permission);
+    });
+
+    test('retrieves permission info', async () => {
+      const res = await request(server)
+        .post('/api/permission.info')
+        .set('Authorization', `Bearer ${bearerToken}`)
+        .send({
+          id: permission.id,
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: true,
+        permission: {
+          id: permission.id,
+          name: expect.any(String),
+          description: expect.any(String),
+          isSystemPermission: expect.any(Boolean),
+          roles: expect.any(Array),
+          org: expect.objectContaining({
+            id: expect.any(String),
+            name: expect.any(String),
+          }),
+          createdAt: expect.any(String),
+          updatedAt: expect.any(String),
+        },
+      });
+    });
   });
 
-  test('returns error when permission is out of scope', async () => {
-    const permission = await createPermission(ctx, {
-      // note the absence of scope to denote global permission
-      name: 'acme.test',
-      description: 'This is a test',
-    });
+  describe('permission out of scope', () => {
+    let permission;
 
-    const res = await request(server)
-      .post('/api/permission.info')
-      .set('Authorization', `Bearer ${bearerToken}`)
-      .send({
-        id: permission.id,
+    beforeAll(async () => {
+      permission = await createPermission(ctx, {
+        // note the absence of scope to denote global permission
+        name: 'acme.test',
+        description: 'This is a test',
       });
-
-    expect(res.status).toBe(200);
-    expect(res.body).toMatchObject({
-      ok: false,
-      error: {
-        code: 10012,
-        message: `User ${user.id} does not have sufficient permissions to access this resource`,
-      },
     });
 
-    const isPermissionDeleted = await deletePermission(ctx, permission);
-    expect(isPermissionDeleted).toBe(true);
+    afterAll(async () => {
+      await deletePermission(ctx, permission);
+    });
+
+    test('returns error', async () => {
+      const res = await request(server)
+        .post('/api/permission.info')
+        .set('Authorization', `Bearer ${bearerToken}`)
+        .send({
+          id: permission.id,
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body).toMatchObject({
+        ok: false,
+        error: {
+          code: 10012,
+          message: `User ${user.id} does not have sufficient permissions to access this resource`,
+        },
+      });
+    });
   });
 });

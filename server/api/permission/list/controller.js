@@ -11,7 +11,7 @@ import {
   findUserPermissionIndex,
 } from '../../../middleware/auth';
 import { AuthorizationError } from '../../../constants/errors';
-import { getRoleIfExists } from '../middleware';
+import { populateOptionalRole } from '../middleware';
 import listPermissions, { parseCursor, stringifyCursor } from './service';
 
 const validation = validateRequest({
@@ -105,7 +105,7 @@ export default compose([
   isUserAuthenticated(),
   validation,
   decorateUserPermissions(),
-  getRoleIfExists,
+  populateOptionalRole,
   isUserAuthorised,
   handler,
 ]);

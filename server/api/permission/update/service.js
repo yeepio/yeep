@@ -37,7 +37,12 @@ async function updatePermission({ db }, permission, nextProps) {
     );
 
     return {
-      ...permission,
+      id: permission._id.toHexString(),
+      name: permission.name,
+      description: permission.description,
+      isSystemPermission: permission.isSystemPermission,
+      scope: permission.scope,
+      createdAt: permission.createdAt,
       ...nextProps,
       updatedAt,
     };

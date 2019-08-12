@@ -10,8 +10,8 @@ import {
   findUserPermissionIndex,
 } from '../../../middleware/auth';
 import deletePermission from './service';
-import getPermissionInfo from '../info/service';
 import { AuthorizationError } from '../../../constants/errors';
+import { populatePermission } from '../middleware';
 
 export const validationSchema = {
   body: {
@@ -20,19 +20,6 @@ export const validationSchema = {
       .hex()
       .required(),
   },
-};
-
-const decorateRequestedPermission = async (ctx, next) => {
-  const { request } = ctx;
-  const permission = await getPermissionInfo(ctx, request.body);
-
-  // decorate session with requested permission
-  request.session = {
-    ...request.session,
-    permission,
-  };
-
-  await next();
 };
 
 const isUserAuthorized = async ({ request }, next) => {
@@ -69,7 +56,7 @@ export default compose([
   decorateSession(),
   isUserAuthenticated(),
   validateRequest(validationSchema),
-  decorateRequestedPermission,
+  populatePermission,
   decorateUserPermissions(),
   isUserAuthorized,
   handler,

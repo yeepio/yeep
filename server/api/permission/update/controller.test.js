@@ -83,7 +83,7 @@ describe('api/permission.update', () => {
       ok: false,
       error: {
         code: 10008,
-        message: 'Permission 5b2d5dd0cd86b77258e16d39 cannot be found',
+        message: 'Permission 5b2d5dd0cd86b77258e16d39 not found',
       },
     });
   });

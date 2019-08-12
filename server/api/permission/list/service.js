@@ -16,41 +16,29 @@ function getPermissions({ db }, $match, limit) {
       $match,
     },
     {
-      $lookup: {
-        from: 'orgMemberships',
-        let: { permissionId: '$_id' },
-        pipeline: [
-          {
-            $match: {
-              $expr: {
-                $eq: ['$permissions.id', '$$permissionId'],
-              },
-            },
-          },
-          {
-            $group: {
-              _id: '$userId',
-            },
-          },
-        ],
-        as: 'users',
+      $sort: {
+        _id: 1,
       },
+    },
+    {
+      $limit: limit,
     },
     {
       $lookup: {
         from: 'roles',
-        let: { permissionId: '$_id' },
+        let: { e: '$_id' },
         pipeline: [
           {
             $match: {
               $expr: {
-                $in: ['$$permissionId', '$permissions'],
+                $in: ['$$e', '$permissions'],
               },
             },
           },
           {
             $project: {
               _id: 1,
+              name: 1,
             },
           },
         ],
@@ -58,12 +46,26 @@ function getPermissions({ db }, $match, limit) {
       },
     },
     {
-      $sort: {
-        _id: 1,
+      $lookup: {
+        from: 'orgs',
+        let: { e: '$scope' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ['$_id', '$$e'],
+              },
+            },
+          },
+          {
+            $project: {
+              _id: 1,
+              name: 1,
+            },
+          },
+        ],
+        as: 'orgs',
       },
-    },
-    {
-      $limit: limit,
     },
   ]);
 }
@@ -72,21 +74,31 @@ function getPermissionCount({ db }, $match) {
   return db.model('Permission').countDocuments($match);
 }
 
-function formatPermissions(permissions){
-  return permissions.map((permission) => ({
+function formatPermission(permission) {
+  return {
     id: permission._id.toHexString(),
     name: permission.name,
     description: permission.description,
     isSystemPermission: permission.isSystemPermission,
-    usersCount: permission.users.length,
-    rolesCount: permission.roles.length,
+    org:
+      permission.orgs.length === 0
+        ? null
+        : {
+            id: permission.orgs[0]._id.toHexString(),
+            name: permission.orgs[0].name,
+          },
+    roles: permission.roles.map((role) => {
+      return {
+        id: role._id.toHexString(),
+        name: role.name,
+      };
+    }),
     createdAt: permission.createdAt,
     updatedAt: permission.updatedAt,
-  }));
+  };
 }
 
 async function listPermissions(ctx, { q, limit, cursor, scopes, role, isSystemPermission }) {
-
   const matchExpressions = [];
 
   if (!scopes.includes(null)) {
@@ -117,7 +129,7 @@ async function listPermissions(ctx, { q, limit, cursor, scopes, role, isSystemPe
   }
 
   // get role count promise
-  const getPermissionCountPromise = getPermissionCount(
+  const permissionCountPromise = getPermissionCount(
     ctx,
     matchExpressions.length ? { $and: matchExpressions } : {}
   );
@@ -130,20 +142,20 @@ async function listPermissions(ctx, { q, limit, cursor, scopes, role, isSystemPe
   }
 
   // get roles promise
-  const getPermissionsPromise = getPermissions(
+  const permissionsPromise = getPermissions(
     ctx,
     matchExpressions.length ? { $and: matchExpressions } : {},
     limit
   );
 
   // retrieve permissions
-  const [ permissions, permissionCount ] = await Promise.all([
-    getPermissionsPromise,
-    getPermissionCountPromise,
+  const [permissions, permissionCount] = await Promise.all([
+    permissionsPromise,
+    permissionCountPromise,
   ]);
 
   return {
-    permissions: formatPermissions(permissions),
+    permissions: permissions.map(formatPermission),
     permissionCount,
   };
 }

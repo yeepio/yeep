@@ -1,7 +1,7 @@
-import { RoleNotFoundError } from '../../constants/errors';
+import { RoleNotFoundError, PermissionNotFoundError } from '../../constants/errors';
 import { ObjectId } from 'mongodb';
 
-export async function getRoleIfExists(ctx, next) {
+export async function populateOptionalRole(ctx, next) {
   const { request, db } = ctx;
   const roleId = request.body.role;
 
@@ -12,6 +12,7 @@ export async function getRoleIfExists(ctx, next) {
       _id: ObjectId(roleId),
     });
 
+    // make sure role exists
     if (!role) {
       throw new RoleNotFoundError(`Role ${roleId} not found`);
     }
@@ -22,6 +23,28 @@ export async function getRoleIfExists(ctx, next) {
       role,
     };
   }
+
+  await next();
+}
+
+export async function populatePermission(ctx, next) {
+  const { request, db } = ctx;
+  const PermissionModel = db.model('Permission');
+
+  const permission = await PermissionModel.findOne({
+    _id: ObjectId(request.body.id),
+  });
+
+  // make sure permission exists
+  if (!permission) {
+    throw new PermissionNotFoundError(`Permission ${request.body.id} not found`);
+  }
+
+  // decorate request with permission
+  request.session = {
+    ...request.session,
+    permission,
+  };
 
   await next();
 }
