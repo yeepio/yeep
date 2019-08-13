@@ -1,18 +1,26 @@
 import { createAction, handleActions } from 'redux-actions';
+import { produce } from 'immer';
 import yeepClient from '../yeepClient';
 
 // initial state
 export const initialState = {
-  permissions: [],
-  permissionCount: 0,
-  permissionListLimit: 10,
-  isPermissionListLoading: false,
-  isPermissionCreationPending: false,
-  cursors: [],
-  page: 0,
-  filters: {
-    isSystemPermission: false,
-    queryText: '',
+  list: {
+    records: [],
+    totalCount: 0,
+    limit: 10,
+    isLoading: false,
+    cursors: [],
+    page: 0,
+    filters: {
+      isSystemPermission: false,
+      queryText: '',
+      org: {},
+      role: {},
+    },
+  },
+  form: {
+    values: {},
+    isWritePending: false,
   },
 };
 
@@ -32,54 +40,49 @@ export const listPermissions = (props = {}) => (dispatch, getState) => {
     .api()
     .then((api) =>
       api.permission.list({
-        limit: store.permissionListLimit,
-        cursor: store.cursors[store.page - 1],
-        isSystemPermission: store.filters.isSystemPermission,
-        q: store.filters.queryText || undefined,
+        limit: store.list.limit,
+        cursor: store.list.cursors[store.list.page - 1],
+        isSystemPermission: store.list.filters.isSystemPermission,
+        q: store.list.filters.queryText || undefined,
         cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(listPermissions),
         ...props,
       })
     )
     .then((data) => {
       dispatch(resolveListPermissions(data));
-      return true;
+      return data.permissions;
     })
     .catch((err) => {
       dispatch(rejectListPermissions(err));
-      return false;
+      return null;
     });
 };
 
 export const reducer = handleActions(
   {
-    [initListPermissions]: (state) => ({
-      ...state,
-      isPermissionListLoading: true,
+    [initListPermissions]: produce((draft) => {
+      draft.list.isLoading = true;
     }),
-    [resolveListPermissions]: (state, action) => ({
-      ...state,
-      isPermissionListLoading: false,
-      permissions: action.payload.permissions,
-      cursors: [...state.cursors, action.payload.nextCursor],
-      permissionCount: action.payload.permissionCount,
+    [resolveListPermissions]: produce((draft, action) => {
+      draft.list.isLoading = false;
+      draft.list.records = action.payload.permissions;
+      draft.list.cursors.push(action.payload.nextCursor);
+      draft.list.totalCount = action.payload.permissionCount;
     }),
-    [setPermissionListLimit]: (state, action) => ({
-      ...state,
-      cursors: [],
-      page: 0,
-      permissionListLimit: action.payload.limit,
+    [setPermissionListLimit]: produce((draft, action) => {
+      draft.list.page = 0;
+      draft.list.cursors = [];
+      draft.list.limit = action.payload.limit;
     }),
-    [setPermissionListPage]: (state, action) => ({
-      ...state,
-      page: action.payload.page,
+    [setPermissionListPage]: produce((draft, action) => {
+      draft.list.page = action.payload.page;
     }),
-    [setPermissionListFilters]: (state, action) => ({
-      ...state,
-      page: 0,
-      filters: {
-        ...state.filters,
+    [setPermissionListFilters]: produce((draft, action) => {
+      draft.list.page = 0;
+      draft.list.filters = {
+        ...draft.list.filters,
         ...action.payload,
-      },
+      };
     }),
   },
   initialState

@@ -15,6 +15,8 @@ import {
   setPermissionListPage,
   setPermissionListFilters,
 } from './permissionStore';
+import yeepClient from '../yeepClient';
+import PermissionListFilters from './PermissionListFilters';
 
 // Dummy data
 const permissionHeadings = [
@@ -30,73 +32,53 @@ const permissionHeadings = [
 ];
 
 const PermissionListPage = () => {
-  const isPermissionListLoading = useSelector((state) => state.permission.isPermissionListLoading);
-  const permissionData = useSelector((state) => state.permission.permissions);
-  const permissionCount = useSelector((state) => state.permission.permissionCount);
-  const permissionListLimit = useSelector((state) => state.permission.permissionListLimit);
-  const permissionListFilters = useSelector((state) => state.permission.filters);
-  const currentPage = useSelector((state) => state.permission.page);
+  const isLoading = useSelector((state) => state.permission.list.isLoading);
+  const records = useSelector((state) => state.permission.list.records);
+  const totalCount = useSelector((state) => state.permission.list.totalCount);
+  const limit = useSelector((state) => state.permission.list.limit);
+  const filters = useSelector((state) => state.permission.list.filters);
+  const page = useSelector((state) => state.permission.list.page);
 
   useDocumentTitle('Permissions');
 
   const dispatch = useDispatch();
 
-  const entitiesStart = currentPage * permissionListLimit + 1;
-  const entitiesEnd =
-    permissionData.length >= permissionListLimit ? (currentPage + 1) * permissionListLimit : permissionData.length;
+  const entitiesStart = page * limit + 1;
+  const entitiesEnd = records.length >= limit ? (page + 1) * limit : records.length;
 
   useEffect(() => {
     dispatch(listPermissions());
-  }, [dispatch, permissionListLimit, currentPage, permissionListFilters]);
+    return () => {
+      // on unmount cancel any in-flight request
+      yeepClient.redeemCancelToken(listPermissions);
+    };
+  }, [dispatch, limit, page, filters]);
 
   const reload = useCallback(() => {
     dispatch(listPermissions());
   }, [dispatch]);
 
-  const handleDelete = useCallback(
+  const onPermissionDelete = useCallback(
     (permission) => {
       dispatch(openPermissionDeleteModal({ permission }));
     },
     [dispatch]
   );
 
-  const handleNext = useCallback(() => {
-    dispatch(setPermissionListPage({ page: currentPage + 1 }));
-  }, [dispatch, currentPage]);
+  const onPageNext = useCallback(() => {
+    dispatch(setPermissionListPage({ page: page + 1 }));
+  }, [dispatch, page]);
 
-  const handlePrevious = useCallback(() => {
-    dispatch(setPermissionListPage({ page: currentPage - 1 }));
-  }, [dispatch, currentPage]);
+  const onPagePrevious = useCallback(() => {
+    dispatch(setPermissionListPage({ page: page - 1 }));
+  }, [dispatch, page]);
 
-  const handleLimitChange = useCallback(
+  const onLimitChange = useCallback(
     (event) => {
       const newLimit = event.value;
       dispatch(setPermissionListLimit({ limit: newLimit }));
     },
     [dispatch]
-  );
-
-  const handleSystemPermissionFilter = useCallback(
-    (event) => {
-      const { checked } = event.target;
-      dispatch(setPermissionListFilters({ isSystemPermission: checked }));
-    },
-    [dispatch]
-  );
-
-  const throttledHandleSearch = useCallback(
-    throttle((searchTerm) => {
-      dispatch(setPermissionListFilters({ queryText: searchTerm }));
-    }, 600),
-    [dispatch]
-  );
-
-  const handleSearch = useCallback(
-    (event) => {
-      const searchTerm = event.target.value;
-      throttledHandleSearch(searchTerm);
-    },
-    [throttledHandleSearch]
   );
 
   return (
@@ -106,75 +88,41 @@ const PermissionListPage = () => {
         Create new
       </ButtonLink>
       <h1 className="font-semibold text-3xl mb-6">Permissions</h1>
-      <fieldset className="mb-6">
-        <legend>Filters and quick search</legend>
-        <div className="sm:flex items-center">
-          <Select
-            className="flex-auto mb-3 sm:mb-0 sm:mr-3"
-            placeholder="All roles"
-            options={[
-              { value: 1, label: 'Role 1' },
-              { value: 2, label: 'Role 2' },
-              { value: 3, label: 'Role 3' },
-              { value: 4, label: 'Role 4' },
-            ]}
-            isClearable={true}
-          />
-          <Select
-            className="flex-auto mb-3 sm:mb-0 sm:mr-3"
-            placeholder="All organisations"
-            options={[
-              { value: 1, label: 'Org 1' },
-              { value: 2, label: 'Org 2' },
-              { value: 3, label: 'Org 3' },
-              { value: 4, label: 'Org 4' },
-            ]}
-            isClearable={true}
-          />
-          <label
-            htmlFor="showSystemPermissions"
-            className="block flex-initial mb-3 sm:mb-0 sm:mr-3"
-          >
-            <input type="checkbox" id="showSystemPermissions" className="mr-2" onChange={handleSystemPermissionFilter} />
-            Show system permissions
-          </label>
-          <Input placeholder="quicksearch" className="w-full sm:w-1/4" onKeyUp={handleSearch} />
-        </div>
-      </fieldset>
+      <PermissionListFilters />
       <Grid
         className="mb-6"
         headings={permissionHeadings}
-        data={permissionData}
+        data={records}
         entitiesStart={entitiesStart}
         entitiesEnd={entitiesEnd}
-        totalCount={permissionCount}
-        hasNext={permissionData.length >= permissionListLimit}
-        hasPrevious={currentPage > 0}
-        onNextClick={handleNext}
-        onPreviousClick={handlePrevious}
-        onLimitChange={handleLimitChange}
-        isLoading={isPermissionListLoading}
-        renderer={(permissionData, index) => {
+        totalCount={totalCount}
+        hasNext={records.length >= limit}
+        hasPrevious={page > 0}
+        onNextClick={onPageNext}
+        onPreviousClick={onPagePrevious}
+        onLimitChange={onLimitChange}
+        isLoading={isLoading}
+        renderer={(permission, index) => {
           return (
             <tr key={`permissionRow${index}`} className={index % 2 ? `bg-grey-lightest` : ``}>
               <td className="p-2">
-                <Link to={`${permissionData.id}/edit`}>{permissionData.name}</Link>
+                <Link to={`${permission.id}/edit`}>{permission.name}</Link>
               </td>
-              <td className="p-2 text-center">{permissionData.isSystemPermission ? 'Yes' : '-'}</td>
-              <td className="p-2 text-center">{permissionData.rolesCount}</td>
+              <td className="p-2 text-center">{permission.isSystemPermission ? 'Yes' : '-'}</td>
+              <td className="p-2 text-center">{permission.rolesCount}</td>
               <td className="p-2 text-center">
-                {permissionData.orgScope ? permissionData.orgScope.orgLabel : '-'}
+                {permission.orgScope ? permission.orgScope.orgLabel : '-'}
               </td>
               <td className="p-2 text-center">
-                {!permissionData.isSystemPermission && (
+                {!permission.isSystemPermission && (
                   <React.Fragment>
-                    <Link to={`${permissionData.id}/edit`}>Edit</Link>{' '}
-                    <button onClick={() => handleDelete(permissionData)} className="pseudolink">
+                    <Link to={`${permission.id}/edit`}>Edit</Link>{' '}
+                    <button onClick={() => onPermissionDelete(permission)} className="pseudolink">
                       Delete
                     </button>
                   </React.Fragment>
                 )}
-                {permissionData.isSystemPermission && <span className="text-grey">Cannot modify</span>}
+                {permission.isSystemPermission && <span className="text-grey">Cannot modify</span>}
               </td>
             </tr>
           );
