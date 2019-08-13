@@ -1,6 +1,7 @@
 import { createAction, handleActions } from 'redux-actions';
 import { produce } from 'immer';
 import yeepClient from '../yeepClient';
+import parseYeepValidationErrors from '../../utilities/parseYeepValidationErrors';
 
 // initial state
 export const initialState = {
@@ -19,8 +20,14 @@ export const initialState = {
     },
   },
   form: {
-    values: {},
-    isWritePending: false,
+    values: {
+      name: '',
+      description: '',
+      org: null,
+    },
+    isLoading: false,
+    isSavePending: false,
+    errors: {},
   },
 };
 
@@ -31,6 +38,21 @@ const rejectListPermissions = createAction('PERMISSION_LIST_REJECT');
 export const setPermissionListLimit = createAction('PERMISSION_LIST_LIMIT_SET');
 export const setPermissionListPage = createAction('PERMISSION_LIST_PAGE_SET');
 export const setPermissionListFilters = createAction('PERMISSION_LIST_FILTERS_SET');
+
+const initCreatePermission = createAction('PERMISSION_CREATE_INIT');
+const resolveCreatePermission = createAction('PERMISSION_CREATE_RESOLVE');
+const rejectCreatePermission = createAction('PERMISSION_CREATE_REJECT');
+
+const initUpdatePermission = createAction('PERMISSION_UPDATE_INIT');
+const resolveUpdatePermission = createAction('PERMISSION_UPDATE_RESOLVE');
+const rejectUpdatePermission = createAction('PERMISSION_UPDATE_REJECT');
+
+const initGetPermissionInfo = createAction('PERMISSION_INFO_INIT');
+const resolveGetPermissionInfo = createAction('PERMISSION_INFO_RESOLVE');
+const rejectGetPermissionInfo = createAction('PERMISSION_INFO_REJECT');
+
+export const setPermissionFormValues = createAction('PERMISSION_FORM_VALUES_SET');
+export const resetPermissionFormValues = createAction('PERMISSION_FORM_VALUES_CLEAR');
 
 export const listPermissions = (props = {}) => (dispatch, getState) => {
   const { permission: store } = getState();
@@ -54,6 +76,66 @@ export const listPermissions = (props = {}) => (dispatch, getState) => {
     })
     .catch((err) => {
       dispatch(rejectListPermissions(err));
+      return null;
+    });
+};
+
+export const createPermission = (props) => (dispatch) => {
+  dispatch(initCreatePermission());
+  return yeepClient
+    .api()
+    .then((api) =>
+      api.permission.create({
+        ...props,
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(createPermission),
+      })
+    )
+    .then((data) => {
+      dispatch(resolveCreatePermission(data));
+      return true;
+    })
+    .catch((err) => {
+      dispatch(rejectCreatePermission(err));
+      return false;
+    });
+};
+
+export const updatePermission = (props) => (dispatch) => {
+  dispatch(initUpdatePermission());
+  return yeepClient
+    .api()
+    .then((api) =>
+      api.permission.update({
+        ...props,
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(updatePermission),
+      })
+    )
+    .then((data) => {
+      dispatch(resolveUpdatePermission(data));
+      return true;
+    })
+    .catch((err) => {
+      dispatch(rejectUpdatePermission(err));
+      return false;
+    });
+};
+
+export const getPermissionInfo = (props) => (dispatch) => {
+  dispatch(initGetPermissionInfo());
+  return yeepClient
+    .api()
+    .then((api) =>
+      api.permission.info({
+        ...props,
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(getPermissionInfo),
+      })
+    )
+    .then((data) => {
+      dispatch(resolveGetPermissionInfo(data));
+      return data.permission;
+    })
+    .catch((err) => {
+      dispatch(rejectGetPermissionInfo(err));
       return null;
     });
 };
@@ -83,6 +165,65 @@ export const reducer = handleActions(
         ...draft.list.filters,
         ...action.payload,
       };
+    }),
+    [initCreatePermission]: produce((draft) => {
+      draft.form.isSavePending = true;
+    }),
+    [resolveCreatePermission]: produce((draft) => {
+      draft.form.isSavePending = false;
+    }),
+    [rejectCreatePermission]: produce((draft, action) => {
+      if (action.payload.code === 400) {
+        draft.form.errors = parseYeepValidationErrors(action.payload);
+      } else {
+        draft.form.errors = {
+          generic: action.payload.message,
+        };
+      }
+      draft.form.isSavePending = false;
+    }),
+    [initUpdatePermission]: produce((draft) => {
+      draft.form.isSavePending = true;
+    }),
+    [resolveUpdatePermission]: produce((draft) => {
+      draft.form.isSavePending = false;
+    }),
+    [rejectUpdatePermission]: produce((draft, action) => {
+      if (action.payload.code === 400) {
+        draft.form.errors = parseYeepValidationErrors(action.payload);
+      } else {
+        draft.form.errors = {
+          generic: action.payload.message,
+        };
+      }
+      draft.form.isSavePending = false;
+    }),
+    [initGetPermissionInfo]: produce((draft) => {
+      draft.form.isLoading = true;
+    }),
+    [resolveGetPermissionInfo]: produce((draft) => {
+      draft.form.isLoading = false;
+    }),
+    [rejectGetPermissionInfo]: produce((draft, action) => {
+      if (action.payload.code === 400) {
+        draft.form.errors = parseYeepValidationErrors(action.payload);
+      } else {
+        draft.form.errors = {
+          generic: action.payload.message,
+        };
+      }
+      draft.form.isLoading = false;
+    }),
+    [setPermissionFormValues]: produce((draft, action) => {
+      draft.form.errors = initialState.form.errors;
+      draft.form.values = {
+        ...draft.form.values,
+        ...action.payload,
+      };
+    }),
+    [resetPermissionFormValues]: produce((draft) => {
+      draft.form.errors = initialState.form.errors;
+      draft.form.values = initialState.form.values;
     }),
   },
   initialState

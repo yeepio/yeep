@@ -3,23 +3,14 @@ import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useSelector, useDispatch } from 'react-redux';
 import ButtonLink from '../../components/ButtonLink';
-import throttle from 'lodash/throttle';
-import Select from 'react-select';
 import Grid from '../../components/Grid';
-import Input from '../../components/Input';
 import PermissionDeleteModal from '../modals/PermissionDeleteModal';
 import { openPermissionDeleteModal } from '../modals/permissionModalsStore';
-import {
-  listPermissions,
-  setPermissionListLimit,
-  setPermissionListPage,
-  setPermissionListFilters,
-} from './permissionStore';
+import { listPermissions, setPermissionListLimit, setPermissionListPage } from './permissionStore';
 import yeepClient from '../yeepClient';
 import PermissionListFilters from './PermissionListFilters';
 
-// Dummy data
-const permissionHeadings = [
+const headings = [
   {
     label: 'Name',
     className: 'text-left',
@@ -91,7 +82,7 @@ const PermissionListPage = () => {
       <PermissionListFilters />
       <Grid
         className="mb-6"
-        headings={permissionHeadings}
+        headings={headings}
         data={records}
         entitiesStart={entitiesStart}
         entitiesEnd={entitiesEnd}
