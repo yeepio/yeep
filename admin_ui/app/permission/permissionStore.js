@@ -190,6 +190,9 @@ export const reducer = handleActions(
       draft.list.limit = action.payload.limit;
     }),
     [setPermissionListPage]: produce((draft, action) => {
+      if (action.payload.page < draft.list.page) {
+        draft.list.cursors.length = action.payload.page;
+      }
       draft.list.page = action.payload.page;
     }),
     [setPermissionListFilters]: produce((draft, action) => {
