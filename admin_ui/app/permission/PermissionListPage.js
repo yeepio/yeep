@@ -104,10 +104,8 @@ const PermissionListPage = () => {
                 <Link to={`${permission.id}/edit`}>{permission.name}</Link>
               </td>
               <td className="p-2 text-center">{permission.isSystemPermission ? 'Yes' : '-'}</td>
-              <td className="p-2 text-center">{permission.rolesCount}</td>
-              <td className="p-2 text-center">
-                {permission.orgScope ? permission.orgScope.orgLabel : '-'}
-              </td>
+              <td className="p-2 text-center">{permission.roles.length}</td>
+              <td className="p-2 text-center">{permission.org ? permission.org.name : '-'}</td>
               <td className="p-2 text-center">
                 {!permission.isSystemPermission && (
                   <React.Fragment>
