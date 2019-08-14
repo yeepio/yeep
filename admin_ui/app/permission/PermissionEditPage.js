@@ -94,7 +94,7 @@ const PermissionEditPage = ({ permissionId }) => {
 };
 
 PermissionEditPage.propTypes = {
-  permissionId: PropTypes.string.isRequired,
+  permissionId: PropTypes.string,
 };
 
 export default PermissionEditPage;
