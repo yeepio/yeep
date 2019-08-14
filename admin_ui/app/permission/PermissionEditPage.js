@@ -4,10 +4,14 @@ import { navigate } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useDispatch, useSelector } from 'react-redux';
 import find from 'lodash/find';
-import PermissionDeleteModal from '../modals/PermissionDeleteModal';
-import { openPermissionDeleteModal } from '../modals/permissionModalsStore';
+import PermissionDeleteModal from './PermissionDeleteModal';
 import PermissionForm from './PermissionForm';
-import { updatePermission, getPermissionInfo, setPermissionFormValues } from './permissionStore';
+import {
+  updatePermission,
+  getPermissionInfo,
+  setPermissionFormValues,
+  openPermissionDeleteModal,
+} from './permissionStore';
 import LoadingIndicator from '../../components/LoadingIndicator';
 import yeepClient from '../yeepClient';
 
@@ -44,7 +48,7 @@ const PermissionEditPage = ({ permissionId }) => {
     (values) => {
       dispatch(
         openPermissionDeleteModal({
-          role: {
+          permission: {
             id: permissionId,
             ...values,
           },

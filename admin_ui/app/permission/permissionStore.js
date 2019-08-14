@@ -29,6 +29,12 @@ export const initialState = {
     isSavePending: false,
     errors: {},
   },
+  deletion: {
+    record: {},
+    isOpen: false,
+    isDeletePending: false,
+    errors: {},
+  },
 };
 
 const initListPermissions = createAction('PERMISSION_LIST_INIT');
@@ -51,8 +57,15 @@ const initGetPermissionInfo = createAction('PERMISSION_INFO_INIT');
 const resolveGetPermissionInfo = createAction('PERMISSION_INFO_RESOLVE');
 const rejectGetPermissionInfo = createAction('PERMISSION_INFO_REJECT');
 
+const initDeletePermission = createAction('PERMISSION_DELETE_INIT');
+const resolveDeletePermission = createAction('PERMISSION_DELETE_RESOLVE');
+const rejectDeletePermission = createAction('PERMISSION_DELETE_REJECT');
+
 export const setPermissionFormValues = createAction('PERMISSION_FORM_VALUES_SET');
 export const resetPermissionFormValues = createAction('PERMISSION_FORM_VALUES_CLEAR');
+
+export const openPermissionDeleteModal = createAction('PERMISSION_DELETE_MODAL_OPEN');
+export const closePermissionDeleteModal = createAction('PERMISSION_DELETE_MODAL_CLOSE');
 
 export const listPermissions = (props = {}) => (dispatch, getState) => {
   const { permission: store } = getState();
@@ -140,6 +153,26 @@ export const getPermissionInfo = (props) => (dispatch) => {
     });
 };
 
+export const deletePermission = (props) => (dispatch) => {
+  dispatch(initDeletePermission());
+  return yeepClient
+    .api()
+    .then((api) =>
+      api.permission.delete({
+        ...props,
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(deletePermission),
+      })
+    )
+    .then((data) => {
+      dispatch(resolveDeletePermission(data));
+      return true;
+    })
+    .catch((err) => {
+      dispatch(rejectDeletePermission(err));
+      return false;
+    });
+};
+
 export const reducer = handleActions(
   {
     [initListPermissions]: produce((draft) => {
@@ -224,6 +257,30 @@ export const reducer = handleActions(
     [resetPermissionFormValues]: produce((draft) => {
       draft.form.errors = initialState.form.errors;
       draft.form.values = initialState.form.values;
+    }),
+    [openPermissionDeleteModal]: produce((draft, action) => {
+      draft.deletion.isOpen = true;
+      draft.deletion.errors = initialState.deletion.errors;
+      draft.deletion.record = action.payload.permission;
+    }),
+    [closePermissionDeleteModal]: produce((draft) => {
+      draft.deletion.isOpen = false;
+    }),
+    [initDeletePermission]: produce((draft) => {
+      draft.deletion.isDeletePending = true;
+    }),
+    [resolveDeletePermission]: produce((draft) => {
+      draft.deletion.isDeletePending = false;
+    }),
+    [rejectDeletePermission]: produce((draft, action) => {
+      if (action.payload.code === 400) {
+        draft.deletion.errors = parseYeepValidationErrors(action.payload);
+      } else {
+        draft.deletion.errors = {
+          generic: action.payload.message,
+        };
+      }
+      draft.deletion.isDeletePending = false;
     }),
   },
   initialState

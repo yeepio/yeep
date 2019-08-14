@@ -4,9 +4,13 @@ import useDocumentTitle from '@rehooks/document-title';
 import { useSelector, useDispatch } from 'react-redux';
 import ButtonLink from '../../components/ButtonLink';
 import Grid from '../../components/Grid';
-import PermissionDeleteModal from '../modals/PermissionDeleteModal';
-import { openPermissionDeleteModal } from '../modals/permissionModalsStore';
-import { listPermissions, setPermissionListLimit, setPermissionListPage } from './permissionStore';
+import PermissionDeleteModal from './PermissionDeleteModal';
+import {
+  listPermissions,
+  setPermissionListLimit,
+  setPermissionListPage,
+  openPermissionDeleteModal,
+} from './permissionStore';
 import yeepClient from '../yeepClient';
 import PermissionListFilters from './PermissionListFilters';
 

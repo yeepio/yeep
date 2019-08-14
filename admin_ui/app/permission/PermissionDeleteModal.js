@@ -4,50 +4,46 @@ import { useSelector, useDispatch } from 'react-redux';
 import noop from 'lodash/noop';
 import classnames from 'classnames';
 import Modal from '../../components/Modal';
-import { Link } from '@reach/router';
 import Button from '../../components/Button';
 import LoadingIndicator from '../../components/LoadingIndicator';
-import { callbacks, closePermissionDeleteModal, deletePermission } from './permissionModalsStore';
+import { closePermissionDeleteModal, deletePermission } from './permissionStore';
 
-/* DEPRECATED in favour of ../permission/PermissionDeleteModal */
 const PermissionDeleteModal = ({ onSuccess, onError, onCancel }) => {
-  const displayedModal = useSelector((state) => state.permissionModals.displayedModal);
-  const permission = useSelector((state) => state.permissionModals.permission);
-  // deleteModals permissionDeleteError = useSelector((state) => state.deleteModals.permissionDeleteError);
-  const isPermissionDeletePending = useSelector(
-    (state) => state.permissionModals.isPermissionDeletePending
-  );
+  const isOpen = useSelector((state) => state.permission.deletion.isOpen);
+  const record = useSelector((state) => state.permission.deletion.record);
+  const isDeletePending = useSelector((state) => state.permission.deletion.isDeletePending);
   const dispatch = useDispatch();
 
   // modalClose will cancel and close the modal
   const onModalClose = useCallback(() => {
     onCancel();
     dispatch(closePermissionDeleteModal());
-  }, [dispatch]);
+  }, [dispatch, onCancel]);
 
   // modalSubmit will call the submit method, close and then perform the deletion
   const onModalSubmit = useCallback(() => {
-    dispatch(deletePermission({ id: permission.id })).then((isPermissionDeleted) => {
-      dispatch(closePermissionDeleteModal());
+    dispatch(deletePermission({ id: record.id })).then((isPermissionDeleted) => {
       if (isPermissionDeleted) {
+        dispatch(closePermissionDeleteModal());
         onSuccess();
       } else {
         onError();
       }
     });
-  }, [dispatch, permission, onSuccess, onError]);
+  }, [dispatch, record, onSuccess, onError]);
 
-  if (displayedModal !== 'PERMISSION_DELETE' || !permission.id) {
+  if (!isOpen) {
     return null;
   }
 
   return (
     <Modal onClose={onModalClose}>
-      <h2 className="font-bold text-2xl mb-4">Delete permission &quot;{permission.name}&quot;?</h2>
-      <p className="mb-4">
-        Please note that {permission.name} is present in{' '}
-        <Link to="/roles">{permission.rolesCount}</Link> roles.
-      </p>
+      <h2 className="font-bold text-2xl mb-4">Delete permission &quot;{record.name}&quot;?</h2>
+      {record.rolesCount !== 0 && (
+        <p className="mb-4">
+          Please note that {record.name} is present in {record.rolesCount} roles.
+        </p>
+      )}
       <p className="mb-4">
         <strong>Warning: This action cannot be undone!</strong>
       </p>
@@ -55,13 +51,12 @@ const PermissionDeleteModal = ({ onSuccess, onError, onCancel }) => {
         <Button
           danger
           onClick={onModalSubmit}
-          disabled={isPermissionDeletePending}
+          disabled={isDeletePending}
           className={classnames({
-            'opacity-50 cursor-not-allowed': isPermissionDeletePending,
+            'opacity-50 cursor-not-allowed': isDeletePending,
           })}
         >
-          {isPermissionDeletePending && <LoadingIndicator />}
-          {!isPermissionDeletePending && 'Delete Permission'}
+          {isDeletePending ? <LoadingIndicator /> : 'Delete Permission'}
         </Button>
       </p>
     </Modal>

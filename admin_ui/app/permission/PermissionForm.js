@@ -141,7 +141,7 @@ const PermissionForm = ({ onSubmit, onCancel, onDelete, type }) => {
       {type === 'update' && (
         <fieldset className="mb-6">
           <legend>Danger zone</legend>
-          <Button type="button" danger={true} onClick={onDelete}>
+          <Button type="button" danger={true} onClick={() => onDelete(values)}>
             Delete permission
           </Button>
         </fieldset>
