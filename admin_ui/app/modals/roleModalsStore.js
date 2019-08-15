@@ -107,15 +107,6 @@ const resolveRoleDelete = createAction('ROLE_DELETE_RESOLVE');
 const rejectRoleDelete = createAction('ROLE_DELETE_REJECT', (err) => {
   return { err };
 });
-// const mockRoleDeleteApiRequest = (id) => {
-//   return new Promise((resolve) => {
-//     // Fake async
-//     setTimeout(() => {
-//       console.log(`Deleted role ${id}`);
-//       resolve();
-//     }, 2000);
-//   });
-// };
 export const deleteRole = (props) => (dispatch) => {
   dispatch(initRoleDelete());
   return yeepClient
