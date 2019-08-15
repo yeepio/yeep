@@ -42,11 +42,13 @@ const validation = validateRequest({
 const isUserAuthorised = async ({ request }, next) => {
   // verify user has access to the requested org
   if (request.body.scope) {
-    const isScopeAccessible =
-      findUserPermissionIndex(request.session.user.permissions, {
-        name: 'yeep.permission.read',
-        orgId: request.body.scope,
-      }) !== -1;
+    const isScopeAccessible = Array.from(new Set([request.body.scope, null])).some(
+      (orgId) =>
+        findUserPermissionIndex(request.session.user.permissions, {
+          name: 'yeep.permission.read',
+          orgId,
+        }) !== -1
+    );
 
     if (!isScopeAccessible) {
       throw new AuthorizationError(
