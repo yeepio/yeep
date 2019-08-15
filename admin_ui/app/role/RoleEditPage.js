@@ -1,13 +1,12 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Link, navigate } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useDispatch, useSelector } from 'react-redux';
 import find from 'lodash/find';
-import RoleDeleteModal from '../modals/RoleDeleteModal';
-import { openRoleDeleteModal } from '../modals/roleModalsStore';
+import RoleDeleteModal from './RoleDeleteModal';
 import RoleForm from './RoleForm';
-import { updateRole, getRoleInfo } from './roleStore';
+import { updateRole, getRoleInfo, setRoleFormValues, openRoleDeleteModal } from './roleStore';
 import LoadingIndicator from '../../components/LoadingIndicator';
 import yeepClient from '../yeepClient';
 
@@ -16,29 +15,29 @@ function gotoRoleList() {
 }
 
 const RoleEditPage = ({ roleId }) => {
-  const [editedRole, setEditedRole] = useState(null);
-  const roles = useSelector((state) => state.role.roles);
+  const records = useSelector((state) => state.permission.list.records);
+  const isLoading = useSelector((state) => state.permission.form.isLoading);
   const dispatch = useDispatch();
 
   useDocumentTitle(`Edit role#${roleId}`);
 
   useEffect(() => {
     // check if role info already exists in store
-    const role = find(roles, (role) => role.id === roleId);
+    const role = find(records, (e) => e.id === roleId);
 
     if (role) {
-      setEditedRole(role);
+      dispatch(setRoleFormValues(role));
     } else {
       // role does not exist in memory - retrieve from API
       dispatch(getRoleInfo({ id: roleId })).then((role) => {
-        setEditedRole(role);
+        dispatch(setRoleFormValues(role));
       });
     }
 
     return () => {
       yeepClient.redeemCancelToken(getRoleInfo);
     };
-  }, [roleId, roles, setEditedRole, dispatch]);
+  }, [roleId, records, dispatch]);
 
   const onRoleDelete = useCallback(
     (values) => {
@@ -63,8 +62,10 @@ const RoleEditPage = ({ roleId }) => {
           description: values.description,
           permissions: values.permissions.map((e) => e.id),
         })
-      ).then(() => {
-        gotoRoleList();
+      ).then((isRoleUpdated) => {
+        if (isRoleUpdated) {
+          gotoRoleList();
+        }
       });
     },
     [dispatch, roleId]
@@ -74,15 +75,14 @@ const RoleEditPage = ({ roleId }) => {
     <React.Fragment>
       <RoleDeleteModal onSuccess={gotoRoleList} onError={(err) => console.error(err)} />
       <h1 className="font-semibold text-3xl mb-6">Edit role #{roleId}</h1>
-      {editedRole == null ? (
+      {isLoading == null ? (
         <LoadingIndicator />
       ) : (
         <RoleForm
+          type="update"
           onCancel={gotoRoleList}
           onSubmit={submitForm}
           onDelete={onRoleDelete}
-          defaultValues={editedRole}
-          withDangerZone
         />
       )}
       <Link to="/roles">Return to the list of roles</Link>

@@ -2,14 +2,15 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useSelector, useDispatch } from 'react-redux';
+import get from 'lodash/get';
 import ButtonLink from '../../components/ButtonLink';
 import Grid from '../../components/Grid';
-import RoleDeleteModal from '../modals/RoleDeleteModal';
+import RoleDeleteModal from './RoleDeleteModal';
 import { openRoleDeleteModal } from '../modals/roleModalsStore';
 import { listRoles, setRoleListLimit, setRoleListPage } from './roleStore';
 import RoleListFilters from './RoleListFilters';
 
-const roleHeadings = [
+const headings = [
   { label: 'Role name', className: 'text-left', isSortable: false },
   { label: 'Permissions', isSortable: false },
   { label: 'System role?', isSortable: false },
@@ -18,19 +19,19 @@ const roleHeadings = [
 ];
 
 const RoleListPage = () => {
-  const isLoading = useSelector((state) => state.role.isRoleListLoading);
-  const roles = useSelector((state) => state.role.roles);
-  const totalCount = useSelector((state) => state.role.roleCount);
-  const limit = useSelector((state) => state.role.limit);
-  const filters = useSelector((state) => state.role.filters);
-  const currentPage = useSelector((state) => state.role.page);
+  const isLoading = useSelector((state) => state.role.list.isLoading);
+  const records = useSelector((state) => state.role.list.records);
+  const totalCount = useSelector((state) => state.role.list.totalCount);
+  const limit = useSelector((state) => state.role.list.limit);
+  const filters = useSelector((state) => state.role.list.filters);
+  const currentPage = useSelector((state) => state.role.list.page);
 
   const entitiesStart = useMemo(() => {
     return currentPage * limit + 1;
   }, [currentPage, limit]);
   const entitiesEnd = useMemo(() => {
-    return roles.length >= limit ? (currentPage + 1) * limit : roles.length;
-  }, [currentPage, limit, roles]);
+    return records.length >= limit ? (currentPage + 1) * limit : records.length;
+  }, [currentPage, limit, records]);
 
   const dispatch = useDispatch();
 
@@ -77,12 +78,12 @@ const RoleListPage = () => {
       <RoleListFilters />
       <Grid
         className="mb-6"
-        headings={roleHeadings}
-        data={roles}
+        headings={headings}
+        data={records}
         entitiesStart={entitiesStart}
         entitiesEnd={entitiesEnd}
         totalCount={totalCount}
-        hasNext={roles.length >= limit}
+        hasNext={records.length >= limit}
         hasPrevious={currentPage > 0}
         onNextClick={onPageNext}
         onPreviousClick={onPagePrevious}
@@ -96,7 +97,7 @@ const RoleListPage = () => {
               </td>
               <td className="p-2 text-center">{role.permissions.length}</td>
               <td className="p-2 text-center">{role.isSystemRole ? 'Yes' : '-'}</td>
-              <td className="p-2 text-center">{role.org ? role.org.name : '-'}</td>
+              <td className="p-2 text-center">{get(role.org, ['name'], '-')}</td>
               <td className="p-2 text-center">
                 {role.isSystemRole ? (
                   <span className="text-grey">Cannot modify</span>

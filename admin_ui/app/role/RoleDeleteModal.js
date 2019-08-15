@@ -4,18 +4,14 @@ import { useSelector, useDispatch } from 'react-redux';
 import noop from 'lodash/noop';
 import classnames from 'classnames';
 import Modal from '../../components/Modal';
-import { Link } from '@reach/router';
 import Button from '../../components/Button';
 import LoadingIndicator from '../../components/LoadingIndicator';
-import { closeRoleDeleteModal, deleteRole } from './roleModalsStore';
+import { closeRoleDeleteModal, deleteRole } from './roleStore';
 
-/* DEPRECATED in favour of ../role/RoleDeleteModal */
 const RoleDeleteModal = ({ onSuccess, onError, onCancel }) => {
-  const displayedModal = useSelector((state) => state.roleModals.displayedModal);
-  const role = useSelector((state) => state.roleModals.role);
-  // const roleDeleteError = useSelector((state) => state.roleModals.roleDeleteError);
-  const isRoleDeletePending = useSelector((state) => state.roleModals.isRoleDeletePending);
-
+  const isOpen = useSelector((state) => state.role.deletion.isOpen);
+  const record = useSelector((state) => state.role.deletion.record);
+  const isDeletePending = useSelector((state) => state.role.deletion.isDeletePending);
   const dispatch = useDispatch();
 
   // modalClose will cancel and close the modal
@@ -26,27 +22,27 @@ const RoleDeleteModal = ({ onSuccess, onError, onCancel }) => {
 
   // modalSubmit will call the submit method, close and then perform the deletion
   const onModalSubmit = useCallback(() => {
-    dispatch(deleteRole({ id: role.id })).then((isRoleDeleted) => {
-      dispatch(closeRoleDeleteModal());
+    dispatch(deleteRole({ id: record.id })).then((isRoleDeleted) => {
       if (isRoleDeleted) {
+        dispatch(closeRoleDeleteModal());
         onSuccess();
       } else {
         onError();
       }
     });
-  }, [dispatch, role, onSuccess, onError]);
+  }, [dispatch, record, onSuccess, onError]);
 
-  if (displayedModal !== 'ROLE_DELETE' || !role.id) {
+  if (!isOpen) {
     return null;
   }
 
   return (
     <Modal onClose={onModalClose}>
-      <h2 className="mb-4">Delete role &quot;{role.name}&quot;?</h2>
-      <p className="mb-4">
+      <h2 className="mb-4">Delete role &quot;{record.name}&quot;?</h2>
+      {/* <p className="mb-4">
         Please note <Link to="/users">{role.usersCount}</Link> users have this role assigned to
         them.
-      </p>
+      </p> */}
       <p className="mb-4">
         <strong>Warning: This action cannot be undone!</strong>
       </p>
@@ -54,13 +50,12 @@ const RoleDeleteModal = ({ onSuccess, onError, onCancel }) => {
         <Button
           danger
           onClick={onModalSubmit}
-          disabled={isRoleDeletePending}
+          disabled={isDeletePending}
           className={classnames({
-            'opacity-50 cursor-not-allowed': isRoleDeletePending,
+            'opacity-50 cursor-not-allowed': isDeletePending,
           })}
         >
-          {isRoleDeletePending && <LoadingIndicator />}
-          {!isRoleDeletePending && 'Delete role'}
+          {isDeletePending ? <LoadingIndicator /> : 'Delete role'}
         </Button>
       </p>
     </Modal>

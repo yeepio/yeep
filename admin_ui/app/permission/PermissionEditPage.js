@@ -33,7 +33,7 @@ const PermissionEditPage = ({ permissionId }) => {
     if (permission) {
       dispatch(setPermissionFormValues(permission));
     } else {
-      // role does not exist in memory - retrieve from API
+      // permission does not exist in memory - retrieve from API
       dispatch(getPermissionInfo({ id: permissionId })).then((permission) => {
         dispatch(setPermissionFormValues(permission));
       });
