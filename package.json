@@ -138,7 +138,7 @@
     "koa-compose": "^4.1.0",
     "koa-connect": "^2.0.1",
     "koa-cookie": "^1.0.0",
-    "koa-helmet": "^4.0.0",
+    "koa-helmet": "^5.1.0",
     "koa-mount": "^4.0.0",
     "koa-router": "^7.4.0",
     "koa-sslify": "^4.0.3",
