@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { navigate } from '@reach/router';
+import { Link, navigate } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useDispatch, useSelector } from 'react-redux';
 import find from 'lodash/find';
@@ -85,6 +85,7 @@ const RoleEditPage = ({ roleId }) => {
           withDangerZone
         />
       )}
+      <Link to="/roles">Return to the list of roles</Link>
     </React.Fragment>
   );
 };

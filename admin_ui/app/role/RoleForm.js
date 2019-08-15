@@ -80,23 +80,20 @@ const RoleForm = ({ onSubmit, onCancel, onDelete, defaultValues, withDangerZone 
 
   return (
     <form onSubmit={onFormSubmit}>
-      <div className="my-4 flex">
-        <div className="flex items-center w-1/4 h-10 flex-shrink-0 pr-4">
+      <fieldset className="mb-6">
+        <legend>Permission details</legend>
+
+        <div className="form-group mb-4">
           <label htmlFor="name" className="">
             Name
           </label>
+          <Input id="name" className="w-full sm:w-1/2" value={name} onChange={onChangeName} />
         </div>
-        <div className="flex-grow">
-          <Input id="name" className="w-full" value={name} onChange={onChangeName} />
-        </div>
-      </div>
-      <div className="my-4 flex">
-        <div className="flex items-center w-1/4 h-10 flex-shrink-0 pr-4">
+
+        <div className="form-group mb-4">
           <label htmlFor="description" className="">
             Description (optional)
           </label>
-        </div>
-        <div className="flex-grow">
           <Textarea
             id="description"
             className="w-full"
@@ -105,17 +102,13 @@ const RoleForm = ({ onSubmit, onCancel, onDelete, defaultValues, withDangerZone 
             onChange={onChangeDescription}
           />
         </div>
-      </div>
-      <div className="my-4 flex">
-        <div className="flex items-center w-1/4 h-10 flex-shrink-0 pr-4">
+        <div className="form-group mb-4">
           <label htmlFor="org" className="">
             Organization scope (optional)
           </label>
-        </div>
-        <div className="flex-grow">
           <AsyncSelect
             id="org"
-            className="w-full"
+            className="w-full sm:w-1/2"
             placeholder="Choose an organization"
             loadOptions={fetchOrgOptionsAsync}
             isClearable={true}
@@ -125,17 +118,14 @@ const RoleForm = ({ onSubmit, onCancel, onDelete, defaultValues, withDangerZone 
             isDisabled={defaultValues.org != null}
           />
         </div>
-      </div>
-      <div className="my-4 flex">
-        <div className="flex items-center w-1/4 h-10 flex-shrink-0 pr-4">
+
+        <div className="form-group mb-4">
           <label htmlFor="permissions" className="">
             Permissions
           </label>
-        </div>
-        <div className="flex-grow">
           <AsyncSelect
             id="permissions"
-            className="w-full"
+            className="w-full sm:w-3/4"
             placeholder="Add role permissions"
             loadOptions={fetchPermissionOptionsAsync}
             isMulti={true}
@@ -145,16 +135,13 @@ const RoleForm = ({ onSubmit, onCancel, onDelete, defaultValues, withDangerZone 
             onChange={setPermissions}
           />
         </div>
-      </div>
-      <div className="my-4 flex">
-        <div className="w-1/4 flex-shrink-0">&nbsp;</div>
-        <div className="flex items-center">
+        <div className="form-submit">
           <Button type="submit">Save</Button>
-          <button type="button" className="p-0 ml-4" onClick={onCancel}>
+          <button type="button" className="pseudolink ml-4" onClick={onCancel}>
             Cancel
           </button>
         </div>
-      </div>
+      </fieldset>
       {withDangerZone && (
         <fieldset className="mb-6">
           <legend>Danger zone</legend>
