@@ -18,27 +18,6 @@ function getRoles({ db }, $match, limit) {
     {
       $limit: limit,
     },
-    // {
-    //   $lookup: {
-    //     from: 'orgMemberships',
-    //     let: { roleId: '$_id' },
-    //     pipeline: [
-    //       {
-    //         $match: {
-    //           $expr: {
-    //             $eq: ['$roles.id', '$$roleId'],
-    //           },
-    //         },
-    //       },
-    //       {
-    //         $group: {
-    //           _id: '$userId',
-    //         },
-    //       },
-    //     ],
-    //     as: 'users',
-    //   },
-    // },
     {
       $lookup: {
         from: 'orgs',
