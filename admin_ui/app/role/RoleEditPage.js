@@ -1,109 +1,90 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Link } from '@reach/router';
+import { navigate } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
-import { useDispatch } from 'react-redux';
-import Input from '../../components/Input';
-import Textarea from '../../components/Textarea';
-import Button from '../../components/Button';
-import Select from 'react-select';
+import { useDispatch, useSelector } from 'react-redux';
+import find from 'lodash/find';
 import RoleDeleteModal from '../modals/RoleDeleteModal';
 import { openRoleDeleteModal } from '../modals/roleModalsStore';
+import RoleForm from './RoleForm';
+import { updateRole, getRoleInfo } from './roleStore';
+import LoadingIndicator from '../../components/LoadingIndicator';
+import yeepClient from '../yeepClient';
+
+function gotoRoleList() {
+  navigate('/roles');
+}
 
 const RoleEditPage = ({ roleId }) => {
+  const [editedRole, setEditedRole] = useState(null);
+  const roles = useSelector((state) => state.role.roles);
+  const dispatch = useDispatch();
+
   useDocumentTitle(`Edit role#${roleId}`);
 
-  const dispatch = useDispatch();
-  const handleDelete = useCallback(() => {
-    dispatch(
-      openRoleDeleteModal(
-        {
-          id: 1,
-          name: 'role_name',
-        },
-        () => {
-          console.log('Submit from roleDelete modal!');
-        },
-        () => {
-          console.log('Cancel from roleDelete modal');
+  useEffect(() => {
+    // check if role info already exists in store
+    const role = find(roles, (role) => role.id === roleId);
 
-        }
-      )
-    );
-  }, [dispatch]);
+    if (role) {
+      setEditedRole(role);
+    } else {
+      // role does not exist in memory - retrieve from API
+      dispatch(getRoleInfo({ id: roleId })).then((role) => {
+        setEditedRole(role);
+      });
+    }
 
-  /*  // On componentDidUnmount close any open modals!
-  React.useEffect(() => {
     return () => {
-      dispatch(setDeleteModal(''));
+      yeepClient.redeemCancelToken(getRoleInfo);
     };
-  }, [dispatch]);*/
+  }, [roleId, roles, setEditedRole, dispatch]);
+
+  const onRoleDelete = useCallback(
+    (values) => {
+      dispatch(
+        openRoleDeleteModal({
+          role: {
+            id: roleId,
+            ...values,
+          },
+        })
+      );
+    },
+    [dispatch, roleId]
+  );
+
+  const submitForm = useCallback(
+    (values) => {
+      dispatch(
+        updateRole({
+          id: roleId,
+          name: values.name,
+          description: values.description,
+          permissions: values.permissions.map((e) => e.id),
+        })
+      ).then(() => {
+        gotoRoleList();
+      });
+    },
+    [dispatch, roleId]
+  );
 
   return (
     <React.Fragment>
-      <RoleDeleteModal />
+      <RoleDeleteModal onSuccess={gotoRoleList} onError={(err) => console.error(err)} />
       <h1 className="font-semibold text-3xl mb-6">Edit role #{roleId}</h1>
-      <fieldset className="mb-6">
-        <legend>Role details</legend>
-        <div className="form-group mb-4">
-          <label htmlFor="role-name">Name:</label>
-          <Input id="role-name" placeholder='e.g. "blog_admin"' className="w-full sm:w-1/2" />
-        </div>
-        <div className="form-group mb-4">
-          <label htmlFor="role-description">Description:</label>
-          <Textarea
-            id="role-description"
-            placeholder="Enter a description for this role"
-            className="w-full sm:w-1/2"
-            rows="6"
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="role-org">Organization scope:</label>
-          <Input disabled id="role-org" value="Our Tech Blog" className="w-full sm:w-1/2" />
-          <div className="neutral">
-            Once created a role <strong>cannot</strong> change the organization it belongs to.
-            Please create a new role if you need to.
-          </div>
-        </div>
-      </fieldset>
-      <fieldset className="mb-6">
-        <legend>Permissions</legend>
-        <p className="mb-4">Pick one or more permissions to associate with this role:</p>
-        <Select
-          isMulti
-          className="w-full mb-4"
-          placeholder="Choose one or more permissions"
-          options={[
-            { value: 1, label: 'blog.read' },
-            { value: 2, label: 'blog.write' },
-            { value: 3, label: 'yeep.org.write' },
-            { value: 4, label: 'yeep.org.read' },
-            { value: 5, label: 'yeep.users.read' },
-            { value: 6, label: 'yeep.users.write' },
-            { value: 7, label: 'yeep.someperm.1' },
-            { value: 8, label: 'yeep.someperm.2' },
-            { value: 9, label: 'yeep.someperm.2' },
-            { value: 10, label: 'crm.access.1', isDisabled: true },
-            { value: 11, label: 'crm.access.2', isDisabled: true },
-            { value: 12, label: 'crm.access.3', isDisabled: true },
-          ]}
-          defaultValue={[{ value: 1, label: 'blog.read' }, { value: 2, label: 'blog.write' }]}
+      {editedRole == null ? (
+        <LoadingIndicator />
+      ) : (
+        <RoleForm
+          onCancel={gotoRoleList}
+          onSubmit={submitForm}
+          onDelete={onRoleDelete}
+          defaultValues={editedRole}
+          withDangerZone
         />
-      </fieldset>
-      <fieldset className="mb-6">
-        <legend>Danger zone</legend>
-        <Button danger={true} onClick={handleDelete}>
-          Delete role
-        </Button>
-      </fieldset>
-      <div className="sm:flex items-center">
-        <Button className="w-full mb-2 sm:mb-0 sm:w-auto sm:mr-4">Save changes</Button>
-        <span className="block text-center sm:text-left">
-          {' '}
-          or <Link to="/roles">cancel and return to the list of roles</Link>
-        </span>
-      </div>
+      )}
     </React.Fragment>
   );
 };

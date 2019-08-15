@@ -109,7 +109,7 @@
     "@koa/cors": "^3.0.0",
     "@reach/router": "^1.2.1",
     "@rehooks/document-title": "^1.0.1",
-    "@yeep/client": "^1.1.0-beta.7",
+    "@yeep/client": "^1.1.0",
     "ajv": "^6.9.2",
     "awaiting": "^3.0.0",
     "aws-sdk": "^2.413.0",
@@ -127,6 +127,7 @@
     "gravatar": "^1.8.0",
     "image-size": "^0.7.2",
     "image-type": "^4.0.0",
+    "immer": "^3.2.0",
     "isemail": "^3.2.0",
     "joi": "^14.3.1",
     "joi-to-swagger": "^3.1.0",
@@ -189,7 +190,8 @@
       "*.spec.js",
       "*.test.js",
       "__tests__",
-      "dist"
+      "dist",
+      "admin_ui"
     ]
   }
 }

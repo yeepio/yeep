@@ -31,6 +31,7 @@ Requestor must be authenticated. No explicit permissions are required; only retr
 - **ok** _(boolean)_ — indicates whether the request was successfully completed
 - **error** _(Object)_ — contains error details in case of an error
 - **roles** _(Array\<Object>)_ — array of roles
+- **roleCount** _(Number)_ — total number of roles
 - **nextCursor** _(string)_ — use this `cursor` to facilitate pagination
 
 ---
@@ -65,8 +66,12 @@ Authorization: `Bearer ${authToken}`
       "name": "acme:developer",
       "description": "Developer role",
       "isSystemRole": false,
-      "usersCount": 5,
-      "permissions": ["5b969dc9901e2af192780a34"],
+      "permissions": [
+        {
+          "id": "5b969dc9901e2af192780a34",
+          "name": "acme.repo.write"
+        }
+      ],
       "org": {
         "id": "8a9295c9901e7af196785a34",
         "name": "acme"
@@ -75,6 +80,7 @@ Authorization: `Bearer ${authToken}`
       "updatedAt": "2017-07-13T05:42:42.222Z"
     }
   ],
+  "roleCount": 1000,
   "nextCursor": "IjViN2QwZGIyMzg1YzcyNWY5ZjNkODkwYSI="
 }
 ```

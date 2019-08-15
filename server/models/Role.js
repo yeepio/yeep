@@ -49,4 +49,18 @@ roleSchema.index(
   }
 );
 
+roleSchema.index(
+  { scope: 1 },
+  {
+    name: 'scope_idx',
+  }
+);
+
+roleSchema.index(
+  { permissions: 1 },
+  {
+    name: 'permission_idx',
+  }
+);
+
 export default roleSchema;

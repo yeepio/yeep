@@ -1,155 +1,120 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import ButtonLink from '../../components/ButtonLink';
-import Select from 'react-select';
 import Grid from '../../components/Grid';
-import Input from '../../components/Input';
 import RoleDeleteModal from '../modals/RoleDeleteModal';
 import { openRoleDeleteModal } from '../modals/roleModalsStore';
+import { listRoles, setRoleListLimit, setRoleListPage } from './roleStore';
+import RoleListFilters from './RoleListFilters';
 
-// Dummy data
-let roleHeadings = [
-  { label: 'Role name', className: 'text-left' },
-  { label: 'Permissions' },
-  { label: 'System role?' },
-  { label: 'Users' },
-  { label: 'Org scope' },
+const roleHeadings = [
+  { label: 'Role name', className: 'text-left', isSortable: false },
+  { label: 'Permissions', isSortable: false },
+  { label: 'System role?', isSortable: false },
+  { label: 'Org scope', isSortable: false },
   { label: 'Actions', isSortable: false },
-];
-let roleData = [
-  {
-    id: 1,
-    name: 'admin',
-    permissions: 10,
-    systemRole: true,
-    users: 1,
-    orgScope: null,
-  },
-  {
-    id: 2,
-    name: 'blog_user',
-    permissions: 1,
-    systemRole: false,
-    users: 10,
-    orgScope: {
-      orgId: 1,
-      orgLabel: 'blog',
-    },
-  },
-  {
-    id: 3,
-    name: 'blog_admin',
-    permissions: 4,
-    systemRole: false,
-    users: 2,
-    orgScope: {
-      orgId: 1,
-      orgLabel: 'blog',
-    },
-  },
-  {
-    id: 4,
-    name: 'crm_user',
-    permissions: 1,
-    systemRole: false,
-    users: 50,
-    orgScope: {
-      orgId: 2,
-      orgLabel: 'zoho_crm',
-    },
-  },
-  {
-    id: 5,
-    name: 'crm_admin',
-    permissions: 5,
-    systemRole: false,
-    users: 2,
-    orgScope: {
-      orgId: 2,
-      orgLabel: 'zoho_crm',
-    },
-  },
 ];
 
 const RoleListPage = () => {
-  useDocumentTitle('Roles');
+  const isLoading = useSelector((state) => state.role.isRoleListLoading);
+  const roles = useSelector((state) => state.role.roles);
+  const totalCount = useSelector((state) => state.role.roleCount);
+  const limit = useSelector((state) => state.role.limit);
+  const filters = useSelector((state) => state.role.filters);
+  const currentPage = useSelector((state) => state.role.page);
+
+  const entitiesStart = useMemo(() => {
+    return currentPage * limit + 1;
+  }, [currentPage, limit]);
+  const entitiesEnd = useMemo(() => {
+    return roles.length >= limit ? (currentPage + 1) * limit : roles.length;
+  }, [currentPage, limit, roles]);
 
   const dispatch = useDispatch();
-  const handleDelete = useCallback(() => {
-    dispatch(
-      openRoleDeleteModal(
-        {
-          id: 1,
-          name: 'role_name',
-        },
-        () => {
-          console.log('Submit from roleDelete modal!');
-        },
-        () => {
-          console.log('Cancel from roleDelete modal');
-        }
-      )
-    );
+
+  useEffect(() => {
+    dispatch(listRoles());
+  }, [dispatch, limit, currentPage, filters]);
+
+  useDocumentTitle('Roles');
+
+  const reload = useCallback(() => {
+    dispatch(listRoles());
   }, [dispatch]);
+
+  const onRoleDelete = useCallback(
+    (role) => {
+      dispatch(openRoleDeleteModal({ role }));
+    },
+    [dispatch]
+  );
+
+  const onPageNext = useCallback(() => {
+    dispatch(setRoleListPage({ page: currentPage + 1 }));
+  }, [dispatch, currentPage]);
+
+  const onPagePrevious = useCallback(() => {
+    dispatch(setRoleListPage({ page: currentPage - 1 }));
+  }, [dispatch, currentPage]);
+
+  const onLimitChange = useCallback(
+    (event) => {
+      const nextLimit = event.value;
+      dispatch(setRoleListLimit({ limit: nextLimit }));
+    },
+    [dispatch]
+  );
 
   return (
     <React.Fragment>
-      <RoleDeleteModal />
+      <RoleDeleteModal onSuccess={reload} onError={(err) => console.error(err)} />
       <ButtonLink to="create" className="float-right">
         Create new
       </ButtonLink>
       <h1 className="font-semibold text-3xl mb-6">Roles</h1>
-      <fieldset className="mb-6">
-        <legend>Filters and quick search</legend>
-        <div className="sm:flex items-center">
-          <Select
-            className="flex-auto mb-3 sm:mb-0 sm:mr-3"
-            placeholder="All organisations"
-            options={[
-              { value: 1, label: 'Org 1' },
-              { value: 2, label: 'Org 2' },
-              { value: 3, label: 'Org 3' },
-              { value: 4, label: 'Org 4' },
-            ]}
-            isClearable={true}
-          />
-          <label htmlFor="showSystemRoles" className="block flex-initial mb-3 sm:mb-0 sm:mr-3">
-            <input type="checkbox" id="showSystemRoles" className="mr-2" />
-            Show system roles
-          </label>
-          <Input placeholder="quicksearch" className="w-full sm:w-1/3" />
-        </div>
-      </fieldset>
+      <RoleListFilters />
       <Grid
         className="mb-6"
         headings={roleHeadings}
-        data={roleData}
-        renderer={(roleData, index) => {
+        data={roles}
+        entitiesStart={entitiesStart}
+        entitiesEnd={entitiesEnd}
+        totalCount={totalCount}
+        hasNext={roles.length >= limit}
+        hasPrevious={currentPage > 0}
+        onNextClick={onPageNext}
+        onPreviousClick={onPagePrevious}
+        onLimitChange={onLimitChange}
+        isLoading={isLoading}
+        renderer={(role, index) => {
           return (
-            <tr key={`roleRow${index}`} className={index % 2 ? `bg-grey-lightest` : ``}>
+            <tr key={role.id} className={index % 2 ? `bg-grey-lightest` : ``}>
               <td className="p-2">
-                <Link to={`${roleData.id}/edit`}>{roleData.name}</Link>
+                <Link to={`${role.id}/edit`}>{role.name}</Link>
               </td>
-              <td className="p-2 text-center">{roleData.permissions}</td>
-              <td className="p-2 text-center">{roleData.systemRole ? 'Yes' : '-'}</td>
-              <td className="p-2 text-center">{roleData.users}</td>
+              <td className="p-2 text-center">{role.permissions.length}</td>
+              <td className="p-2 text-center">{role.isSystemRole ? 'Yes' : '-'}</td>
+              <td className="p-2 text-center">{role.org ? role.org.name : '-'}</td>
               <td className="p-2 text-center">
-                {roleData.orgScope ? roleData.orgScope.orgLabel : '-'}
-              </td>
-              <td className="p-2 text-center">
-                <Link to={`${roleData.id}/edit`}>Edit</Link>{' '}
-                <button onClick={handleDelete} className="pseudolink">
-                  Delete
-                </button>
+                {role.isSystemRole ? (
+                  <span className="text-grey">Cannot modify</span>
+                ) : (
+                  <React.Fragment>
+                    <Link to={`${role.id}/edit`}>Edit</Link>{' '}
+                    <button onClick={() => onRoleDelete(role)} className="pseudolink">
+                      Delete
+                    </button>
+                  </React.Fragment>
+                )}
               </td>
             </tr>
           );
         }}
       />
       <p>
-        <Link to="..">Return to the dashboard</Link>
+        <Link to="..">Return to dashboard</Link>
       </p>
     </React.Fragment>
   );

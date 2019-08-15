@@ -54,10 +54,19 @@ Authorization: `Bearer ${authToken}`
   "ok": true,
   "permission": {
     "id": "327f191e810c19729de76232",
-    "name": "acme.test",
-    "description": "This is a test",
-    "scope": "5b2d649ce248cb779e7f26e2",
+    "name": "acme.invoice.read",
+    "description": "Permission to read invoices",
     "isSystemPermission": false,
+    "org": {
+      "id": "8a9295c9901e7af196785a34",
+      "name": "acme"
+    },
+    "roles": [
+      {
+        "id": "507f191e810c19729de860ea",
+        "name": "acme:accountant"
+      }
+    ],
     "createdAt": "2017-07-13T05:00:42.145Z",
     "updatedAt": "2017-07-13T05:42:42.222Z"
   }

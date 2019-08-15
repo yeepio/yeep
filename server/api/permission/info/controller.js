@@ -20,7 +20,7 @@ export const validationSchema = {
   },
 };
 
-const decorateRequestedPermission = async (ctx, next) => {
+const populatePermissionInfo = async (ctx, next) => {
   const { request } = ctx;
   const permission = await getPermissionInfo(ctx, request.body);
 
@@ -34,7 +34,10 @@ const decorateRequestedPermission = async (ctx, next) => {
 };
 
 const isUserAuthorized = async ({ request }, next) => {
-  const hasPermission = Array.from(new Set([request.session.permission.scope, null])).some(
+  const hasPermission = (request.session.permission.org
+    ? [request.session.permission.org.id, null]
+    : [null]
+  ).some(
     (orgId) =>
       findUserPermissionIndex(request.session.user.permissions, {
         name: 'yeep.permission.read',
@@ -63,7 +66,7 @@ export default compose([
   decorateSession(),
   isUserAuthenticated(),
   validateRequest(validationSchema),
-  decorateRequestedPermission,
+  populatePermissionInfo,
   decorateUserPermissions(),
   isUserAuthorized,
   handler,

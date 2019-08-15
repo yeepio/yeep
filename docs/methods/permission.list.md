@@ -32,6 +32,7 @@ Requestor must be authenticated. No explicit permissions are required; only retr
 - **ok** _(boolean)_ — indicates whether the request was successfully completed
 - **error** _(Object)_ — contains error details in case of an error
 - **permissions** _(Array\<Object>)_ — array of permissions
+- **permissionCount** _(Number)_ — total number of permissions
 - **nextCursor** _(string)_ — use this `cursor` to facilitate pagination
 
 ---
@@ -63,15 +64,24 @@ Authorization: `Bearer ${authToken}`
   "permissions": [
     {
       "id": "327f191e810c19729de76232",
-      "name": "yeep.permission.read",
-      "description": "Permission to read permissions",
-      "isSystemPermission": true,
-      "usersCount": 12,
-      "rolesCount": 5,
+      "name": "acme.invoice.read",
+      "description": "Permission to read invoices",
+      "isSystemPermission": false,
+      "org": {
+        "id": "8a9295c9901e7af196785a34",
+        "name": "acme"
+      },
+      "roles": [
+        {
+          "id": "507f191e810c19729de860ea",
+          "name": "acme:accountant"
+        }
+      ],
       "createdAt": "2017-07-13T05:00:42.145Z",
       "updatedAt": "2017-07-13T05:42:42.222Z"
     }
   ],
+  "permissionCount": 100,
   "nextCursor": "IjViN2QwZGIyMzg1YzcyNWY5ZjNkODkwYSI="
 }
 ```

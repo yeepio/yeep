@@ -91,7 +91,7 @@ describe('api/role.delete', () => {
       ok: false,
       error: {
         code: 10017,
-        message: 'Role 5b2d5dd0cd86b77258e16d39 cannot be found',
+        message: 'Role 5b2d5dd0cd86b77258e16d39 not found',
       },
     });
   });
@@ -132,7 +132,7 @@ describe('api/role.delete', () => {
   test('deletes role and returns expected response', async () => {
     const role = await createRole(ctx, {
       name: 'acme:manager',
-      description: 'This is a test',
+      description: 'You know, for testing...',
       permissions: [permission.id],
       scope: org.id,
     });
@@ -157,8 +157,8 @@ describe('api/role.delete', () => {
 
     const role = await createRole(ctx, {
       // note the absence of scope to denote global role
-      name: 'manager',
-      description: 'This is a test',
+      name: 'global:manager',
+      description: 'You know, for testing...',
       permissions: [globalPermission.id],
     });
 

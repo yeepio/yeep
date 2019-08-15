@@ -56,8 +56,14 @@ async function updateRole({ db }, role, nextProps) {
     );
 
     return {
-      ...role,
+      id: role._id.toHexString(),
+      name: role.name,
+      description: role.description,
+      scope: role.scope,
+      permissions: role.permissions,
+      isSystemRole: role.isSystemRole,
       ...nextProps,
+      createdAt: role.createdAt,
       updatedAt,
     };
   } catch (err) {

@@ -45,4 +45,11 @@ permissionSchema.index(
   }
 );
 
+permissionSchema.index(
+  { scope: 1 },
+  {
+    name: 'scope_idx',
+  }
+);
+
 export default permissionSchema;

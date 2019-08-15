@@ -11,7 +11,7 @@ import {
   findUserPermissionIndex,
 } from '../../../middleware/auth';
 import { AuthorizationError } from '../../../constants/errors';
-import getRoleInfo from '../../role/info/service';
+import { populateOptionalRole } from '../middleware';
 import listPermissions, { parseCursor, stringifyCursor } from './service';
 
 const validation = validateRequest({
@@ -39,29 +39,16 @@ const validation = validateRequest({
   },
 });
 
-const decorateRequestedRole = async (ctx, next) => {
-  const { request } = ctx;
-  const roleId = request.body.role;
-  if (roleId) {
-    const role = await getRoleInfo(ctx, { id: roleId });
-
-    // decorate session with requested role data
-    request.session = {
-      ...request.session,
-      role,
-    };
-  }
-  await next();
-};
-
 const isUserAuthorised = async ({ request }, next) => {
   // verify user has access to the requested org
   if (request.body.scope) {
-    const isScopeAccessible =
-      findUserPermissionIndex(request.session.user.permissions, {
-        name: 'yeep.permission.read',
-        orgId: request.body.scope,
-      }) !== -1;
+    const isScopeAccessible = Array.from(new Set([request.body.scope, null])).some(
+      (orgId) =>
+        findUserPermissionIndex(request.session.user.permissions, {
+          name: 'yeep.permission.read',
+          orgId,
+        }) !== -1
+    );
 
     if (!isScopeAccessible) {
       throw new AuthorizationError(
@@ -97,7 +84,7 @@ async function handler(ctx) {
   const { request, response } = ctx;
   const { q, limit, cursor, scope, isSystemPermission } = request.body;
 
-  const permissions = await listPermissions(ctx, {
+  const { permissions, permissionCount } = await listPermissions(ctx, {
     q,
     limit,
     cursor: cursor ? parseCursor(cursor) : null,
@@ -109,6 +96,7 @@ async function handler(ctx) {
   response.status = 200; // OK
   response.body = {
     permissions,
+    permissionCount,
     nextCursor: permissions.length < limit ? undefined : stringifyCursor(last(permissions)),
   };
 }
@@ -119,7 +107,7 @@ export default compose([
   isUserAuthenticated(),
   validation,
   decorateUserPermissions(),
-  decorateRequestedRole,
+  populateOptionalRole,
   isUserAuthorised,
   handler,
 ]);

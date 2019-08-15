@@ -8,15 +8,35 @@ import GridPerPage from './GridPerPage';
 import GridHeadingCell from './GridHeadingCell';
 import GridLoadingOverlay from './GridLoadingOverlay';
 
-const Grid = ({ headings, data, renderer, isLoading, className }) => {
+const Grid = ({
+  headings,
+  data,
+  renderer,
+  isLoading,
+  className,
+  entitiesStart,
+  entitiesEnd,
+  totalCount,
+  hasNext,
+  hasPrevious,
+  onNextClick,
+  onPreviousClick,
+  onLimitChange,
+}) => {
   return (
-    <div className={classNames("grid relative",className)}>
+    <div className={classNames('grid relative', className)}>
       {isLoading && <GridLoadingOverlay />}
       <div className="py-2 text-center sm:flex sm:text-left">
         <p>
-          Showing entities <strong>1</strong> to <strong>X</strong> of <strong>TOTAL</strong>:
+          Showing entities <strong>{entitiesStart}</strong> to <strong>{entitiesEnd}</strong> of{' '}
+          <strong>{totalCount}</strong>:
         </p>
-        <GridPager />
+        <GridPager
+          hasNext={hasNext}
+          hasPrevious={hasPrevious}
+          onNextClick={onNextClick}
+          onPreviousClick={onPreviousClick}
+        />
       </div>
       <style jsx>{`
         .grid-wrapper {
@@ -46,8 +66,13 @@ const Grid = ({ headings, data, renderer, isLoading, className }) => {
         </table>
       </div>
       <div className="sm:flex flex-row text-center items-center py-2">
-        <GridPerPage />
-        <GridPager />
+        <GridPerPage onChange={onLimitChange} />
+        <GridPager
+          hasNext={hasNext}
+          hasPrevious={hasPrevious}
+          onNextClick={onNextClick}
+          onPreviousClick={onPreviousClick}
+        />
       </div>
     </div>
   );
@@ -81,10 +106,20 @@ Grid.propTypes = {
   isLoading: PropTypes.bool,
   // A custom className
   className: PropTypes.string,
+  totalCount: PropTypes.number,
+  hasNext: PropTypes.bool,
+  hasPrevious: PropTypes.bool,
+  onNextClick: PropTypes.func,
+  onPreviousClick: PropTypes.func,
+  onLimitChange: PropTypes.func,
+
+  entitiesStart: PropTypes.number,
+  entitiesEnd: PropTypes.number,
 };
 
 Grid.defaultProps = {
   isLoading: false,
+  totalCount: 0,
 };
 
 export default Grid;

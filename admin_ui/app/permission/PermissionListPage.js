@@ -1,178 +1,122 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import get from 'lodash/get';
 import ButtonLink from '../../components/ButtonLink';
-import Select from 'react-select';
 import Grid from '../../components/Grid';
-import Input from '../../components/Input';
-import PermissionDeleteModal from '../modals/PermissionDeleteModal';
-import { openPermissionDeleteModal } from '../modals/permissionModalsStore';
+import PermissionDeleteModal from './PermissionDeleteModal';
+import {
+  listPermissions,
+  setPermissionListLimit,
+  setPermissionListPage,
+  openPermissionDeleteModal,
+} from './permissionStore';
+import yeepClient from '../yeepClient';
+import PermissionListFilters from './PermissionListFilters';
 
-// Dummy data
-let permissionHeadings = [
+const headings = [
   {
     label: 'Name',
     className: 'text-left',
+    isSortable: false,
   },
-  { label: 'Is system?' },
-  { label: 'Role assignments' },
-  { label: 'Org scope' },
+  { label: 'System permission', isSortable: false },
+  { label: 'Role assignments', isSortable: false },
+  { label: 'Org scope', isSortable: false },
   { label: 'Actions', isSortable: false },
-];
-let permissionData = [
-  {
-    id: 1,
-    name: 'yeep.org.write',
-    systemPermission: true,
-    roles: 1,
-    orgScope: null,
-  },
-  {
-    id: 2,
-    name: 'yeep.org.read',
-    systemPermission: true,
-    roles: 1,
-    orgScope: null,
-  },
-  {
-    id: 3,
-    name: 'yeep.user.write',
-    systemPermission: true,
-    roles: 1,
-    orgScope: null,
-  },
-  {
-    id: 4,
-    name: 'yeep.user.read',
-    systemPermission: true,
-    roles: 1,
-    orgScope: null,
-  },
-  {
-    id: 5,
-    name: 'yeep.permission.write',
-    systemPermission: true,
-    roles: 1,
-    orgScope: null,
-  },
-  {
-    id: 6,
-    name: 'yeep.permission.read',
-    systemPermission: true,
-    roles: 1,
-    orgScope: null,
-  },
-  {
-    id: 7,
-    name: 'blog.read',
-    systemPermission: false,
-    roles: 1,
-    orgScope: {
-      ordId: 1,
-      orgLabel: 'blog',
-    },
-  },
-  {
-    id: 8,
-    name: 'blog.modify',
-    systemPermission: false,
-    roles: 1,
-    orgScope: {
-      ordId: 1,
-      orgLabel: 'blog',
-    },
-  },
 ];
 
 const PermissionListPage = () => {
+  const isLoading = useSelector((state) => state.permission.list.isLoading);
+  const records = useSelector((state) => state.permission.list.records);
+  const totalCount = useSelector((state) => state.permission.list.totalCount);
+  const limit = useSelector((state) => state.permission.list.limit);
+  const filters = useSelector((state) => state.permission.list.filters);
+  const page = useSelector((state) => state.permission.list.page);
+
   useDocumentTitle('Permissions');
 
   const dispatch = useDispatch();
-  const handleDelete = useCallback(() => {
-    dispatch(
-      openPermissionDeleteModal(
-        {
-          id: 1,
-          name: 'blog.read',
-        },
-        () => {
-          console.log('Submit from permissionDelete modal!');
-        },
-        () => {
-          console.log('Cancel from permissionDelete modal');
-        }
-      )
-    );
+
+  const entitiesStart = page * limit + 1;
+  const entitiesEnd = records.length >= limit ? (page + 1) * limit : records.length;
+
+  useEffect(() => {
+    dispatch(listPermissions());
+    return () => {
+      // on unmount cancel any in-flight request
+      yeepClient.redeemCancelToken(listPermissions);
+    };
+  }, [dispatch, limit, page, filters]);
+
+  const reload = useCallback(() => {
+    dispatch(listPermissions());
   }, [dispatch]);
+
+  const onPermissionDelete = useCallback(
+    (permission) => {
+      dispatch(openPermissionDeleteModal({ permission }));
+    },
+    [dispatch]
+  );
+
+  const onPageNext = useCallback(() => {
+    dispatch(setPermissionListPage({ page: page + 1 }));
+  }, [dispatch, page]);
+
+  const onPagePrevious = useCallback(() => {
+    dispatch(setPermissionListPage({ page: page - 1 }));
+  }, [dispatch, page]);
+
+  const onLimitChange = useCallback(
+    (event) => {
+      const newLimit = event.value;
+      dispatch(setPermissionListLimit({ limit: newLimit }));
+    },
+    [dispatch]
+  );
 
   return (
     <React.Fragment>
-      <PermissionDeleteModal />
+      <PermissionDeleteModal onSuccess={reload} onError={(err) => console.error(err)} />
       <ButtonLink to="create" className="float-right">
         Create new
       </ButtonLink>
       <h1 className="font-semibold text-3xl mb-6">Permissions</h1>
-      <fieldset className="mb-6">
-        <legend>Filters and quick search</legend>
-        <div className="sm:flex items-center">
-          <Select
-            className="flex-auto mb-3 sm:mb-0 sm:mr-3"
-            placeholder="All roles"
-            options={[
-              { value: 1, label: 'Role 1' },
-              { value: 2, label: 'Role 2' },
-              { value: 3, label: 'Role 3' },
-              { value: 4, label: 'Role 4' },
-            ]}
-            isClearable={true}
-          />
-          <Select
-            className="flex-auto mb-3 sm:mb-0 sm:mr-3"
-            placeholder="All organisations"
-            options={[
-              { value: 1, label: 'Org 1' },
-              { value: 2, label: 'Org 2' },
-              { value: 3, label: 'Org 3' },
-              { value: 4, label: 'Org 4' },
-            ]}
-            isClearable={true}
-          />
-          <label
-            htmlFor="showSystemPermissions"
-            className="block flex-initial mb-3 sm:mb-0 sm:mr-3"
-          >
-            <input type="checkbox" id="showSystemPermissions" className="mr-2" />
-            Show system permissions
-          </label>
-          <Input placeholder="quicksearch" className="w-full sm:w-1/4" />
-        </div>
-      </fieldset>
+      <PermissionListFilters />
       <Grid
         className="mb-6"
-        headings={permissionHeadings}
-        data={permissionData}
-        renderer={(permissionData, index) => {
+        headings={headings}
+        data={records}
+        entitiesStart={entitiesStart}
+        entitiesEnd={entitiesEnd}
+        totalCount={totalCount}
+        hasNext={records.length >= limit}
+        hasPrevious={page > 0}
+        onNextClick={onPageNext}
+        onPreviousClick={onPagePrevious}
+        onLimitChange={onLimitChange}
+        isLoading={isLoading}
+        renderer={(permission, index) => {
           return (
             <tr key={`permissionRow${index}`} className={index % 2 ? `bg-grey-lightest` : ``}>
               <td className="p-2">
-                <Link to={`${permissionData.id}/edit`}>{permissionData.name}</Link>
+                <Link to={`${permission.id}/edit`}>{permission.name}</Link>
               </td>
-              <td className="p-2 text-center">{permissionData.systemPermission ? 'Yes' : '-'}</td>
-              <td className="p-2 text-center">{permissionData.roles}</td>
+              <td className="p-2 text-center">{permission.isSystemPermission ? 'Yes' : '-'}</td>
+              <td className="p-2 text-center">{permission.roles.length}</td>
+              <td className="p-2 text-center">{get(permission.org, ['name'], '-')}</td>
               <td className="p-2 text-center">
-                {permissionData.orgScope ? permissionData.orgScope.orgLabel : '-'}
-              </td>
-              <td className="p-2 text-center">
-                {permissionData.orgScope && (
+                {!permission.isSystemPermission && (
                   <React.Fragment>
-                    <Link to={`${permissionData.id}/edit`}>Edit</Link>{' '}
-                    <button onClick={handleDelete} className="pseudolink">
+                    <Link to={`${permission.id}/edit`}>Edit</Link>{' '}
+                    <button onClick={() => onPermissionDelete(permission)} className="pseudolink">
                       Delete
                     </button>
                   </React.Fragment>
                 )}
-                {!permissionData.orgScope && <span className="text-grey">Cannot modify</span>}
+                {permission.isSystemPermission && <span className="text-grey">Cannot modify</span>}
               </td>
             </tr>
           );

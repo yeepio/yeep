@@ -38,11 +38,13 @@ export const validationSchema = {
 const isUserAuthorised = async ({ request }, next) => {
   // verify a user has access to the requested org
   if (request.body.scope) {
-    const isScopeAccessible =
-      findUserPermissionIndex(request.session.user.permissions, {
-        name: 'yeep.role.read',
-        orgId: request.body.scope,
-      }) !== -1;
+    const isScopeAccessible = [request.body.scope, null].some(
+      (orgId) =>
+        findUserPermissionIndex(request.session.user.permissions, {
+          name: 'yeep.role.read',
+          orgId,
+        }) !== -1
+    );
 
     if (!isScopeAccessible) {
       throw new AuthorizationError(
@@ -60,7 +62,7 @@ async function handler(ctx) {
   const { request, response } = ctx;
   const { q, limit, cursor, isSystemRole, scope } = request.body;
 
-  const roles = await listRoles(ctx, {
+  const { roles, roleCount } = await listRoles(ctx, {
     q,
     limit,
     cursor: cursor ? parseCursor(cursor) : null,
@@ -71,6 +73,7 @@ async function handler(ctx) {
   response.status = 200; // OK
   response.body = {
     roles,
+    roleCount,
     nextCursor: roles.length < limit ? undefined : stringifyCursor(last(roles)),
   };
 }

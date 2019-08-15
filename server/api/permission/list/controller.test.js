@@ -57,14 +57,14 @@ describe('api/permission.list', () => {
     // create test permission
     permissions = await Promise.all([
       createPermission(ctx, {
-        name: 'acme.code.write',
-        description: 'Permission to edit (write, delete, update) source code',
-        scope: acme.id,
-      }),
-      createPermission(ctx, {
         name: 'monsters.code.write',
         description: 'Permission to edit (write, delete, update) source code',
         scope: monsters.id,
+      }),
+      createPermission(ctx, {
+        name: 'acme.code.write',
+        description: 'Permission to edit (write, delete, update) source code',
+        scope: acme.id,
       }),
       createPermission(ctx, {
         name: 'global.code.write',
@@ -76,7 +76,7 @@ describe('api/permission.list', () => {
       createRole(ctx, {
         name: 'monsters:developer',
         description: 'Developer role',
-        permissions: [permissions[1].id],
+        permissions: [permissions[0].id],
         scope: monsters.id,
       }),
       createRole(ctx, {
@@ -104,7 +104,7 @@ describe('api/permission.list', () => {
     await server.teardown();
   });
 
-  test('returns list of permissions the user has access to', async () => {
+  test('returns permissions that requestor has access to', async () => {
     const res = await request(server)
       .post('/api/permission.list')
       .set('Authorization', `Bearer ${bearerToken}`)
@@ -113,14 +113,23 @@ describe('api/permission.list', () => {
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
       ok: true,
+      permissionCount: 2,
       permissions: expect.arrayContaining([
         expect.objectContaining({
           id: expect.any(String),
           name: expect.any(String),
           description: expect.any(String),
           isSystemPermission: expect.any(Boolean),
-          usersCount: expect.any(Number),
-          rolesCount: expect.any(Number),
+          roles: expect.arrayContaining([
+            expect.objectContaining({
+              id: expect.any(String),
+              name: expect.any(String),
+            }),
+          ]),
+          org: expect.objectContaining({
+            id: expect.any(String),
+            name: expect.any(String),
+          }),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
         }),
@@ -140,14 +149,23 @@ describe('api/permission.list', () => {
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
       ok: true,
+      permissionCount: 2,
       permissions: expect.arrayContaining([
         expect.objectContaining({
           id: expect.any(String),
           name: expect.any(String),
           description: expect.any(String),
           isSystemPermission: expect.any(Boolean),
-          usersCount: expect.any(Number),
-          rolesCount: expect.any(Number),
+          roles: expect.arrayContaining([
+            expect.objectContaining({
+              id: expect.any(String),
+              name: expect.any(String),
+            }),
+          ]),
+          org: expect.objectContaining({
+            id: expect.any(String),
+            name: expect.any(String),
+          }),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
         }),
@@ -208,11 +226,14 @@ describe('api/permission.list', () => {
       permissions: expect.arrayContaining([
         expect.objectContaining({
           id: expect.any(String),
-          name: expect.stringMatching(/^acme\./),
+          name: expect.any(String),
           description: expect.any(String),
           isSystemPermission: expect.any(Boolean),
-          usersCount: expect.any(Number),
-          rolesCount: expect.any(Number),
+          roles: expect.any(Array),
+          org: expect.objectContaining({
+            id: expect.any(String),
+            name: expect.any(String),
+          }),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
         }),
@@ -234,11 +255,14 @@ describe('api/permission.list', () => {
       permissions: expect.arrayContaining([
         expect.objectContaining({
           id: expect.any(String),
-          name: expect.stringMatching(/^acme\./),
+          name: expect.any(String),
           description: expect.any(String),
           isSystemPermission: expect.any(Boolean),
-          usersCount: expect.any(Number),
-          rolesCount: expect.any(Number),
+          roles: expect.any(Array),
+          org: expect.objectContaining({
+            id: expect.any(String),
+            name: expect.any(String),
+          }),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
         }),
@@ -260,11 +284,19 @@ describe('api/permission.list', () => {
       permissions: expect.arrayContaining([
         expect.objectContaining({
           id: expect.any(String),
-          name: expect.stringMatching(/^monsters\./),
+          name: expect.any(String),
           description: expect.any(String),
           isSystemPermission: expect.any(Boolean),
-          usersCount: expect.any(Number),
-          rolesCount: expect.any(Number),
+          roles: expect.arrayContaining([
+            expect.objectContaining({
+              id: expect.any(String),
+              name: expect.any(String),
+            }),
+          ]),
+          org: expect.objectContaining({
+            id: expect.any(String),
+            name: expect.any(String),
+          }),
           createdAt: expect.any(String),
           updatedAt: expect.any(String),
         }),
@@ -273,7 +305,7 @@ describe('api/permission.list', () => {
     expect(res.body.permissions.length).toBe(1);
   });
 
-  test('throws error when trying to filter by `role` param when unauthorised', async () => {
+  test('throws error when `role` is inaccessiblepe', async () => {
     const res = await request(server)
       .post('/api/permission.list')
       .set('Authorization', `Bearer ${bearerToken}`)
@@ -301,7 +333,7 @@ describe('api/permission.list', () => {
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
       ok: true,
-      permissions: expect.arrayContaining([]),
+      permissions: expect.any(Array),
     });
     expect(res.body.permissions.length).toBe(0);
   });
