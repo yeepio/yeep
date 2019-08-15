@@ -12,6 +12,5 @@ module.exports = {
   plugins: [
     '@babel/plugin-syntax-dynamic-import',
     ['@babel/plugin-proposal-object-rest-spread', { useBuiltIns: true }],
-    ['@babel/plugin-proposal-optional-chaining', { loose: true }],
   ],
 };
