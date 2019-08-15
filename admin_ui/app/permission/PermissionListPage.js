@@ -2,6 +2,7 @@ import React, { useCallback, useEffect } from 'react';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useSelector, useDispatch } from 'react-redux';
+import get from 'lodash/get';
 import ButtonLink from '../../components/ButtonLink';
 import Grid from '../../components/Grid';
 import PermissionDeleteModal from './PermissionDeleteModal';
@@ -105,7 +106,7 @@ const PermissionListPage = () => {
               </td>
               <td className="p-2 text-center">{permission.isSystemPermission ? 'Yes' : '-'}</td>
               <td className="p-2 text-center">{permission.roles.length}</td>
-              <td className="p-2 text-center">{permission.org ? permission.org.name : '-'}</td>
+              <td className="p-2 text-center">{get(permission.org, ['name'], '-')}</td>
               <td className="p-2 text-center">
                 {!permission.isSystemPermission && (
                   <React.Fragment>
