@@ -1,5 +1,6 @@
 import { createAction, handleActions } from 'redux-actions';
 import { produce } from 'immer';
+import get from 'lodash/get';
 import yeepClient from '../yeepClient';
 import parseYeepValidationErrors from '../../utilities/parseYeepValidationErrors';
 
@@ -79,6 +80,8 @@ export const listPermissions = (props = {}) => (dispatch, getState) => {
         cursor: store.list.cursors[store.list.page - 1],
         isSystemPermission: store.list.filters.isSystemPermission,
         q: store.list.filters.queryText || undefined,
+        scope: get(store.list.filters.org, ['id']),
+        role: get(store.list.filters.role, ['id']),
         cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(listPermissions),
         ...props,
       })
