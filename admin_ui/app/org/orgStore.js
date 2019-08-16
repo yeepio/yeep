@@ -58,9 +58,9 @@ export const reducer = handleActions(
     }),
     [resolveListOrgs]: produce((draft, action) => {
       draft.list.isLoading = false;
-      draft.list.records = action.payload.roles;
+      draft.list.records = action.payload.orgs;
       draft.list.cursors.push(action.payload.nextCursor);
-      draft.list.totalCount = action.payload.roleCount;
+      draft.list.totalCount = action.payload.orgCount;
     }),
     [setOrgListLimit]: produce((draft, action) => {
       draft.list.page = 0;
