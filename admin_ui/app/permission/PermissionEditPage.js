@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { navigate } from '@reach/router';
+import { Link, navigate } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useDispatch, useSelector } from 'react-redux';
 import find from 'lodash/find';
@@ -33,7 +33,7 @@ const PermissionEditPage = ({ permissionId }) => {
     if (permission) {
       dispatch(setPermissionFormValues(permission));
     } else {
-      // role does not exist in memory - retrieve from API
+      // permission does not exist in memory - retrieve from API
       dispatch(getPermissionInfo({ id: permissionId })).then((permission) => {
         dispatch(setPermissionFormValues(permission));
       });
@@ -89,6 +89,7 @@ const PermissionEditPage = ({ permissionId }) => {
           onDelete={onPermissionDelete}
         />
       )}
+      <Link to="/permissions">Return to the list of permissions</Link>
     </React.Fragment>
   );
 };

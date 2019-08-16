@@ -1,22 +1,40 @@
 import { createAction, handleActions } from 'redux-actions';
+import { produce } from 'immer';
 import yeepClient from '../yeepClient';
+import parseYeepValidationErrors from '../../utilities/parseYeepValidationErrors';
 
 // initial state
 export const initialState = {
-  roles: [],
-  roleCount: 0,
-  cursors: [],
-  page: 0,
-  limit: 10,
-  filters: {
-    org: {},
-    isSystemRole: false,
-    queryText: '',
+  list: {
+    records: [],
+    totalCount: 0,
+    limit: 10,
+    isLoading: false,
+    cursors: [],
+    page: 0,
+    filters: {
+      isSystemRole: false,
+      queryText: '',
+      org: {},
+    },
   },
-  isRoleListLoading: false,
-  isRoleCreationPending: false,
-  isRoleUpdatePending: false,
-  isRoleInfoLoading: false,
+  form: {
+    values: {
+      name: '',
+      description: '',
+      org: null,
+      permissions: [],
+    },
+    isLoading: false,
+    isSavePending: false,
+    errors: {},
+  },
+  deletion: {
+    record: {},
+    isOpen: false,
+    isDeletePending: false,
+    errors: {},
+  },
 };
 
 const initListRoles = createAction('ROLE_LIST_INIT');
@@ -39,6 +57,16 @@ const initGetRoleInfo = createAction('ROLE_INFO_INIT');
 const resolveGetRoleInfo = createAction('ROLE_INFO_RESOLVE');
 const rejectGetRoleInfo = createAction('ROLE_INFO_REJECT');
 
+const initDeleteRole = createAction('ROLE_DELETE_INIT');
+const resolveDeleteRole = createAction('ROLE_DELETE_RESOLVE');
+const rejectDeleteRole = createAction('ROLE_DELETE_REJECT');
+
+export const setRoleFormValues = createAction('ROLE_FORM_VALUES_SET');
+export const resetRoleFormValues = createAction('ROLE_FORM_VALUES_CLEAR');
+
+export const openRoleDeleteModal = createAction('ROLE_DELETE_MODAL_OPEN');
+export const closeRoleDeleteModal = createAction('ROLE_DELETE_MODAL_CLOSE');
+
 export const listRoles = (props = {}) => (dispatch, getState) => {
   const { role: store } = getState();
 
@@ -47,11 +75,11 @@ export const listRoles = (props = {}) => (dispatch, getState) => {
     .api()
     .then((api) =>
       api.role.list({
-        limit: store.limit,
-        cursor: store.cursors[store.page - 1],
-        isSystemRole: store.filters.isSystemRole,
-        q: store.filters.queryText || undefined,
-        scope: store.filters.org.id || undefined,
+        limit: store.list.limit,
+        cursor: store.list.cursors[store.list.page - 1],
+        isSystemRole: store.list.filters.isSystemRole,
+        q: store.list.filters.queryText || undefined,
+        scope: store.list.filters.org.id,
         cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(listRoles),
         ...props,
       })
@@ -126,60 +154,137 @@ export const getRoleInfo = (props) => (dispatch) => {
     });
 };
 
+export const deleteRole = (props) => (dispatch) => {
+  dispatch(initDeleteRole());
+  return yeepClient
+    .api()
+    .then((api) =>
+      api.role.delete({
+        ...props,
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(deleteRole),
+      })
+    )
+    .then((data) => {
+      dispatch(resolveDeleteRole(data));
+      return true;
+    })
+    .catch((err) => {
+      dispatch(rejectDeleteRole(err));
+      return false;
+    });
+};
+
 export const reducer = handleActions(
   {
-    [initListRoles]: (state) => ({
-      ...state,
-      isRoleListLoading: true,
+    [initListRoles]: produce((draft) => {
+      draft.list.isLoading = true;
     }),
-    [resolveListRoles]: (state, action) => ({
-      ...state,
-      isRoleListLoading: false,
-      roles: action.payload.roles,
-      cursors: [...state.cursors, action.payload.nextCursor],
-      roleCount: action.payload.roleCount,
+    [resolveListRoles]: produce((draft, action) => {
+      draft.list.isLoading = false;
+      draft.list.records = action.payload.roles;
+      draft.list.cursors.push(action.payload.nextCursor);
+      draft.list.totalCount = action.payload.roleCount;
     }),
-    [setRoleListLimit]: (state, action) => ({
-      ...state,
-      cursors: [],
-      page: 0,
-      limit: action.payload.limit,
+    [setRoleListLimit]: produce((draft, action) => {
+      draft.list.page = 0;
+      draft.list.cursors = [];
+      draft.list.limit = action.payload.limit;
     }),
-    [setRoleListPage]: (state, action) => ({
-      ...state,
-      page: action.payload.page,
+    [setRoleListPage]: produce((draft, action) => {
+      if (action.payload.page < draft.list.page) {
+        draft.list.cursors.length = action.payload.page;
+      }
+      draft.list.page = action.payload.page;
     }),
-    [setRoleListFilters]: (state, action) => ({
-      ...state,
-      page: 0,
-      filters: {
-        ...state.filters,
+    [setRoleListFilters]: produce((draft, action) => {
+      draft.list.page = 0;
+      draft.list.filters = {
+        ...draft.list.filters,
         ...action.payload,
-      },
+      };
     }),
-    [initCreateRole]: (state) => ({
-      ...state,
-      isRoleCreationPending: true,
+    [initCreateRole]: produce((draft) => {
+      draft.form.isSavePending = true;
     }),
-    [resolveCreateRole]: (state) => ({
-      ...state,
-      isRoleCreationPending: false,
+    [resolveCreateRole]: produce((draft) => {
+      draft.form.isSavePending = false;
     }),
-    [initUpdateRole]: (state) => ({
-      ...state,
-      isRoleUpdatePending: true,
+    [rejectCreateRole]: produce((draft, action) => {
+      if (action.payload.code === 400) {
+        draft.form.errors = parseYeepValidationErrors(action.payload);
+      } else {
+        draft.form.errors = {
+          generic: action.payload.message,
+        };
+      }
+      draft.form.isSavePending = false;
     }),
-    [resolveUpdateRole]: (state) => ({
-      ...state,
-      isRoleUpdatePending: false,
+    [initUpdateRole]: produce((draft) => {
+      draft.form.isSavePending = true;
     }),
-    [initGetRoleInfo]: (state) => ({
-      ...state,
-      isRoleInfoLoading: true,
+    [resolveUpdateRole]: produce((draft) => {
+      draft.form.isSavePending = false;
     }),
-    [resolveGetRoleInfo]: (state) => ({
-      ...state,
-      isRoleInfoLoading: false,
+    [rejectUpdateRole]: produce((draft, action) => {
+      if (action.payload.code === 400) {
+        draft.form.errors = parseYeepValidationErrors(action.payload);
+      } else {
+        draft.form.errors = {
+          generic: action.payload.message,
+        };
+      }
+      draft.form.isSavePending = false;
+    }),
+    [initGetRoleInfo]: produce((draft) => {
+      draft.form.isLoading = true;
+    }),
+    [resolveGetRoleInfo]: produce((draft) => {
+      draft.form.isLoading = false;
+    }),
+    [rejectGetRoleInfo]: produce((draft, action) => {
+      if (action.payload.code === 400) {
+        draft.form.errors = parseYeepValidationErrors(action.payload);
+      } else {
+        draft.form.errors = {
+          generic: action.payload.message,
+        };
+      }
+      draft.form.isLoading = false;
+    }),
+    [setRoleFormValues]: produce((draft, action) => {
+      draft.form.errors = initialState.form.errors;
+      draft.form.values = {
+        ...draft.form.values,
+        ...action.payload,
+      };
+    }),
+    [resetRoleFormValues]: produce((draft) => {
+      draft.form.errors = initialState.form.errors;
+      draft.form.values = initialState.form.values;
+    }),
+    [openRoleDeleteModal]: produce((draft, action) => {
+      draft.deletion.isOpen = true;
+      draft.deletion.errors = initialState.deletion.errors;
+      draft.deletion.record = action.payload.role;
+    }),
+    [closeRoleDeleteModal]: produce((draft) => {
+      draft.deletion.isOpen = false;
+    }),
+    [initDeleteRole]: produce((draft) => {
+      draft.deletion.isDeletePending = true;
+    }),
+    [resolveDeleteRole]: produce((draft) => {
+      draft.deletion.isDeletePending = false;
+    }),
+    [rejectDeleteRole]: produce((draft, action) => {
+      if (action.payload.code === 400) {
+        draft.deletion.errors = parseYeepValidationErrors(action.payload);
+      } else {
+        draft.deletion.errors = {
+          generic: action.payload.message,
+        };
+      }
+      draft.deletion.isDeletePending = false;
     }),
   },
   initialState

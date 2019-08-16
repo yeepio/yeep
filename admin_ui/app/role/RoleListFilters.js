@@ -23,7 +23,7 @@ function fetchOrgOptionsAsync(inputValue) {
 }
 
 const RoleListFilters = () => {
-  const filters = useSelector((state) => state.role.filters);
+  const filters = useSelector((state) => state.role.list.filters);
   const dispatch = useDispatch();
 
   useEffect(() => {

@@ -62,7 +62,12 @@ const LoginPage = () => {
 
   return (
     <div className="w-screen min-h-screen bg-grey-light flex items-center justify-center">
-      <form className="block text-center w-full p-3 sm:w-auto" onSubmit={handleSubmit}>
+      <form className="block text-center w-full p-3 sm:w-auto login-form" onSubmit={handleSubmit}>
+        <style jsx>{`
+          .login-form {
+            width:400px;
+          }
+        `}</style>
         <img src="/yeep-logo-horizontal.svg" alt="Yeep logo" className="mb-6 mx-auto w-48" />
         <h2 className="font-bold text-2xl mb-6">Yeep administration - Sign in</h2>
         {loginErrors.generic && (
@@ -102,7 +107,7 @@ const LoginPage = () => {
         <Button
           type="submit"
           className="w-4/5"
-          disabled={isLoginPending || !isUserKeyValid(userKey) || !isPasswordValid(password)}
+          // disabled={isLoginPending || !isUserKeyValid(userKey) || !isPasswordValid(password)}
         >
           <React.Fragment>
             {isLoginPending && (
