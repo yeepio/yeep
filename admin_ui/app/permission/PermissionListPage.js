@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useSelector, useDispatch } from 'react-redux';
@@ -35,12 +35,13 @@ const PermissionListPage = () => {
   const filters = useSelector((state) => state.permission.list.filters);
   const page = useSelector((state) => state.permission.list.page);
 
-  useDocumentTitle('Permissions');
-
   const dispatch = useDispatch();
 
-  const entitiesStart = page * limit + 1;
-  const entitiesEnd = records.length >= limit ? (page + 1) * limit : records.length;
+  const entitiesStart = useMemo(() => page * limit + 1, [page, limit]);
+  const entitiesEnd = useMemo(
+    () => (records.length >= limit ? (page + 1) * limit : records.length),
+    [records, page, limit]
+  );
 
   useEffect(() => {
     dispatch(listPermissions());
@@ -76,6 +77,8 @@ const PermissionListPage = () => {
     },
     [dispatch]
   );
+
+  useDocumentTitle('Permissions');
 
   return (
     <React.Fragment>
