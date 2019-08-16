@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
 import escapeRegExp from 'lodash/escapeRegExp';
+import isBoolean from 'lodash/isBoolean';
 
 export const stringifyCursor = ({ id }) => {
   return Buffer.from(JSON.stringify(id)).toString('base64');
@@ -122,7 +123,7 @@ async function listPermissions(ctx, { q, limit, cursor, scopes, role, isSystemPe
     });
   }
 
-  if (isSystemPermission) {
+  if (isBoolean(isSystemPermission)) {
     matchExpressions.push({
       isSystemPermission: { $eq: isSystemPermission },
     });
