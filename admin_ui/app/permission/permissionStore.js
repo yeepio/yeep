@@ -1,6 +1,5 @@
 import { createAction, handleActions } from 'redux-actions';
 import { produce } from 'immer';
-import get from 'lodash/get';
 import yeepClient from '../yeepClient';
 import parseYeepValidationErrors from '../../utilities/parseYeepValidationErrors';
 
@@ -14,7 +13,7 @@ export const initialState = {
     cursors: [],
     page: 0,
     filters: {
-      isSystemPermission: false,
+      isSystemPermission: true,
       queryText: '',
       org: {},
       role: {},
@@ -78,7 +77,9 @@ export const listPermissions = (props = {}) => (dispatch, getState) => {
       api.permission.list({
         limit: store.list.limit,
         cursor: store.list.cursors[store.list.page - 1],
-        isSystemPermission: store.list.filters.isSystemPermission,
+        // If "Show system permissions" flag is set, send undefined to permission.list
+        // so that everything is returned.
+        isSystemPermission: store.list.filters.isSystemPermission ? undefined : false,
         q: store.list.filters.queryText || undefined,
         scope: store.list.filters.org.id,
         role: store.list.filters.role.id,
