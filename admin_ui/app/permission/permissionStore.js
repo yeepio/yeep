@@ -201,6 +201,7 @@ export const reducer = handleActions(
     }),
     [setPermissionListFilters]: produce((draft, action) => {
       draft.list.page = 0;
+      draft.list.cursors = [];
       draft.list.filters = {
         ...draft.list.filters,
         ...action.payload,
