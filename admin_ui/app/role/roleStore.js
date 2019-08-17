@@ -73,8 +73,8 @@ export const listRoles = (props = {}) => (dispatch, getState) => {
   dispatch(initListRoles());
   return yeepClient
     .api()
-    .then((api) =>
-      api.role.list({
+    .then((api) => {
+      return api.role.list({
         limit: store.list.limit,
         cursor: store.list.cursors[store.list.page - 1],
         isSystemRole: store.list.filters.isSystemRole,
@@ -82,8 +82,8 @@ export const listRoles = (props = {}) => (dispatch, getState) => {
         scope: store.list.filters.org.id,
         cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(listRoles),
         ...props,
-      })
-    )
+      });
+    })
     .then((data) => {
       dispatch(resolveListRoles(data));
       return data.roles;
@@ -198,6 +198,7 @@ export const reducer = handleActions(
     }),
     [setRoleListFilters]: produce((draft, action) => {
       draft.list.page = 0;
+      draft.list.cursors = [];
       draft.list.filters = {
         ...draft.list.filters,
         ...action.payload,
