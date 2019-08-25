@@ -1,5 +1,5 @@
 import { Schema } from 'mongoose';
-import isPlainObject from 'lodash/isPlainObject';
+import sortedUniqBy from 'lodash/sortedUniqBy';
 import isString from 'lodash/isString';
 import { ObjectId } from 'mongodb';
 import typeOf from 'typeof';
@@ -121,28 +121,32 @@ orgMembershipSchema.index(
   }
 );
 
-orgMembershipSchema.static('getUserPermissions', async function({ user, org, scope }) {
-  if (!isString(user)) {
-    throw new TypeError(`Invalid "user" property; expected string, received ${typeOf(user)}`);
+orgMembershipSchema.static('getUserPermissions', async function({
+  userId,
+  orgId,
+  permissionScope,
+}) {
+  if (!isString(userId)) {
+    throw new TypeError(`Invalid "userId" property; expected string, received ${typeOf(userId)}`);
   }
 
-  if (org && !isString(org)) {
-    throw new TypeError(`Invalid "org" propery; expected string, received ${typeOf(org)}`);
+  if (orgId && !isString(orgId)) {
+    throw new TypeError(`Invalid "orgId" propery; expected string, received ${typeOf(orgId)}`);
   }
 
-  if (scope && !Array.isArray(scope)) {
+  if (permissionScope && !Array.isArray(permissionScope)) {
     throw new TypeError(
-      `Invalid "scope" propery; expected Array<string>, received ${typeOf(scope)}`
+      `Invalid "scope" propery; expected Array<string>, received ${typeOf(permissionScope)}`
     );
   }
 
   const records = await this.aggregate(
     [
       {
-        $match: {
-          userId: ObjectId(user),
-          orgId: org ? ObjectId(org) : undefined,
-        },
+        $match: Object.assign(
+          { userId: ObjectId(userId) },
+          orgId ? { orgId: ObjectId(orgId) } : undefined
+        ),
       },
       {
         $facet: {
@@ -246,15 +250,15 @@ orgMembershipSchema.static('getUserPermissions', async function({ user, org, sco
           ],
         },
       },
-      scope
+      permissionScope
         ? {
             $match: {
               'permission._id': {
-                $in: scope.map(ObjectId),
+                $in: permissionScope.map(ObjectId),
               },
             },
           }
-        : undefined,
+        : null,
       {
         $sort: {
           'permission.name': 1,
@@ -265,7 +269,7 @@ orgMembershipSchema.static('getUserPermissions', async function({ user, org, sco
     ].filter(Boolean)
   );
 
-  return [...records.directPermissions, ...records.viaRole].map((record) => {
+  const permissions = [...records[0].directPermissions, ...records[0].viaRole].map((record) => {
     return {
       id: record.permission._id.toHexString(),
       name: record.permission.name,
@@ -275,6 +279,55 @@ orgMembershipSchema.static('getUserPermissions', async function({ user, org, sco
       roleId: record.role ? record.role._id.toHexString() : undefined,
     };
   });
+
+  return sortedUniqBy(permissions, (permission) =>
+    [permission.name, permission.orgId, permission.resourceId].join(';')
+  );
+});
+
+orgMembershipSchema.static('getUserOrgs', async function({ userId }) {
+  if (!isString(userId)) {
+    throw new TypeError(`Invalid "userId" property; expected string, received ${typeOf(userId)}`);
+  }
+
+  // if (permissionId && !isString(permissionId)) {
+  //   throw new TypeError(
+  //     `Invalid "permissionId" propery; expected string, received ${typeOf(permissionId)}`
+  //   );
+  // }
+
+  const records = await this.aggregate([
+    {
+      $match: {
+        userId: ObjectId(userId),
+        orgId: { $ne: null },
+      },
+    },
+    {
+      $lookup: {
+        from: 'orgs',
+        localField: 'orgId',
+        foreignField: '_id',
+        as: 'orgs',
+      },
+    },
+  ]);
+
+  // const permissions = [...records.directPermissions, ...records.viaRole].map((record) => {
+  //   return {
+  //     id: record.permission._id.toHexString(),
+  //     name: record.permission.name,
+  //     isSystemPermission: record.permission.isSystemPermission,
+  //     orgId: record.orgId ? record.orgId.toHexString() : null,
+  //     resourceId: record.oresourceId,
+  //     roleId: record.role ? record.role._id.toHexString() : undefined,
+  //   };
+  // });
+
+  // return sortedUniqBy(permissions, (permission) =>
+  //   [permission.name, permission.orgId, permission.resourceId].join(';')
+  // );
+  return records;
 });
 
 export default orgMembershipSchema;

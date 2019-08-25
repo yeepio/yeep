@@ -51,13 +51,13 @@ export function findIndex(haystack, needle) {
 /**
  * Indicates whether the specified properties exist in the designated haystack array.
  * @param {Array<Object>} haystack array of user haystack to inspect
- * @param {Object} props matching properties
- * @prop {string} props.name permission name
- * @prop {string|ObjectId} [props.orgId] permission orgId (optional)
+ * @param {Object} needle matching properties
+ * @prop {string} needle.name permission name
+ * @prop {string|ObjectId} [needle.orgId] permission orgId (optional)
  * @returns {boolean}
  */
-export function includes(haystack, props) {
-  return findIndex(haystack, props) !== -1;
+export function includes(haystack, needle) {
+  return findIndex(haystack, needle) !== -1;
 }
 
 /**

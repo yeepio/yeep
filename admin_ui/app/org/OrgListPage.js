@@ -9,11 +9,10 @@ import { listOrgs, setOrgListPage, setOrgListLimit } from './orgStore';
 import yeepClient from '../yeepClient';
 
 let headings = [
-  { label: 'Name', sort: 'asc', className: 'text-left' },
-  { label: 'Slug / URL key' },
-  { label: 'User count' },
-  { label: 'Role count' },
-  { label: 'Permission count' },
+  { label: 'Name', isSortable: false, className: 'text-left' },
+  { label: 'User count', isSortable: false },
+  { label: 'Role count', isSortable: false },
+  { label: 'Permission count', isSortable: false },
   { label: 'Actions', isSortable: false },
 ];
 
@@ -24,8 +23,6 @@ const OrgListPage = () => {
   const limit = useSelector((state) => state.org.list.limit);
   const filters = useSelector((state) => state.org.list.filters);
   const page = useSelector((state) => state.org.list.page);
-
-  console.log(records);
 
   const dispatch = useDispatch();
 
@@ -47,7 +44,7 @@ const OrgListPage = () => {
     dispatch(listOrgs());
   }, [dispatch]);
 
-  const onPermissionDelete = useCallback(
+  const onOrgDelete = useCallback(
     (org) => {
       // dispatch(openOrgDeleteModal({ org }));
     },
@@ -99,11 +96,10 @@ const OrgListPage = () => {
           return (
             <tr key={`gridRow${index}`} className={index % 2 ? `bg-grey-lightest` : ``}>
               <td className="p-2">
-                <Link to={`${org.id}/edit`}>{org.orgLabel}</Link>
+                <Link to={`${org.id}/edit`}>{org.name}</Link>
               </td>
-              <td className="p-2 text-center">{org.slug}</td>
               <td className="p-2 text-center">
-                <a href="/">{org.users}</a>
+                <a href="/">{org.usersCount}</a>
               </td>
               <td className="p-2 text-center">
                 <a href="/">{org.roles}</a>

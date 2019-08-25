@@ -61,9 +61,11 @@ Authorization: `Bearer ${authToken}`
       "_id": "5c86b03771ac98675a2f8e30",
       "name": "Acme Inc",
       "slug": "acme",
+      "usersCount": 5,
+      "rolesCount": 2,
+      "permissionsCount": 10,
       "createdAt": "2019-03-11T19:00:07.282Z",
-      "updatedAt": "2019-03-11T19:00:07.282Z",
-      "usersCount": 5
+      "updatedAt": "2019-03-11T19:00:07.282Z"
     }
   ],
   "nextCursor": "IjViN2QwZGIyMzg1YzcyNWY5ZjNkODkwYSI="

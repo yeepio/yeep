@@ -43,7 +43,7 @@ export const listOrgs = (props = {}) => (dispatch, getState) => {
     )
     .then((data) => {
       dispatch(resolveListOrgs(data));
-      return data.roles;
+      return data.orgs;
     })
     .catch((err) => {
       dispatch(rejectListOrgs(err));
@@ -60,7 +60,7 @@ export const reducer = handleActions(
       draft.list.isLoading = false;
       draft.list.records = action.payload.orgs;
       draft.list.cursors.push(action.payload.nextCursor);
-      draft.list.totalCount = action.payload.orgCount;
+      draft.list.totalCount = action.payload.orgsCount;
     }),
     [setOrgListLimit]: produce((draft, action) => {
       draft.list.page = 0;
@@ -75,6 +75,7 @@ export const reducer = handleActions(
     }),
     [setOrgListFilters]: produce((draft, action) => {
       draft.list.page = 0;
+      draft.list.cursors = [];
       draft.list.filters = {
         ...draft.list.filters,
         ...action.payload,
