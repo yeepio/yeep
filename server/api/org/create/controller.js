@@ -5,11 +5,11 @@ import { validateRequest } from '../../../middleware/validation';
 import {
   decorateSession,
   isUserAuthenticated,
-  decorateUserPermissions,
-  findUserPermissionIndex,
+  populateUserPermissions,
 } from '../../../middleware/auth';
 import createOrg from './service';
 import { AuthorizationError } from '../../../constants/errors';
+import * as SortedUserPermissionArray from '../../../utils/SortedUserPermissionArray';
 
 export const validationSchema = {
   body: {
@@ -28,39 +28,35 @@ export const validationSchema = {
   },
 };
 
-const isUserAuthorized = async ({ request }, next) => {
-  const hasPermission =
-    findUserPermissionIndex(request.session.user.permissions, {
+async function isUserAuthorized({ request, config }, next) {
+  if (config.isOrgCreationOpen === false) {
+    // ensure user is authorized to create orgs
+    const hasPermission = SortedUserPermissionArray.includes(request.session.user.permissions, {
       name: 'yeep.org.write',
       orgId: null,
-    }) !== -1;
+    });
 
-  if (!hasPermission) {
-    throw new AuthorizationError(
-      `User ${request.session.user.id} does not have sufficient permissions to access this resource`
-    );
+    if (!hasPermission) {
+      throw new AuthorizationError(
+        `User ${request.session.user.id} is not authorized to create orgs`
+      );
+    }
   }
 
   await next();
-};
-
-const authz = compose([decorateUserPermissions(), isUserAuthorized]);
-
-const adaptiveAuthZ = async (ctx, next) => {
-  const { isOrgCreationOpen } = ctx.config;
-
-  if (!isOrgCreationOpen) {
-    return authz(ctx, next);
-  }
-
-  await next();
-};
+}
 
 async function handler(ctx) {
   const { request, response } = ctx;
+
+  const isGlobalAdmin = SortedUserPermissionArray.includes(request.session.user.permissions, {
+    name: 'yeep.org.write',
+    orgId: null,
+  });
+
   const org = await createOrg(ctx, {
     ...request.body,
-    adminId: request.session.user.id,
+    adminId: isGlobalAdmin ? null : request.session.user.id,
   });
 
   response.status = 200; // OK
@@ -74,6 +70,7 @@ export default compose([
   decorateSession(),
   isUserAuthenticated(),
   validateRequest(validationSchema),
-  adaptiveAuthZ,
+  populateUserPermissions,
+  isUserAuthorized,
   handler,
 ]);
