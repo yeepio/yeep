@@ -13,6 +13,7 @@ The Yeep API provides programmatic access to users, permissions, roles, sessions
 | **[org.delete](methods/org.delete.md)**             | Deletes the designated org           |
 | **[org.list](methods/org.list.md)**                 | Lists all orgs                       |
 | **[org.removeMember](methods/org.removeMember.md)** | Removes the designated user from org |
+| **[org.update](methods/org.update.md)**             | Updates the designated org           |
 
 ### User
 
