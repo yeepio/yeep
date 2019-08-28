@@ -5,8 +5,9 @@ import { useSelector, useDispatch } from 'react-redux';
 import ButtonLink from '../../components/ButtonLink';
 import Input from '../../components/Input';
 import Grid from '../../components/Grid';
-import { listOrgs, setOrgListPage, setOrgListLimit } from './orgStore';
+import { listOrgs, setOrgListPage, setOrgListLimit, openOrgDeleteModal } from './orgStore';
 import yeepClient from '../yeepClient';
+import OrgDeleteModal from './OrgDeleteModal';
 
 let headings = [
   { label: 'Name', isSortable: false, className: 'text-left' },
@@ -46,7 +47,7 @@ const OrgListPage = () => {
 
   const onOrgDelete = useCallback(
     (org) => {
-      // dispatch(openOrgDeleteModal({ org }));
+      dispatch(openOrgDeleteModal({ org }));
     },
     [dispatch]
   );
@@ -71,6 +72,7 @@ const OrgListPage = () => {
 
   return (
     <React.Fragment>
+      <OrgDeleteModal onSuccess={reload} onError={(err) => console.error(err)} />
       <ButtonLink to="create" className="float-right">
         Create new
       </ButtonLink>
@@ -108,7 +110,10 @@ const OrgListPage = () => {
                 <a href="/">{org.permissionsCount}</a>
               </td>
               <td className="p-2 text-center">
-                <Link to={`${org.id}/edit`}>Edit</Link> <a href="/">Delete</a>
+                <Link to={`${org.id}/edit`}>Edit</Link>{' '}
+                <button onClick={() => onOrgDelete(org)} className="pseudolink">
+                  Delete
+                </button>
               </td>
             </tr>
           );
