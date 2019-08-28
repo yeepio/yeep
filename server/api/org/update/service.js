@@ -1,10 +1,7 @@
 import { ObjectId } from 'mongodb';
-import {
-  DuplicateOrgError,
-  OrgNotFoundError,
-} from '../../../constants/errors';
+import { DuplicateOrgError } from '../../../constants/errors';
 
-async function updateOrg({ db }, orgId, nextProps) {
+export async function updateOrg({ db }, orgId, nextProps) {
   const OrgModel = db.model('Org');
 
   // update org in db
@@ -35,15 +32,3 @@ async function updateOrg({ db }, orgId, nextProps) {
     throw err;
   }
 }
-
-export async function checkOrgExists({ db }, orgId) {
-  const OrgModel = db.model('Org');
-
-  const org = await OrgModel.findOne({
-    _id: ObjectId(orgId),
-  });
-
-  return org;
-}
-
-export default updateOrg;

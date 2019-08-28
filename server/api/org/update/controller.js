@@ -1,16 +1,17 @@
 import Joi from 'joi';
 import Boom from 'boom';
 import compose from 'koa-compose';
+import { ObjectId } from 'mongodb';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
 import {
   decorateSession,
   isUserAuthenticated,
-  decorateUserPermissions,
-  findUserPermissionIndex,
+  populateUserPermissions,
 } from '../../../middleware/auth';
-import updateOrg, { checkOrgExists } from './service';
+import { updateOrg } from './service';
 import { AuthorizationError, OrgNotFoundError } from '../../../constants/errors';
+import * as SortedUserPermissionArray from '../../../utils/SortedUserPermissionArray';
 
 export const validationSchema = {
   body: {
@@ -33,38 +34,8 @@ export const validationSchema = {
   },
 };
 
-const doesRequestedOrgExist = async (ctx, next) => {
-  const { request } = ctx;
-  const org = await checkOrgExists(ctx, request.body.id);
-
-  if (!org) {
-    throw new OrgNotFoundError(`Org ${request.body.id} cannot be found`);
-  }
-
-  await next();
-};
-
-const isUserAuthorized = async ({ request }, next) => {
-  const hasPermission = Array.from(new Set([request.body.id, null])).some(
-    (orgId) =>
-      findUserPermissionIndex(request.session.user.permissions, {
-        name: 'yeep.role.write',
-        orgId,
-      }) !== -1
-  );
-
-  if (!hasPermission) {
-    throw new AuthorizationError(
-      `User ${request.session.user.id} does not have sufficient permissions to access this resource`
-    );
-  }
-
-  await next();
-};
-
-async function handler(ctx) {
-  const { request, response } = ctx;
-  const { id: orgId, name, slug } = request.body;
+async function applyAdditionalValidationLogic({ request }, next) {
+  const { name, slug } = request.body;
 
   // ensure name or slug have been specified
   if (!(name || slug)) {
@@ -78,7 +49,45 @@ async function handler(ctx) {
     throw boom;
   }
 
-  const org = await updateOrg(ctx, orgId, {
+  await next();
+}
+
+async function ensureRequestedOrgExists({ request, db }, next) {
+  const OrgModel = db.model('Org');
+
+  const count = await OrgModel.countDocuments({
+    _id: ObjectId(request.body.id),
+  });
+
+  if (count === 0) {
+    throw new OrgNotFoundError(`Org ${request.body.id} cannot be found`);
+  }
+
+  await next();
+}
+
+async function isUserAuthorized({ request }, next) {
+  const hasPermission = [request.body.id, null].some((orgId) =>
+    SortedUserPermissionArray.includes(request.session.user.permissions, {
+      name: 'yeep.org.write',
+      orgId,
+    })
+  );
+
+  if (!hasPermission) {
+    throw new AuthorizationError(
+      `User ${request.session.user.id} is not authorized to update org ${request.body.id}`
+    );
+  }
+
+  await next();
+}
+
+async function handler(ctx) {
+  const { request, response } = ctx;
+  const { id, name, slug } = request.body;
+
+  const org = await updateOrg(ctx, id, {
     name,
     slug,
   });
@@ -94,8 +103,9 @@ export default compose([
   decorateSession(),
   isUserAuthenticated(),
   validateRequest(validationSchema),
-  decorateUserPermissions(),
-  doesRequestedOrgExist,
+  applyAdditionalValidationLogic,
+  populateUserPermissions,
+  ensureRequestedOrgExists,
   isUserAuthorized,
   handler,
 ]);

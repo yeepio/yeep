@@ -21,7 +21,7 @@ export const validationSchema = {
   },
 };
 
-const isUserAuthorized = async ({ request }, next) => {
+async function isUserAuthorized({ request }, next) {
   const hasPermission = [request.body.id, null].some((orgId) =>
     SortedUserPermissionArray.includes(request.session.user.permissions, {
       name: 'yeep.org.write',
@@ -36,7 +36,7 @@ const isUserAuthorized = async ({ request }, next) => {
   }
 
   await next();
-};
+}
 
 async function handler(ctx) {
   const { request, response } = ctx;
