@@ -6,11 +6,11 @@ import { validateRequest } from '../../../middleware/validation';
 import {
   decorateSession,
   isUserAuthenticated,
-  decorateUserPermissions,
-  findUserPermissionIndex,
+  populateUserPermissions,
 } from '../../../middleware/auth';
 import deleteOrg from './service';
 import { AuthorizationError } from '../../../constants/errors';
+import * as SortedUserPermissionArray from '../../../utils/SortedUserPermissionArray';
 
 export const validationSchema = {
   body: {
@@ -22,17 +22,16 @@ export const validationSchema = {
 };
 
 const isUserAuthorized = async ({ request }, next) => {
-  const hasPermission = [request.body.id, null].some(
-    (orgId) =>
-      findUserPermissionIndex(request.session.user.permissions, {
-        name: 'yeep.org.write',
-        orgId,
-      }) !== -1
+  const hasPermission = [request.body.id, null].some((orgId) =>
+    SortedUserPermissionArray.includes(request.session.user.permissions, {
+      name: 'yeep.org.write',
+      orgId,
+    })
   );
 
   if (!hasPermission) {
     throw new AuthorizationError(
-      `User ${request.session.user.id} does not have sufficient permissions to access this resource`
+      `User ${request.session.user.id} is not authorized to delete org ${request.body.id}`
     );
   }
 
@@ -55,7 +54,7 @@ export default compose([
   decorateSession(),
   isUserAuthenticated(),
   validateRequest(validationSchema),
-  decorateUserPermissions(),
+  populateUserPermissions,
   isUserAuthorized,
   handler,
 ]);
