@@ -98,7 +98,7 @@ async function listRoles(ctx, { q, limit, cursor, scopes, isSystemRole }) {
     });
   }
 
-  if (isSystemRole) {
+  if (isSystemRole != null) {
     matchExpressions.push({
       isSystemRole: { $eq: isSystemRole },
     });

@@ -122,7 +122,7 @@ const PermissionListFilters = () => {
             defaultChecked={filters.isSystemPermission}
             onChange={onSystemPermissionChage}
           />
-          Show only system permissions
+          Show system permissions
         </label>
         <Input
           placeholder="quicksearch"

@@ -122,7 +122,7 @@ async function listPermissions(ctx, { q, limit, cursor, scopes, role, isSystemPe
     });
   }
 
-  if (isSystemPermission) {
+  if (isSystemPermission != null) {
     matchExpressions.push({
       isSystemPermission: { $eq: isSystemPermission },
     });
