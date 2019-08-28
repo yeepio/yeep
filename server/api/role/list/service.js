@@ -1,6 +1,5 @@
 import { ObjectId } from 'mongodb';
 import escapeRegExp from 'lodash/escapeRegExp';
-import isBoolean from 'lodash/isBoolean';
 
 export const stringifyCursor = ({ id }) => {
   return Buffer.from(JSON.stringify(id)).toString('base64');
@@ -99,7 +98,7 @@ async function listRoles(ctx, { q, limit, cursor, scopes, isSystemRole }) {
     });
   }
 
-  if (isBoolean(isSystemRole)) {
+  if (isSystemRole != null) {
     matchExpressions.push({
       isSystemRole: { $eq: isSystemRole },
     });
