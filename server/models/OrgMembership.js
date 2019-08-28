@@ -1,8 +1,11 @@
 import { Schema } from 'mongoose';
-import sortedUniqBy from 'lodash/sortedUniqBy';
 import isString from 'lodash/isString';
 import { ObjectId } from 'mongodb';
 import typeOf from 'typeof';
+import flow from 'lodash/fp/flow';
+import map from 'lodash/fp/map';
+import sortBy from 'lodash/fp/sortBy';
+import sortedUniqBy from 'lodash/fp/sortedUniqBy';
 
 const permissionSchema = new Schema(
   {
@@ -119,6 +122,19 @@ orgMembershipSchema.index(
   {
     name: 'roleAssignment_idx',
   }
+);
+
+const formatUserPermissions = flow(
+  map((record) => ({
+    id: record.permission._id.toHexString(),
+    name: record.permission.name,
+    isSystemPermission: record.permission.isSystemPermission,
+    orgId: record.orgId ? record.orgId.toHexString() : null,
+    resourceId: record.oresourceId,
+    roleId: record.role ? record.role._id.toHexString() : undefined,
+  })),
+  sortBy(['name', 'orgId', 'resourceId']),
+  sortedUniqBy((permission) => [permission.name, permission.orgId, permission.resourceId].join(':'))
 );
 
 orgMembershipSchema.static('getUserPermissions', async function({
@@ -259,30 +275,10 @@ orgMembershipSchema.static('getUserPermissions', async function({
             },
           }
         : null,
-      {
-        $sort: {
-          'permission.name': 1,
-          orgId: 1,
-          resourceId: 1,
-        },
-      },
     ].filter(Boolean)
   );
 
-  const permissions = [...records[0].directPermissions, ...records[0].viaRole].map((record) => {
-    return {
-      id: record.permission._id.toHexString(),
-      name: record.permission.name,
-      isSystemPermission: record.permission.isSystemPermission,
-      orgId: record.orgId ? record.orgId.toHexString() : null,
-      resourceId: record.oresourceId,
-      roleId: record.role ? record.role._id.toHexString() : undefined,
-    };
-  });
-
-  return sortedUniqBy(permissions, (permission) =>
-    [permission.name, permission.orgId, permission.resourceId].join(';')
-  );
+  return formatUserPermissions([...records[0].directPermissions, ...records[0].viaRole]);
 });
 
 orgMembershipSchema.static('getUserOrgs', async function({ userId }) {
