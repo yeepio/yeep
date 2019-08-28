@@ -46,6 +46,10 @@ const initDeleteOrg = createAction('ORG_DELETE_INIT');
 const resolveDeleteOrg = createAction('ORG_DELETE_RESOLVE');
 const rejectDeleteOrg = createAction('ORG_DELETE_REJECT');
 
+const initUpdateOrg = createAction('ORG_UPDATE_INIT');
+const resolveUpdateOrg = createAction('ORG_UPDATE_RESOLVE');
+const rejectUpdateOrg = createAction('ORG_UPDATE_REJECT');
+
 export const setOrgListLimit = createAction('ORG_LIST_LIMIT_SET');
 export const setOrgListPage = createAction('ORG_LIST_PAGE_SET');
 export const setOrgListFilters = createAction('ORG_LIST_FILTERS_SET');
@@ -117,6 +121,26 @@ export const deleteOrg = (props) => (dispatch) => {
     })
     .catch((err) => {
       dispatch(rejectDeleteOrg(err));
+      return false;
+    });
+};
+
+export const updateOrg = (props) => (dispatch) => {
+  dispatch(initUpdateOrg());
+  return yeepClient
+    .api()
+    .then((api) =>
+      api.org.update({
+        ...props,
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(updateOrg),
+      })
+    )
+    .then((data) => {
+      dispatch(resolveUpdateOrg(data));
+      return true;
+    })
+    .catch((err) => {
+      dispatch(rejectUpdateOrg(err));
       return false;
     });
 };
@@ -201,6 +225,22 @@ export const reducer = handleActions(
         };
       }
       draft.deletion.isDeletePending = false;
+    }),
+    [initUpdateOrg]: produce((draft) => {
+      draft.form.isSavePending = true;
+    }),
+    [resolveUpdateOrg]: produce((draft) => {
+      draft.form.isSavePending = false;
+    }),
+    [rejectUpdateOrg]: produce((draft, action) => {
+      if (action.payload.code === 400) {
+        draft.form.errors = parseYeepValidationErrors(action.payload);
+      } else {
+        draft.form.errors = {
+          generic: action.payload.message,
+        };
+      }
+      draft.form.isSavePending = false;
     }),
   },
   initialState
