@@ -1,6 +1,7 @@
 import { createAction, handleActions } from 'redux-actions';
 import { produce } from 'immer';
 import yeepClient from '../yeepClient';
+import parseYeepValidationErrors from '../../utilities/parseYeepValidationErrors';
 // import parseYeepValidationErrors from '../../utilities/parseYeepValidationErrors';
 
 // initial state
@@ -116,6 +117,22 @@ export const reducer = handleActions(
         ...draft.list.filters,
         ...action.payload,
       };
+    }),
+    [initCreateOrg]: produce((draft) => {
+      draft.form.isSavePending = true;
+    }),
+    [resolveCreateOrg]: produce((draft) => {
+      draft.form.isSavePending = false;
+    }),
+    [rejectCreateOrg]: produce((draft, action) => {
+      if (action.payload.code === 400) {
+        draft.form.errors = parseYeepValidationErrors(action.payload);
+      } else {
+        draft.form.errors = {
+          generic: action.payload.message,
+        };
+      }
+      draft.form.isSavePending = false;
     }),
     [setOrgFormValues]: produce((draft, action) => {
       draft.form.errors = initialState.form.errors;
