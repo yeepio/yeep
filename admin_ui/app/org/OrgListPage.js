@@ -102,10 +102,10 @@ const OrgListPage = () => {
                 <a href="/">{org.usersCount}</a>
               </td>
               <td className="p-2 text-center">
-                <a href="/">{org.roles}</a>
+                <a href="/">{org.rolesCount}</a>
               </td>
               <td className="p-2 text-center">
-                <a href="/">{org.permissions}</a>
+                <a href="/">{org.permissionsCount}</a>
               </td>
               <td className="p-2 text-center">
                 <Link to={`${org.id}/edit`}>Edit</Link> <a href="/">Delete</a>
