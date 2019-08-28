@@ -16,15 +16,31 @@ export const initialState = {
       queryText: '',
     },
   },
+  form: {
+    values: {
+      name: '',
+      slug: '',
+    },
+    isLoading: false,
+    isSavePending: false,
+    errors: {},
+  },
 };
 
 const initListOrgs = createAction('ORG_LIST_INIT');
 const resolveListOrgs = createAction('ORG_LIST_RESOLVE');
 const rejectListOrgs = createAction('ORG_LIST_REJECT');
 
+const initCreateOrg = createAction('ORG_CREATE_INIT');
+const resolveCreateOrg = createAction('ORG_CREATE_RESOLVE');
+const rejectCreateOrg = createAction('ORG_CREATE_REJECT');
+
 export const setOrgListLimit = createAction('ORG_LIST_LIMIT_SET');
 export const setOrgListPage = createAction('ORG_LIST_PAGE_SET');
 export const setOrgListFilters = createAction('ORG_LIST_FILTERS_SET');
+
+export const setOrgFormValues = createAction('ORG_FORM_VALUES_SET');
+export const resetOrgFormValues = createAction('ORG_FORM_VALUES_CLEAR');
 
 export const listOrgs = (props = {}) => (dispatch, getState) => {
   const { org: store } = getState();
@@ -48,6 +64,26 @@ export const listOrgs = (props = {}) => (dispatch, getState) => {
     .catch((err) => {
       dispatch(rejectListOrgs(err));
       return null;
+    });
+};
+
+export const createOrg = (props) => (dispatch) => {
+  dispatch(initCreateOrg());
+  return yeepClient
+    .api()
+    .then((api) =>
+      api.org.create({
+        ...props,
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(createOrg),
+      })
+    )
+    .then((data) => {
+      dispatch(resolveCreateOrg(data));
+      return true;
+    })
+    .catch((err) => {
+      dispatch(rejectCreateOrg(err));
+      return false;
     });
 };
 
@@ -80,6 +116,17 @@ export const reducer = handleActions(
         ...draft.list.filters,
         ...action.payload,
       };
+    }),
+    [setOrgFormValues]: produce((draft, action) => {
+      draft.form.errors = initialState.form.errors;
+      draft.form.values = {
+        ...draft.form.values,
+        ...action.payload,
+      };
+    }),
+    [resetOrgFormValues]: produce((draft) => {
+      draft.form.errors = initialState.form.errors;
+      draft.form.values = initialState.form.values;
     }),
   },
   initialState
