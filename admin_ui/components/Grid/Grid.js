@@ -8,6 +8,25 @@ import GridPerPage from './GridPerPage';
 import GridHeadingCell from './GridHeadingCell';
 import GridLoadingOverlay from './GridLoadingOverlay';
 
+/**
+ * Return a helpful message depending on the count of items we're showing on the grid
+ * @param start - First item index
+ * @param end - Last item index
+ * @param total - Total items found
+ * @returns {string|*}
+ */
+const getPaginationLabel = (start, end, total) => {
+  if (total === 0) {
+    return <strong>No results found</strong>;
+  }
+  return (
+    <React.Fragment>
+      Showing entities <strong>{start}</strong> to <strong>{end}</strong> of{' '}
+      <strong>{total}</strong>:
+    </React.Fragment>
+  );
+};
+
 const Grid = ({
   headings,
   data,
@@ -27,10 +46,7 @@ const Grid = ({
     <div className={classNames('grid relative', className)}>
       {isLoading && <GridLoadingOverlay />}
       <div className="py-2 text-center sm:flex sm:text-left">
-        <p>
-          Showing entities <strong>{entitiesStart}</strong> to <strong>{entitiesEnd}</strong> of{' '}
-          <strong>{totalCount}</strong>:
-        </p>
+        <p>{getPaginationLabel(entitiesStart, entitiesEnd, totalCount)}</p>
         <GridPager
           hasNext={hasNext}
           hasPrevious={hasPrevious}
