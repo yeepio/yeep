@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 
-async function deleteOrg({ db }, { id }) {
+export async function deleteOrg({ db }, { id }) {
   const OrgModel = db.model('Org');
   const OrgMembershipModel = db.model('OrgMembership');
 
