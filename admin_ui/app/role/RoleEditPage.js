@@ -15,8 +15,8 @@ function gotoRoleList() {
 }
 
 const RoleEditPage = ({ roleId }) => {
-  const records = useSelector((state) => state.permission.list.records);
-  const isLoading = useSelector((state) => state.permission.form.isLoading);
+  const records = useSelector((state) => state.role.list.records);
+  const isLoading = useSelector((state) => state.role.form.isLoading);
   const dispatch = useDispatch();
 
   useDocumentTitle(`Edit role#${roleId}`);
