@@ -2,10 +2,7 @@ import { Schema } from 'mongoose';
 import isString from 'lodash/isString';
 import { ObjectId } from 'mongodb';
 import typeOf from 'typeof';
-import flow from 'lodash/fp/flow';
-import map from 'lodash/fp/map';
-import sortBy from 'lodash/fp/sortBy';
-import sortedUniqBy from 'lodash/fp/sortedUniqBy';
+import * as SortedUserPermissionArray from '../utils/SortedUserPermissionArray';
 
 const permissionSchema = new Schema(
   {
@@ -124,19 +121,14 @@ orgMembershipSchema.index(
   }
 );
 
-const formatUserPermissions = flow(
-  map((record) => ({
-    id: record.permission._id.toHexString(),
-    name: record.permission.name,
-    isSystemPermission: record.permission.isSystemPermission,
-    orgId: record.orgId ? record.orgId.toHexString() : null,
-    resourceId: record.oresourceId,
-    roleId: record.role ? record.role._id.toHexString() : undefined,
-  })),
-  sortBy(['name', 'orgId', 'resourceId']),
-  sortedUniqBy((permission) => [permission.name, permission.orgId, permission.resourceId].join(':'))
-);
-
+/**
+ * Retrieves permissions assigned to the designated user from db.
+ * @param {Object} props
+ * @property {string} props.userId - user ID
+ * @property {string} [props.orgId] - org ID to retrieve permissions for (optional)
+ * @property {[string]} [props.permissionScope] - array of permissions IDs to scope retrieved permissions (optional)
+ * @returns {Promise<Array>}
+ */
 orgMembershipSchema.static('getUserPermissions', async function({
   userId,
   orgId,
@@ -278,19 +270,22 @@ orgMembershipSchema.static('getUserPermissions', async function({
     ].filter(Boolean)
   );
 
-  return formatUserPermissions([...records[0].directPermissions, ...records[0].viaRole]);
+  const permissions = [...records[0].directPermissions, ...records[0].viaRole].map((record) => ({
+    id: record.permission._id.toHexString(),
+    name: record.permission.name,
+    isSystemPermission: record.permission.isSystemPermission,
+    orgId: record.orgId ? record.orgId.toHexString() : null,
+    resourceId: record.resourceId || null,
+    roleId: record.role ? record.role._id.toHexString() : undefined,
+  }));
+
+  return SortedUserPermissionArray.sortDedup(permissions);
 });
 
 orgMembershipSchema.static('getUserOrgs', async function({ userId }) {
   if (!isString(userId)) {
     throw new TypeError(`Invalid "userId" property; expected string, received ${typeOf(userId)}`);
   }
-
-  // if (permissionId && !isString(permissionId)) {
-  //   throw new TypeError(
-  //     `Invalid "permissionId" propery; expected string, received ${typeOf(permissionId)}`
-  //   );
-  // }
 
   const records = await this.aggregate([
     {
@@ -309,20 +304,6 @@ orgMembershipSchema.static('getUserOrgs', async function({ userId }) {
     },
   ]);
 
-  // const permissions = [...records.directPermissions, ...records.viaRole].map((record) => {
-  //   return {
-  //     id: record.permission._id.toHexString(),
-  //     name: record.permission.name,
-  //     isSystemPermission: record.permission.isSystemPermission,
-  //     orgId: record.orgId ? record.orgId.toHexString() : null,
-  //     resourceId: record.oresourceId,
-  //     roleId: record.role ? record.role._id.toHexString() : undefined,
-  //   };
-  // });
-
-  // return sortedUniqBy(permissions, (permission) =>
-  //   [permission.name, permission.orgId, permission.resourceId].join(';')
-  // );
   return records;
 });
 

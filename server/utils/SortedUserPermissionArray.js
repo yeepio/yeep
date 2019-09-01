@@ -4,10 +4,23 @@ import isPlainObject from 'lodash/isPlainObject';
 import isNull from 'lodash/isNull';
 import binarySearch from 'binary-search';
 import { ObjectId } from 'mongodb';
+import flow from 'lodash/fp/flow';
+import sortBy from 'lodash/fp/sortBy';
+import sortedUniqBy from 'lodash/fp/sortedUniqBy';
+
+/**
+ * Sorts and deduplicates the supplied user permissions array - does not mutate original array.
+ * @param {[Object]} haystack array of user permissions
+ * @returns {[Object]} new array with sorted user permissions
+ */
+export const sortDedup = flow(
+  sortBy(['name', 'orgId', 'resourceId']),
+  sortedUniqBy((permission) => [permission.name, permission.orgId, permission.resourceId].join(' '))
+);
 
 /**
  * Finds and returns the index of the user permission object that matches the specified properties.
- * @param {Array<Object>} haystack array of user haystack to inspect
+ * @param {[Object]} haystack sorted array of user permissions to inspect
  * @param {Object} needle matching properties
  * @prop {string} needle.name permission name
  * @prop {string|ObjectId} [needle.orgId] permission orgId (optional)
@@ -79,7 +92,7 @@ export function findIndex(haystack, needle) {
 
 /**
  * Indicates whether the specified properties exist in the designated haystack array.
- * @param {Array<Object>} haystack array of user haystack to inspect
+ * @param {[Object]} haystack sorted array of user permissions to inspect
  * @param {Object} needle matching properties
  * @prop {string} needle.name permission name
  * @prop {string|ObjectId} [needle.orgId] permission orgId (optional)
@@ -91,7 +104,7 @@ export function includes(haystack, needle) {
 
 /**
  * Retrieves unique orgs from the designated sorted user-haystack array.
- * @param {Array<Object>} haystack sorted array of user-haystack
+ * @param {[Object]} haystack sorted array of user permissions
  * @param {Object} [needle] matching properties
  * @prop {string} [needle.name] permission name
  * @returns {boolean}
