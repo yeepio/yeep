@@ -13,20 +13,20 @@ describe('SortedUserPermissionArray', () => {
     },
     {
       name: 'yeep.test.2',
-      orgId: null,
+      orgId: 'abc',
     },
     {
       name: 'yeep.test.2',
-      orgId: 'abc',
+      orgId: null,
     },
   ];
 
   describe('findIndex', () => {
     test('returns integer >= 0 when there is match', () => {
       expect(findIndex(permissions, { name: 'yeep.test.1' })).toEqual(1);
-      expect(findIndex(permissions, { name: 'yeep.test.2', orgId: null })).toEqual(2);
+      expect(findIndex(permissions, { name: 'yeep.test.2', orgId: null })).toEqual(3);
       expect(findIndex(permissions, { name: 'yeep.test.1', orgId: 'abc' })).toEqual(0);
-      expect(findIndex(permissions, { name: 'yeep.test.2', orgId: 'abc' })).toEqual(3);
+      expect(findIndex(permissions, { name: 'yeep.test.2', orgId: 'abc' })).toEqual(2);
     });
 
     test('returns -1 when there is no match', () => {
@@ -78,7 +78,7 @@ describe('SortedUserPermissionArray', () => {
 
     test('accepts permission name filter', () => {
       expect(getUniqueOrgIds(permissions, { name: 'yeep.test.1' })).toEqual(['abc', 'def']);
-      expect(getUniqueOrgIds(permissions, { name: 'yeep.test.2' })).toEqual([null, 'abc']);
+      expect(getUniqueOrgIds(permissions, { name: 'yeep.test.2' })).toEqual(['abc', null]);
       expect(getUniqueOrgIds(permissions, { name: 'yeep.test.3' })).toEqual([]);
     });
   });

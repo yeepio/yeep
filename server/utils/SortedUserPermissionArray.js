@@ -40,9 +40,38 @@ export function findIndex(haystack, needle) {
       name,
       orgId,
     },
-    (a, b) =>
-      a.name.localeCompare(b.name) ||
-      (b.orgId === undefined ? 0 : (a.orgId || '').localeCompare(b.orgId || ''))
+    (a, b) => {
+      const nameComparator = a.name.localeCompare(b.name);
+
+      if (nameComparator !== 0) {
+        return nameComparator; // optimization - exit early
+      }
+
+      // from here on, name comparator is zero (0), i.e. (a.name === b.name)
+
+      // ensure orgId has been specified
+      if (b.orgId === undefined) {
+        return 0; // no further checks required
+      }
+
+      // handle case (a.orgId === b.orgId === null)
+      if (a.orgId === null && b.orgId === null) {
+        return 0;
+      }
+
+      // handle case (a.orgId === null && b.orgId !== null)
+      if (a.orgId === null) {
+        return 1;
+      }
+
+      // handle case (a.orgId !== null && b.orgId === null)
+      if (b.orgId === null) {
+        return -1;
+      }
+
+      // handle case (a.orgId !== null && b.orgId !== null)
+      return a.orgId.localeCompare(b.orgId);
+    }
   );
 
   return Math.max(index, -1);
