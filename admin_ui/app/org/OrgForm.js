@@ -81,7 +81,7 @@ const OrgForm = ({ onSubmit, onCancel, onDelete, type }) => {
         <fieldset className="mb-6">
           <legend>Danger zone</legend>
           <Button type="button" danger={true} onClick={() => onDelete(values)}>
-            Delete role
+            Delete org
           </Button>
         </fieldset>
       )}

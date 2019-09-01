@@ -13,6 +13,7 @@ const OrgCreatePage = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
+    // clear existing form values
     dispatch(resetOrgFormValues());
   }, [dispatch]);
 

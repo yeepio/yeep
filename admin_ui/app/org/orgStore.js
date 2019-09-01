@@ -50,6 +50,10 @@ const initUpdateOrg = createAction('ORG_UPDATE_INIT');
 const resolveUpdateOrg = createAction('ORG_UPDATE_RESOLVE');
 const rejectUpdateOrg = createAction('ORG_UPDATE_REJECT');
 
+const initGetOrgInfo = createAction('ORG_INFO_INIT');
+const resolveGetOrgInfo = createAction('ORG_INFO_RESOLVE');
+const rejectGetOrgInfo = createAction('ORG_INFO_REJECT');
+
 export const setOrgListLimit = createAction('ORG_LIST_LIMIT_SET');
 export const setOrgListPage = createAction('ORG_LIST_PAGE_SET');
 export const setOrgListFilters = createAction('ORG_LIST_FILTERS_SET');
@@ -142,6 +146,26 @@ export const updateOrg = (props) => (dispatch) => {
     .catch((err) => {
       dispatch(rejectUpdateOrg(err));
       return false;
+    });
+};
+
+export const getOrgInfo = (props) => (dispatch) => {
+  dispatch(initGetOrgInfo());
+  return yeepClient
+    .api()
+    .then((api) =>
+      api.org.info({
+        ...props,
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(getOrgInfo),
+      })
+    )
+    .then((data) => {
+      dispatch(resolveGetOrgInfo(data));
+      return data.org;
+    })
+    .catch((err) => {
+      dispatch(rejectGetOrgInfo(err));
+      return null;
     });
 };
 
@@ -241,6 +265,23 @@ export const reducer = handleActions(
         };
       }
       draft.form.isSavePending = false;
+    }),
+    [initGetOrgInfo]: produce((draft) => {
+      draft.form.isLoading = true;
+    }),
+    [resolveGetOrgInfo]: produce((draft, action) => {
+      draft.form.isLoading = false;
+      draft.form.values = action.payload.org;
+    }),
+    [rejectGetOrgInfo]: produce((draft, action) => {
+      if (action.payload.code === 400) {
+        draft.form.errors = parseYeepValidationErrors(action.payload);
+      } else {
+        draft.form.errors = {
+          generic: action.payload.message,
+        };
+      }
+      draft.form.isLoading = false;
     }),
   },
   initialState
