@@ -58,7 +58,7 @@ Authorization: `Bearer ${authToken}`
   "ok": true,
   "orgs": [
     {
-      "_id": "5c86b03771ac98675a2f8e30",
+      "id": "5c86b03771ac98675a2f8e30",
       "name": "Acme Inc",
       "slug": "acme",
       "usersCount": 5,
