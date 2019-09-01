@@ -302,7 +302,7 @@ describe('api/org.list', () => {
     });
   });
 
-  test('throws AuthorisationError when requesting organisations of a user with yeep.user.read access but not assignment access', async () => {
+  test('throws AuthorizationError when requesting organisations of a user with yeep.user.read access but not assignment access', async () => {
     const res = await request(server)
       .post('/api/org.list')
       .set('Authorization', `Bearer ${professorBearerToken}`)
