@@ -10,10 +10,57 @@ export const parseCursor = (cursorStr) => {
   return { id };
 };
 
-function getRoles({ db }, $match, limit) {
-  return db.model('Role').aggregate([
+/**
+ * Retrieves roles from db matching the supplied props.
+ * @param {Object} ctx - context
+ * @property {MongooseConnection} ctx.db
+ * @param {Object} props
+ * @property {string} [props.q] - search query
+ * @property {number} [props.limit=100] - max number of roles to return
+ * @property {Object} [props.cursor] - pagination cursor
+ * @property {[string]} props.orgScope - array of org IDs to scope roles
+ * @property {boolean} [props.isSystemRole] - indicates whether to return system roles
+ * @return {Promise<Object>}
+ */
+export async function getRoles({ db }, { q, limit = 100, cursor, orgScope, isSystemRole }) {
+  const RoleModel = db.model('Role');
+
+  const matchExpressions = [];
+
+  if (!orgScope.includes(null)) {
+    matchExpressions.push({
+      scope: { $in: orgScope.map((scope) => ObjectId(scope)) },
+    });
+  }
+
+  if (q) {
+    matchExpressions.push({
+      name: {
+        $regex: `^${escapeRegExp(q)}`,
+        $options: 'i',
+      },
+    });
+  }
+
+  if (isSystemRole != null) {
+    matchExpressions.push({
+      isSystemRole: { $eq: isSystemRole },
+    });
+  }
+
+  // handle pagination
+  if (cursor) {
+    matchExpressions.push({
+      _id: { $gt: ObjectId(cursor.id) },
+    });
+  }
+
+  const pipeline = [
     {
-      $match,
+      $match: matchExpressions.length !== 0 ? { $and: matchExpressions } : {},
+    },
+    {
+      $sort: { _id: 1 },
     },
     {
       $limit: limit,
@@ -48,44 +95,53 @@ function getRoles({ db }, $match, limit) {
         'orgs.name': 1,
       },
     },
-  ]);
+  ];
+
+  const records = await RoleModel.aggregate(pipeline);
+
+  return records.map((record) => {
+    return {
+      id: record._id.toHexString(),
+      name: record.name,
+      org:
+        record.orgs.length === 0
+          ? null
+          : {
+              id: record.orgs[0]._id.toHexString(),
+              name: record.orgs[0].name,
+            },
+      description: record.description,
+      isSystemRole: record.isSystemRole,
+      permissions: record.permissions.map((permission) => {
+        return {
+          id: permission._id.toHexString(),
+          name: permission.name,
+        };
+      }),
+      createdAt: record.createdAt,
+      updatedAt: record.updatedAt,
+    };
+  });
 }
 
-function getRoleCount({ db }, $match) {
-  return db.model('Role').countDocuments($match);
-}
+/**
+ * Counts roles in db matching the supplied props.
+ * @param {Object} ctx - context
+ * @property {MongooseConnection} ctx.db
+ * @param {Object} props
+ * @property {string} [props.q] - search query
+ * @property {[string]} props.orgScope - array of org IDs to scope roles
+ * @property {boolean} [props.isSystemRole] - indicates whether to return system roles
+ * @return {Promise<number>}
+ */
+export async function getRoleCount({ db }, { q, orgScope, isSystemRole }) {
+  const RoleModel = db.model('Role');
 
-function formatRole(role) {
-  return {
-    id: role._id.toHexString(),
-    name: role.name,
-    org:
-      role.orgs.length === 0
-        ? null
-        : {
-            id: role.orgs[0]._id.toHexString(),
-            name: role.orgs[0].name,
-          },
-    description: role.description,
-    isSystemRole: role.isSystemRole,
-    permissions: role.permissions.map((permission) => {
-      return {
-        id: permission._id.toHexString(),
-        name: permission.name,
-      };
-    }),
-    createdAt: role.createdAt,
-    updatedAt: role.updatedAt,
-  };
-}
-
-async function listRoles(ctx, { q, limit, cursor, scopes, isSystemRole }) {
-  // decorate match expressions
   const matchExpressions = [];
 
-  if (!scopes.includes(null)) {
+  if (!orgScope.includes(null)) {
     matchExpressions.push({
-      scope: { $in: scopes.map((scope) => ObjectId(scope)) },
+      scope: { $in: orgScope.map((scope) => ObjectId(scope)) },
     });
   }
 
@@ -104,33 +160,5 @@ async function listRoles(ctx, { q, limit, cursor, scopes, isSystemRole }) {
     });
   }
 
-  // get role count promise
-  const getRoleCountPromise = getRoleCount(
-    ctx,
-    matchExpressions.length ? { $and: matchExpressions } : {}
-  );
-
-  // we don't want the cursor to be taken into account when counting
-  if (cursor) {
-    matchExpressions.push({
-      _id: { $gt: ObjectId(cursor.id) },
-    });
-  }
-
-  // get roles promise
-  const getRolesPromise = getRoles(
-    ctx,
-    matchExpressions.length ? { $and: matchExpressions } : {},
-    limit
-  );
-
-  // resolve both promises
-  const [roles, roleCount] = await Promise.all([getRolesPromise, getRoleCountPromise]);
-
-  return {
-    roles: roles.map(formatRole),
-    roleCount,
-  };
+  return RoleModel.countDocuments(matchExpressions.length !== 0 ? { $and: matchExpressions } : {});
 }
-
-export default listRoles;

@@ -6,12 +6,11 @@ import { validateRequest } from '../../../middleware/validation';
 import {
   decorateSession,
   isUserAuthenticated,
-  decorateUserPermissions,
-  getAuthorizedUniqueOrgIds,
-  findUserPermissionIndex,
+  populateUserPermissions,
 } from '../../../middleware/auth';
 import { AuthorizationError } from '../../../constants/errors';
-import listRoles, { parseCursor, stringifyCursor } from './service';
+import { parseCursor, stringifyCursor, getRoles, getRoleCount } from './service';
+import * as SortedUserPermissionArray from '../../../utils/SortedUserPermissionArray';
 
 export const validationSchema = {
   body: {
@@ -35,22 +34,23 @@ export const validationSchema = {
   },
 };
 
-const isUserAuthorised = async ({ request }, next) => {
+const isUserAuthorized = async ({ request }, next) => {
+  const requestor = request.session.user;
+
   // verify a user has access to the requested org
   if (request.body.scope) {
-    const isScopeAccessible = [request.body.scope, null].some(
-      (orgId) =>
-        findUserPermissionIndex(request.session.user.permissions, {
-          name: 'yeep.role.read',
-          orgId,
-        }) !== -1
+    const isScopeAccessible = [request.body.scope, null].some((orgId) =>
+      SortedUserPermissionArray.includes(requestor.permissions, {
+        name: 'yeep.role.read',
+        orgId,
+      })
     );
 
     if (!isScopeAccessible) {
       throw new AuthorizationError(
-        `User ${
-          request.session.user.id
-        } does not have sufficient permissions to list roles under org ${request.body.scope}`
+        `User ${request.session.user.id} is not authorized to list roles under org ${
+          request.body.scope
+        }`
       );
     }
   }
@@ -60,15 +60,29 @@ const isUserAuthorised = async ({ request }, next) => {
 
 async function handler(ctx) {
   const { request, response } = ctx;
-  const { q, limit, cursor, isSystemRole, scope } = request.body;
+  const { q, limit, isSystemRole, scope, cursor } = request.body;
 
-  const { roles, roleCount } = await listRoles(ctx, {
-    q,
-    limit,
-    cursor: cursor ? parseCursor(cursor) : null,
-    scopes: scope ? [scope] : getAuthorizedUniqueOrgIds(request, 'yeep.role.read'),
-    isSystemRole,
-  });
+  const orgScope = scope
+    ? [scope]
+    : SortedUserPermissionArray.getUniqueOrgIds(request.session.user.permissions, {
+        name: 'yeep.role.read',
+      });
+  const cursorObj = cursor ? parseCursor(cursor) : null;
+
+  const [roles, roleCount] = await Promise.all([
+    getRoles(ctx, {
+      q,
+      limit,
+      cursor: cursorObj,
+      orgScope,
+      isSystemRole,
+    }),
+    getRoleCount(ctx, {
+      q,
+      orgScope,
+      isSystemRole,
+    }),
+  ]);
 
   response.status = 200; // OK
   response.body = {
@@ -83,7 +97,7 @@ export default compose([
   decorateSession(),
   isUserAuthenticated(),
   validateRequest(validationSchema),
-  decorateUserPermissions(),
-  isUserAuthorised,
+  populateUserPermissions,
+  isUserAuthorized,
   handler,
 ]);

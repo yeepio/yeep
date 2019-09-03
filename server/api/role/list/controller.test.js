@@ -6,7 +6,7 @@ import createUser from '../../user/create/service';
 import createOrg from '../../org/create/service';
 import { createSession, signBearerJWT } from '../../session/issueToken/service';
 import { destroySession } from '../../session/destroyToken/service';
-import deleteOrg from '../../org/delete/service';
+import { deleteOrg } from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
 import createPermission from '../../permission/create/service';
 import createRole from '../create/service';
@@ -197,6 +197,7 @@ describe('api/role.list', () => {
     expect(res.body).toMatchObject({
       ok: true,
     });
+
     expect(res.body.roles.length).toBe(2);
 
     const res1 = await request(server)
@@ -287,7 +288,7 @@ describe('api/role.list', () => {
     expect(res.body.roles.length).toBe(1);
   });
 
-  test('throws AuthorisationError when requesting a scope with no access', async () => {
+  test('throws AuthorizationError when requesting a scope with no access', async () => {
     const res = await request(server)
       .post('/api/role.list')
       .set('Authorization', `Bearer ${bearerToken}`)
