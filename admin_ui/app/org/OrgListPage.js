@@ -8,6 +8,7 @@ import Grid from '../../components/Grid';
 import { listOrgs, setOrgListPage, setOrgListLimit, openOrgDeleteModal } from './orgStore';
 import yeepClient from '../yeepClient';
 import OrgDeleteModal from './OrgDeleteModal';
+import OrgListFilters from './OrgListFilters';
 
 let headings = [
   { label: 'Name', isSortable: false, className: 'text-left' },
@@ -77,10 +78,7 @@ const OrgListPage = () => {
         Create new
       </ButtonLink>
       <h1 className="mb-6 font-semibold text-3xl">Organizations</h1>
-      <fieldset className="mb-6">
-        <legend>Quick search</legend>
-        <Input id="quicksearch" placeholder="quicksearch" />
-      </fieldset>
+      <OrgListFilters />
       <Grid
         className="mb-6"
         headings={headings}
