@@ -3,7 +3,6 @@ import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useSelector, useDispatch } from 'react-redux';
 import ButtonLink from '../../components/ButtonLink';
-import Input from '../../components/Input';
 import Grid from '../../components/Grid';
 import { listOrgs, setOrgListPage, setOrgListLimit, openOrgDeleteModal } from './orgStore';
 import yeepClient from '../yeepClient';
