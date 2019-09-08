@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React from 'react';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useSelector, useDispatch } from 'react-redux';
-import get from 'lodash/get';
 import ButtonLink from '../../components/ButtonLink';
-import Grid from '../../components/Grid';
+import PermissionGrid from '../../components/PermissionGrid';
 import PermissionDeleteModal from './PermissionDeleteModal';
 import {
   listPermissions,
@@ -14,18 +13,6 @@ import {
 } from './permissionStore';
 import yeepClient from '../yeepClient';
 import PermissionListFilters from './PermissionListFilters';
-
-const headings = [
-  {
-    label: 'Name',
-    className: 'text-left',
-    isSortable: false,
-  },
-  { label: 'System permission', isSortable: false },
-  { label: 'Role assignments', isSortable: false },
-  { label: 'Org scope', isSortable: false },
-  { label: 'Actions', isSortable: false },
-];
 
 const PermissionListPage = () => {
   const isLoading = useSelector((state) => state.permission.list.isLoading);
@@ -37,13 +24,7 @@ const PermissionListPage = () => {
 
   const dispatch = useDispatch();
 
-  const entitiesStart = useMemo(() => page * limit + 1, [page, limit]);
-  const entitiesEnd = useMemo(
-    () => (records.length >= limit ? (page + 1) * limit : records.length),
-    [records, page, limit]
-  );
-
-  useEffect(() => {
+  React.useEffect(() => {
     dispatch(listPermissions());
     return () => {
       // on unmount cancel any in-flight request
@@ -51,26 +32,26 @@ const PermissionListPage = () => {
     };
   }, [dispatch, limit, page, filters]);
 
-  const reload = useCallback(() => {
+  const reload = React.useCallback(() => {
     dispatch(listPermissions());
   }, [dispatch]);
 
-  const onPermissionDelete = useCallback(
+  const onPermissionDelete = React.useCallback(
     (permission) => {
       dispatch(openPermissionDeleteModal({ permission }));
     },
     [dispatch]
   );
 
-  const onPageNext = useCallback(() => {
+  const onPageNext = React.useCallback(() => {
     dispatch(setPermissionListPage({ page: page + 1 }));
   }, [dispatch, page]);
 
-  const onPagePrevious = useCallback(() => {
+  const onPagePrevious = React.useCallback(() => {
     dispatch(setPermissionListPage({ page: page - 1 }));
   }, [dispatch, page]);
 
-  const onLimitChange = useCallback(
+  const onLimitChange = React.useCallback(
     (event) => {
       const newLimit = event.value;
       dispatch(setPermissionListLimit({ limit: newLimit }));
@@ -88,7 +69,20 @@ const PermissionListPage = () => {
       </ButtonLink>
       <h1 className="font-semibold text-3xl mb-6">Permissions</h1>
       <PermissionListFilters />
-      <Grid
+      <PermissionGrid
+        className="mb-6"
+        isLoading={isLoading}
+        records={records}
+        totalCount={totalCount}
+        page={page}
+        limit={limit}
+        onNextClick={onPageNext}
+        onPreviousClick={onPagePrevious}
+        onLimitChange={onLimitChange}
+        getRecordEditLink={(record) => `${record.id}/edit`}
+        onRecordDelete={onPermissionDelete}
+      />
+      {/* <Grid
         className="mb-6"
         headings={headings}
         data={records}
@@ -97,10 +91,6 @@ const PermissionListPage = () => {
         totalCount={totalCount}
         hasNext={records.length >= limit}
         hasPrevious={page > 0}
-        onNextClick={onPageNext}
-        onPreviousClick={onPagePrevious}
-        onLimitChange={onLimitChange}
-        isLoading={isLoading}
         renderer={(permission, index) => {
           return (
             <tr key={`permissionRow${index}`} className={index % 2 ? `bg-grey-lightest` : ``}>
@@ -124,7 +114,7 @@ const PermissionListPage = () => {
             </tr>
           );
         }}
-      />
+      /> */}
       <p>
         <Link to="..">Return to the dashboard</Link>
       </p>
