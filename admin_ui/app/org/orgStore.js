@@ -32,6 +32,17 @@ export const initialState = {
     isDeletePending: false,
     errors: {},
   },
+  permission: {
+    list: {
+      scope: '',
+      records: [],
+      totalCount: 0,
+      limit: 10,
+      isLoading: false,
+      cursors: [],
+      page: 0,
+    },
+  },
 };
 
 const initListOrgs = createAction('ORG_LIST_INIT');
@@ -63,6 +74,13 @@ export const resetOrgFormValues = createAction('ORG_FORM_VALUES_CLEAR');
 
 export const openOrgDeleteModal = createAction('ORG_DELETE_MODAL_OPEN');
 export const closeOrgDeleteModal = createAction('ORG_DELETE_MODAL_CLOSE');
+
+const initListOrgPermissions = createAction('ORG_PERMISSION_LIST_INIT');
+const resolveListOrgPermissions = createAction('ORG_PERMISSION_LIST_RESOLVE');
+const rejectListOrgPermissions = createAction('ORG_PERMISSION_LIST_REJECT');
+
+export const setOrgPermissionListLimit = createAction('ORG_PERMISSION_LIST_LIMIT_SET');
+export const setOrgPermissionListPage = createAction('ORG_PERMISSION_LIST_PAGE_SET');
 
 export const listOrgs = (props = {}) => (dispatch, getState) => {
   const { org: store } = getState();
@@ -165,6 +183,31 @@ export const getOrgInfo = (props) => (dispatch) => {
     })
     .catch((err) => {
       dispatch(rejectGetOrgInfo(err));
+      return null;
+    });
+};
+
+export const listOrgPermissions = (props = {}) => (dispatch, getState) => {
+  const { org: store } = getState();
+
+  dispatch(initListOrgPermissions());
+  return yeepClient
+    .api()
+    .then((api) =>
+      api.permission.list({
+        limit: store.permission.list.limit,
+        cursor: store.permission.list.cursors[store.permission.list.page - 1],
+        scope: store.form.values.id,
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(listOrgPermissions),
+        ...props,
+      })
+    )
+    .then((data) => {
+      dispatch(resolveListOrgPermissions(data));
+      return data.permissions;
+    })
+    .catch((err) => {
+      dispatch(rejectListOrgPermissions(err));
       return null;
     });
 };
@@ -282,6 +325,26 @@ export const reducer = handleActions(
         };
       }
       draft.form.isLoading = false;
+    }),
+    [initListOrgPermissions]: produce((draft) => {
+      draft.permission.list.isLoading = true;
+    }),
+    [resolveListOrgPermissions]: produce((draft, action) => {
+      draft.permission.list.isLoading = false;
+      draft.permission.list.records = action.payload.permissions;
+      draft.permission.list.cursors.push(action.payload.nextCursor);
+      draft.permission.list.totalCount = action.payload.permissionCount;
+    }),
+    [setOrgPermissionListLimit]: produce((draft, action) => {
+      draft.permission.list.page = 0;
+      draft.permission.list.cursors = [];
+      draft.permission.list.limit = action.payload.limit;
+    }),
+    [setOrgPermissionListPage]: produce((draft, action) => {
+      if (action.payload.page < draft.permission.list.page) {
+        draft.permission.list.cursors.length = action.payload.page;
+      }
+      draft.permission.list.page = action.payload.page;
     }),
   },
   initialState

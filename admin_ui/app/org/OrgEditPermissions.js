@@ -1,11 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from '@reach/router';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import useDocumentTitle from '@rehooks/document-title';
 import TabLinks from '../../components/TabLinks';
 import Button from '../../components/Button';
-import Grid from '../../components/Grid';
 import PermissionCreateModal from '../modals/PermissionCreateModal';
 import PermissionEditModal from '../modals/PermissionEditModal';
 import PermissionDeleteModal from '../modals/PermissionDeleteModal';
@@ -14,37 +13,59 @@ import {
   openPermissionEditModal,
   openPermissionDeleteModal,
 } from '../modals/permissionModalsStore';
-
-// Dummy data
-let permissionHeadings = [
-  {
-    label: 'Name',
-    className: 'text-left',
-  },
-  { label: 'Is system?' },
-  { label: 'Role assignments' },
-  { label: 'Actions', isSortable: false, className: 'text-right' },
-];
-let permissionData = [
-  {
-    id: 7,
-    name: 'blog.read',
-    systemPermission: false,
-    roles: 1,
-  },
-  {
-    id: 8,
-    name: 'blog.modify',
-    systemPermission: false,
-    roles: 1,
-  },
-];
+import PermissionGrid from '../../components/PermissionGrid';
+import {
+  listOrgPermissions,
+  setOrgPermissionListPage,
+  setOrgPermissionListLimit,
+} from './orgStore';
+import yeepClient from '../yeepClient';
 
 const OrgEditPermissions = ({ orgId }) => {
+  const isLoading = useSelector((state) => state.org.permission.list.isLoading);
+  const records = useSelector((state) => state.org.permission.list.records);
+  const totalCount = useSelector((state) => state.org.permission.list.totalCount);
+  const limit = useSelector((state) => state.org.permission.list.limit);
+  const page = useSelector((state) => state.org.permission.list.page);
+
   const dispatch = useDispatch();
 
-  // Set page title
-  useDocumentTitle(`Organization name: Permissions`);
+  React.useEffect(() => {
+    dispatch(listOrgPermissions());
+    return () => {
+      // on unmount cancel any in-flight request
+      yeepClient.redeemCancelToken(listOrgPermissions);
+    };
+  }, [dispatch, limit, page]);
+
+  const reload = React.useCallback(() => {
+    dispatch(listOrgPermissions());
+  }, [dispatch]);
+
+  const onPermissionDelete = React.useCallback(
+    (permission) => {
+      // dispatch(openPermissionDeleteModal({ permission }));
+    },
+    [dispatch]
+  );
+
+  const onPageNext = React.useCallback(() => {
+    dispatch(setOrgPermissionListPage({ page: page + 1 }));
+  }, [dispatch, page]);
+
+  const onPagePrevious = React.useCallback(() => {
+    dispatch(setOrgPermissionListPage({ page: page - 1 }));
+  }, [dispatch, page]);
+
+  const onLimitChange = React.useCallback(
+    (event) => {
+      const newLimit = event.value;
+      dispatch(setOrgPermissionListLimit({ limit: newLimit }));
+    },
+    [dispatch]
+  );
+
+  useDocumentTitle(`${orgId}: Permissions`);
 
   return (
     <React.Fragment>
@@ -90,7 +111,19 @@ const OrgEditPermissions = ({ orgId }) => {
       </fieldset>
       <fieldset className="mb-6">
         <legend>Existing permissions</legend>
-        <Grid
+        <PermissionGrid
+          isLoading={isLoading}
+          records={records}
+          totalCount={totalCount}
+          page={page}
+          limit={limit}
+          onNextClick={onPageNext}
+          onPreviousClick={onPagePrevious}
+          onLimitChange={onLimitChange}
+          getRecordEditLink={(record) => `${record.id}/edit`}
+          onRecordDelete={onPermissionDelete}
+        />
+        {/* <Grid
           headings={permissionHeadings}
           data={permissionData}
           renderer={(permissionData, index) => {
@@ -142,7 +175,7 @@ const OrgEditPermissions = ({ orgId }) => {
               </tr>
             );
           }}
-        />
+        /> */}
       </fieldset>
       <p className="flex">
         <Link to={`/organizations/${orgId}/edit`}>&laquo; Organization details</Link>
