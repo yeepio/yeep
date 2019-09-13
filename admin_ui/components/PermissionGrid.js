@@ -54,17 +54,23 @@ const PermissionGrid = ({
         return (
           <tr key={`permissionRow${index}`} className={index % 2 ? `bg-grey-lightest` : ``}>
             <td className="p-2">
-              {getRecordEditLink ? (
+              {permission.isSystemPermission ? (
+                permission.name
+              ) : getRecordEditLink ? (
                 <Link to={getRecordEditLink(permission)}>{permission.name}</Link>
               ) : (
-                permission.name
+                <button onClick={() => onRecordEdit(permission)} className="pseudolink">
+                  {permission.name}
+                </button>
               )}
             </td>
             <td className="p-2 text-center">{permission.isSystemPermission ? 'Yes' : '-'}</td>
             <td className="p-2 text-center">{permission.roles.length}</td>
             <td className="p-2 text-center">{get(permission.org, ['name'], '-')}</td>
             <td className="p-2 text-center">
-              {!permission.isSystemPermission && (
+              {permission.isSystemPermission ? (
+                <span className="text-grey">Cannot modify</span>
+              ) : (
                 <React.Fragment>
                   {getRecordEditLink ? (
                     <Link to={getRecordEditLink(permission)}>Edit</Link>
@@ -78,7 +84,6 @@ const PermissionGrid = ({
                   </button>
                 </React.Fragment>
               )}
-              {permission.isSystemPermission && <span className="text-grey">Cannot modify</span>}
             </td>
           </tr>
         );
