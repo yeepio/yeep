@@ -63,7 +63,7 @@ const PermissionListPage = () => {
 
   return (
     <React.Fragment>
-      <PermissionDeleteModal onSuccess={reload} onError={(err) => console.error(err)} />
+      <PermissionDeleteModal onSuccess={reload} />
       <ButtonLink to="create" className="float-right">
         Create new
       </ButtonLink>
@@ -82,39 +82,6 @@ const PermissionListPage = () => {
         getRecordEditLink={(record) => `${record.id}/edit`}
         onRecordDelete={onPermissionDelete}
       />
-      {/* <Grid
-        className="mb-6"
-        headings={headings}
-        data={records}
-        entitiesStart={entitiesStart}
-        entitiesEnd={entitiesEnd}
-        totalCount={totalCount}
-        hasNext={records.length >= limit}
-        hasPrevious={page > 0}
-        renderer={(permission, index) => {
-          return (
-            <tr key={`permissionRow${index}`} className={index % 2 ? `bg-grey-lightest` : ``}>
-              <td className="p-2">
-                <Link to={`${permission.id}/edit`}>{permission.name}</Link>
-              </td>
-              <td className="p-2 text-center">{permission.isSystemPermission ? 'Yes' : '-'}</td>
-              <td className="p-2 text-center">{permission.roles.length}</td>
-              <td className="p-2 text-center">{get(permission.org, ['name'], '-')}</td>
-              <td className="p-2 text-center">
-                {!permission.isSystemPermission && (
-                  <React.Fragment>
-                    <Link to={`${permission.id}/edit`}>Edit</Link>{' '}
-                    <button onClick={() => onPermissionDelete(permission)} className="pseudolink">
-                      Delete
-                    </button>
-                  </React.Fragment>
-                )}
-                {permission.isSystemPermission && <span className="text-grey">Cannot modify</span>}
-              </td>
-            </tr>
-          );
-        }}
-      /> */}
       <p>
         <Link to="..">Return to the dashboard</Link>
       </p>

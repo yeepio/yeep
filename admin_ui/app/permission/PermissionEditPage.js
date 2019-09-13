@@ -80,10 +80,7 @@ const PermissionEditPage = ({ permissionId }) => {
 
   return (
     <React.Fragment>
-      <PermissionDeleteModal
-        onSuccess={gotoPermissionListPage}
-        onError={(err) => console.error(err)}
-      />
+      <PermissionDeleteModal onSuccess={gotoPermissionListPage} />
       <h1 className="font-semibold text-3xl mb-6">Edit permission #{permissionId}</h1>
       <PermissionForm
         defaultValues={values}
