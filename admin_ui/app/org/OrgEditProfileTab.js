@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { Link, navigate } from '@reach/router';
 import { useDispatch, useSelector } from 'react-redux';
 import OrgDeleteModal from './OrgDeleteModal';
-import OrgForm from '../../components/OrgForm';
+import OrgForm from './OrgForm';
 import { updateOrg, openOrgDeleteModal } from './orgStore';
 
 function gotoOrgListPage() {

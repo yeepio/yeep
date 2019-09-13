@@ -1,31 +1,11 @@
 import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import noop from 'lodash/noop';
-import { useDispatch, useSelector } from 'react-redux';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
-import { setOrgFormValues } from './orgStore';
 
-const OrgForm = ({ onSubmit, onCancel, onDelete, type }) => {
-  const errors = useSelector((state) => state.org.form.errors);
-  const values = useSelector((state) => state.org.form.values);
-  const isSavePending = useSelector((state) => state.org.form.isSavePending);
-
-  const dispatch = useDispatch();
-
-  const onChangeName = useCallback(
-    (event) => {
-      dispatch(setOrgFormValues({ name: event.target.value }));
-    },
-    [dispatch]
-  );
-
-  const onChangeSlug = useCallback(
-    (event) => {
-      dispatch(setOrgFormValues({ slug: event.target.value }));
-    },
-    [dispatch]
-  );
+const OrgForm = ({ defaultValues, isSavePending, errors, onSubmit, onCancel, onDelete }) => {
+  const [values, setValues] = React.useState(defaultValues);
 
   const onFormSubmit = useCallback(
     (event) => {
@@ -52,7 +32,8 @@ const OrgForm = ({ onSubmit, onCancel, onDelete, type }) => {
             id="name"
             className="w-full sm:w-1/2"
             value={values.name}
-            onChange={onChangeName}
+            onChange={(event) => setValues({ ...values, name: event.target.value })}
+            disabled={isSavePending}
           />
           {errors.name && <p className="invalid mt-2">{errors.name}</p>}
         </div>
@@ -64,7 +45,8 @@ const OrgForm = ({ onSubmit, onCancel, onDelete, type }) => {
             id="slug"
             className="w-full sm:w-1/2"
             value={values.slug}
-            onChange={onChangeSlug}
+            onChange={(event) => setValues({ ...values, slug: event.target.value })}
+            disabled={isSavePending}
           />
           {errors.slug && <p className="invalid mt-2">{errors.slug}</p>}
         </div>
@@ -72,12 +54,17 @@ const OrgForm = ({ onSubmit, onCancel, onDelete, type }) => {
           <Button type="submit" disabled={isSavePending}>
             Save
           </Button>
-          <button type="button" className="pseudolink ml-4" onClick={onCancel}>
+          <button
+            type="button"
+            className="pseudolink ml-4"
+            onClick={onCancel}
+            disabled={isSavePending}
+          >
             Cancel
           </button>
         </div>
       </fieldset>
-      {type === 'update' && (
+      {values.id != null && (
         <fieldset className="mb-6">
           <legend>Danger zone</legend>
           <Button type="button" danger={true} onClick={() => onDelete(values)}>
@@ -90,17 +77,21 @@ const OrgForm = ({ onSubmit, onCancel, onDelete, type }) => {
 };
 
 OrgForm.propTypes = {
-  type: PropTypes.oneOf(['create', 'update']),
+  defaultValues: PropTypes.object,
+  errors: PropTypes.object,
   onSubmit: PropTypes.func,
   onCancel: PropTypes.func,
   onDelete: PropTypes.func,
+  isSavePending: PropTypes.bool,
 };
 
 OrgForm.defaultProps = {
-  type: 'create',
+  defaultValues: {},
+  errors: {},
   onSubmit: noop,
   onCancel: noop,
   onDelete: noop,
+  isSavePending: false,
 };
 
 export default OrgForm;
