@@ -36,8 +36,6 @@ const OrgEditPage = ({ orgId }) => {
 
   useDocumentTitle(`Edit organization ${orgId}`);
 
-  console.log(Date.now());
-
   if (values.id == null || isLoading) {
     return <LoadingIndicator />;
   }

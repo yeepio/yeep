@@ -101,7 +101,7 @@ const PermissionForm = ({ defaultValues, isSavePending, errors, onSubmit, onCanc
           </button>
         </div>
       </fieldset>
-      {values.id != null && (
+      {values.id != null && onDelete !== noop && (
         <fieldset className="mb-6">
           <legend>Danger zone</legend>
           <Button type="button" danger={true} onClick={() => onDelete(values)}>

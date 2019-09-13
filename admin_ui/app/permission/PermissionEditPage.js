@@ -58,12 +58,12 @@ const PermissionEditPage = ({ permissionId }) => {
   );
 
   const submitForm = React.useCallback(
-    (values) => {
+    (nextValues) => {
       dispatch(
         updatePermission({
-          id: values.id,
-          name: values.name,
-          description: values.description,
+          id: nextValues.id,
+          name: nextValues.name,
+          description: nextValues.description,
         })
       ).then((isPermissionUpdated) => {
         if (isPermissionUpdated) {

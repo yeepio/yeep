@@ -3,69 +3,67 @@ import { Link } from '@reach/router';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from '../../components/Button';
 import PermissionCreateModal from '../modals/PermissionCreateModal';
-import PermissionEditModal from '../modals/PermissionEditModal';
-import PermissionDeleteModal from '../modals/PermissionDeleteModal';
-import {
-  openPermissionCreateModal,
-  openPermissionEditModal,
-  openPermissionDeleteModal,
-} from '../modals/permissionModalsStore';
+import PermissionDeleteModal from '../permission/PermissionDeleteModal';
+import PermissionEditModal from '../permission/PermissionEditModal';
+import { openPermissionCreateModal } from '../modals/permissionModalsStore';
 import PermissionGrid from '../../components/PermissionGrid';
 import {
-  listOrgPermissions,
-  setOrgPermissionListPage,
-  setOrgPermissionListLimit,
-} from './orgStore';
+  listPermissions,
+  setPermissionListPage,
+  setPermissionListLimit,
+  openPermissionDeleteModal,
+  setPermissionFormValues,
+} from '../permission/permissionStore';
 import yeepClient from '../yeepClient';
 
 const OrgEditPermissionsTab = () => {
   const org = useSelector((state) => state.org.form.values);
-  const isLoading = useSelector((state) => state.org.permission.list.isLoading);
-  const records = useSelector((state) => state.org.permission.list.records);
-  const totalCount = useSelector((state) => state.org.permission.list.totalCount);
-  const limit = useSelector((state) => state.org.permission.list.limit);
-  const page = useSelector((state) => state.org.permission.list.page);
+  const isLoading = useSelector((state) => state.permission.list.isLoading);
+  const records = useSelector((state) => state.permission.list.records);
+  const totalCount = useSelector((state) => state.permission.list.totalCount);
+  const limit = useSelector((state) => state.permission.list.limit);
+  const page = useSelector((state) => state.permission.list.page);
 
   const dispatch = useDispatch();
 
   React.useEffect(() => {
-    dispatch(listOrgPermissions());
+    dispatch(listPermissions({ scope: org.id }));
     return () => {
       // on unmount cancel any in-flight request
-      yeepClient.redeemCancelToken(listOrgPermissions);
+      yeepClient.redeemCancelToken(listPermissions);
     };
   }, [dispatch, limit, page, org]);
 
   const reload = React.useCallback(() => {
-    dispatch(listOrgPermissions());
-  }, [dispatch]);
+    dispatch(listPermissions({ scope: org.id }));
+  }, [dispatch, org]);
 
   const onPermissionDelete = React.useCallback(
     (permission) => {
-      // dispatch(openPermissionDeleteModal({ permission }));
+      dispatch(openPermissionDeleteModal({ permission }));
     },
     [dispatch]
   );
 
   const onPermissionEdit = React.useCallback(
     (permission) => {
-      // dispatch(openPermissionDeleteModal({ permission }));
+      dispatch(setPermissionFormValues(permission));
     },
     [dispatch]
   );
 
   const onPageNext = React.useCallback(() => {
-    dispatch(setOrgPermissionListPage({ page: page + 1 }));
+    dispatch(setPermissionListPage({ page: page + 1 }));
   }, [dispatch, page]);
 
   const onPagePrevious = React.useCallback(() => {
-    dispatch(setOrgPermissionListPage({ page: page - 1 }));
+    dispatch(setPermissionListPage({ page: page - 1 }));
   }, [dispatch, page]);
 
   const onLimitChange = React.useCallback(
     (event) => {
       const newLimit = event.value;
-      dispatch(setOrgPermissionListLimit({ limit: newLimit }));
+      dispatch(setPermissionListLimit({ limit: newLimit }));
     },
     [dispatch]
   );
@@ -73,8 +71,8 @@ const OrgEditPermissionsTab = () => {
   return (
     <React.Fragment>
       <PermissionCreateModal />
-      <PermissionEditModal />
-      <PermissionDeleteModal />
+      <PermissionEditModal onSuccess={reload} />
+      <PermissionDeleteModal onSuccess={reload} />
       <fieldset className="mb-6">
         <legend>New permissions</legend>
         <Button
