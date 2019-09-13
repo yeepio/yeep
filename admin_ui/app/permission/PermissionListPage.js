@@ -76,8 +76,8 @@ const PermissionListPage = () => {
         totalCount={totalCount}
         page={page}
         limit={limit}
-        onNextClick={onPageNext}
-        onPreviousClick={onPagePrevious}
+        onPageNext={onPageNext}
+        onPagePrevious={onPagePrevious}
         onLimitChange={onLimitChange}
         getRecordEditLink={(record) => `${record.id}/edit`}
         onRecordDelete={onPermissionDelete}
