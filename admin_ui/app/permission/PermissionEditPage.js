@@ -5,7 +5,7 @@ import useDocumentTitle from '@rehooks/document-title';
 import { useDispatch, useSelector } from 'react-redux';
 import find from 'lodash/find';
 import PermissionDeleteModal from './PermissionDeleteModal';
-import PermissionForm from '../../components/PermissionForm';
+import PermissionForm from './PermissionForm';
 import {
   updatePermission,
   getPermissionInfo,

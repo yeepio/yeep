@@ -3,7 +3,7 @@ import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useSelector, useDispatch } from 'react-redux';
 import ButtonLink from '../../components/ButtonLink';
-import PermissionGrid from '../../components/PermissionGrid';
+import PermissionGrid from './PermissionGrid';
 import PermissionDeleteModal from './PermissionDeleteModal';
 import {
   listPermissions,

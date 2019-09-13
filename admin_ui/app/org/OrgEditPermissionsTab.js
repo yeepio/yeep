@@ -1,8 +1,6 @@
 import React from 'react';
 import { Link } from '@reach/router';
 import { useDispatch, useSelector } from 'react-redux';
-import useDocumentTitle from '@rehooks/document-title';
-import TabLinks from '../../components/TabLinks';
 import Button from '../../components/Button';
 import PermissionCreateModal from '../modals/PermissionCreateModal';
 import PermissionEditModal from '../modals/PermissionEditModal';
@@ -12,7 +10,7 @@ import {
   openPermissionEditModal,
   openPermissionDeleteModal,
 } from '../modals/permissionModalsStore';
-import PermissionGrid from '../../components/PermissionGrid';
+import PermissionGrid from '../permission/PermissionGrid';
 import {
   listOrgPermissions,
   setOrgPermissionListPage,

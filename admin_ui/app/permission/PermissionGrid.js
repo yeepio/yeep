@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
 import { Link } from '@reach/router';
-import Grid from './Grid';
+import Grid from '../../components/Grid';
 
 const headings = [
   {
