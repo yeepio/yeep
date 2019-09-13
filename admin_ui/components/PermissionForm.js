@@ -2,11 +2,11 @@ import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import AsyncSelect from 'react-select/lib/Async';
 import noop from 'lodash/noop';
-import Input from '../../components/Input';
-import Textarea from '../../components/Textarea';
-import yeepClient from '../yeepClient';
-import Button from '../../components/Button';
-import OrgOption from '../../utilities/OrgOption';
+import Input from './Input';
+import Textarea from './Textarea';
+import yeepClient from '../app/yeepClient';
+import Button from './Button';
+import OrgOption from '../utilities/OrgOption';
 
 function fetchOrgOptionsAsync(inputValue) {
   return yeepClient.api().then((api) => {

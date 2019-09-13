@@ -10,7 +10,7 @@ import {
   openPermissionEditModal,
   openPermissionDeleteModal,
 } from '../modals/permissionModalsStore';
-import PermissionGrid from '../permission/PermissionGrid';
+import PermissionGrid from '../../components/PermissionGrid';
 import {
   listOrgPermissions,
   setOrgPermissionListPage,

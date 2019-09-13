@@ -2,7 +2,7 @@ import React from 'react';
 import { navigate } from '@reach/router';
 import { useDispatch, useSelector } from 'react-redux';
 import useDocumentTitle from '@rehooks/document-title';
-import PermissionForm from './PermissionForm';
+import PermissionForm from '../../components/PermissionForm';
 import { createPermission, resetPermissionFormValues } from './permissionStore';
 
 function gotoPermissionListPage() {

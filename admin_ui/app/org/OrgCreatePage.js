@@ -2,7 +2,7 @@ import React, { useEffect, useCallback } from 'react';
 import { navigate } from '@reach/router';
 import { useDispatch } from 'react-redux';
 import useDocumentTitle from '@rehooks/document-title';
-import OrgForm from './OrgForm';
+import OrgForm from '../../components/OrgForm';
 import { createOrg, resetOrgFormValues } from './orgStore';
 
 function gotoOrgListPage() {

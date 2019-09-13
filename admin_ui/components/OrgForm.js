@@ -1,8 +1,8 @@
 import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import noop from 'lodash/noop';
-import Input from '../../components/Input';
-import Button from '../../components/Button';
+import Input from './Input';
+import Button from './Button';
 
 const OrgForm = ({ defaultValues, isSavePending, errors, onSubmit, onCancel, onDelete }) => {
   const [values, setValues] = React.useState(defaultValues);
