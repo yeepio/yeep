@@ -1,78 +1,50 @@
-import React, { useCallback, useEffect } from 'react';
+import React from 'react';
+import { Router } from '@reach/router';
 import PropTypes from 'prop-types';
-import { Link, navigate } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useDispatch, useSelector } from 'react-redux';
 import find from 'lodash/find';
-import OrgDeleteModal from './OrgDeleteModal';
-import OrgForm from './OrgForm';
-import { updateOrg, getOrgInfo, setOrgFormValues, openOrgDeleteModal } from './orgStore';
+import { getOrgInfo, setOrgFormValues, resetOrgFormValues } from './orgStore';
 import LoadingIndicator from '../../components/LoadingIndicator';
 import yeepClient from '../yeepClient';
 import TabLinks from '../../components/TabLinks';
-
-function gotoOrgListPage() {
-  navigate('/organizations');
-}
+import OrgEditProfileTab from './OrgEditProfileTab';
+import OrgEditPermissionsTab from './OrgEditPermissionsTab';
 
 const OrgEditPage = ({ orgId }) => {
   const records = useSelector((state) => state.org.list.records);
   const isLoading = useSelector((state) => state.org.form.isLoading);
+  const values = useSelector((state) => state.org.form.values);
   const dispatch = useDispatch();
 
-  useDocumentTitle(`Edit organization ${orgId}`);
-
-  useEffect(() => {
+  React.useEffect(() => {
     // check if org info already exists in store
     const org = find(records, (e) => e.id === orgId);
 
     if (org) {
       dispatch(setOrgFormValues(org));
     } else {
-      // org does not exist in memory - retrieve from API
+      // org does not exist in store - retrieve from API
       dispatch(getOrgInfo({ id: orgId }));
     }
 
     return () => {
       yeepClient.redeemCancelToken(getOrgInfo);
+      dispatch(resetOrgFormValues());
     };
   }, [orgId, records, dispatch]);
 
-  const onOrgDelete = useCallback(
-    (values) => {
-      dispatch(
-        openOrgDeleteModal({
-          org: {
-            id: orgId,
-            ...values,
-          },
-        })
-      );
-    },
-    [dispatch, orgId]
-  );
+  useDocumentTitle(`Edit organization ${orgId}`);
 
-  const submitForm = useCallback(
-    (values) => {
-      dispatch(
-        updateOrg({
-          id: orgId,
-          name: values.name,
-          slug: values.slug,
-        })
-      ).then((isOrgUpdated) => {
-        if (isOrgUpdated) {
-          gotoOrgListPage();
-        }
-      });
-    },
-    [dispatch, orgId]
-  );
+  console.log(Date.now());
+
+  if (values.id == null || isLoading) {
+    return <LoadingIndicator />;
+  }
 
   return (
     <React.Fragment>
-      <OrgDeleteModal onSuccess={gotoOrgListPage} onError={(err) => console.error(err)} />
-      <h1 className="font-semibold text-3xl mb-6">Edit organization {orgId}</h1>
+      <h1 className="font-semibold text-3xl mb-6">Edit organization {values.name}</h1>
       <TabLinks
         className="mb-6"
         links={[
@@ -94,22 +66,10 @@ const OrgEditPage = ({ orgId }) => {
           },
         ]}
       />
-      {isLoading == null ? (
-        <LoadingIndicator />
-      ) : (
-        <OrgForm
-          type="update"
-          onCancel={gotoOrgListPage}
-          onSubmit={submitForm}
-          onDelete={onOrgDelete}
-        />
-      )}
-      <p className="flex">
-        <Link to="/organizations">Return to the list of organizations</Link>
-        <Link to={`/organizations/${orgId}/edit/permissions`} className="ml-auto">
-          Permissions &raquo;
-        </Link>
-      </p>
+      <Router>
+        <OrgEditProfileTab path="/" />
+        <OrgEditPermissionsTab path="/permissions" />
+      </Router>
     </React.Fragment>
   );
 };
