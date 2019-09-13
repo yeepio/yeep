@@ -6,7 +6,7 @@ import Modal from './Modal';
 import Button from './Button';
 import LoadingIndicator from './LoadingIndicator';
 
-const PermissionDeleteModal = ({ record, onDelete, onDismiss, isDeletePending, isOpen }) => {
+const PermissionDeleteModal = ({ isOpen, record, onDelete, isDeletePending, onDismiss }) => {
   if (!isOpen) {
     return null;
   }
