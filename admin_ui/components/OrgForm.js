@@ -6,7 +6,6 @@ import Button from './Button';
 
 const OrgForm = ({ defaultValues, isSavePending, errors, onSubmit, onCancel, onDelete }) => {
   const [values, setValues] = React.useState(defaultValues);
-  console.log(values);
 
   const onFormSubmit = useCallback(
     (event) => {
@@ -34,6 +33,7 @@ const OrgForm = ({ defaultValues, isSavePending, errors, onSubmit, onCancel, onD
             className="w-full sm:w-1/2"
             value={values.name}
             onChange={(event) => setValues({ ...values, name: event.target.value })}
+            disabled={isSavePending}
           />
           {errors.name && <p className="invalid mt-2">{errors.name}</p>}
         </div>
@@ -46,6 +46,7 @@ const OrgForm = ({ defaultValues, isSavePending, errors, onSubmit, onCancel, onD
             className="w-full sm:w-1/2"
             value={values.slug}
             onChange={(event) => setValues({ ...values, slug: event.target.value })}
+            disabled={isSavePending}
           />
           {errors.slug && <p className="invalid mt-2">{errors.slug}</p>}
         </div>
@@ -53,7 +54,12 @@ const OrgForm = ({ defaultValues, isSavePending, errors, onSubmit, onCancel, onD
           <Button type="submit" disabled={isSavePending}>
             Save
           </Button>
-          <button type="button" className="pseudolink ml-4" onClick={onCancel}>
+          <button
+            type="button"
+            className="pseudolink ml-4"
+            onClick={onCancel}
+            disabled={isSavePending}
+          >
             Cancel
           </button>
         </div>
