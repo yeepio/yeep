@@ -75,7 +75,7 @@ const PermissionListPage = () => {
         records={records}
         totalCount={totalCount}
         page={page}
-        limit={limit}
+        pageSize={limit}
         onPageNext={onPageNext}
         onPagePrevious={onPagePrevious}
         onLimitChange={onLimitChange}

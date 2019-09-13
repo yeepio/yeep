@@ -22,7 +22,7 @@ const PermissionGrid = ({
   records,
   totalCount,
   page,
-  limit,
+  pageSize,
   onRecordEdit,
   getRecordEditLink,
   onRecordDelete,
@@ -30,10 +30,10 @@ const PermissionGrid = ({
   onPagePrevious,
   onLimitChange,
 }) => {
-  const entitiesStart = React.useMemo(() => page * limit + 1, [page, limit]);
+  const entitiesStart = React.useMemo(() => page * pageSize + 1, [page, pageSize]);
   const entitiesEnd = React.useMemo(
-    () => (records.length >= limit ? (page + 1) * limit : records.length),
-    [records, page, limit]
+    () => (records.length >= pageSize ? (page + 1) * pageSize : records.length),
+    [records, page, pageSize]
   );
 
   return (
@@ -44,7 +44,7 @@ const PermissionGrid = ({
       entitiesStart={entitiesStart}
       entitiesEnd={entitiesEnd}
       totalCount={totalCount}
-      hasNext={records.length >= limit}
+      hasNext={records.length >= pageSize}
       hasPrevious={page > 0}
       onNextClick={onPageNext}
       onPreviousClick={onPagePrevious}
@@ -93,7 +93,7 @@ PermissionGrid.propTypes = {
   records: PropTypes.arrayOf(PropTypes.object).isRequired,
   totalCount: PropTypes.number.isRequired,
   page: PropTypes.number.isRequired,
-  limit: PropTypes.number.isRequired,
+  pageSize: PropTypes.number.isRequired,
   onRecordEdit: PropTypes.func,
   getRecordEditLink: PropTypes.func, // when specified will render a link instead of a button (useful for "open in new tab")
   onRecordDelete: PropTypes.func.isRequired,
