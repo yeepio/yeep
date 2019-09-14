@@ -2,21 +2,25 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import noop from 'lodash/noop';
 import { useSelector, useDispatch } from 'react-redux';
-import { resetPermissionFormValues, updatePermission } from './permissionStore';
-import PermissionForm from '../../components/PermissionForm';
-import LoadingIndicator from '../../components/LoadingIndicator';
+import {
+  clearPermissionUpdateForm,
+  updatePermission,
+  hidePermissionUpdateForm,
+} from './permissionStore';
+import PermissionForm from './PermissionForm';
 import Modal from '../../components/Modal';
 
 const PermissionEditModal = ({ onSuccess, onError }) => {
-  const isLoading = useSelector((state) => state.permission.form.isLoading);
-  const errors = useSelector((state) => state.permission.form.errors);
-  const values = useSelector((state) => state.permission.form.values);
-  const isSavePending = useSelector((state) => state.permission.form.isSavePending);
+  const errors = useSelector((state) => state.permission.update.errors);
+  const record = useSelector((state) => state.permission.update.record);
+  const isSavePending = useSelector((state) => state.permission.update.isSavePending);
+  const isDisplayed = useSelector((state) => state.permission.update.isDisplayed);
 
   const dispatch = useDispatch();
 
   const onDismiss = React.useCallback(() => {
-    dispatch(resetPermissionFormValues());
+    dispatch(clearPermissionUpdateForm());
+    dispatch(hidePermissionUpdateForm());
   }, [dispatch]);
 
   const submitForm = React.useCallback(
@@ -29,7 +33,8 @@ const PermissionEditModal = ({ onSuccess, onError }) => {
         })
       ).then((isPermissionUpdated) => {
         if (isPermissionUpdated) {
-          dispatch(resetPermissionFormValues());
+          dispatch(clearPermissionUpdateForm());
+          dispatch(hidePermissionUpdateForm());
           onSuccess();
         } else {
           onError();
@@ -39,19 +44,15 @@ const PermissionEditModal = ({ onSuccess, onError }) => {
     [dispatch, onError, onSuccess]
   );
 
-  if (values.id == null) {
+  if (record.id == null || !isDisplayed) {
     return null;
-  }
-
-  if (isLoading) {
-    return <LoadingIndicator />;
   }
 
   return (
     <Modal onClose={onDismiss}>
-      <h1 className="font-semibold text-3xl mb-6">Edit permission {values.name}</h1>
+      <h1 className="font-semibold text-3xl mb-6">Edit permission {record.name}</h1>
       <PermissionForm
-        defaultValues={values}
+        defaultValues={record}
         isSavePending={isSavePending}
         errors={errors}
         onCancel={onDismiss}

@@ -19,19 +19,24 @@ export const initialState = {
       role: {},
     },
   },
-  form: {
-    values: {
+  create: {
+    isDisplayed: false,
+    isSavePending: false,
+    errors: {},
+  },
+  update: {
+    record: {
       name: '',
       description: '',
       org: null,
     },
-    isLoading: false,
+    isDisplayed: false,
     isSavePending: false,
     errors: {},
   },
-  deletion: {
+  delete: {
     record: {},
-    isOpen: false,
+    isDisplayed: false,
     isDeletePending: false,
     errors: {},
   },
@@ -41,10 +46,6 @@ const initListPermissions = createAction('PERMISSION_LIST_INIT');
 const resolveListPermissions = createAction('PERMISSION_LIST_RESOLVE');
 const rejectListPermissions = createAction('PERMISSION_LIST_REJECT');
 
-export const setPermissionListLimit = createAction('PERMISSION_LIST_LIMIT_SET');
-export const setPermissionListPage = createAction('PERMISSION_LIST_PAGE_SET');
-export const setPermissionListFilters = createAction('PERMISSION_LIST_FILTERS_SET');
-
 const initCreatePermission = createAction('PERMISSION_CREATE_INIT');
 const resolveCreatePermission = createAction('PERMISSION_CREATE_RESOLVE');
 const rejectCreatePermission = createAction('PERMISSION_CREATE_REJECT');
@@ -53,19 +54,27 @@ const initUpdatePermission = createAction('PERMISSION_UPDATE_INIT');
 const resolveUpdatePermission = createAction('PERMISSION_UPDATE_RESOLVE');
 const rejectUpdatePermission = createAction('PERMISSION_UPDATE_REJECT');
 
-const initGetPermissionInfo = createAction('PERMISSION_INFO_INIT');
-const resolveGetPermissionInfo = createAction('PERMISSION_INFO_RESOLVE');
-const rejectGetPermissionInfo = createAction('PERMISSION_INFO_REJECT');
-
 const initDeletePermission = createAction('PERMISSION_DELETE_INIT');
 const resolveDeletePermission = createAction('PERMISSION_DELETE_RESOLVE');
 const rejectDeletePermission = createAction('PERMISSION_DELETE_REJECT');
 
-export const setPermissionFormValues = createAction('PERMISSION_FORM_VALUES_SET');
-export const resetPermissionFormValues = createAction('PERMISSION_FORM_VALUES_CLEAR');
+export const setPermissionListLimit = createAction('PERMISSION_LIST_LIMIT_SET');
+export const setPermissionListPage = createAction('PERMISSION_LIST_PAGE_SET');
+export const setPermissionListFilters = createAction('PERMISSION_LIST_FILTERS_SET');
 
-export const openPermissionDeleteModal = createAction('PERMISSION_DELETE_MODAL_OPEN');
-export const closePermissionDeleteModal = createAction('PERMISSION_DELETE_MODAL_CLOSE');
+export const setPermissionUpdateRecord = createAction('PERMISSION_UPDATE_RECORD_SET');
+export const clearPermissionUpdateForm = createAction('PERMISSION_UPDATE_FORM_CLEAR');
+export const showPermissionUpdateForm = createAction('PERMISSION_UPDATE_FORM_SHOW');
+export const hidePermissionUpdateForm = createAction('PERMISSION_UPDATE_FORM_HIDE');
+
+export const setPermissionDeleteRecord = createAction('PERMISSION_DELETE_RECORD_SET');
+export const clearPermissionDeleteForm = createAction('PERMISSION_DELETE_FORM_CLEAR');
+export const showPermissionDeleteForm = createAction('PERMISSION_DELETE_FORM_SHOW');
+export const hidePermissionDeleteForm = createAction('PERMISSION_DELETE_FORM_HIDE');
+
+export const clearPermissionCreateForm = createAction('PERMISSION_CREATE_FORM_CLEAR');
+export const showPermissionCreateForm = createAction('PERMISSION_CREATE_FORM_SHOW');
+export const hidePermissionCreateForm = createAction('PERMISSION_CREATE_FORM_HIDE');
 
 export const listPermissions = (props = {}) => (dispatch, getState) => {
   const { permission: store } = getState();
@@ -137,26 +146,6 @@ export const updatePermission = (props) => (dispatch) => {
     });
 };
 
-export const getPermissionInfo = (props) => (dispatch) => {
-  dispatch(initGetPermissionInfo());
-  return yeepClient
-    .api()
-    .then((api) =>
-      api.permission.info({
-        ...props,
-        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(getPermissionInfo),
-      })
-    )
-    .then((data) => {
-      dispatch(resolveGetPermissionInfo(data));
-      return data.permission;
-    })
-    .catch((err) => {
-      dispatch(rejectGetPermissionInfo(err));
-      return null;
-    });
-};
-
 export const deletePermission = (props) => (dispatch) => {
   dispatch(initDeletePermission());
   return yeepClient
@@ -208,87 +197,92 @@ export const reducer = handleActions(
       };
     }),
     [initCreatePermission]: produce((draft) => {
-      draft.form.isSavePending = true;
+      draft.create.isSavePending = true;
     }),
     [resolveCreatePermission]: produce((draft) => {
-      draft.form.isSavePending = false;
+      draft.create.isSavePending = false;
     }),
     [rejectCreatePermission]: produce((draft, action) => {
       if (action.payload.code === 400) {
-        draft.form.errors = parseYeepValidationErrors(action.payload);
+        draft.create.errors = parseYeepValidationErrors(action.payload);
       } else {
-        draft.form.errors = {
+        draft.create.errors = {
           generic: action.payload.message,
         };
       }
-      draft.form.isSavePending = false;
+      draft.create.isSavePending = false;
+    }),
+    [clearPermissionCreateForm]: produce((draft) => {
+      draft.create.errors = initialState.create.errors;
+    }),
+    [showPermissionCreateForm]: produce((draft) => {
+      draft.create.isDisplayed = true;
+    }),
+    [hidePermissionCreateForm]: produce((draft) => {
+      draft.create.isDisplayed = false;
     }),
     [initUpdatePermission]: produce((draft) => {
-      draft.form.isSavePending = true;
+      draft.update.isSavePending = true;
     }),
     [resolveUpdatePermission]: produce((draft) => {
-      draft.form.isSavePending = false;
+      draft.update.isSavePending = false;
     }),
     [rejectUpdatePermission]: produce((draft, action) => {
       if (action.payload.code === 400) {
-        draft.form.errors = parseYeepValidationErrors(action.payload);
+        draft.update.errors = parseYeepValidationErrors(action.payload);
       } else {
-        draft.form.errors = {
+        draft.update.errors = {
           generic: action.payload.message,
         };
       }
-      draft.form.isSavePending = false;
+      draft.update.isSavePending = false;
     }),
-    [initGetPermissionInfo]: produce((draft) => {
-      draft.form.isLoading = true;
-    }),
-    [resolveGetPermissionInfo]: produce((draft) => {
-      draft.form.isLoading = false;
-    }),
-    [rejectGetPermissionInfo]: produce((draft, action) => {
-      if (action.payload.code === 400) {
-        draft.form.errors = parseYeepValidationErrors(action.payload);
-      } else {
-        draft.form.errors = {
-          generic: action.payload.message,
-        };
-      }
-      draft.form.isLoading = false;
-    }),
-    [setPermissionFormValues]: produce((draft, action) => {
-      draft.form.errors = initialState.form.errors;
-      draft.form.values = {
-        ...draft.form.values,
+    [setPermissionUpdateRecord]: produce((draft, action) => {
+      draft.update.errors = initialState.update.errors;
+      draft.update.record = {
+        ...draft.update.record,
         ...action.payload,
       };
     }),
-    [resetPermissionFormValues]: produce((draft) => {
-      draft.form.errors = initialState.form.errors;
-      draft.form.values = initialState.form.values;
+    [clearPermissionUpdateForm]: produce((draft) => {
+      draft.update.errors = initialState.update.errors;
+      draft.update.record = initialState.update.record;
     }),
-    [openPermissionDeleteModal]: produce((draft, action) => {
-      draft.deletion.isOpen = true;
-      draft.deletion.errors = initialState.deletion.errors;
-      draft.deletion.record = action.payload.permission;
+    [showPermissionUpdateForm]: produce((draft) => {
+      draft.update.isDisplayed = true;
     }),
-    [closePermissionDeleteModal]: produce((draft) => {
-      draft.deletion.isOpen = false;
+    [hidePermissionUpdateForm]: produce((draft) => {
+      draft.update.isDisplayed = false;
     }),
     [initDeletePermission]: produce((draft) => {
-      draft.deletion.isDeletePending = true;
+      draft.delete.isDeletePending = true;
     }),
     [resolveDeletePermission]: produce((draft) => {
-      draft.deletion.isDeletePending = false;
+      draft.delete.isDeletePending = false;
     }),
     [rejectDeletePermission]: produce((draft, action) => {
       if (action.payload.code === 400) {
-        draft.deletion.errors = parseYeepValidationErrors(action.payload);
+        draft.delete.errors = parseYeepValidationErrors(action.payload);
       } else {
-        draft.deletion.errors = {
+        draft.delete.errors = {
           generic: action.payload.message,
         };
       }
-      draft.deletion.isDeletePending = false;
+      draft.delete.isDeletePending = false;
+    }),
+    [setPermissionDeleteRecord]: produce((draft, action) => {
+      draft.delete.errors = initialState.delete.errors;
+      draft.delete.record = action.payload;
+    }),
+    [clearPermissionDeleteForm]: produce((draft) => {
+      draft.delete.errors = initialState.delete.errors;
+      draft.delete.record = initialState.delete.record;
+    }),
+    [showPermissionDeleteForm]: produce((draft) => {
+      draft.delete.isDisplayed = true;
+    }),
+    [hidePermissionDeleteForm]: produce((draft) => {
+      draft.delete.isDisplayed = false;
     }),
   },
   initialState

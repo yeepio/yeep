@@ -3,13 +3,14 @@ import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useSelector, useDispatch } from 'react-redux';
 import ButtonLink from '../../components/ButtonLink';
-import PermissionGrid from '../../components/PermissionGrid';
+import PermissionGrid from './PermissionGrid';
 import PermissionDeleteModal from './PermissionDeleteModal';
 import {
   listPermissions,
   setPermissionListLimit,
   setPermissionListPage,
-  openPermissionDeleteModal,
+  setPermissionDeleteRecord,
+  showPermissionDeleteForm,
 } from './permissionStore';
 import yeepClient from '../yeepClient';
 import PermissionListFilters from './PermissionListFilters';
@@ -38,7 +39,8 @@ const PermissionListPage = () => {
 
   const onPermissionDelete = React.useCallback(
     (permission) => {
-      dispatch(openPermissionDeleteModal({ permission }));
+      dispatch(setPermissionDeleteRecord(permission));
+      dispatch(showPermissionDeleteForm());
     },
     [dispatch]
   );

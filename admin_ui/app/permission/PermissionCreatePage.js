@@ -1,23 +1,15 @@
 import React from 'react';
-import { navigate } from '@reach/router';
 import { useDispatch, useSelector } from 'react-redux';
 import useDocumentTitle from '@rehooks/document-title';
-import PermissionForm from '../../components/PermissionForm';
-import { createPermission, resetPermissionFormValues } from './permissionStore';
-
-function gotoPermissionListPage() {
-  navigate('/permissions');
-}
+import PermissionForm from './PermissionForm';
+import { createPermission } from './permissionStore';
+import { gotoPermissionListPage } from './permissionLocationUtils';
 
 const PermissionCreatePage = () => {
-  const errors = useSelector((state) => state.permission.form.errors);
-  const isSavePending = useSelector((state) => state.permission.form.isSavePending);
+  const errors = useSelector((state) => state.permission.create.errors);
+  const isSavePending = useSelector((state) => state.permission.create.isSavePending);
 
   const dispatch = useDispatch();
-
-  React.useEffect(() => {
-    dispatch(resetPermissionFormValues());
-  }, [dispatch]);
 
   const onSubmit = React.useCallback(
     (values) => {

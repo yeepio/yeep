@@ -6,13 +6,16 @@ import PermissionCreateModal from '../modals/PermissionCreateModal';
 import PermissionDeleteModal from '../permission/PermissionDeleteModal';
 import PermissionEditModal from '../permission/PermissionEditModal';
 import { openPermissionCreateModal } from '../modals/permissionModalsStore';
-import PermissionGrid from '../../components/PermissionGrid';
+import PermissionGrid from '../permission/PermissionGrid';
 import {
   listPermissions,
   setPermissionListPage,
   setPermissionListLimit,
-  openPermissionDeleteModal,
-  setPermissionFormValues,
+  setPermissionUpdateRecord,
+  showPermissionDeleteForm,
+  showPermissionUpdateForm,
+  showPermissionCreateForm,
+  setPermissionDeleteRecord,
 } from '../permission/permissionStore';
 import yeepClient from '../yeepClient';
 
@@ -40,14 +43,16 @@ const OrgEditPermissionsTab = () => {
 
   const onPermissionDelete = React.useCallback(
     (permission) => {
-      dispatch(openPermissionDeleteModal({ permission }));
+      dispatch(setPermissionDeleteRecord(permission));
+      dispatch(showPermissionDeleteForm());
     },
     [dispatch]
   );
 
   const onPermissionEdit = React.useCallback(
     (permission) => {
-      dispatch(setPermissionFormValues(permission));
+      dispatch(setPermissionUpdateRecord(permission));
+      dispatch(showPermissionUpdateForm());
     },
     [dispatch]
   );
@@ -75,13 +80,7 @@ const OrgEditPermissionsTab = () => {
       <PermissionDeleteModal onSuccess={reload} />
       <fieldset className="mb-6">
         <legend>New permissions</legend>
-        <Button
-          onClick={() => {
-            dispatch(openPermissionCreateModal());
-          }}
-        >
-          Create new permission
-        </Button>
+        <Button onClick={() => dispatch(showPermissionCreateForm())}>Create new permission</Button>
         <p className="mt-4">
           Tip: If you want to create a permission that is <em>not</em> scoped to the
           &quot;ORGNAME&quot; organization, please{' '}

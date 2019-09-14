@@ -1,26 +1,34 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import noop from 'lodash/noop';
+import classnames from 'classnames';
 import { useSelector, useDispatch } from 'react-redux';
-import PermissionDeleteModal from '../../components/PermissionDeleteModal';
-import { closePermissionDeleteModal, deletePermission } from './permissionStore';
+import {
+  deletePermission,
+  hidePermissionDeleteForm,
+  clearPermissionDeleteForm,
+} from './permissionStore';
+import Modal from '../../components/Modal';
+import Button from '../../components/Button';
+import LoadingIndicator from '../../components/LoadingIndicator';
 
-const ConnectedPermissionDeleteModal = ({ onSuccess, onError }) => {
-  const isOpen = useSelector((state) => state.permission.deletion.isOpen);
-  const record = useSelector((state) => state.permission.deletion.record);
-  // const errors = useSelector((state) => state.permission.deletion.errors);
-  const isDeletePending = useSelector((state) => state.permission.deletion.isDeletePending);
+const PermissionDeleteModal = ({ onSuccess, onError }) => {
+  const record = useSelector((state) => state.permission.delete.record);
+  const isDeletePending = useSelector((state) => state.permission.delete.isDeletePending);
+  const isDisplayed = useSelector((state) => state.permission.delete.isDisplayed);
 
   const dispatch = useDispatch();
 
   const onDismiss = React.useCallback(() => {
-    dispatch(closePermissionDeleteModal());
+    dispatch(clearPermissionDeleteForm());
+    dispatch(hidePermissionDeleteForm());
   }, [dispatch]);
 
   const onDelete = React.useCallback(() => {
     dispatch(deletePermission({ id: record.id })).then((isPermissionDeleted) => {
       if (isPermissionDeleted) {
-        dispatch(closePermissionDeleteModal());
+        dispatch(clearPermissionDeleteForm());
+        dispatch(hidePermissionDeleteForm());
         onSuccess();
       } else {
         onError();
@@ -28,26 +36,45 @@ const ConnectedPermissionDeleteModal = ({ onSuccess, onError }) => {
     });
   }, [dispatch, record, onError, onSuccess]);
 
+  if (record.id == null || !isDisplayed) {
+    return null;
+  }
+
   return (
-    <PermissionDeleteModal
-      record={record}
-      onDelete={onDelete}
-      onDismiss={onDismiss}
-      isOpen={isOpen}
-      isDeletePending={isDeletePending}
-    />
+    <Modal onClose={onDismiss}>
+      <h2 className="font-bold text-2xl mb-4">Delete permission &quot;{record.name}&quot;?</h2>
+      {record.rolesCount !== 0 && (
+        <p className="mb-4">
+          Please note that {record.name} is present in {record.rolesCount} roles.
+        </p>
+      )}
+      <p className="mb-4">
+        <strong>Warning: This action cannot be undone!</strong>
+      </p>
+      <p className="text-center">
+        <Button
+          danger
+          onClick={onDelete}
+          disabled={isDeletePending}
+          className={classnames({
+            'opacity-50 cursor-not-allowed': isDeletePending,
+          })}
+        >
+          {isDeletePending ? <LoadingIndicator /> : 'Delete Permission'}
+        </Button>
+      </p>
+    </Modal>
   );
 };
 
-ConnectedPermissionDeleteModal.propTypes = {
+PermissionDeleteModal.propTypes = {
   onSuccess: PropTypes.func,
   onError: PropTypes.func,
-  onCancel: PropTypes.func,
 };
 
-ConnectedPermissionDeleteModal.defaultProps = {
+PermissionDeleteModal.defaultProps = {
+  onSuccess: noop,
   onError: noop,
-  onCancel: noop,
 };
 
-export default ConnectedPermissionDeleteModal;
+export default PermissionDeleteModal;

@@ -1,31 +1,36 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Link, navigate } from '@reach/router';
+import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useDispatch, useSelector } from 'react-redux';
 import find from 'lodash/find';
 import PermissionDeleteModal from './PermissionDeleteModal';
-import PermissionForm from '../../components/PermissionForm';
+import PermissionForm from './PermissionForm';
 import {
   updatePermission,
-  getPermissionInfo,
-  setPermissionFormValues,
-  openPermissionDeleteModal,
-  resetPermissionFormValues,
+  setPermissionUpdateRecord,
+  setPermissionDeleteRecord,
+  showPermissionDeleteForm,
+  clearPermissionUpdateForm,
 } from './permissionStore';
 import LoadingIndicator from '../../components/LoadingIndicator';
 import yeepClient from '../yeepClient';
+import { gotoPermissionListPage } from './permissionLocationUtils';
 
-function gotoPermissionListPage() {
-  navigate('/permissions');
+function getPermissionInfo({ id }) {
+  return yeepClient.api().then((api) =>
+    api.permission.info({
+      id,
+      cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(getPermissionInfo),
+    })
+  );
 }
 
 const PermissionEditPage = ({ permissionId }) => {
   const records = useSelector((state) => state.permission.list.records);
-  const isLoading = useSelector((state) => state.permission.form.isLoading);
-  const errors = useSelector((state) => state.permission.form.errors);
-  const values = useSelector((state) => state.permission.form.values);
-  const isSavePending = useSelector((state) => state.permission.form.isSavePending);
+  const errors = useSelector((state) => state.permission.update.errors);
+  const record = useSelector((state) => state.permission.update.record);
+  const isSavePending = useSelector((state) => state.permission.update.isSavePending);
 
   const dispatch = useDispatch();
 
@@ -36,23 +41,28 @@ const PermissionEditPage = ({ permissionId }) => {
     const permission = find(records, (e) => e.id === permissionId);
 
     if (permission) {
-      dispatch(setPermissionFormValues(permission));
+      dispatch(setPermissionUpdateRecord(permission));
     } else {
       // permission does not exist in memory - retrieve from API
-      dispatch(getPermissionInfo({ id: permissionId })).then((permission) => {
-        dispatch(setPermissionFormValues(permission));
-      });
+      getPermissionInfo({ id: permissionId })
+        .then((data) => {
+          dispatch(setPermissionUpdateRecord(data.permission));
+        })
+        .catch((err) => {
+          console.error(err);
+        });
     }
 
     return () => {
       yeepClient.redeemCancelToken(getPermissionInfo);
-      dispatch(resetPermissionFormValues());
+      dispatch(clearPermissionUpdateForm());
     };
   }, [permissionId, records, dispatch]);
 
   const onPermissionDelete = React.useCallback(
     (permission) => {
-      dispatch(openPermissionDeleteModal({ permission }));
+      dispatch(setPermissionDeleteRecord(permission));
+      dispatch(showPermissionDeleteForm());
     },
     [dispatch]
   );
@@ -74,7 +84,7 @@ const PermissionEditPage = ({ permissionId }) => {
     [dispatch]
   );
 
-  if (values.id == null || isLoading) {
+  if (record.id == null) {
     return <LoadingIndicator />;
   }
 
@@ -83,7 +93,7 @@ const PermissionEditPage = ({ permissionId }) => {
       <PermissionDeleteModal onSuccess={gotoPermissionListPage} />
       <h1 className="font-semibold text-3xl mb-6">Edit permission #{permissionId}</h1>
       <PermissionForm
-        defaultValues={values}
+        defaultValues={record}
         isSavePending={isSavePending}
         errors={errors}
         onCancel={gotoPermissionListPage}
