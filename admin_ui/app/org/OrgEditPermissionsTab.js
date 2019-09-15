@@ -2,10 +2,9 @@ import React from 'react';
 import { Link } from '@reach/router';
 import { useDispatch, useSelector } from 'react-redux';
 import Button from '../../components/Button';
-import PermissionCreateModal from '../modals/PermissionCreateModal';
+import PermissionCreateModal from '../permission/PermissionCreateModal';
 import PermissionDeleteModal from '../permission/PermissionDeleteModal';
 import PermissionEditModal from '../permission/PermissionEditModal';
-import { openPermissionCreateModal } from '../modals/permissionModalsStore';
 import PermissionGrid from '../permission/PermissionGrid';
 import {
   listPermissions,
