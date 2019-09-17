@@ -17,18 +17,23 @@ export const initialState = {
       queryText: '',
     },
   },
-  form: {
-    values: {
-      name: '',
-      slug: '',
-    },
-    isLoading: false,
+  info: {
+    record: {},
+  },
+  create: {
+    isDisplayed: false,
     isSavePending: false,
     errors: {},
   },
-  deletion: {
+  update: {
     record: {},
-    isOpen: false,
+    isDisplayed: false,
+    isSavePending: false,
+    errors: {},
+  },
+  delete: {
+    record: {},
+    isDisplayed: false,
     isDeletePending: false,
     errors: {},
   },
@@ -58,11 +63,19 @@ export const setOrgListLimit = createAction('ORG_LIST_LIMIT_SET');
 export const setOrgListPage = createAction('ORG_LIST_PAGE_SET');
 export const setOrgListFilters = createAction('ORG_LIST_FILTERS_SET');
 
-export const setOrgFormValues = createAction('ORG_FORM_VALUES_SET');
-export const resetOrgFormValues = createAction('ORG_FORM_VALUES_CLEAR');
+export const setOrgUpdateRecord = createAction('ORG_UPDATE_RECORD_SET');
+export const clearOrgUpdateForm = createAction('ORG_UPDATE_FORM_CLEAR');
+export const showOrgUpdateForm = createAction('ORG_UPDATE_FORM_SHOW');
+export const hideOrgUpdateForm = createAction('ORG_UPDATE_FORM_HIDE');
 
-export const openOrgDeleteModal = createAction('ORG_DELETE_MODAL_OPEN');
-export const closeOrgDeleteModal = createAction('ORG_DELETE_MODAL_CLOSE');
+export const setOrgDeleteRecord = createAction('ORG_DELETE_RECORD_SET');
+export const clearOrgDeleteForm = createAction('ORG_DELETE_FORM_CLEAR');
+export const showOrgDeleteForm = createAction('ORG_DELETE_FORM_SHOW');
+export const hideOrgDeleteForm = createAction('ORG_DELETE_FORM_HIDE');
+
+export const clearOrgCreateForm = createAction('ORG_CREATE_FORM_CLEAR');
+export const showOrgCreateForm = createAction('ORG_CREATE_FORM_SHOW');
+export const hideOrgCreateForm = createAction('ORG_CREATE_FORM_HIDE');
 
 export const listOrgs = (props = {}) => (dispatch, getState) => {
   const { org: store } = getState();
@@ -215,56 +228,77 @@ export const reducer = handleActions(
       }
       draft.form.isSavePending = false;
     }),
-    [setOrgFormValues]: produce((draft, action) => {
-      draft.form.errors = initialState.form.errors;
-      draft.form.values = {
-        ...draft.form.values,
-        ...action.payload,
-      };
+    [clearOrgCreateForm]: produce((draft) => {
+      draft.create.errors = initialState.create.errors;
     }),
-    [resetOrgFormValues]: produce((draft) => {
-      draft.form.errors = initialState.form.errors;
-      draft.form.values = initialState.form.values;
+    [showOrgCreateForm]: produce((draft) => {
+      draft.create.isDisplayed = true;
     }),
-    [openOrgDeleteModal]: produce((draft, action) => {
-      draft.deletion.isOpen = true;
-      draft.deletion.errors = initialState.deletion.errors;
-      draft.deletion.record = action.payload.org;
-    }),
-    [closeOrgDeleteModal]: produce((draft) => {
-      draft.deletion.isOpen = false;
-    }),
-    [initDeleteOrg]: produce((draft) => {
-      draft.deletion.isDeletePending = true;
-    }),
-    [resolveDeleteOrg]: produce((draft) => {
-      draft.deletion.isDeletePending = false;
-    }),
-    [rejectDeleteOrg]: produce((draft, action) => {
-      if (action.payload.code === 400) {
-        draft.deletion.errors = parseYeepValidationErrors(action.payload);
-      } else {
-        draft.deletion.errors = {
-          generic: action.payload.message,
-        };
-      }
-      draft.deletion.isDeletePending = false;
+    [hideOrgCreateForm]: produce((draft) => {
+      draft.create.isDisplayed = false;
     }),
     [initUpdateOrg]: produce((draft) => {
-      draft.form.isSavePending = true;
+      draft.update.isSavePending = true;
     }),
     [resolveUpdateOrg]: produce((draft) => {
-      draft.form.isSavePending = false;
+      draft.update.isSavePending = false;
     }),
     [rejectUpdateOrg]: produce((draft, action) => {
       if (action.payload.code === 400) {
-        draft.form.errors = parseYeepValidationErrors(action.payload);
+        draft.update.errors = parseYeepValidationErrors(action.payload);
       } else {
-        draft.form.errors = {
+        draft.update.errors = {
           generic: action.payload.message,
         };
       }
-      draft.form.isSavePending = false;
+      draft.update.isSavePending = false;
+    }),
+    [setOrgUpdateRecord]: produce((draft, action) => {
+      draft.update.errors = initialState.update.errors;
+      draft.update.record = {
+        ...draft.update.record,
+        ...action.payload,
+      };
+    }),
+    [clearOrgUpdateForm]: produce((draft) => {
+      draft.update.errors = initialState.update.errors;
+      draft.update.record = initialState.update.record;
+    }),
+    [showOrgUpdateForm]: produce((draft) => {
+      draft.update.isDisplayed = true;
+    }),
+    [hideOrgUpdateForm]: produce((draft) => {
+      draft.update.isDisplayed = false;
+    }),
+    [initDeleteOrg]: produce((draft) => {
+      draft.delete.isDeletePending = true;
+    }),
+    [resolveDeleteOrg]: produce((draft) => {
+      draft.delete.isDeletePending = false;
+    }),
+    [rejectDeleteOrg]: produce((draft, action) => {
+      if (action.payload.code === 400) {
+        draft.delete.errors = parseYeepValidationErrors(action.payload);
+      } else {
+        draft.delete.errors = {
+          generic: action.payload.message,
+        };
+      }
+      draft.delete.isDeletePending = false;
+    }),
+    [setOrgDeleteRecord]: produce((draft, action) => {
+      draft.delete.errors = initialState.delete.errors;
+      draft.delete.record = action.payload;
+    }),
+    [clearOrgDeleteForm]: produce((draft) => {
+      draft.delete.errors = initialState.delete.errors;
+      draft.delete.record = initialState.delete.record;
+    }),
+    [showOrgDeleteForm]: produce((draft) => {
+      draft.delete.isDisplayed = true;
+    }),
+    [hideOrgDeleteForm]: produce((draft) => {
+      draft.delete.isDisplayed = false;
     }),
     [initGetOrgInfo]: produce((draft) => {
       draft.form.isLoading = true;

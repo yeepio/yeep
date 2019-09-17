@@ -19,7 +19,7 @@ import {
 import yeepClient from '../yeepClient';
 
 const OrgEditPermissionsTab = () => {
-  const org = useSelector((state) => state.org.form.values);
+  const org = useSelector((state) => state.org.update.record);
   const isLoading = useSelector((state) => state.permission.list.isLoading);
   const records = useSelector((state) => state.permission.list.records);
   const totalCount = useSelector((state) => state.permission.list.totalCount);

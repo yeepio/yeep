@@ -4,17 +4,29 @@ import PropTypes from 'prop-types';
 import useDocumentTitle from '@rehooks/document-title';
 import { useDispatch, useSelector } from 'react-redux';
 import find from 'lodash/find';
-import { getOrgInfo, setOrgFormValues, resetOrgFormValues } from './orgStore';
+import { setOrgUpdateRecord, clearOrgUpdateForm } from './orgStore';
 import LoadingIndicator from '../../components/LoadingIndicator';
 import yeepClient from '../yeepClient';
 import TabLinks from '../../components/TabLinks';
 import OrgEditProfileTab from './OrgEditProfileTab';
 import OrgEditPermissionsTab from './OrgEditPermissionsTab';
 
+function getOrgInfo({ id }) {
+  return yeepClient
+    .api()
+    .then((api) =>
+      api.org.info({
+        id,
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(getOrgInfo),
+      })
+    )
+    .then((data) => data.org);
+}
+
 const OrgEditPage = ({ orgId }) => {
   const records = useSelector((state) => state.org.list.records);
-  const isLoading = useSelector((state) => state.org.form.isLoading);
-  const values = useSelector((state) => state.org.form.values);
+  const record = useSelector((state) => state.org.update.record);
+
   const dispatch = useDispatch();
 
   React.useEffect(() => {
@@ -22,27 +34,33 @@ const OrgEditPage = ({ orgId }) => {
     const org = find(records, (e) => e.id === orgId);
 
     if (org) {
-      dispatch(setOrgFormValues(org));
+      dispatch(setOrgUpdateRecord(org));
     } else {
-      // org does not exist in store - retrieve from API
-      dispatch(getOrgInfo({ id: orgId }));
+      // org does not exist in memory - retrieve from API
+      getOrgInfo({ id: orgId })
+        .then((org) => {
+          dispatch(setOrgUpdateRecord(org));
+        })
+        .catch((err) => {
+          console.error(err);
+        });
     }
 
     return () => {
       yeepClient.redeemCancelToken(getOrgInfo);
-      dispatch(resetOrgFormValues());
+      dispatch(clearOrgUpdateForm());
     };
   }, [orgId, records, dispatch]);
 
   useDocumentTitle(`Edit organization ${orgId}`);
 
-  if (values.id == null || isLoading) {
+  if (record.id == null) {
     return <LoadingIndicator />;
   }
 
   return (
     <React.Fragment>
-      <h1 className="font-semibold text-3xl mb-6">Edit organization {values.name}</h1>
+      <h1 className="font-semibold text-3xl mb-6">Edit organization {record.name}</h1>
       <TabLinks
         className="mb-6"
         links={[

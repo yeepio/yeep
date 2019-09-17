@@ -1,28 +1,30 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Link, navigate } from '@reach/router';
 import { useDispatch, useSelector } from 'react-redux';
 import OrgDeleteModal from './OrgDeleteModal';
-import OrgForm from '../../components/OrgForm';
-import { updateOrg, openOrgDeleteModal } from './orgStore';
+import OrgForm from './OrgForm';
+import { updateOrg, setOrgDeleteRecord, showOrgDeleteForm } from './orgStore';
 
 function gotoOrgListPage() {
   navigate('/organizations');
 }
 
 const OrgEditProfileTab = () => {
-  const values = useSelector((state) => state.org.form.values);
-  const errors = useSelector((state) => state.org.form.errors);
-  const isSavePending = useSelector((state) => state.org.form.isSavePending);
+  const record = useSelector((state) => state.org.update.record);
+  const errors = useSelector((state) => state.org.update.errors);
+  const isSavePending = useSelector((state) => state.org.update.isSavePending);
+
   const dispatch = useDispatch();
 
-  const onOrgDelete = useCallback(
-    (values) => {
-      dispatch(openOrgDeleteModal({ org: values }));
+  const onOrgDelete = React.useCallback(
+    (org) => {
+      dispatch(setOrgDeleteRecord(org));
+      dispatch(showOrgDeleteForm());
     },
     [dispatch]
   );
 
-  const submitForm = useCallback(
+  const submitForm = React.useCallback(
     (nextValues) => {
       dispatch(
         updateOrg({
@@ -43,7 +45,7 @@ const OrgEditProfileTab = () => {
     <React.Fragment>
       <OrgDeleteModal onSuccess={gotoOrgListPage} onError={(err) => console.error(err)} />
       <OrgForm
-        defaultValues={values}
+        defaultValues={record}
         isSavePending={isSavePending}
         errors={errors}
         onCancel={gotoOrgListPage}
@@ -52,7 +54,7 @@ const OrgEditProfileTab = () => {
       />
       <p className="flex">
         <Link to="/organizations">Return to the list of organizations</Link>
-        <Link to={`/organizations/${values.id}/edit/permissions`} className="ml-auto">
+        <Link to={`/organizations/${record.id}/edit/permissions`} className="ml-auto">
           Permissions &raquo;
         </Link>
       </p>

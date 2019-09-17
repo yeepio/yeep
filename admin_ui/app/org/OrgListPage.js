@@ -1,21 +1,19 @@
-import React, { useEffect, useCallback, useMemo } from 'react';
+import React from 'react';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useSelector, useDispatch } from 'react-redux';
 import ButtonLink from '../../components/ButtonLink';
-import Grid from '../../components/Grid';
-import { listOrgs, setOrgListPage, setOrgListLimit, openOrgDeleteModal } from './orgStore';
+import {
+  listOrgs,
+  setOrgListPage,
+  setOrgListLimit,
+  showOrgDeleteForm,
+  setOrgDeleteRecord,
+} from './orgStore';
 import yeepClient from '../yeepClient';
 import OrgDeleteModal from './OrgDeleteModal';
 import OrgListFilters from './OrgListFilters';
-
-let headings = [
-  { label: 'Name', isSortable: false, className: 'text-left' },
-  { label: 'User count', isSortable: false },
-  { label: 'Role count', isSortable: false },
-  { label: 'Permission count', isSortable: false },
-  { label: 'Actions', isSortable: false },
-];
+import OrgGrid from './OrgGrid';
 
 const OrgListPage = () => {
   const isLoading = useSelector((state) => state.org.list.isLoading);
@@ -27,13 +25,7 @@ const OrgListPage = () => {
 
   const dispatch = useDispatch();
 
-  const entitiesStart = useMemo(() => page * limit + 1, [page, limit]);
-  const entitiesEnd = useMemo(
-    () => (records.length >= limit ? (page + 1) * limit : records.length),
-    [records, page, limit]
-  );
-
-  useEffect(() => {
+  React.useEffect(() => {
     dispatch(listOrgs());
     return () => {
       // on unmount cancel any in-flight request
@@ -41,26 +33,27 @@ const OrgListPage = () => {
     };
   }, [dispatch, limit, page, filters]);
 
-  const reload = useCallback(() => {
+  const reload = React.useCallback(() => {
     dispatch(listOrgs());
   }, [dispatch]);
 
-  const onOrgDelete = useCallback(
+  const onOrgDelete = React.useCallback(
     (org) => {
-      dispatch(openOrgDeleteModal({ org }));
+      dispatch(setOrgDeleteRecord(org));
+      dispatch(showOrgDeleteForm());
     },
     [dispatch]
   );
 
-  const onPageNext = useCallback(() => {
+  const onPageNext = React.useCallback(() => {
     dispatch(setOrgListPage({ page: page + 1 }));
   }, [dispatch, page]);
 
-  const onPagePrevious = useCallback(() => {
+  const onPagePrevious = React.useCallback(() => {
     dispatch(setOrgListPage({ page: page - 1 }));
   }, [dispatch, page]);
 
-  const onLimitChange = useCallback(
+  const onLimitChange = React.useCallback(
     (event) => {
       const newLimit = event.value;
       dispatch(setOrgListLimit({ limit: newLimit }));
@@ -78,43 +71,18 @@ const OrgListPage = () => {
       </ButtonLink>
       <h1 className="mb-6 font-semibold text-3xl">Organizations</h1>
       <OrgListFilters />
-      <Grid
+      <OrgGrid
         className="mb-6"
-        headings={headings}
-        data={records}
-        entitiesStart={entitiesStart}
-        entitiesEnd={entitiesEnd}
-        totalCount={totalCount}
-        hasNext={records.length >= limit}
-        hasPrevious={page > 0}
-        onNextClick={onPageNext}
-        onPreviousClick={onPagePrevious}
-        onLimitChange={onLimitChange}
         isLoading={isLoading}
-        renderer={(org, index) => {
-          return (
-            <tr key={`gridRow${index}`} className={index % 2 ? `bg-grey-lightest` : ``}>
-              <td className="p-2">
-                <Link to={`${org.id}/edit`}>{org.name}</Link>
-              </td>
-              <td className="p-2 text-center">
-                <a href="/">{org.usersCount}</a>
-              </td>
-              <td className="p-2 text-center">
-                <a href="/">{org.rolesCount}</a>
-              </td>
-              <td className="p-2 text-center">
-                <a href="/">{org.permissionsCount}</a>
-              </td>
-              <td className="p-2 text-center">
-                <Link to={`${org.id}/edit`}>Edit</Link>{' '}
-                <button onClick={() => onOrgDelete(org)} className="pseudolink">
-                  Delete
-                </button>
-              </td>
-            </tr>
-          );
-        }}
+        records={records}
+        totalCount={totalCount}
+        page={page}
+        pageSize={limit}
+        onPageNext={onPageNext}
+        onPagePrevious={onPagePrevious}
+        onLimitChange={onLimitChange}
+        getRecordEditLink={(record) => `${record.id}/edit`}
+        onRecordDelete={onOrgDelete}
       />
       <p>
         <Link to="..">Return to the dashboard</Link>

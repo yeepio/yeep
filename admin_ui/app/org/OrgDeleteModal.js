@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Link } from '@reach/router';
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
@@ -7,25 +7,25 @@ import classnames from 'classnames';
 import Modal from '../../components/Modal';
 import Button from '../../components/Button';
 import LoadingIndicator from '../../components/LoadingIndicator';
-import { closeOrgDeleteModal, deleteOrg } from './orgStore';
+import { hideOrgDeleteForm, clearOrgDeleteForm, deleteOrg } from './orgStore';
 
-const OrgDeleteModal = ({ onSuccess, onError, onCancel }) => {
-  const isOpen = useSelector((state) => state.org.deletion.isOpen);
-  const record = useSelector((state) => state.org.deletion.record);
-  const isDeletePending = useSelector((state) => state.org.deletion.isDeletePending);
+const OrgDeleteModal = ({ onSuccess, onError }) => {
+  const isDisplayed = useSelector((state) => state.org.delete.isDisplayed);
+  const record = useSelector((state) => state.org.delete.record);
+  const isDeletePending = useSelector((state) => state.org.delete.isDeletePending);
+
   const dispatch = useDispatch();
 
-  // modalClose will cancel and close the modal
-  const onModalClose = useCallback(() => {
-    onCancel();
-    dispatch(closeOrgDeleteModal());
-  }, [dispatch, onCancel]);
+  const onDismiss = React.useCallback(() => {
+    dispatch(clearOrgDeleteForm());
+    dispatch(hideOrgDeleteForm());
+  }, [dispatch]);
 
-  // modalSubmit will call the submit method, close and then perform the deletion
-  const onModalSubmit = useCallback(() => {
-    dispatch(deleteOrg({ id: record.id })).then((isRoleDeleted) => {
-      if (isRoleDeleted) {
-        dispatch(closeOrgDeleteModal());
+  const onDelete = React.useCallback(() => {
+    dispatch(deleteOrg({ id: record.id })).then((isOrgDeleted) => {
+      if (isOrgDeleted) {
+        dispatch(clearOrgDeleteForm());
+        dispatch(hideOrgDeleteForm());
         onSuccess();
       } else {
         onError();
@@ -33,12 +33,12 @@ const OrgDeleteModal = ({ onSuccess, onError, onCancel }) => {
     });
   }, [dispatch, record, onSuccess, onError]);
 
-  if (!isOpen) {
+  if (record.id == null || !isDisplayed) {
     return null;
   }
 
   return (
-    <Modal onClose={onModalClose}>
+    <Modal onClose={onDismiss}>
       <h2 className="mb-4">Delete org &quot;{record.name}&quot;?</h2>
       <p className="mb-4">
         Please note <Link to="/users">{record.usersCount}</Link> users have this org assigned to
@@ -50,7 +50,7 @@ const OrgDeleteModal = ({ onSuccess, onError, onCancel }) => {
       <p className="text-center">
         <Button
           danger
-          onClick={onModalSubmit}
+          onClick={onDelete}
           disabled={isDeletePending}
           className={classnames({
             'opacity-50 cursor-not-allowed': isDeletePending,
@@ -66,13 +66,11 @@ const OrgDeleteModal = ({ onSuccess, onError, onCancel }) => {
 OrgDeleteModal.propTypes = {
   onSuccess: PropTypes.func,
   onError: PropTypes.func,
-  onCancel: PropTypes.func,
 };
 
 OrgDeleteModal.defaultProps = {
   onSuccess: noop,
   onError: noop,
-  onCancel: noop,
 };
 
 export default OrgDeleteModal;

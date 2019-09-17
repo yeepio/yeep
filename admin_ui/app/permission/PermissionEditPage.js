@@ -15,15 +15,18 @@ import {
 } from './permissionStore';
 import LoadingIndicator from '../../components/LoadingIndicator';
 import yeepClient from '../yeepClient';
-import { gotoPermissionListPage } from './permissionLocationUtils';
+import { gotoPermissionListPage } from './permissionURL';
 
 function getPermissionInfo({ id }) {
-  return yeepClient.api().then((api) =>
-    api.permission.info({
-      id,
-      cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(getPermissionInfo),
-    })
-  );
+  return yeepClient
+    .api()
+    .then((api) =>
+      api.permission.info({
+        id,
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(getPermissionInfo),
+      })
+    )
+    .then((data) => data.permission);
 }
 
 const PermissionEditPage = ({ permissionId }) => {
@@ -45,8 +48,8 @@ const PermissionEditPage = ({ permissionId }) => {
     } else {
       // permission does not exist in memory - retrieve from API
       getPermissionInfo({ id: permissionId })
-        .then((data) => {
-          dispatch(setPermissionUpdateRecord(data.permission));
+        .then((permission) => {
+          dispatch(setPermissionUpdateRecord(permission));
         })
         .catch((err) => {
           console.error(err);

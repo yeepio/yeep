@@ -1,23 +1,17 @@
-import React, { useEffect, useCallback } from 'react';
-import { navigate } from '@reach/router';
-import { useDispatch } from 'react-redux';
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import useDocumentTitle from '@rehooks/document-title';
-import OrgForm from '../../components/OrgForm';
-import { createOrg, resetOrgFormValues } from './orgStore';
-
-function gotoOrgListPage() {
-  navigate('/organizations');
-}
+import OrgForm from './OrgForm';
+import { createOrg } from './orgStore';
+import { gotoOrgListPage } from './orgURL';
 
 const OrgCreatePage = () => {
+  const errors = useSelector((state) => state.org.create.errors);
+  const isSavePending = useSelector((state) => state.org.create.isSavePending);
+
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    // clear existing form values
-    dispatch(resetOrgFormValues());
-  }, [dispatch]);
-
-  const onSubmit = useCallback(
+  const onSubmit = React.useCallback(
     (values) => {
       dispatch(
         createOrg({
@@ -38,7 +32,12 @@ const OrgCreatePage = () => {
   return (
     <React.Fragment>
       <h1 className="font-semibold text-3xl mb-6">Create new organization</h1>
-      <OrgForm onCancel={gotoOrgListPage} onSubmit={onSubmit} />
+      <OrgForm
+        errors={errors}
+        isSavePending={isSavePending}
+        onCancel={gotoOrgListPage}
+        onSubmit={onSubmit}
+      />
     </React.Fragment>
   );
 };

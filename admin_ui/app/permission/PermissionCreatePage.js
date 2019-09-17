@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import useDocumentTitle from '@rehooks/document-title';
 import PermissionForm from './PermissionForm';
 import { createPermission } from './permissionStore';
-import { gotoPermissionListPage } from './permissionLocationUtils';
+import { gotoPermissionListPage } from './permissionURL';
 
 const PermissionCreatePage = () => {
   const errors = useSelector((state) => state.permission.create.errors);
