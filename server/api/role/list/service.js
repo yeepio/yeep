@@ -147,9 +147,8 @@ export async function getRoleCount({ db }, { q, orgScope, isSystemRole }) {
 
   if (q) {
     matchExpressions.push({
-      name: {
-        $regex: `^${escapeRegExp(q)}`,
-        $options: 'i',
+      $text: {
+        $search: q,
       },
     });
   }
