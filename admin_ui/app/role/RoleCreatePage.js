@@ -1,22 +1,17 @@
-import React, { useCallback, useEffect } from 'react';
-import { navigate } from '@reach/router';
-import { useDispatch } from 'react-redux';
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import useDocumentTitle from '@rehooks/document-title';
 import RoleForm from './RoleForm';
-import { createRole, resetRoleFormValues } from './roleStore';
-
-function gotoRoleList() {
-  navigate('/roles');
-}
+import { createRole } from './roleStore';
+import { gotoRoleListPage } from './roleURL';
 
 const RoleCreatePage = () => {
+  const errors = useSelector((state) => state.permission.create.errors);
+  const isSavePending = useSelector((state) => state.permission.create.isSavePending);
+
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(resetRoleFormValues());
-  }, [dispatch]);
-
-  const onSubmit = useCallback(
+  const onSubmit = React.useCallback(
     (values) => {
       dispatch(
         createRole({
@@ -30,7 +25,7 @@ const RoleCreatePage = () => {
         })
       ).then((isPermissionCreated) => {
         if (isPermissionCreated) {
-          gotoRoleList();
+          gotoRoleListPage();
         }
       });
     },
@@ -42,7 +37,12 @@ const RoleCreatePage = () => {
   return (
     <React.Fragment>
       <h1 className="font-semibold text-3xl mb-6">Create new role</h1>
-      <RoleForm onCancel={gotoRoleList} onSubmit={onSubmit} />
+      <RoleForm
+        errors={errors}
+        isSavePending={isSavePending}
+        onCancel={gotoRoleListPage}
+        onSubmit={onSubmit}
+      />
     </React.Fragment>
   );
 };
