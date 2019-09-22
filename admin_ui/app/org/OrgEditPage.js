@@ -10,6 +10,7 @@ import yeepClient from '../yeepClient';
 import TabLinks from '../../components/TabLinks';
 import OrgEditProfileTab from './OrgEditProfileTab';
 import OrgEditPermissionsTab from './OrgEditPermissionsTab';
+import OrgEditRolesTab from './OrgEditRolesTab';
 
 function getOrgInfo({ id }) {
   return yeepClient
@@ -85,6 +86,7 @@ const OrgEditPage = ({ orgId }) => {
       <Router>
         <OrgEditProfileTab path="/" />
         <OrgEditPermissionsTab path="/permissions" />
+        <OrgEditRolesTab path="/roles" />
       </Router>
     </React.Fragment>
   );
