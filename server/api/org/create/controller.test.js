@@ -308,7 +308,7 @@ describe('api/org.create', () => {
           ok: false,
           error: {
             code: 10012,
-            message: `User ${user.id} does not have sufficient permissions to access this resource`,
+            message: `User ${user.id} is not authorized to create orgs`,
           },
         });
       });
@@ -352,9 +352,6 @@ describe('api/org.create', () => {
             updatedAt: expect.any(String),
           }),
         });
-
-        const admin = await getUserInfo(ctx, user);
-        expect(admin.orgs).toEqual(expect.arrayContaining([res.body.org.id]));
 
         const isOrgDeleted = await deleteOrg(ctx, res.body.org);
         expect(isOrgDeleted).toBe(true);

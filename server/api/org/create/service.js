@@ -3,7 +3,7 @@ import memoize from 'lodash/memoize';
 import { DuplicateOrgError } from '../../../constants/errors';
 
 const getAdminRole = memoize(
-  (db) => {
+  function({ db }) {
     const RoleModel = db.model('Role');
     return RoleModel.findOne(
       {
@@ -17,30 +17,37 @@ const getAdminRole = memoize(
   () => 'role'
 );
 
-async function createOrg({ db }, { name, slug, adminId }) {
+async function createOrg(ctx, { name, slug, adminId }) {
+  const adminRole = await getAdminRole(ctx);
+
+  const { db } = ctx;
   const OrgModel = db.model('Org');
   const OrgMembershipModel = db.model('OrgMembership');
-
-  // retrieve admin role
-  const adminRole = await getAdminRole(db);
 
   const session = await db.startSession();
   session.startTransaction();
 
   try {
     // create org
-    const org = await OrgModel.create({ name, slug });
+    const [org] = await OrgModel.create([{ name, slug }], { session });
 
-    // create org membership
-    await OrgMembershipModel.create({
-      userId: ObjectId(adminId),
-      orgId: org._id,
-      roles: [
-        {
-          id: adminRole._id,
-        },
-      ],
-    });
+    if (adminId) {
+      // create org membership
+      await OrgMembershipModel.create(
+        [
+          {
+            userId: ObjectId(adminId),
+            orgId: org._id,
+            roles: [
+              {
+                id: adminRole._id,
+              },
+            ],
+          },
+        ],
+        { session }
+      );
+    }
 
     await session.commitTransaction();
 

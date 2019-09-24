@@ -1,74 +1,88 @@
 import React from 'react';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
+import { useSelector, useDispatch } from 'react-redux';
 import ButtonLink from '../../components/ButtonLink';
-import Input from '../../components/Input';
-import Grid from '../../components/Grid';
+import {
+  listOrgs,
+  setOrgListPage,
+  setOrgListLimit,
+  showOrgDeleteForm,
+  setOrgDeleteRecord,
+} from './orgStore';
+import yeepClient from '../yeepClient';
+import OrgDeleteModal from './OrgDeleteModal';
+import OrgListFilters from './OrgListFilters';
+import OrgGrid from './OrgGrid';
 
-// Dummy data
-let gridHeadings = [
-  { label: 'Name', sort: 'asc', className: 'text-left' },
-  { label: 'Slug / URL key' },
-  { label: 'User count' },
-  { label: 'Role count' },
-  { label: 'Permission count' },
-  { label: 'Actions', isSortable: false },
-];
-let gridData = [
-  {
-    orgId: 1,
-    orgLabel: 'Our Tech Blog',
-    slug: 'blog',
-    users: 5,
-    roles: 4,
-    permissions: 10,
-  },
-  {
-    orgId: 2,
-    orgLabel: 'Zoho CRM',
-    slug: 'zoho_crm',
-    users: 40,
-    roles: 5,
-    permissions: 11,
-  },
-];
+const OrgListPage = () => {
+  const isLoading = useSelector((state) => state.org.list.isLoading);
+  const records = useSelector((state) => state.org.list.records);
+  const totalCount = useSelector((state) => state.org.list.totalCount);
+  const limit = useSelector((state) => state.org.list.limit);
+  const filters = useSelector((state) => state.org.list.filters);
+  const page = useSelector((state) => state.org.list.page);
 
-const OrgList = () => {
-  useDocumentTitle('Organization List');
+  const dispatch = useDispatch();
+
+  React.useEffect(() => {
+    dispatch(listOrgs());
+    return () => {
+      // on unmount cancel any in-flight request
+      yeepClient.redeemCancelToken(listOrgs);
+    };
+  }, [dispatch, limit, page, filters]);
+
+  const reload = React.useCallback(() => {
+    dispatch(listOrgs());
+  }, [dispatch]);
+
+  const onOrgDelete = React.useCallback(
+    (org) => {
+      dispatch(setOrgDeleteRecord(org));
+      dispatch(showOrgDeleteForm());
+    },
+    [dispatch]
+  );
+
+  const onPageNext = React.useCallback(() => {
+    dispatch(setOrgListPage({ page: page + 1 }));
+  }, [dispatch, page]);
+
+  const onPagePrevious = React.useCallback(() => {
+    dispatch(setOrgListPage({ page: page - 1 }));
+  }, [dispatch, page]);
+
+  const onLimitChange = React.useCallback(
+    (event) => {
+      const newLimit = event.value;
+      dispatch(setOrgListLimit({ limit: newLimit }));
+    },
+    [dispatch]
+  );
+
+  useDocumentTitle('Organizations');
+
   return (
     <React.Fragment>
-      <ButtonLink to="create" className="float-right">Create new</ButtonLink>
+      <OrgDeleteModal onSuccess={reload} onError={(err) => console.error(err)} />
+      <ButtonLink to="create" className="float-right">
+        Create new
+      </ButtonLink>
       <h1 className="mb-6 font-semibold text-3xl">Organizations</h1>
-      <fieldset className="mb-6">
-        <legend>Quick search</legend>
-        <Input id="quicksearch" placeholder="quicksearch" />
-      </fieldset>
-      <Grid
+      <OrgListFilters />
+      <OrgGrid
         className="mb-6"
-        headings={gridHeadings}
-        data={gridData}
-        renderer={(rowData, index) => {
-          return (
-            <tr key={`gridRow${index}`} className={index % 2 ? `bg-grey-lightest` : ``}>
-              <td className="p-2">
-                <Link to={`${rowData.orgId}/edit`}>{rowData.orgLabel}</Link>
-              </td>
-              <td className="p-2 text-center">{rowData.slug}</td>
-              <td className="p-2 text-center">
-                <a href="/">{rowData.users}</a>
-              </td>
-              <td className="p-2 text-center">
-                <a href="/">{rowData.roles}</a>
-              </td>
-              <td className="p-2 text-center">
-                <a href="/">{rowData.permissions}</a>
-              </td>
-              <td className="p-2 text-center">
-                <Link to={`${rowData.orgId}/edit`}>Edit</Link> <a href="/">Delete</a>
-              </td>
-            </tr>
-          );
-        }}
+        isLoading={isLoading}
+        records={records}
+        totalCount={totalCount}
+        page={page}
+        pageSize={limit}
+        onPageNext={onPageNext}
+        onPagePrevious={onPagePrevious}
+        onLimitChange={onLimitChange}
+        getRecordEditLink={(record) => `${record.id}/edit`}
+        onRecordDelete={onOrgDelete}
       />
       <p>
         <Link to="..">Return to the dashboard</Link>
@@ -77,4 +91,4 @@ const OrgList = () => {
   );
 };
 
-export default OrgList;
+export default OrgListPage;

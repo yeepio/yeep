@@ -1,5 +1,4 @@
 import Joi from 'joi';
-import Boom from 'boom';
 import compose from 'koa-compose';
 import packJSONRPC from '../../../middleware/packJSONRPC';
 import { validateRequest } from '../../../middleware/validation';
@@ -8,11 +7,11 @@ import {
   isUserAuthenticated,
   populateUserPermissions,
 } from '../../../middleware/auth';
-import deleteOrg from './service';
 import { AuthorizationError } from '../../../constants/errors';
+import { getOrgInfo } from './service';
 import * as SortedUserPermissionArray from '../../../utils/SortedUserPermissionArray';
 
-export const validationSchema = {
+const validationSchema = {
   body: {
     id: Joi.string()
       .length(24)
@@ -31,7 +30,7 @@ async function isUserAuthorized({ request }, next) {
 
   if (!hasPermission) {
     throw new AuthorizationError(
-      `User ${request.session.user.id} is not authorized to delete org ${request.body.id}`
+      `User ${request.session.user.id} is not authorized to retrieve info on org ${request.body.id}`
     );
   }
 
@@ -40,13 +39,12 @@ async function isUserAuthorized({ request }, next) {
 
 async function handler(ctx) {
   const { request, response } = ctx;
-  const isOrgDeleted = await deleteOrg(ctx, request.body);
-
-  if (!isOrgDeleted) {
-    throw Boom.internal();
-  }
+  const org = await getOrgInfo(ctx, request.body);
 
   response.status = 200; // OK
+  response.body = {
+    org,
+  };
 }
 
 export default compose([

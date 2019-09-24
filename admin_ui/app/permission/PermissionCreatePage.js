@@ -1,22 +1,17 @@
-import React, { useCallback, useEffect } from 'react';
-import { navigate } from '@reach/router';
-import { useDispatch } from 'react-redux';
+import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import useDocumentTitle from '@rehooks/document-title';
 import PermissionForm from './PermissionForm';
-import { createPermission, resetPermissionFormValues } from './permissionStore';
-
-function gotoPermissionList() {
-  navigate('/permissions');
-}
+import { createPermission } from './permissionStore';
+import { gotoPermissionListPage } from './permissionURL';
 
 const PermissionCreatePage = () => {
+  const errors = useSelector((state) => state.permission.create.errors);
+  const isSavePending = useSelector((state) => state.permission.create.isSavePending);
+
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(resetPermissionFormValues());
-  }, [dispatch]);
-
-  const onSubmit = useCallback(
+  const onSubmit = React.useCallback(
     (values) => {
       dispatch(
         createPermission({
@@ -26,7 +21,7 @@ const PermissionCreatePage = () => {
         })
       ).then((isPermissionCreated) => {
         if (isPermissionCreated) {
-          gotoPermissionList();
+          gotoPermissionListPage();
         }
       });
     },
@@ -38,7 +33,12 @@ const PermissionCreatePage = () => {
   return (
     <React.Fragment>
       <h1 className="font-semibold text-3xl mb-6">Create new permission</h1>
-      <PermissionForm onCancel={gotoPermissionList} onSubmit={onSubmit} />
+      <PermissionForm
+        errors={errors}
+        isSavePending={isSavePending}
+        onCancel={gotoPermissionListPage}
+        onSubmit={onSubmit}
+      />
     </React.Fragment>
   );
 };

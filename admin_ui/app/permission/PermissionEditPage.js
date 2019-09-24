@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { Link, navigate } from '@reach/router';
+import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
 import { useDispatch, useSelector } from 'react-redux';
 import find from 'lodash/find';
@@ -8,87 +8,101 @@ import PermissionDeleteModal from './PermissionDeleteModal';
 import PermissionForm from './PermissionForm';
 import {
   updatePermission,
-  getPermissionInfo,
-  setPermissionFormValues,
-  openPermissionDeleteModal,
+  setPermissionUpdateRecord,
+  setPermissionDeleteRecord,
+  showPermissionDeleteForm,
+  clearPermissionUpdateForm,
 } from './permissionStore';
 import LoadingIndicator from '../../components/LoadingIndicator';
 import yeepClient from '../yeepClient';
+import { gotoPermissionListPage } from './permissionURL';
 
-function gotoPermissionList() {
-  navigate('/permissions');
+function getPermissionInfo({ id }) {
+  return yeepClient
+    .api()
+    .then((api) =>
+      api.permission.info({
+        id,
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(getPermissionInfo),
+      })
+    )
+    .then((data) => data.permission);
 }
 
 const PermissionEditPage = ({ permissionId }) => {
   const records = useSelector((state) => state.permission.list.records);
-  const isLoading = useSelector((state) => state.permission.form.isLoading);
+  const errors = useSelector((state) => state.permission.update.errors);
+  const record = useSelector((state) => state.permission.update.record);
+  const isSavePending = useSelector((state) => state.permission.update.isSavePending);
+
   const dispatch = useDispatch();
 
   useDocumentTitle(`Edit permission #${permissionId}`);
 
-  useEffect(() => {
+  React.useEffect(() => {
     // check if permission already exists in store
     const permission = find(records, (e) => e.id === permissionId);
 
     if (permission) {
-      dispatch(setPermissionFormValues(permission));
+      dispatch(setPermissionUpdateRecord(permission));
     } else {
       // permission does not exist in memory - retrieve from API
-      dispatch(getPermissionInfo({ id: permissionId })).then((permission) => {
-        dispatch(setPermissionFormValues(permission));
-      });
+      getPermissionInfo({ id: permissionId })
+        .then((permission) => {
+          dispatch(setPermissionUpdateRecord(permission));
+        })
+        .catch((err) => {
+          console.error(err);
+        });
     }
 
     return () => {
       yeepClient.redeemCancelToken(getPermissionInfo);
+      dispatch(clearPermissionUpdateForm());
     };
   }, [permissionId, records, dispatch]);
 
-  const onPermissionDelete = useCallback(
-    (values) => {
-      dispatch(
-        openPermissionDeleteModal({
-          permission: {
-            id: permissionId,
-            ...values,
-          },
-        })
-      );
+  const onPermissionDelete = React.useCallback(
+    (permission) => {
+      dispatch(setPermissionDeleteRecord(permission));
+      dispatch(showPermissionDeleteForm());
     },
-    [dispatch, permissionId]
+    [dispatch]
   );
 
-  const submitForm = useCallback(
-    (values) => {
+  const submitForm = React.useCallback(
+    (nextValues) => {
       dispatch(
         updatePermission({
-          id: permissionId,
-          name: values.name,
-          description: values.description,
+          id: nextValues.id,
+          name: nextValues.name,
+          description: nextValues.description,
         })
       ).then((isPermissionUpdated) => {
         if (isPermissionUpdated) {
-          gotoPermissionList();
+          gotoPermissionListPage();
         }
       });
     },
-    [dispatch, permissionId]
+    [dispatch]
   );
+
+  if (record.id == null) {
+    return <LoadingIndicator />;
+  }
 
   return (
     <React.Fragment>
-      <PermissionDeleteModal onSuccess={gotoPermissionList} onError={(err) => console.error(err)} />
+      <PermissionDeleteModal onSuccess={gotoPermissionListPage} />
       <h1 className="font-semibold text-3xl mb-6">Edit permission #{permissionId}</h1>
-      {isLoading == null ? (
-        <LoadingIndicator />
-      ) : (
-        <PermissionForm
-          type="update"
-          onCancel={gotoPermissionList}
-          onSubmit={submitForm}
-          onDelete={onPermissionDelete}
-        />
-      )}
+      <PermissionForm
+        defaultValues={record}
+        isSavePending={isSavePending}
+        errors={errors}
+        onCancel={gotoPermissionListPage}
+        onSubmit={submitForm}
+        onDelete={onPermissionDelete}
+      />
       <Link to="/permissions">Return to the list of permissions</Link>
     </React.Fragment>
   );

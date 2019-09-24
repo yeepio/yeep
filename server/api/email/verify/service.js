@@ -19,7 +19,7 @@ async function verify(ctx, { token: secret }) {
   }
 
   // acquire user from db
-  const user = await UserModel.findOne({ _id: tokenRecord.userId });
+  const user = await UserModel.findOne({ _id: tokenRecord.user });
 
   // ensure user exists
   if (!user) {
@@ -58,12 +58,16 @@ async function verify(ctx, { token: secret }) {
           emails: nextEmails,
           updatedAt: currentDate,
         },
-      }
+      },
+      { session }
     );
     // redeem token, i.e. delete from db
-    await EmailVerificationTokenModel.deleteOne({
-      _id: tokenRecord._id,
-    });
+    await EmailVerificationTokenModel.deleteOne(
+      {
+        _id: tokenRecord._id,
+      },
+      { session }
+    );
 
     await session.commitTransaction();
 

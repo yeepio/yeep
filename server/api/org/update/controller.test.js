@@ -3,22 +3,19 @@ import request from 'supertest';
 import compareDesc from 'date-fns/compare_desc';
 import server from '../../../server';
 import config from '../../../../yeep.config';
-// import createPermission from '../../permission/create/service';
 import createOrg from '../create/service';
 import createUser from '../../user/create/service';
-// import createPermissionAssignment from '../../user/assignPermission/service';
 import { createSession, signBearerJWT } from '../../session/issueToken/service';
 import { destroySession } from '../../session/destroyToken/service';
-// import deletePermissionAssignment from '../../user/revokePermission/service';
 import deleteOrg from '../delete/service';
 import deleteUser from '../../user/delete/service';
 
 describe('api/org.update', () => {
   let ctx;
   let user;
-  let org;
+  let acmeOrg;
   let unauthorisedOrg;
-  let umbrella;
+  let umbrellaOrg;
   let session;
   let bearerToken;
 
@@ -40,7 +37,7 @@ describe('api/org.update', () => {
       ],
     });
 
-    [org, unauthorisedOrg, umbrella] = await Promise.all([
+    [acmeOrg, unauthorisedOrg, umbrellaOrg] = await Promise.all([
       createOrg(ctx, {
         name: 'Acme Inc',
         slug: 'acme',
@@ -66,9 +63,9 @@ describe('api/org.update', () => {
 
   afterAll(async () => {
     await destroySession(ctx, session);
-    await deleteOrg(ctx, org);
+    await deleteOrg(ctx, acmeOrg);
     await deleteOrg(ctx, unauthorisedOrg);
-    await deleteOrg(ctx, umbrella);
+    await deleteOrg(ctx, umbrellaOrg);
     await deleteUser(ctx, user);
     await server.teardown();
   });
@@ -106,7 +103,7 @@ describe('api/org.update', () => {
       ok: false,
       error: {
         code: 10012,
-        message: `User ${user.id} does not have sufficient permissions to access this resource`,
+        message: `User ${user.id} is not authorized to update org ${unauthorisedOrg.id}`,
       },
     });
   });
@@ -116,7 +113,7 @@ describe('api/org.update', () => {
       .post('/api/org.update')
       .set('Authorization', `Bearer ${bearerToken}`)
       .send({
-        id: org.id, // some random objectid
+        id: acmeOrg.id, // some random objectid
       });
 
     expect(res.status).toBe(200);
@@ -140,7 +137,7 @@ describe('api/org.update', () => {
       .post('/api/org.update')
       .set('Authorization', `Bearer ${bearerToken}`)
       .send({
-        id: umbrella.id,
+        id: umbrellaOrg.id,
         name: 'Umbrella Tost',
         slug: 'umbrulla',
       });
@@ -149,12 +146,12 @@ describe('api/org.update', () => {
     expect(res.body).toMatchObject({
       ok: true,
       org: {
-        id: umbrella.id,
+        id: umbrellaOrg.id,
         name: 'Umbrella Tost',
         slug: 'umbrulla',
       },
     });
-    expect(compareDesc(org.createdAt, res.body.org.createdAt)).toBe(0);
-    expect(compareDesc(org.updatedAt, res.body.org.updatedAt)).toBe(1);
+    expect(compareDesc(acmeOrg.createdAt, res.body.org.createdAt)).toBe(0);
+    expect(compareDesc(acmeOrg.updatedAt, res.body.org.updatedAt)).toBe(1);
   });
 });

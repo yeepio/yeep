@@ -1,16 +1,67 @@
 import React from 'react';
+import { Router } from '@reach/router';
 import PropTypes from 'prop-types';
-import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
-import Input from '../../components/Input';
-import Button from '../../components/Button';
+import { useDispatch, useSelector } from 'react-redux';
+import find from 'lodash/find';
+import { setOrgUpdateRecord, clearOrgUpdateForm } from './orgStore';
+import LoadingIndicator from '../../components/LoadingIndicator';
+import yeepClient from '../yeepClient';
 import TabLinks from '../../components/TabLinks';
+import OrgEditProfileTab from './OrgEditProfileTab';
+import OrgEditPermissionsTab from './OrgEditPermissionsTab';
+import OrgEditRolesTab from './OrgEditRolesTab';
+
+function getOrgInfo({ id }) {
+  return yeepClient
+    .api()
+    .then((api) =>
+      api.org.info({
+        id,
+        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(getOrgInfo),
+      })
+    )
+    .then((data) => data.org);
+}
 
 const OrgEditPage = ({ orgId }) => {
-  useDocumentTitle(`Edit organization #${orgId}`);
+  const records = useSelector((state) => state.org.list.records);
+  const record = useSelector((state) => state.org.update.record);
+
+  const dispatch = useDispatch();
+
+  React.useEffect(() => {
+    // check if org info already exists in store
+    const org = find(records, (e) => e.id === orgId);
+
+    if (org) {
+      dispatch(setOrgUpdateRecord(org));
+    } else {
+      // org does not exist in memory - retrieve from API
+      getOrgInfo({ id: orgId })
+        .then((org) => {
+          dispatch(setOrgUpdateRecord(org));
+        })
+        .catch((err) => {
+          console.error(err);
+        });
+    }
+
+    return () => {
+      yeepClient.redeemCancelToken(getOrgInfo);
+      dispatch(clearOrgUpdateForm());
+    };
+  }, [orgId, records, dispatch]);
+
+  useDocumentTitle(`Edit organization ${orgId}`);
+
+  if (record.id == null) {
+    return <LoadingIndicator />;
+  }
+
   return (
     <React.Fragment>
-      <h1 className="mb-6 font-semibold text-3xl">Edit organization #{orgId}</h1>
+      <h1 className="font-semibold text-3xl mb-6">Edit organization {record.name}</h1>
       <TabLinks
         className="mb-6"
         links={[
@@ -32,28 +83,11 @@ const OrgEditPage = ({ orgId }) => {
           },
         ]}
       />
-      <fieldset className="mb-6">
-        <legend>Organisation details</legend>
-        <div className="form-group mb-4">
-          <label htmlFor="org-name">Name:</label>
-          <Input id="org-name" placeholder="organisation name" className="w-full sm:w-1/2" />
-        </div>
-        <div className="form-group mb-4">
-          <label htmlFor="org-slug">Slug:</label>
-          <Input id="org-slug" placeholder="url slug" className="w-full sm:w-1/2" />
-        </div>
-        <div className="form-submit">
-          <Button>Save changes</Button>
-        </div>
-      </fieldset>
-      <fieldset className="mb-6">
-        <legend>Danger zone</legend>
-        <Button danger={true}>Delete organization</Button>
-      </fieldset>
-      <p className="flex">
-        <Link to="/organizations">Return to the list of organizations</Link>
-        <Link to={`/organizations/${orgId}/edit/permissions`} className="ml-auto">Permissions &raquo;</Link>
-      </p>
+      <Router>
+        <OrgEditProfileTab path="/" />
+        <OrgEditPermissionsTab path="/permissions" />
+        <OrgEditRolesTab path="/roles" />
+      </Router>
     </React.Fragment>
   );
 };

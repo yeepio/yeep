@@ -18,20 +18,24 @@ export const initialState = {
       org: {},
     },
   },
-  form: {
-    values: {
-      name: '',
-      description: '',
-      org: null,
-      permissions: [],
-    },
-    isLoading: false,
+  create: {
+    isDisplayed: false,
     isSavePending: false,
     errors: {},
   },
-  deletion: {
+  update: {
+    record: {
+      name: '',
+      description: '',
+      org: null,
+    },
+    isDisplayed: false,
+    isSavePending: false,
+    errors: {},
+  },
+  delete: {
     record: {},
-    isOpen: false,
+    isDisplayed: false,
     isDeletePending: false,
     errors: {},
   },
@@ -41,10 +45,6 @@ const initListRoles = createAction('ROLE_LIST_INIT');
 const resolveListRoles = createAction('ROLE_LIST_RESOLVE');
 const rejectListRoles = createAction('ROLE_LIST_REJECT');
 
-export const setRoleListLimit = createAction('ROLE_LIST_LIMIT_SET');
-export const setRoleListPage = createAction('ROLE_LIST_PAGE_SET');
-export const setRoleListFilters = createAction('ROLE_LIST_FILTERS_SET');
-
 const initCreateRole = createAction('ROLE_CREATE_INIT');
 const resolveCreateRole = createAction('ROLE_CREATE_RESOLVE');
 const rejectCreateRole = createAction('ROLE_CREATE_REJECT');
@@ -53,19 +53,27 @@ const initUpdateRole = createAction('ROLE_UPDATE_INIT');
 const resolveUpdateRole = createAction('ROLE_UPDATE_RESOLVE');
 const rejectUpdateRole = createAction('ROLE_UPDATE_REJECT');
 
-const initGetRoleInfo = createAction('ROLE_INFO_INIT');
-const resolveGetRoleInfo = createAction('ROLE_INFO_RESOLVE');
-const rejectGetRoleInfo = createAction('ROLE_INFO_REJECT');
-
 const initDeleteRole = createAction('ROLE_DELETE_INIT');
 const resolveDeleteRole = createAction('ROLE_DELETE_RESOLVE');
 const rejectDeleteRole = createAction('ROLE_DELETE_REJECT');
 
-export const setRoleFormValues = createAction('ROLE_FORM_VALUES_SET');
-export const resetRoleFormValues = createAction('ROLE_FORM_VALUES_CLEAR');
+export const setRoleListLimit = createAction('ROLE_LIST_LIMIT_SET');
+export const setRoleListPage = createAction('ROLE_LIST_PAGE_SET');
+export const setRoleListFilters = createAction('ROLE_LIST_FILTERS_SET');
 
-export const openRoleDeleteModal = createAction('ROLE_DELETE_MODAL_OPEN');
-export const closeRoleDeleteModal = createAction('ROLE_DELETE_MODAL_CLOSE');
+export const setRoleUpdateRecord = createAction('ROLE_UPDATE_RECORD_SET');
+export const clearRoleUpdateForm = createAction('ROLE_UPDATE_FORM_CLEAR');
+export const showRoleUpdateForm = createAction('ROLE_UPDATE_FORM_SHOW');
+export const hideRoleUpdateForm = createAction('ROLE_UPDATE_FORM_HIDE');
+
+export const setRoleDeleteRecord = createAction('ROLE_DELETE_RECORD_SET');
+export const clearRoleDeleteForm = createAction('ROLE_DELETE_FORM_CLEAR');
+export const showRoleDeleteForm = createAction('ROLE_DELETE_FORM_SHOW');
+export const hideRoleDeleteForm = createAction('ROLE_DELETE_FORM_HIDE');
+
+export const clearRoleCreateForm = createAction('ROLE_CREATE_FORM_CLEAR');
+export const showRoleCreateForm = createAction('ROLE_CREATE_FORM_SHOW');
+export const hideRoleCreateForm = createAction('ROLE_CREATE_FORM_HIDE');
 
 export const listRoles = (props = {}) => (dispatch, getState) => {
   const { role: store } = getState();
@@ -73,8 +81,8 @@ export const listRoles = (props = {}) => (dispatch, getState) => {
   dispatch(initListRoles());
   return yeepClient
     .api()
-    .then((api) =>
-      api.role.list({
+    .then((api) => {
+      return api.role.list({
         limit: store.list.limit,
         cursor: store.list.cursors[store.list.page - 1],
         isSystemRole: store.list.filters.isSystemRole,
@@ -82,8 +90,8 @@ export const listRoles = (props = {}) => (dispatch, getState) => {
         scope: store.list.filters.org.id,
         cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(listRoles),
         ...props,
-      })
-    )
+      });
+    })
     .then((data) => {
       dispatch(resolveListRoles(data));
       return data.roles;
@@ -134,25 +142,25 @@ export const updateRole = (props) => (dispatch) => {
     });
 };
 
-export const getRoleInfo = (props) => (dispatch) => {
-  dispatch(initGetRoleInfo());
-  return yeepClient
-    .api()
-    .then((api) =>
-      api.role.info({
-        ...props,
-        cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(getRoleInfo),
-      })
-    )
-    .then((data) => {
-      dispatch(resolveGetRoleInfo(data));
-      return data.role;
-    })
-    .catch((err) => {
-      dispatch(rejectGetRoleInfo(err));
-      return null;
-    });
-};
+// export const getRoleInfo = (props) => (dispatch) => {
+//   dispatch(initGetRoleInfo());
+//   return yeepClient
+//     .api()
+//     .then((api) =>
+//       api.role.info({
+//         ...props,
+//         cancelToken: yeepClient.issueCancelTokenAndRedeemPrevious(getRoleInfo),
+//       })
+//     )
+//     .then((data) => {
+//       dispatch(resolveGetRoleInfo(data));
+//       return data.role;
+//     })
+//     .catch((err) => {
+//       dispatch(rejectGetRoleInfo(err));
+//       return null;
+//     });
+// };
 
 export const deleteRole = (props) => (dispatch) => {
   dispatch(initDeleteRole());
@@ -198,93 +206,99 @@ export const reducer = handleActions(
     }),
     [setRoleListFilters]: produce((draft, action) => {
       draft.list.page = 0;
+      draft.list.cursors = [];
       draft.list.filters = {
         ...draft.list.filters,
         ...action.payload,
       };
     }),
     [initCreateRole]: produce((draft) => {
-      draft.form.isSavePending = true;
+      draft.create.isSavePending = true;
     }),
     [resolveCreateRole]: produce((draft) => {
-      draft.form.isSavePending = false;
+      draft.create.isSavePending = false;
     }),
     [rejectCreateRole]: produce((draft, action) => {
       if (action.payload.code === 400) {
-        draft.form.errors = parseYeepValidationErrors(action.payload);
+        draft.create.errors = parseYeepValidationErrors(action.payload);
       } else {
-        draft.form.errors = {
+        draft.create.errors = {
           generic: action.payload.message,
         };
       }
-      draft.form.isSavePending = false;
+      draft.create.isSavePending = false;
+    }),
+    [clearRoleCreateForm]: produce((draft) => {
+      draft.create.errors = initialState.create.errors;
+    }),
+    [showRoleCreateForm]: produce((draft) => {
+      draft.create.isDisplayed = true;
+    }),
+    [hideRoleCreateForm]: produce((draft) => {
+      draft.create.isDisplayed = false;
     }),
     [initUpdateRole]: produce((draft) => {
-      draft.form.isSavePending = true;
+      draft.update.isSavePending = true;
     }),
     [resolveUpdateRole]: produce((draft) => {
-      draft.form.isSavePending = false;
+      draft.update.isSavePending = false;
     }),
     [rejectUpdateRole]: produce((draft, action) => {
       if (action.payload.code === 400) {
-        draft.form.errors = parseYeepValidationErrors(action.payload);
+        draft.update.errors = parseYeepValidationErrors(action.payload);
       } else {
-        draft.form.errors = {
+        draft.update.errors = {
           generic: action.payload.message,
         };
       }
-      draft.form.isSavePending = false;
+      draft.update.isSavePending = false;
     }),
-    [initGetRoleInfo]: produce((draft) => {
-      draft.form.isLoading = true;
-    }),
-    [resolveGetRoleInfo]: produce((draft) => {
-      draft.form.isLoading = false;
-    }),
-    [rejectGetRoleInfo]: produce((draft, action) => {
-      if (action.payload.code === 400) {
-        draft.form.errors = parseYeepValidationErrors(action.payload);
-      } else {
-        draft.form.errors = {
-          generic: action.payload.message,
-        };
-      }
-      draft.form.isLoading = false;
-    }),
-    [setRoleFormValues]: produce((draft, action) => {
-      draft.form.errors = initialState.form.errors;
-      draft.form.values = {
-        ...draft.form.values,
+    [setRoleUpdateRecord]: produce((draft, action) => {
+      draft.update.errors = initialState.update.errors;
+      draft.update.record = {
+        ...draft.update.record,
         ...action.payload,
       };
     }),
-    [resetRoleFormValues]: produce((draft) => {
-      draft.form.errors = initialState.form.errors;
-      draft.form.values = initialState.form.values;
+    [clearRoleUpdateForm]: produce((draft) => {
+      draft.update.errors = initialState.update.errors;
+      draft.update.record = initialState.update.record;
     }),
-    [openRoleDeleteModal]: produce((draft, action) => {
-      draft.deletion.isOpen = true;
-      draft.deletion.errors = initialState.deletion.errors;
-      draft.deletion.record = action.payload.role;
+    [showRoleUpdateForm]: produce((draft) => {
+      draft.update.isDisplayed = true;
     }),
-    [closeRoleDeleteModal]: produce((draft) => {
-      draft.deletion.isOpen = false;
+    [hideRoleUpdateForm]: produce((draft) => {
+      draft.update.isDisplayed = false;
     }),
     [initDeleteRole]: produce((draft) => {
-      draft.deletion.isDeletePending = true;
+      draft.delete.isDeletePending = true;
     }),
     [resolveDeleteRole]: produce((draft) => {
-      draft.deletion.isDeletePending = false;
+      draft.delete.isDeletePending = false;
     }),
     [rejectDeleteRole]: produce((draft, action) => {
       if (action.payload.code === 400) {
-        draft.deletion.errors = parseYeepValidationErrors(action.payload);
+        draft.delete.errors = parseYeepValidationErrors(action.payload);
       } else {
-        draft.deletion.errors = {
+        draft.delete.errors = {
           generic: action.payload.message,
         };
       }
-      draft.deletion.isDeletePending = false;
+      draft.delete.isDeletePending = false;
+    }),
+    [setRoleDeleteRecord]: produce((draft, action) => {
+      draft.delete.errors = initialState.delete.errors;
+      draft.delete.record = action.payload;
+    }),
+    [clearRoleDeleteForm]: produce((draft) => {
+      draft.delete.errors = initialState.delete.errors;
+      draft.delete.record = initialState.delete.record;
+    }),
+    [showRoleDeleteForm]: produce((draft) => {
+      draft.delete.isDisplayed = true;
+    }),
+    [hideRoleDeleteForm]: produce((draft) => {
+      draft.delete.isDisplayed = false;
     }),
   },
   initialState

@@ -283,11 +283,11 @@ describe('api/org.list', () => {
           updatedAt: expect.any(String),
         }),
       ]),
+      orgsCount: 1,
     });
-    expect(res.body.orgs.length).toBe(1);
   });
 
-  test('throws AuthorisationError when requesting organisations of a user with no access', async () => {
+  test('returns 0 orgs when filtering by user with no access', async () => {
     const res = await request(server)
       .post('/api/org.list')
       .set('Authorization', `Bearer ${bearerToken}`)
@@ -296,16 +296,13 @@ describe('api/org.list', () => {
       });
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
-      ok: false,
-      error: {
-        // authorisation code
-        code: 10012,
-        message: expect.any(String),
-      },
+      ok: true,
+      orgs: [],
+      orgsCount: 0,
     });
   });
 
-  test('throws AuthorisationError when requesting organisations of a user with yeep.user.read access but not assignment access', async () => {
+  test('throws AuthorizationError when requesting organisations of a user with yeep.user.read access but not assignment access', async () => {
     const res = await request(server)
       .post('/api/org.list')
       .set('Authorization', `Bearer ${professorBearerToken}`)

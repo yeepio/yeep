@@ -2,13 +2,11 @@ import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import AsyncSelect from 'react-select/lib/Async';
 import noop from 'lodash/noop';
-import { useDispatch, useSelector } from 'react-redux';
 import Input from '../../components/Input';
 import Textarea from '../../components/Textarea';
 import yeepClient from '../yeepClient';
 import Button from '../../components/Button';
 import OrgOption from '../../utilities/OrgOption';
-import { setPermissionFormValues } from './permissionStore';
 
 function fetchOrgOptionsAsync(inputValue) {
   return yeepClient.api().then((api) => {
@@ -24,37 +22,8 @@ function fetchOrgOptionsAsync(inputValue) {
   });
 }
 
-const PermissionForm = ({ onSubmit, onCancel, onDelete, type }) => {
-  const errors = useSelector((state) => state.permission.form.errors);
-  const values = useSelector((state) => state.permission.form.values);
-  const isSavePending = useSelector((state) => state.permission.form.isSavePending);
-
-  const dispatch = useDispatch();
-
-  const onChangeName = useCallback(
-    (event) => {
-      dispatch(setPermissionFormValues({ name: event.target.value }));
-    },
-    [dispatch]
-  );
-
-  const onChangeDescription = useCallback(
-    (event) => {
-      dispatch(setPermissionFormValues({ description: event.target.value }));
-    },
-    [dispatch]
-  );
-
-  const onChangeOrg = useCallback(
-    (selectedOption) => {
-      dispatch(
-        setPermissionFormValues({
-          org: selectedOption ? OrgOption.fromOption(selectedOption).toRecord() : null,
-        })
-      );
-    },
-    [dispatch]
-  );
+const PermissionForm = ({ defaultValues, isSavePending, errors, onSubmit, onCancel, onDelete }) => {
+  const [values, setValues] = React.useState(defaultValues);
 
   const onFormSubmit = useCallback(
     (event) => {
@@ -81,7 +50,7 @@ const PermissionForm = ({ onSubmit, onCancel, onDelete, type }) => {
             id="name"
             className="w-full sm:w-1/2"
             value={values.name}
-            onChange={onChangeName}
+            onChange={(event) => setValues({ ...values, name: event.target.value })}
             disabled={isSavePending}
           />
           {errors.name && <p className="invalid mt-2">{errors.name}</p>}
@@ -93,7 +62,7 @@ const PermissionForm = ({ onSubmit, onCancel, onDelete, type }) => {
             className="w-full"
             rows="3"
             value={values.description}
-            onChange={onChangeDescription}
+            onChange={(event) => setValues({ ...values, description: event.target.value })}
             disabled={isSavePending}
           />
           {errors.description && <p className="invalid mt-2">{errors.description}</p>}
@@ -108,8 +77,13 @@ const PermissionForm = ({ onSubmit, onCancel, onDelete, type }) => {
             isClearable={true}
             defaultOptions={true}
             value={values.org ? OrgOption.fromRecord(values.org).toOption() : null}
-            onChange={onChangeOrg}
-            isDisabled={isSavePending || type === 'update'}
+            onChange={(selectedOption) =>
+              setValues({
+                ...values,
+                org: selectedOption ? OrgOption.fromOption(selectedOption).toRecord() : null,
+              })
+            }
+            isDisabled={isSavePending || values.id != null}
           />
           {errors.org && <p className="text-red mt-2">{errors.org}</p>}
         </div>
@@ -117,12 +91,17 @@ const PermissionForm = ({ onSubmit, onCancel, onDelete, type }) => {
           <Button type="submit" disabled={isSavePending}>
             Save
           </Button>
-          <button type="button" className="pseudolink ml-4" onClick={onCancel}>
+          <button
+            type="button"
+            className="pseudolink ml-4"
+            onClick={onCancel}
+            disabled={isSavePending}
+          >
             Cancel
           </button>
         </div>
       </fieldset>
-      {type === 'update' && (
+      {values.id != null && onDelete !== noop && (
         <fieldset className="mb-6">
           <legend>Danger zone</legend>
           <Button type="button" danger={true} onClick={() => onDelete(values)}>
@@ -135,17 +114,21 @@ const PermissionForm = ({ onSubmit, onCancel, onDelete, type }) => {
 };
 
 PermissionForm.propTypes = {
-  type: PropTypes.oneOf(['create', 'update']),
+  defaultValues: PropTypes.object,
+  errors: PropTypes.object,
   onSubmit: PropTypes.func,
   onCancel: PropTypes.func,
   onDelete: PropTypes.func,
+  isSavePending: PropTypes.bool,
 };
 
 PermissionForm.defaultProps = {
-  type: 'create',
+  defaultValues: {},
+  errors: {},
   onSubmit: noop,
   onCancel: noop,
   onDelete: noop,
+  isSavePending: false,
 };
 
 export default PermissionForm;

@@ -225,6 +225,33 @@ export const decorateUserPermissions = () => async (ctx, next) => {
   await next();
 };
 
+export async function populateUserPermissions(ctx, next) {
+  const { request, db } = ctx;
+
+  // ensure user is authenticated
+  if (!has(request, ['session', 'user'])) {
+    throw new AuthorizationError('Unable to retrieve permissions for non-authenticated user');
+  }
+
+  // extract user id
+  const userId = request.session.user.id;
+
+  // retrieve user permissions
+  const OrgMembershipModel = db.model('OrgMembership');
+  const permissions = await OrgMembershipModel.getUserPermissions({ userId });
+
+  // decorate request with user permissions
+  request.session = {
+    ...request.session,
+    user: {
+      ...request.session.user,
+      permissions,
+    },
+  };
+
+  await next();
+}
+
 /**
  * Finds and returns the index of the user permission object that matches the specified properties.
  * @param {Array<Object>} userPermissions array of user permissions to inspect
@@ -260,8 +287,13 @@ export const findUserPermissionIndex = (userPermissions, { name, orgId }) => {
   return Math.max(index, -1);
 };
 
-export const getAuthorizedUniqueOrgIds = (request, permission) => {
-  const userPermissions = get(request, ['session', 'user', 'permissions']);
-  const orgIds = userPermissions.filter((e) => e.name === permission).map((e) => e.orgId || null);
-  return uniq(orgIds);
-};
+export function getAuthorizedUniqueOrgIds(request, permission) {
+  const permissions = get(request, ['session', 'user', 'permissions']);
+  const set = new Set();
+  permissions
+    .filter((e) => e.name === permission)
+    .forEach((e) => {
+      set.add(e.orgId || null);
+    });
+  return Array.from(set);
+}
