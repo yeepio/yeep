@@ -1,5 +1,4 @@
 import { ObjectId } from 'mongodb';
-import escapeRegExp from 'lodash/escapeRegExp';
 
 export const stringifyCursor = ({ id }) => {
   return Buffer.from(JSON.stringify(id)).toString('base64');
@@ -109,9 +108,8 @@ async function listPermissions(ctx, { q, limit, cursor, scopes, role, isSystemPe
 
   if (q) {
     matchExpressions.push({
-      name: {
-        $regex: `^${escapeRegExp(q)}`,
-        $options: 'i',
+      $text: {
+        $search: q,
       },
     });
   }
