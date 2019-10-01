@@ -12,6 +12,7 @@ import {
   initialState as permissionInitialState,
 } from './permission/permissionStore';
 import { reducer as orgReducer, initialState as orgInitialState } from './org/orgStore';
+import { reducer as userReducer, initialState as userInitialState } from './user/userStore';
 
 const sessionPersistConfig = {
   key: 'session',
@@ -24,6 +25,7 @@ const rootReducer = combineReducers({
   role: roleReducer,
   permission: permissionReducer,
   org: orgReducer,
+  user: userReducer,
 });
 
 const preloadedState = {
@@ -31,6 +33,7 @@ const preloadedState = {
   role: roleInitialState,
   permission: permissionInitialState,
   org: orgInitialState,
+  user: userInitialState,
 };
 
 const middleware = [
