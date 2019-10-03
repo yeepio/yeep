@@ -11,7 +11,7 @@ import {
   setUserDeleteRecord,
 } from './userStore';
 import yeepClient from '../yeepClient';
-// import UserDeleteModal from './UserDeleteModal';
+import UserDeleteModal from './UserDeleteModal';
 import UserListFilters from './UserListFilters';
 import UserGrid from './UserGrid';
 
@@ -65,7 +65,7 @@ const UserListPage = () => {
 
   return (
     <React.Fragment>
-      {/* <UserDeleteModal onSuccess={reload} onError={(err) => console.error(err)} /> */}
+      <UserDeleteModal onSuccess={reload} onError={(err) => console.error(err)} />
       <ButtonLink to="create" className="float-right">
         Create new
       </ButtonLink>

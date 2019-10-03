@@ -87,7 +87,7 @@ const UserGrid = ({
                 </button>
               )}{' '}
               <button onClick={() => onRecordDelete(user)} className="pseudolink">
-                Remove
+                Delete
               </button>
             </td>
           </tr>
