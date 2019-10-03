@@ -192,7 +192,7 @@ export const reducer = handleActions(
       draft.list.isLoading = false;
       draft.list.records = action.payload.users;
       draft.list.cursors.push(action.payload.nextCursor);
-      draft.list.totalCount = action.payload.usersCount;
+      draft.list.totalCount = action.payload.userCount;
     }),
     [setUserListLimit]: produce((draft, action) => {
       draft.list.page = 0;

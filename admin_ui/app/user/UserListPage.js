@@ -1,175 +1,88 @@
 import React from 'react';
 import { Link } from '@reach/router';
 import useDocumentTitle from '@rehooks/document-title';
+import { useSelector, useDispatch } from 'react-redux';
 import ButtonLink from '../../components/ButtonLink';
-import Select from 'react-select';
-import Grid from '../../components/Grid';
-import Input from '../../components/Input';
-
-// Dummy data
-let userHeadings = [
-  { label: 'Username', className: 'text-left' },
-  { label: 'Full name', className: 'text-left' },
-  { label: 'Verified?' },
-  { label: 'Primary email', className: 'text-left' },
-  { label: 'Orgs' },
-  { label: 'Roles' },
-  { label: 'Actions', isSortable: false },
-];
-let userData = [
-  {
-    id: 1,
-    username: 'rf123',
-    fullName: 'Rodney Fields',
-    verified: true,
-    email: 'rodney@gmail.com',
-    orgs: 1,
-    roles: 1,
-  },
-  {
-    id: 2,
-    username: 'manuela1091',
-    fullName: 'Manuela Carvalho',
-    verified: true,
-    email: 'mcarvallho45@hotmail.com',
-    orgs: 2,
-    roles: 2,
-  },
-  {
-    id: 3,
-    username: 'pmartin_5',
-    fullName: 'Philip Martin',
-    verified: true,
-    email: 'mcarvallho45@hotmail.com',
-    orgs: 2,
-    roles: 2,
-  },
-  {
-    id: 4,
-    username: 'leeleeva',
-    fullName: 'Liva Christensen',
-    verified: true,
-    email: 'leeleeva@gmail.com',
-    orgs: 1,
-    roles: 1,
-  },
-  {
-    id: 5,
-    username: 'abc1',
-    fullName: 'Alfredo Wendel',
-    verified: false,
-    email: 'alfredo@hotmail.com',
-    orgs: 0,
-    roles: 0,
-  },
-  {
-    id: 6,
-    username: 'traphunt444',
-    fullName: 'Junstine Singh',
-    verified: false,
-    email: 'jsingh123@yandex.ru',
-    orgs: 0,
-    roles: 0,
-  },
-  {
-    id: 7,
-    username: 'ag1',
-    fullName: 'Afranio Goncalves',
-    verified: true,
-    email: 'ag1@hotmail.com',
-    orgs: 1,
-    roles: 1,
-  },
-  {
-    id: 8,
-    username: 'carl_pedersen_1981',
-    fullName: 'Carl Pedersen',
-    verified: true,
-    email: 'card_pedersen@gmail.com',
-    orgs: 1,
-    roles: 1,
-  },
-  {
-    id: 9,
-    username: 'kagkouras1',
-    fullName: 'George Kagkouras',
-    verified: true,
-    email: 'giorgaros_sexy@otenet.gr',
-    orgs: 2,
-    roles: 2,
-  },
-  {
-    id: 10,
-    username: 'silly-smile',
-    fullName: 'Julia Francescu',
-    verified: true,
-    email: 'ssm1978@gmail.com',
-    orgs: 2,
-    roles: 2,
-  },
-];
+import {
+  listUsers,
+  setUserListPage,
+  setUserListLimit,
+  showUserDeleteForm,
+  setUserDeleteRecord,
+} from './userStore';
+import yeepClient from '../yeepClient';
+// import UserDeleteModal from './UserDeleteModal';
+import UserListFilters from './UserListFilters';
+import UserGrid from './UserGrid';
 
 const UserListPage = () => {
+  const isLoading = useSelector((state) => state.user.list.isLoading);
+  const records = useSelector((state) => state.user.list.records);
+  const totalCount = useSelector((state) => state.user.list.totalCount);
+  const limit = useSelector((state) => state.user.list.limit);
+  const filters = useSelector((state) => state.user.list.filters);
+  const page = useSelector((state) => state.user.list.page);
+
+  const dispatch = useDispatch();
+
+  React.useEffect(() => {
+    dispatch(listUsers());
+    return () => {
+      // on unmount cancel any in-flight request
+      yeepClient.redeemCancelToken(listUsers);
+    };
+  }, [dispatch, limit, page, filters]);
+
+  const reload = React.useCallback(() => {
+    dispatch(listUsers());
+  }, [dispatch]);
+
+  const onUserDelete = React.useCallback(
+    (user) => {
+      dispatch(setUserDeleteRecord(user));
+      dispatch(showUserDeleteForm());
+    },
+    [dispatch]
+  );
+
+  const onPageNext = React.useCallback(() => {
+    dispatch(setUserListPage({ page: page + 1 }));
+  }, [dispatch, page]);
+
+  const onPagePrevious = React.useCallback(() => {
+    dispatch(setUserListPage({ page: page - 1 }));
+  }, [dispatch, page]);
+
+  const onLimitChange = React.useCallback(
+    (event) => {
+      const newLimit = event.value;
+      dispatch(setUserListLimit({ limit: newLimit }));
+    },
+    [dispatch]
+  );
+
   useDocumentTitle('Users');
+
   return (
     <React.Fragment>
+      {/* <UserDeleteModal onSuccess={reload} onError={(err) => console.error(err)} /> */}
       <ButtonLink to="create" className="float-right">
         Create new
       </ButtonLink>
-      <h1 className="font-semibold text-3xl mb-6">Users</h1>
-      <fieldset className="mb-6">
-        <legend>Filters and quick search</legend>
-        <div className="sm:flex items-center">
-          <Select
-            className="flex-auto mb-3 sm:mb-0 sm:mr-3"
-            placeholder="All organisations"
-            options={[
-              { value: 1, label: 'Org 1' },
-              { value: 2, label: 'Org 2' },
-              { value: 3, label: 'Org 3' },
-              { value: 4, label: 'Org 4' },
-            ]}
-            isClearable={true}
-          />
-          <Select
-            className="flex-auto mb-3 sm:mb-0 sm:mr-3"
-            placeholder="All roles"
-            options={[
-              { value: 1, label: 'Role 1' },
-              { value: 2, label: 'Role 2' },
-              { value: 3, label: 'Role 3' },
-            ]}
-            isClearable={true}
-          />
-          <Input placeholder="quicksearch" className="w-full sm:w-1/3" />
-        </div>
-      </fieldset>
-      <Grid
+      <h1 className="mb-6 font-semibold text-3xl">Users</h1>
+      <UserListFilters />
+      <UserGrid
         className="mb-6"
-        headings={userHeadings}
-        data={userData}
-        renderer={(userData, index) => {
-          return (
-            <tr key={`userRow${index}`} className={index % 2 ? `bg-grey-lightest` : ``}>
-              <td className="p-2">{userData.username}</td>
-              <td className="p-2">
-                <Link to={`${userData.id}/edit`}>{userData.fullName}</Link>
-              </td>
-              <td className="p-2 text-center">
-                {userData.verified && <img src="/icon-yes.svg" alt="Verified email" width={16} />}
-                {!userData.verified && (
-                  <img src="/icon-no.svg" alt="Non-verified email" width={16} />
-                )}
-              </td>
-              <td className="p-2">{userData.email}</td>
-              <td className="p-2 text-center">{userData.orgs}</td>
-              <td className="p-2 text-center">{userData.roles}</td>
-              <td className="p-2 text-center">
-                <Link to={`${userData.id}/edit`}>Edit</Link> <a href="/">Remove</a>
-              </td>
-            </tr>
-          );
-        }}
+        isLoading={isLoading}
+        records={records}
+        totalCount={totalCount}
+        page={page}
+        pageSize={limit}
+        onPageNext={onPageNext}
+        onPagePrevious={onPagePrevious}
+        onLimitChange={onLimitChange}
+        getRecordEditLink={(record) => `${record.id}/edit`}
+        onRecordDelete={onUserDelete}
       />
       <p>
         <Link to="..">Return to the dashboard</Link>
