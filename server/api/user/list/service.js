@@ -2,6 +2,7 @@ import { ObjectId } from 'mongodb';
 import escapeRegExp from 'lodash/escapeRegExp';
 import invokeMap from 'lodash/invokeMap';
 import pick from 'lodash/pick';
+import get from 'lodash/get';
 
 export const stringifyCursor = ({ id }) => {
   return Buffer.from(JSON.stringify(id)).toString('base64');
@@ -23,19 +24,43 @@ export const defaultProjection = {
   updatedAt: true,
 };
 
-async function listUsers({ db }, { q, limit, cursor, scopes, projection = defaultProjection }) {
+export async function getUsers(
+  { db },
+  { q, limit, cursor, orgScope, projection = defaultProjection }
+) {
   const UserModel = db.model('User');
-  const users = await UserModel.aggregate([
+  const matchExpressions = [];
+
+  if (q) {
+    matchExpressions.push({
+      username: {
+        $regex: `^${escapeRegExp(q)}`,
+        $options: 'i',
+      },
+    });
+  }
+
+  // handle pagination
+  if (cursor) {
+    matchExpressions.push({
+      _id: { $gt: ObjectId(cursor.id) },
+    });
+  }
+
+  // init pipeline - retrieve users
+  const pipeline = [
     {
-      $match: q
-        ? {
-            username: {
-              $regex: `^${escapeRegExp(q)}`,
-              $options: 'i',
-            },
-          }
-        : {},
+      $match:
+        matchExpressions.length !== 0
+          ? {
+              $and: matchExpressions,
+            }
+          : {},
     },
+  ];
+
+  // scope by org membership
+  pipeline.push(
     {
       $lookup: {
         from: 'orgMemberships',
@@ -46,12 +71,12 @@ async function listUsers({ db }, { q, limit, cursor, scopes, projection = defaul
               $expr: {
                 $and: [
                   { $eq: ['$userId', '$$userId'] },
-                  scopes.includes(null)
+                  orgScope.includes(null)
                     ? {
                         $eq: ['$orgId', null],
                       }
                     : {
-                        $in: ['$orgId', scopes.map((scope) => ObjectId(scope))],
+                        $in: ['$orgId', orgScope.map((scope) => ObjectId(scope))],
                       },
                 ],
               },
@@ -64,53 +89,109 @@ async function listUsers({ db }, { q, limit, cursor, scopes, projection = defaul
             },
           },
         ],
-        as: 'orgMemberships',
+        as: 'memberships',
       },
     },
     {
-      $match: Object.assign(
-        {
-          orgMemberships: {
-            $not: { $size: 0 },
-          },
-        },
-        cursor
-          ? {
-              _id: {
-                $gt: ObjectId(cursor.id),
-              },
-            }
-          : {}
-      ),
-    },
-    {
-      $limit: limit,
-    },
-  ]);
+      $match: {
+        memberships: { $ne: [] },
+      },
+    }
+  );
+
+  // impose page limit
+  pipeline.push({
+    $limit: limit,
+  });
+
+  const records = await UserModel.aggregate(pipeline);
 
   const fields = Object.entries(projection).reduce((accumulator, [key, value]) => {
-    if (value) {
-      return accumulator.concat(key);
-    }
-    return accumulator;
+    return value ? [...accumulator, key] : accumulator;
   }, []);
 
-  // Please note: if you add a new prop to user, remember to update the defaultProjection obj
-  return users.map((user) =>
-    pick(
-      {
-        id: user._id.toHexString(),
-        username: user.username,
-        fullName: user.fullName,
-        picture: user.picture,
-        emails: user.emails,
-        orgs: invokeMap(user.orgMemberships, 'orgId.toHexString'),
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-      },
-      fields
-    )
-  );
+  return records.map((record) => {
+    // Please note: if you add a new prop to user, remember to update the defaultProjection obj
+    const obj = {
+      id: record._id.toHexString(),
+      username: record.username,
+      fullName: record.fullName,
+      picture: record.picture,
+      emails: record.emails,
+      orgs: invokeMap(record.memberships, 'orgId.toHexString'),
+      createdAt: record.createdAt,
+      updatedAt: record.updatedAt,
+    };
+
+    return pick(obj, fields);
+  });
 }
 
-export default listUsers;
+export async function getUserCount({ db }, { q, orgScope = [] }) {
+  const UserModel = db.model('User');
+
+  const matchExpressions = [];
+
+  if (q) {
+    matchExpressions.push({
+      username: {
+        $regex: `^${escapeRegExp(q)}`,
+        $options: 'i',
+      },
+    });
+  }
+
+  const pipeline = [
+    {
+      $match:
+        matchExpressions.length !== 0
+          ? {
+              $and: matchExpressions,
+            }
+          : {},
+    },
+    {
+      $lookup: {
+        from: 'orgMemberships',
+        let: { userId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ['$userId', '$$userId'] },
+                  orgScope.includes(null)
+                    ? {
+                        $eq: ['$orgId', null],
+                      }
+                    : {
+                        $in: ['$orgId', orgScope.map((scope) => ObjectId(scope))],
+                      },
+                ],
+              },
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              orgId: 1,
+            },
+          },
+        ],
+        as: 'memberships',
+      },
+    },
+    {
+      $match: {
+        memberships: { $ne: [] },
+      },
+    },
+  ];
+
+  pipeline.push({
+    $count: 'count',
+  });
+
+  const records = await UserModel.aggregate(pipeline);
+  return get(records, [0, 'count'], 0);
+}

@@ -170,6 +170,7 @@ describe('api/user.list', () => {
             updatedAt: expect.any(String),
           }),
         ]),
+        userCount: 3,
       });
       expect(res.body.users.length).toBe(3);
       expect(res.body.users.findIndex((user) => user.username === 'wazowski')).not.toBe(-1);
@@ -208,6 +209,7 @@ describe('api/user.list', () => {
           }),
         ]),
         nextCursor: expect.any(String),
+        userCount: 3,
       });
       expect(res.body.users.length).toBe(1);
     });
@@ -233,6 +235,7 @@ describe('api/user.list', () => {
       expect(res1.body).toMatchObject({
         ok: true,
         nextCursor: expect.any(String),
+        userCount: 3,
       });
       expect(res1.body.users.length).toBe(1);
       expect(res1.body.users[0]).toEqual(res.body.users[0]);
@@ -258,6 +261,7 @@ describe('api/user.list', () => {
         .send({
           q: 'por',
         });
+
       expect(res.body).toMatchObject({
         ok: true,
         users: expect.arrayContaining([
@@ -278,6 +282,7 @@ describe('api/user.list', () => {
             updatedAt: expect.any(String),
           }),
         ]),
+        userCount: 1,
       });
       expect(res.body.users.length).toBe(1);
     });
@@ -309,6 +314,7 @@ describe('api/user.list', () => {
             updatedAt: expect.any(String),
           }),
         ]),
+        userCount: 2,
       });
       expect(res.body.users.length).toBe(2);
       expect(res.body.users.findIndex((user) => user.username === 'wazowski')).not.toBe(-1);
@@ -361,7 +367,7 @@ describe('api/user.list', () => {
         await destroySession(ctx, otherSession);
       });
 
-      test('returns empty list of users', async () => {
+      test('throws authorization error', async () => {
         const res = await request(server)
           .post('/api/user.list')
           .set('Authorization', `Bearer ${otherBearerToken}`)
@@ -369,26 +375,10 @@ describe('api/user.list', () => {
 
         expect(res.status).toBe(200);
         expect(res.body).toMatchObject({
-          ok: true,
-          users: [],
-        });
-      });
-
-      test('returns authorization error when trying to filter by org id', async () => {
-        const res = await request(server)
-          .post('/api/user.list')
-          .set('Authorization', `Bearer ${otherBearerToken}`)
-          .send({
-            org: monsters.id,
-          });
-
-        expect(res.status).toBe(200);
-        expect(res.body).toMatchObject({
           ok: false,
           error: {
-            // authorisation code
-            code: 10012,
-            message: expect.any(String),
+            code: 10012, // i.e. authorisation error code
+            message: `User ${spongebob.id} is not allowed to list users`,
           },
         });
       });

@@ -7,12 +7,11 @@ import { validateRequest } from '../../../middleware/validation';
 import {
   decorateSession,
   isUserAuthenticated,
-  decorateUserPermissions,
-  getAuthorizedUniqueOrgIds,
-  findUserPermissionIndex,
+  populateUserPermissions,
 } from '../../../middleware/auth';
 import { AuthorizationError } from '../../../constants/errors';
-import listUsers, { parseCursor, stringifyCursor, defaultProjection } from './service';
+import * as SortedUserPermissionArray from '../../../utils/SortedUserPermissionArray';
+import { parseCursor, stringifyCursor, defaultProjection, getUsers, getUserCount } from './service';
 
 export const validationSchema = {
   body: {
@@ -44,57 +43,92 @@ export const validationSchema = {
   },
 };
 
-const isRequestorAllowedToReadOrgs = (requestorPermissions, orgId) => {
-  const hasUserReadPermissions =
-    findUserPermissionIndex(requestorPermissions, {
-      name: 'yeep.user.read',
-      orgId,
-    }) !== -1;
-  const hasPermissionsAssignmentRead =
-    findUserPermissionIndex(requestorPermissions, {
-      name: 'yeep.permission.assignment.read',
-      orgId,
-    }) !== -1;
-  const hasRoleAssignmentRead =
-    findUserPermissionIndex(requestorPermissions, {
-      name: 'yeep.role.assignment.read',
-      orgId,
-    }) !== -1;
+async function isUserAuthorised({ request }, next) {
+  const requestor = request.session.user;
 
-  return hasUserReadPermissions && (hasPermissionsAssignmentRead || hasRoleAssignmentRead);
-};
+  // ensure requestor can read users
+  const hasAnyUserReadPermission = SortedUserPermissionArray.includes(requestor.permissions, {
+    name: 'yeep.user.read',
+  });
 
-const isUserAuthorised = async ({ request }, next) => {
-  // verify a user has access to the requested org
+  if (!hasAnyUserReadPermission) {
+    throw new AuthorizationError(`User ${request.session.user.id} is not allowed to list users`);
+  }
+
+  // ensure requestor has access to the specified org
   if (request.body.org) {
-    const isScopeAccessible = isRequestorAllowedToReadOrgs(request.session.user.permissions, request.body.org);
+    const hasUserReadPermissions =
+      SortedUserPermissionArray.includes(requestor.permissions, {
+        name: 'yeep.user.read',
+        orgId: request.body.org,
+      }) ||
+      SortedUserPermissionArray.includes(requestor.permissions, {
+        name: 'yeep.user.read',
+        orgId: null,
+      });
+    const hasPermissionsAssignmentRead =
+      SortedUserPermissionArray.includes(requestor.permissions, {
+        name: 'yeep.permission.assignment.read',
+        orgId: request.body.org,
+      }) ||
+      SortedUserPermissionArray.includes(requestor.permissions, {
+        name: 'yeep.permission.assignment.read',
+        orgId: null,
+      });
+    const hasRoleAssignmentRead =
+      SortedUserPermissionArray.includes(requestor.permissions, {
+        name: 'yeep.role.assignment.read',
+        orgId: request.body.org,
+      }) ||
+      SortedUserPermissionArray.includes(requestor.permissions, {
+        name: 'yeep.role.assignment.read',
+        orgId: null,
+      });
 
-    if (!isScopeAccessible) {
+    const hasPermission =
+      hasUserReadPermissions && (hasPermissionsAssignmentRead || hasRoleAssignmentRead);
+
+    if (!hasPermission) {
       throw new AuthorizationError(
-        `User ${
-          request.session.user.id
-        } does not have sufficient permissions to list users under org ${request.body.org}`
+        `User ${request.session.user.id} is not allowed to list users under org ${request.body.org}`
       );
     }
   }
 
   await next();
-};
+}
 
 async function handler(ctx) {
   const { request, response } = ctx;
   const { q, limit, cursor, projection, org } = request.body;
+  const requestor = request.session.user;
 
-  const users = await listUsers(ctx, {
-    q,
-    limit,
-    cursor: cursor ? parseCursor(cursor) : null,
-    scopes: org ? [org] : getAuthorizedUniqueOrgIds(request, 'yeep.user.read'),
-    projection,
-  });
+  const orgScope = org
+    ? [org]
+    : SortedUserPermissionArray.includes(requestor.permissions, {
+        name: 'yeep.org.read',
+        orgId: null,
+      })
+    ? []
+    : SortedUserPermissionArray.getUniqueOrgIds(requestor.permissions, { name: 'yeep.user.read' });
+
+  const [users, userCount] = await Promise.all([
+    getUsers(ctx, {
+      q,
+      limit,
+      cursor: cursor ? parseCursor(cursor) : null,
+      orgScope,
+      projection,
+    }),
+    getUserCount(ctx, {
+      q,
+      orgScope,
+    }),
+  ]);
 
   response.status = 200; // OK
   response.body = {
+    userCount,
     users,
     nextCursor: users.length < limit ? undefined : stringifyCursor(last(users)),
   };
@@ -105,7 +139,7 @@ export default compose([
   decorateSession(),
   isUserAuthenticated(),
   validateRequest(validationSchema),
-  decorateUserPermissions(),
+  populateUserPermissions,
   isUserAuthorised,
   handler,
 ]);
