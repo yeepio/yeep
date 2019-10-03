@@ -6,7 +6,7 @@ import createUser from '../../user/create/service';
 import createOrg from '../../org/create/service';
 import { createSession, signBearerJWT } from '../../session/issueToken/service';
 import { destroySession } from '../../session/destroyToken/service';
-import deleteOrg from '../../org/delete/service';
+import { deleteOrg } from '../../org/delete/service';
 import deleteUser from '../../user/delete/service';
 // import createPermission from '../../permission/create/service';
 // import createRole from '../create/service';

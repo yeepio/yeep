@@ -31,6 +31,8 @@ export async function getUsers(
   const UserModel = db.model('User');
   const matchExpressions = [];
 
+  console.log(orgScope);
+
   if (q) {
     matchExpressions.push({
       username: {
@@ -71,14 +73,12 @@ export async function getUsers(
               $expr: {
                 $and: [
                   { $eq: ['$userId', '$$userId'] },
-                  orgScope.includes(null)
+                  orgScope.length !== 0
                     ? {
-                        $eq: ['$orgId', null],
-                      }
-                    : {
                         $in: ['$orgId', orgScope.map((scope) => ObjectId(scope))],
-                      },
-                ],
+                      }
+                    : null,
+                ].filter(Boolean),
               },
             },
           },
@@ -160,14 +160,12 @@ export async function getUserCount({ db }, { q, orgScope = [] }) {
               $expr: {
                 $and: [
                   { $eq: ['$userId', '$$userId'] },
-                  orgScope.includes(null)
+                  orgScope.length !== 0
                     ? {
-                        $eq: ['$orgId', null],
-                      }
-                    : {
                         $in: ['$orgId', orgScope.map((scope) => ObjectId(scope))],
-                      },
-                ],
+                      }
+                    : null,
+                ].filter(Boolean),
               },
             },
           },
