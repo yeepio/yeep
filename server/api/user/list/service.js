@@ -31,8 +31,6 @@ export async function getUsers(
   const UserModel = db.model('User');
   const matchExpressions = [];
 
-  console.log(orgScope);
-
   if (q) {
     matchExpressions.push({
       username: {
