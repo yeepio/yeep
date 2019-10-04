@@ -1,8 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import useDocumentTitle from '@rehooks/document-title';
-import { Link } from '@reach/router';
+import { useSelector } from 'react-redux';
 import IconOrganisation from '../../icons/IconOrganisation';
+import IconUser from '../../icons/IconUser';
+import ButtonLink from '../../components/ButtonLink';
+import IconPermission from '../../icons/IconPermission';
+import IconRole from '../../icons/IconRole';
 
 // TODO: Fetch actual data and replace this
 const dummyOrgs = [
@@ -22,59 +26,45 @@ const dummyOrgs = [
   },
 ];
 
-const DashboardOrgCard = (props) => {
-  return (
-    <div className="border border-grey rounded p-4 flex-1 mb-4 sm:mr-4 relative">
-      <h2 className="mb-4 font-bold text-2xl">
-        <Link to={`/organizations/${props.id}/edit`}>{props.name}</Link>
-      </h2>
-      <IconOrganisation className="absolute top-0 right-0 mt-4 mr-4" height={28} />
-      <table className="w-full">
-        <tbody>
-          <tr>
-            <td>Total users:</td>
-            <td className="text-right">
-              <Link to="/users">{props.users}</Link>
-            </td>
-          </tr>
-          <tr>
-            <td>Active sessions:</td>
-            <td className="text-right">{props.activeSessions}</td>
-          </tr>
-          <tr>
-            <td>Org-specific roles:</td>
-            <td className="text-right">
-              <Link to="/roles">{props.roles}</Link>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  );
-};
-DashboardOrgCard.propTypes = {
-  id: PropTypes.number.isRequired,
-  name: PropTypes.string.isRequired,
-  users: PropTypes.number,
-  activeSessions: PropTypes.number,
-  roles: PropTypes.number,
-};
-
 const DashboardPage = () => {
   useDocumentTitle('Dashboard');
+  const userFullName = useSelector((state) => state.session.user.fullName);
   return (
     <div className="leading-normal p-4 sm:p-8 max-w-2xl sm:h-full">
       <h1 className="mb-4 font-semibold text-3xl">Dashboard</h1>
       <p className="mb-4">
-        Welcome <strong>Jane Doe</strong>. You are managing <strong>40</strong> users across{' '}
-        <strong>2</strong> organisations:
+        Welcome <strong>{userFullName}</strong>. You Yeep installation is currently helping you
+        manage the following:
       </p>
-      <div className="sm:flex">
-        <DashboardOrgCard {...dummyOrgs[0]} />
-        <DashboardOrgCard {...dummyOrgs[1]} />
-      </div>
-      <div className="bg-yellow-lighter rounded p-4">
-        <strong>Tip:</strong> Some helpful message to appear here
+      <div className="sm:flex flex-wrap">
+        <div className="border border-grey rounded p-4 sm:mr-4 flex-auto mb-4 text-center">
+          <IconOrganisation className="inline-block mb-4" color="#8492A6" height={44} />
+          <h2 className="mb-4 text-2xl">
+            <strong>???</strong> organisations
+          </h2>
+          <ButtonLink to="organizations">View all organizations</ButtonLink>
+        </div>
+        <div className="border border-grey rounded p-4 sm:mr-4 flex-auto mb-4 text-center">
+          <IconUser className="inline-block mb-4" color="#8492A6" height={44} />
+          <h2 className="mb-4 text-2xl">
+            <strong>???</strong> users
+          </h2>
+          <ButtonLink to="users">View all users</ButtonLink>
+        </div>
+        <div className="border border-grey rounded p-4 sm:mr-4 flex-auto mb-4 text-center">
+          <IconPermission className="inline-block mb-4" color="#8492A6" height={44} />
+          <h2 className="mb-4 text-2xl">
+            <strong>???</strong> permissions
+          </h2>
+          <ButtonLink to="permissions">View all permissions</ButtonLink>
+        </div>
+        <div className="border border-grey rounded p-4 sm:mr-4 flex-auto mb-4 text-center">
+          <IconRole className="inline-block mb-4" color="#8492A6" height={44} />
+          <h2 className="mb-4 text-2xl">
+            <strong>???</strong> roles
+          </h2>
+          <ButtonLink to="roles">View all roles</ButtonLink>
+        </div>
       </div>
     </div>
   );
