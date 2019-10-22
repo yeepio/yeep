@@ -214,20 +214,20 @@ export const reducer = handleActions(
       };
     }),
     [initCreateUser]: produce((draft) => {
-      draft.form.isSavePending = true;
+      draft.create.isSavePending = true;
     }),
     [resolveCreateUser]: produce((draft) => {
-      draft.form.isSavePending = false;
+      draft.create.isSavePending = false;
     }),
     [rejectCreateUser]: produce((draft, action) => {
       if (action.payload.code === 400) {
-        draft.form.errors = parseYeepValidationErrors(action.payload);
+        draft.create.errors = parseYeepValidationErrors(action.payload);
       } else {
-        draft.form.errors = {
+        draft.create.errors = {
           generic: action.payload.message,
         };
       }
-      draft.form.isSavePending = false;
+      draft.create.isSavePending = false;
     }),
     [clearUserCreateForm]: produce((draft) => {
       draft.create.errors = initialState.create.errors;
