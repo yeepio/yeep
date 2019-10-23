@@ -59,6 +59,7 @@ function reducer(draft, action) {
 
 const UserCreateForm = ({ defaultValues, isSavePending, errors, onSubmit, onCancel }) => {
   const [values, dispatch] = useImmerReducer(reducer, defaultValues);
+  const [isPasswordDisplayed, setPasswordDisplayed] = React.useState(false);
 
   const onFormSubmit = React.useCallback(
     (event) => {
@@ -105,13 +106,20 @@ const UserCreateForm = ({ defaultValues, isSavePending, errors, onSubmit, onCanc
           <label htmlFor="password">Password</label>
           <Input
             id="password"
-            type="password"
+            type={isPasswordDisplayed ? 'text' : 'password'}
             className="w-full sm:w-1/2"
             value={values.password}
             onChange={(event) => dispatch({ type: SET_PASSWORD, value: event.target.value })}
             disabled={isSavePending}
             maxLength="50"
           />
+          <button
+            type="button"
+            className="pseudolink self-center whitespace-no-wrap ml-3"
+            onClick={() => setPasswordDisplayed((prevValue) => !prevValue)}
+          >
+            {isPasswordDisplayed ? 'Hide' : 'Show'}
+          </button>
           {errors.password && <p className="invalid mt-2">{errors.password}</p>}
         </div>
         <div className="form-group">
