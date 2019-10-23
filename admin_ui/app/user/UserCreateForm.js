@@ -1,14 +1,66 @@
-import React, { useCallback } from 'react';
+import React from 'react';
+import { useImmerReducer } from 'use-immer';
 import PropTypes from 'prop-types';
 import noop from 'lodash/noop';
-import { produce } from 'immer';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 
-const UserCreateForm = ({ defaultValues, isSavePending, errors, onSubmit, onCancel }) => {
-  const [values, setValues] = React.useState(defaultValues);
+const SET_USERNAME = 'SET_USERNAME';
+const SET_FULLNAME = 'SET_FULLNAME';
+const SET_PASSWORD = 'SET_PASSWORD';
+const ADD_EMAIL = 'ADD_EMAIL';
+const REMOVE_EMAIL = 'REMOVE_EMAIL';
+const SET_EMAIL_VERIFIED = 'SET_EMAIL_VERIFIED';
+const SET_EMAIL_PRIMARY = 'SET_EMAIL_PRIMARY';
+const SET_EMAIL_ADDRESS = 'SET_EMAIL_ADDRESS';
 
-  const onFormSubmit = useCallback(
+function reducer(draft, action) {
+  switch (action.type) {
+    case SET_USERNAME:
+      draft.username = action.value;
+      break;
+    case SET_PASSWORD:
+      draft.password = action.value;
+      break;
+    case SET_FULLNAME:
+      draft.fullName = action.value;
+      break;
+    case ADD_EMAIL:
+      draft.emails.push({
+        address: '',
+        isPrimary: false,
+        isVerified: false,
+      });
+      break;
+    case REMOVE_EMAIL: {
+      const shouldRecalculatePrimary = draft.emails[action.index].isPrimary;
+      draft.emails.splice(action.index, 1);
+      if (shouldRecalculatePrimary) {
+        draft.emails[0].isPrimary = true;
+      }
+      break;
+    }
+    case SET_EMAIL_ADDRESS:
+      draft.emails[action.index].address = action.value;
+      break;
+    case SET_EMAIL_PRIMARY:
+      draft.emails = draft.emails.map((e, i) => {
+        e.isPrimary = i === action.index;
+        return e;
+      });
+      break;
+    case SET_EMAIL_VERIFIED:
+      draft.emails[action.index].isVerified = !draft.emails[action.index].isVerified;
+      break;
+    default:
+      throw new Error();
+  }
+}
+
+const UserCreateForm = ({ defaultValues, isSavePending, errors, onSubmit, onCancel }) => {
+  const [values, dispatch] = useImmerReducer(reducer, defaultValues);
+
+  const onFormSubmit = React.useCallback(
     (event) => {
       event.preventDefault();
       onSubmit(values);
@@ -31,14 +83,7 @@ const UserCreateForm = ({ defaultValues, isSavePending, errors, onSubmit, onCanc
             id="fullName"
             className="w-full sm:w-1/2"
             value={values.fullName}
-            onChange={(event) => {
-              const { value } = event.target;
-              setValues(
-                produce((draft) => {
-                  draft.fullName = value;
-                })
-              );
-            }}
+            onChange={(event) => dispatch({ type: SET_FULLNAME, value: event.target.value })}
             disabled={isSavePending}
             maxLength="100"
           />
@@ -50,14 +95,7 @@ const UserCreateForm = ({ defaultValues, isSavePending, errors, onSubmit, onCanc
             id="username"
             className="w-full sm:w-1/2"
             value={values.username}
-            onChange={(event) => {
-              const { value } = event.target;
-              setValues(
-                produce((draft) => {
-                  draft.username = value;
-                })
-              );
-            }}
+            onChange={(event) => dispatch({ type: SET_USERNAME, value: event.target.value })}
             disabled={isSavePending}
             maxLength="30"
           />
@@ -70,14 +108,7 @@ const UserCreateForm = ({ defaultValues, isSavePending, errors, onSubmit, onCanc
             type="password"
             className="w-full sm:w-1/2"
             value={values.password}
-            onChange={(event) => {
-              const { value } = event.target;
-              setValues(
-                produce((draft) => {
-                  draft.password = value;
-                })
-              );
-            }}
+            onChange={(event) => dispatch({ type: SET_PASSWORD, value: event.target.value })}
             disabled={isSavePending}
             maxLength="50"
           />
@@ -94,30 +125,16 @@ const UserCreateForm = ({ defaultValues, isSavePending, errors, onSubmit, onCanc
                     type="email"
                     className="w-full"
                     value={email.address}
-                    onChange={(event) => {
-                      const { value } = event.target;
-                      setValues(
-                        produce((draft) => {
-                          draft.emails[i].address = value;
-                        })
-                      );
-                    }}
+                    onChange={(event) =>
+                      dispatch({ type: SET_EMAIL_ADDRESS, index: i, value: event.target.value })
+                    }
                     disabled={isSavePending}
                     maxLength="100"
                   />
                   <button
                     type="button"
                     className="pseudolink self-center whitespace-no-wrap ml-3"
-                    onClick={() => {
-                      setValues(
-                        produce((draft) => {
-                          draft.emails = draft.emails.map((e, j) => {
-                            e.isPrimary = j === i;
-                            return e;
-                          });
-                        })
-                      );
-                    }}
+                    onClick={() => dispatch({ type: SET_EMAIL_PRIMARY, index: i })}
                     disabled={email.isPrimary}
                   >
                     {email.isPrimary ? 'Primary' : 'Make primary'}
@@ -125,13 +142,7 @@ const UserCreateForm = ({ defaultValues, isSavePending, errors, onSubmit, onCanc
                   <button
                     type="button"
                     className="pseudolink self-center whitespace-no-wrap ml-3"
-                    onClick={() => {
-                      setValues(
-                        produce((draft) => {
-                          draft.emails[i].isVerified = !draft.emails[i].isVerified;
-                        })
-                      );
-                    }}
+                    onClick={() => dispatch({ type: SET_EMAIL_VERIFIED, index: i })}
                   >
                     Mark {email.isVerified ? 'unverified' : 'verified'}
                   </button>
@@ -139,17 +150,7 @@ const UserCreateForm = ({ defaultValues, isSavePending, errors, onSubmit, onCanc
                     <button
                       type="button"
                       className="pseudolink self-center whitespace-no-wrap ml-3"
-                      onClick={() => {
-                        setValues(
-                          produce((draft) => {
-                            const shouldRecalculatePrimary = draft.emails[i].isPrimary;
-                            draft.emails.splice(i, 1);
-                            if (shouldRecalculatePrimary) {
-                              draft.emails[0].isPrimary = true;
-                            }
-                          })
-                        );
-                      }}
+                      onClick={() => dispatch({ type: REMOVE_EMAIL, index: i })}
                     >
                       Remove
                     </button>
@@ -164,17 +165,7 @@ const UserCreateForm = ({ defaultValues, isSavePending, errors, onSubmit, onCanc
           <button
             type="button"
             className="pseudolink"
-            onClick={() => {
-              setValues(
-                produce((draft) => {
-                  draft.emails.push({
-                    address: '',
-                    isPrimary: false,
-                    isVerified: false,
-                  });
-                })
-              );
-            }}
+            onClick={() => dispatch({ type: ADD_EMAIL })}
           >
             Add a new email address
           </button>
