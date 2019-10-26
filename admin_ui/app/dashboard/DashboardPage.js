@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import useDocumentTitle from '@rehooks/document-title';
 import { useSelector } from 'react-redux';
 import IconOrganisation from '../../icons/IconOrganisation';
@@ -8,26 +7,9 @@ import ButtonLink from '../../components/ButtonLink';
 import IconPermission from '../../icons/IconPermission';
 import IconRole from '../../icons/IconRole';
 
-// TODO: Fetch actual data and replace this
-const dummyOrgs = [
-  {
-    id: 1,
-    name: 'Our Tech Blog',
-    users: 10,
-    activeSessions: 0,
-    roles: 2,
-  },
-  {
-    id: 2,
-    name: 'Zoho CRM',
-    users: 30,
-    activeSessions: 1,
-    roles: 7,
-  },
-];
-
 const DashboardPage = () => {
   useDocumentTitle('Dashboard');
+
   const userFullName = useSelector((state) => state.session.user.fullName);
   return (
     <div className="leading-normal p-4 sm:p-8 max-w-2xl sm:h-full">
