@@ -8,7 +8,8 @@ import parseYeepValidationErrors from '../../utilities/parseYeepValidationErrors
 export const initialState = {
   list: {
     records: [],
-    totalCount: 0,
+    // Initialise to "null" cause 0 is actually meaningfull
+    totalCount: null,
     limit: 10,
     isLoading: false,
     cursors: [],
