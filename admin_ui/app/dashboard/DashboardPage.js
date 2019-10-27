@@ -15,13 +15,21 @@ const DashboardPage = () => {
   useDocumentTitle('Dashboard');
   console.log('render!');
 
+  const dispatch = useDispatch();
+
+  // TODO:
+  //  Loading all data for 3 models (4 after users are ready) is a bit redundant.
+  //  Consider implementing a .getCounts() API call
   const orgCountLoading = useSelector((state) => state.org.list.isLoading);
   const orgCount = useSelector((state) => state.org.list.totalCount);
   const roleCountLoading = useSelector((state) => state.role.list.isLoading);
   const roleCount = useSelector((state) => state.role.list.totalCount);
   const permissionCountLoading = useSelector((state) => state.permission.list.isLoading);
   const permissionCount = useSelector((state) => state.permission.list.totalCount);
-  const dispatch = useDispatch();
+  // TODO: Populate the two varibles beow with proper selectors
+  //  once branch user-adminui-management is merged
+  const userCountLoading = true;
+  const userCount = 0;
 
   React.useEffect(() => {
     // On component mount, load counts for all orgs
@@ -42,7 +50,7 @@ const DashboardPage = () => {
         <div className="border border-grey rounded p-4 sm:mr-4 flex-auto mb-4 text-center">
           <IconOrganisation className="inline-block mb-4" color="#8492A6" height={44} />
           <h2 className="mb-4 text-2xl">
-            {orgCountLoading && <Spinner size="36" />}
+            {orgCountLoading && <Spinner size={36} className="ml-auto mr-auto" />}
             {!orgCountLoading && (
               <React.Fragment>
                 <strong>{orgCount}</strong> organizations
@@ -54,14 +62,19 @@ const DashboardPage = () => {
         <div className="border border-grey rounded p-4 sm:mr-4 flex-auto mb-4 text-center">
           <IconUser className="inline-block mb-4" color="#8492A6" height={44} />
           <h2 className="mb-4 text-2xl">
-            <strong>???</strong> users
+            {userCountLoading && <Spinner size={36} className="ml-auto mr-auto" />}
+            {!userCountLoading && (
+              <React.Fragment>
+                <strong>{userCount}</strong> users
+              </React.Fragment>
+            )}
           </h2>
           <ButtonLink to="users">View all users</ButtonLink>
         </div>
         <div className="border border-grey rounded p-4 sm:mr-4 flex-auto mb-4 text-center">
           <IconPermission className="inline-block mb-4" color="#8492A6" height={44} />
           <h2 className="mb-4 text-2xl">
-            {permissionCountLoading && <Spinner size="36" />}
+            {permissionCountLoading && <Spinner size={36} className="ml-auto mr-auto" />}
             {!permissionCountLoading && (
               <React.Fragment>
                 <strong>{permissionCount}</strong> permissions
@@ -73,7 +86,7 @@ const DashboardPage = () => {
         <div className="border border-grey rounded p-4 sm:mr-4 flex-auto mb-4 text-center">
           <IconRole className="inline-block mb-4" color="#8492A6" height={44} />
           <h2 className="mb-4 text-2xl">
-            {roleCountLoading && <Spinner size="36" />}
+            {roleCountLoading && <Spinner size={36} className="ml-auto mr-auto" />}
             {!roleCountLoading && (
               <React.Fragment>
                 <strong>{roleCount}</strong> roles

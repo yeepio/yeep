@@ -1,11 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classNames from 'classnames';
 
-const Spinner = ({size}) => {
+const Spinner = ({size, className}) => {
   let borderWidth = parseInt(size / 10, 10);
   return (
     <React.Fragment>
-      <div className="spinner"/>
+      <div className={classNames(className, "spinner")}/>
       <style jsx>{`
         .spinner {
           background-color: rgba(255, 255, 255, 0.8);
@@ -43,7 +44,8 @@ const Spinner = ({size}) => {
 };
 
 Spinner.propTypes = {
-  size: PropTypes.number
+  size: PropTypes.number,
+  className: PropTypes.string
 };
 
 Spinner.defaultProps = {
