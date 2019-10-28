@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import useDocumentTitle from '@rehooks/document-title';
 import { createUser } from './userStore';
 import { gotoUserListPage } from './userURL';
-import UserCreateForm from './UserCreateForm';
+import UserForm from './UserForm';
 
 const UserCreatePage = () => {
   const errors = useSelector((state) => state.org.create.errors);
@@ -35,7 +35,7 @@ const UserCreatePage = () => {
   return (
     <React.Fragment>
       <h1 className="font-semibold text-3xl mb-6">Create new user</h1>
-      <UserCreateForm
+      <UserForm
         errors={errors}
         isSavePending={isSavePending}
         onCancel={gotoUserListPage}

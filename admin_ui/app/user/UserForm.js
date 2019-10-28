@@ -57,7 +57,7 @@ function reducer(draft, action) {
   }
 }
 
-const UserCreateForm = ({ defaultValues, isSavePending, errors, onSubmit, onCancel }) => {
+const UserForm = ({ defaultValues, isSavePending, errors, onSubmit, onCancel }) => {
   const [values, dispatch] = useImmerReducer(reducer, defaultValues);
   const [isPasswordDisplayed, setPasswordDisplayed] = React.useState(false);
 
@@ -196,7 +196,7 @@ const UserCreateForm = ({ defaultValues, isSavePending, errors, onSubmit, onCanc
   );
 };
 
-UserCreateForm.propTypes = {
+UserForm.propTypes = {
   defaultValues: PropTypes.object,
   errors: PropTypes.object,
   onSubmit: PropTypes.func,
@@ -204,7 +204,7 @@ UserCreateForm.propTypes = {
   isSavePending: PropTypes.bool,
 };
 
-UserCreateForm.defaultProps = {
+UserForm.defaultProps = {
   defaultValues: {
     username: '',
     password: '',
@@ -223,4 +223,4 @@ UserCreateForm.defaultProps = {
   isSavePending: false,
 };
 
-export default UserCreateForm;
+export default UserForm;
