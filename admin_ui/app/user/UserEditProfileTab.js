@@ -14,13 +14,10 @@ const UserEditProfileTab = () => {
 
   const dispatch = useDispatch();
 
-  const onUserDelete = React.useCallback(
-    (org) => {
-      dispatch(setUserDeleteRecord(org));
-      dispatch(showUserDeleteForm());
-    },
-    [dispatch]
-  );
+  const onUserDelete = React.useCallback(() => {
+    dispatch(setUserDeleteRecord(record));
+    dispatch(showUserDeleteForm());
+  }, [dispatch, record]);
 
   const submitForm = React.useCallback(
     (nextValues) => {
@@ -52,7 +49,7 @@ const UserEditProfileTab = () => {
       <fieldset className="mb-6">
         <legend>Profile picture</legend>
         <div className="sm:flex mb-4">
-          <div className="sm:w-1/4">Picture srouce:</div>
+          <div className="sm:w-1/4">Picture source:</div>
           <div className="sm:w-3/4">
             <label htmlFor="user-pic-source-none" className="block">
               <input
@@ -104,7 +101,7 @@ const UserEditProfileTab = () => {
       </fieldset>
       <fieldset className="mb-6">
         <legend>Danger zone</legend>
-        <Button danger={true} className="mr-4">
+        <Button danger={true} className="mr-4" onClick={onUserDelete}>
           Delete user
         </Button>
         <Button>Deactivate user</Button>

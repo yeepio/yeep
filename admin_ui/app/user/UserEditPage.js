@@ -8,6 +8,8 @@ import { setUserUpdateRecord, clearUserUpdateForm } from './userStore';
 import yeepClient from '../yeepClient';
 import LoadingIndicator from '../../components/LoadingIndicator';
 import UserEditProfileTab from './UserEditProfileTab';
+import UserDeleteModal from './UserDeleteModal';
+import { gotoUserListPage } from './userURL';
 
 function getUserInfo({ id }) {
   return yeepClient
@@ -58,6 +60,7 @@ const UserEditPage = ({ userId }) => {
 
   return (
     <React.Fragment>
+      <UserDeleteModal onSuccess={gotoUserListPage} onError={(err) => console.error(err)} />
       <h1 className="font-semibold text-3xl mb-6">Edit user &quot;{record.fullName}&quot;</h1>
       <TabLinks
         className="mb-6"
