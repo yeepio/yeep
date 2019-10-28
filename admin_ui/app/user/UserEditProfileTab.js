@@ -47,9 +47,7 @@ const UserEditProfileTab = () => {
         defaultValues={record}
         isSavePending={isSavePending}
         errors={errors}
-        onCancel={gotoUserListPage}
         onSubmit={submitForm}
-        onDelete={onUserDelete}
       />
       <fieldset className="mb-6">
         <legend>Profile picture</legend>

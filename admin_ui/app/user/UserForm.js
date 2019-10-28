@@ -1,7 +1,6 @@
 import React from 'react';
 import { useImmerReducer } from 'use-immer';
 import PropTypes from 'prop-types';
-import noop from 'lodash/noop';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 
@@ -182,14 +181,16 @@ const UserForm = ({ defaultValues, isSavePending, errors, onSubmit, onCancel }) 
           <Button type="submit" disabled={isSavePending}>
             Save
           </Button>
-          <button
-            type="button"
-            className="pseudolink ml-4"
-            onClick={onCancel}
-            disabled={isSavePending}
-          >
-            Cancel
-          </button>
+          {onCancel && (
+            <button
+              type="button"
+              className="pseudolink ml-4"
+              onClick={onCancel}
+              disabled={isSavePending}
+            >
+              Cancel
+            </button>
+          )}
         </div>
       </fieldset>
     </form>
@@ -199,7 +200,7 @@ const UserForm = ({ defaultValues, isSavePending, errors, onSubmit, onCancel }) 
 UserForm.propTypes = {
   defaultValues: PropTypes.object,
   errors: PropTypes.object,
-  onSubmit: PropTypes.func,
+  onSubmit: PropTypes.func.isRequired,
   onCancel: PropTypes.func,
   isSavePending: PropTypes.bool,
 };
@@ -218,8 +219,6 @@ UserForm.defaultProps = {
     ],
   },
   errors: {},
-  onSubmit: noop,
-  onCancel: noop,
   isSavePending: false,
 };
 
