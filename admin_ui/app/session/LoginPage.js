@@ -9,14 +9,6 @@ import Button from '../../components/Button';
 import { login, resetLoginErrors } from './sessionStore';
 import classnames from 'classnames';
 
-function isUserKeyValid(userKey) {
-  return userKey.length >= 2;
-}
-
-function isPasswordValid(password) {
-  return password.length >= 8;
-}
-
 const LoginPage = () => {
   const isLoginPending = useSelector((state) => state.session.isLoginPending);
   const loginErrors = useSelector((state) => state.session.loginErrors);
