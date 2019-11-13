@@ -32,7 +32,7 @@ const PermissionGrid = ({
 }) => {
   const entitiesStart = React.useMemo(() => page * pageSize + 1, [page, pageSize]);
   const entitiesEnd = React.useMemo(
-    () => (records.length >= pageSize ? (page + 1) * pageSize : records.length),
+    () => (records.length >= pageSize ? (page + 1) * pageSize : totalCount),
     [records, page, pageSize]
   );
 
