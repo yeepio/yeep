@@ -2,9 +2,15 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from '@reach/router';
 import classNames from 'classnames';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { hideOnboarding } from '../session/sessionStore';
 
 const DashboardOnboarding = ({ orgCount, permissionCount, roleCount, userCount }) => {
+  const dispatch = useDispatch();
+  const onOnboardingOptOutClick = () => {
+    dispatch(hideOnboarding());
+  };
+
   const user = useSelector((state) => state.session.user);
   return (
     <React.Fragment>
@@ -41,6 +47,11 @@ const DashboardOnboarding = ({ orgCount, permissionCount, roleCount, userCount }
         description="Finally you can create your users and assign them to one or more organisations with the appropriate roles and / or permissions. You can also partially create profiles and invite the users via email to log in and create their profiles."
         successText={userCount ? `${userCount} users have been created` : null}
       />
+      <p>
+        <button className="pseudolink" onClick={onOnboardingOptOutClick}>
+          Hide this welcome page
+        </button>
+      </p>
     </React.Fragment>
   );
 };

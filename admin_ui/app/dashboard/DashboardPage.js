@@ -25,12 +25,15 @@ const DashboardPage = () => {
   const roleCount = useSelector((state) => state.role.list.totalCount);
   const permissionCountLoading = useSelector((state) => state.permission.list.isLoading);
   const permissionCount = useSelector((state) => state.permission.list.totalCount);
-  // TODO: Populate the two varibles beow with proper selectors
+  // TODO: Populate the two varibles below with proper selectors
   //  once branch user-adminui-management is merged
   const userCountLoading = false;
   // Temporary: Change to 1 to view the "normal" dashboard view.
   // Keep as 0 to view the onboarding UI
   const userCount = 0;
+
+  // The user might have opted to hide the onboarding page
+  const hideOnboarding = useSelector((state) => state.session.hideOnboarding);
 
   React.useEffect(() => {
     // On component mount, load counts for all orgs
@@ -50,7 +53,7 @@ const DashboardPage = () => {
         !roleCountLoading &&
         !permissionCountLoading &&
         !userCountLoading &&
-        (userCount > 0 && orgCount > 0) && (
+        ((userCount > 0 && orgCount > 0) || hideOnboarding) && (
           <React.Fragment>
             <p className="mb-4">
               Welcome <strong>{userFullName}</strong>. You Yeep installation is currently helping
@@ -112,7 +115,7 @@ const DashboardPage = () => {
         !roleCountLoading &&
         !permissionCountLoading &&
         !userCountLoading &&
-        (userCount === 0 || orgCount === 0) && (
+        ((userCount === 0 || orgCount === 0) && !hideOnboarding) && (
           <DashboardOnboarding
             orgCount={orgCount}
             permissionCount={permissionCount}
