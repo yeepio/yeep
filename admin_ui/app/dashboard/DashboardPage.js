@@ -112,7 +112,14 @@ const DashboardPage = () => {
         !roleCountLoading &&
         !permissionCountLoading &&
         !userCountLoading &&
-        (userCount === 0 || orgCount === 0) && <DashboardOnboarding />}
+        (userCount === 0 || orgCount === 0) && (
+          <DashboardOnboarding
+            orgCount={orgCount}
+            permissionCount={permissionCount}
+            roleCount={roleCount}
+            userCount={userCount}
+          />
+        )}
     </div>
   );
 };
