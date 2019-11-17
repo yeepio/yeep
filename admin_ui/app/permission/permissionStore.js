@@ -7,7 +7,7 @@ import parseYeepValidationErrors from '../../utilities/parseYeepValidationErrors
 export const initialState = {
   list: {
     records: [],
-    totalCount: 0,
+    totalCount: null,
     limit: 10,
     isLoading: false,
     cursors: [],

@@ -7,6 +7,7 @@ export const initialState = {
   user: {},
   loginErrors: {},
   isLoginPending: false,
+  hideOnboarding: false,
 };
 
 // actions
@@ -18,6 +19,8 @@ const rejectLogin = createAction('LOGIN_REJECT');
 export const resetLoginErrors = createAction('LOGIN_RESET_ERRORS');
 const initLogout = createAction('LOGOUT_INIT');
 export const resolveLogout = createAction('LOGOUT_RESOLVE');
+// Users can tap "Hide this welcome page" on the <DashboardOnboaring /> page
+export const hideOnboarding = createAction('HIDE_ONBOARDING');
 
 export const login = (user, password) => (dispatch) => {
   dispatch(initLogin());
@@ -77,6 +80,12 @@ export const reducer = handleActions(
       return {
         ...state,
         loginErrors: initialState.loginErrors,
+      };
+    },
+    [hideOnboarding]: (state) => {
+      return {
+        ...state,
+        hideOnboarding: true,
       };
     },
   },
