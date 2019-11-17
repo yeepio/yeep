@@ -1,5 +1,4 @@
 import { ObjectId } from 'mongodb';
-import escapeRegExp from 'lodash/escapeRegExp';
 
 export const stringifyCursor = ({ id }) => {
   return Buffer.from(JSON.stringify(id)).toString('base64');
@@ -35,9 +34,8 @@ export async function getRoles({ db }, { q, limit = 100, cursor, orgScope, isSys
 
   if (q) {
     matchExpressions.push({
-      name: {
-        $regex: `^${escapeRegExp(q)}`,
-        $options: 'i',
+      $text: {
+        $search: q,
       },
     });
   }
@@ -147,9 +145,8 @@ export async function getRoleCount({ db }, { q, orgScope, isSystemRole }) {
 
   if (q) {
     matchExpressions.push({
-      name: {
-        $regex: `^${escapeRegExp(q)}`,
-        $options: 'i',
+      $text: {
+        $search: q,
       },
     });
   }

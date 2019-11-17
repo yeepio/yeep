@@ -24,9 +24,8 @@ export async function getOrgs({ db }, { q, orgScope, user, limit, cursor }) {
 
   if (q) {
     matchExpressions.push({
-      name: {
-        $regex: `^${escapeRegExp(q)}`,
-        $options: 'i',
+      $text: {
+        $search: q,
       },
     });
   }
