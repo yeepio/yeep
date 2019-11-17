@@ -74,9 +74,9 @@ const OnboardingPane = ({ number, link, linkText, description, successText = nul
     >
       <div
         className={classNames(
-          'mr-3',
-          'w-16',
-          'h-16',
+          'mr-4',
+          'w-12',
+          'h-12',
           'flex-none',
           'flex',
           'rounded',
@@ -93,7 +93,7 @@ const OnboardingPane = ({ number, link, linkText, description, successText = nul
       >
         <span className="text-3xl text-white">
           {successText ? (
-            <img src="/icon-yes-white.svg" width="36" height="29" alt="Checkmark" />
+            <img src="/icon-yes-white.svg" width="26" alt="Checkmark" />
           ) : (
             number
           )}
