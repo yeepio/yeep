@@ -2,12 +2,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Link } from '@reach/router';
 import classNames from 'classnames';
+import { useSelector } from 'react-redux';
 
 const DashboardOnboarding = ({ orgCount, permissionCount, roleCount, userCount }) => {
+  const user = useSelector((state) => state.session.user);
   return (
     <React.Fragment>
       <p className="mb-4">
-        Welcome XXXX.
+        Welcome <strong>{user.fullName}</strong>.
         <br />
         Not sure where to start? Follow these 4 steps below:
       </p>
