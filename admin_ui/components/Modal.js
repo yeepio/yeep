@@ -39,7 +39,7 @@ function Modal(props) {
           'modal',
           'w-full',
           'h-full',
-          'sm:w-auto',
+          // 'sm:w-auto',
           'sm:h-auto',
           'max-w-lg',
           'relative',

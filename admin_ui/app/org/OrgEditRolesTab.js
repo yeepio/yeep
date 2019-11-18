@@ -17,6 +17,7 @@ import {
   setRoleDeleteRecord,
 } from '../role/roleStore';
 import yeepClient from '../yeepClient';
+import PermissionCreateModal from '../permission/PermissionCreateModal';
 
 const OrgEditRoleTab = () => {
   const org = useSelector((state) => state.org.update.record);
@@ -74,7 +75,7 @@ const OrgEditRoleTab = () => {
 
   return (
     <React.Fragment>
-      <RoleCreateModal />
+      <RoleCreateModal org={org} />
       <RoleEditModal onSuccess={reload} />
       <RoleDeleteModal onSuccess={reload} />
       <fieldset className="mb-6">

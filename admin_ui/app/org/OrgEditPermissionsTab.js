@@ -74,7 +74,7 @@ const OrgEditPermissionsTab = () => {
 
   return (
     <React.Fragment>
-      <PermissionCreateModal />
+      <PermissionCreateModal org={org} />
       <PermissionEditModal onSuccess={reload} />
       <PermissionDeleteModal onSuccess={reload} />
       <fieldset className="mb-6">

@@ -37,7 +37,15 @@ function fetchPermissionOptionsAsync(inputValue) {
   });
 }
 
-const RoleForm = ({ defaultValues, isSavePending, errors, onSubmit, onCancel, onDelete }) => {
+const RoleForm = ({
+  defaultValues,
+  isSavePending,
+  errors,
+  onSubmit,
+  onCancel,
+  onDelete,
+  lockOrgScope,
+}) => {
   const [values, setValues] = React.useState(defaultValues);
 
   const onFormSubmit = useCallback(
@@ -83,7 +91,10 @@ const RoleForm = ({ defaultValues, isSavePending, errors, onSubmit, onCancel, on
           {errors.description && <p className="invalid mt-2">{errors.description}</p>}
         </div>
         <div className="form-group mb-4">
-          <label htmlFor="org">Organization scope (optional)</label>
+          <label htmlFor="org">
+            Organization scope
+            {!lockOrgScope && !values.id && <span> (optional)</span>}
+          </label>
           <AsyncSelect
             id="org"
             className="w-full sm:w-1/2"
@@ -98,7 +109,7 @@ const RoleForm = ({ defaultValues, isSavePending, errors, onSubmit, onCancel, on
                 org: selectedOption ? OrgOption.fromOption(selectedOption).toRecord() : null,
               })
             }
-            isDisabled={isSavePending || values.id != null}
+            isDisabled={isSavePending || values.id != null || lockOrgScope}
           />
           {errors.org && <p className="text-red mt-2">{errors.org}</p>}
         </div>
@@ -163,6 +174,10 @@ RoleForm.propTypes = {
   onCancel: PropTypes.func,
   onDelete: PropTypes.func,
   isSavePending: PropTypes.bool,
+  // Under certain circumstances we might not want the user to be able
+  // to chage a (pre-selected) organization scope
+  // (for example in the "Create role" modal from with the edit org page
+  lockOrgScope: PropTypes.bool,
 };
 
 RoleForm.defaultProps = {
@@ -172,6 +187,7 @@ RoleForm.defaultProps = {
   onCancel: noop,
   onDelete: noop,
   isSavePending: false,
+  lockOrgScope: false,
 };
 
 export default RoleForm;
