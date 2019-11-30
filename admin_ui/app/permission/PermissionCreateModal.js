@@ -10,7 +10,8 @@ import {
 import PermissionForm from './PermissionForm';
 import Modal from '../../components/Modal';
 
-const PermissionCreateModal = ({ onSuccess, onError }) => {
+const PermissionCreateModal = ({ onSuccess, onError, org }) => {
+
   const errors = useSelector((state) => state.permission.create.errors);
   const isSavePending = useSelector((state) => state.permission.create.isSavePending);
   const isDisplayed = useSelector((state) => state.permission.create.isDisplayed);
@@ -43,18 +44,35 @@ const PermissionCreateModal = ({ onSuccess, onError }) => {
     [dispatch, onError, onSuccess]
   );
 
+  // Create an empty record that we'll pass to <PermissionForm>
+  // via the default Values prop
+  let record = {};
+
   if (!isDisplayed) {
     return null;
+  } else {
+    // We will display the modal. If an org was passed in via props,
+    // send it down the line to <PermissionForm /> so that it shows that
+    // org as preselected
+    if (org.id) {
+      record = {
+        name: "",
+        description: "",
+        org
+      };
+    }
   }
 
   return (
-    <Modal onClose={onDismiss}>
+    <Modal onClose={onDismiss} fullWidth={true}>
       <h1 className="font-semibold text-3xl mb-6">Create permission</h1>
       <PermissionForm
         isSavePending={isSavePending}
         errors={errors}
         onCancel={onDismiss}
         onSubmit={submitForm}
+        defaultValues={record}
+        lockOrgScope={true}
       />
     </Modal>
   );
@@ -63,6 +81,7 @@ const PermissionCreateModal = ({ onSuccess, onError }) => {
 PermissionCreateModal.propTypes = {
   onSuccess: PropTypes.func,
   onError: PropTypes.func,
+  org: PropTypes.object
 };
 
 PermissionCreateModal.defaultProps = {
