@@ -64,7 +64,7 @@ const PermissionCreateModal = ({ onSuccess, onError, org }) => {
   }
 
   return (
-    <Modal onClose={onDismiss}>
+    <Modal onClose={onDismiss} fullWidth={true}>
       <h1 className="font-semibold text-3xl mb-6">Create permission</h1>
       <PermissionForm
         isSavePending={isSavePending}

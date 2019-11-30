@@ -39,7 +39,7 @@ function Modal(props) {
           'modal',
           'w-full',
           'h-full',
-          // 'sm:w-auto',
+          {'sm:w-auto' : !props.fullWidth},
           'sm:h-auto',
           'max-w-lg',
           'relative',
@@ -74,8 +74,13 @@ function Modal(props) {
 Modal.propTypes = {
   // Parent component needs to send an onClose handler
   onClose: PropTypes.func.isRequired,
+  // If "fullWidth" prop is specified, sm:w-auto class will be removed
+  // so that the modal contents can greedily take the full width of the
+  // modal (up to .max-w-lg)
+  fullWidth: PropTypes.bool,
   className: PropTypes.string,
   children: PropTypes.node,
+
 };
 
 export default Modal;
