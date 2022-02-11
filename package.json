@@ -110,7 +110,7 @@
     "@reach/router": "^1.2.1",
     "@rehooks/document-title": "^1.0.1",
     "@yeep/client": "^1.1.0",
-    "ajv": "^6.9.2",
+    "ajv": "^6.12.3",
     "awaiting": "^3.0.0",
     "aws-sdk": "^2.413.0",
     "axios": "^0.18.0",
