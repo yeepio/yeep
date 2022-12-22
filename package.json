@@ -131,7 +131,7 @@
     "isemail": "^3.2.0",
     "joi": "^14.3.1",
     "joi-to-swagger": "^3.1.0",
-    "jsonwebtoken": "^8.5.0",
+    "jsonwebtoken": "^9.0.0",
     "juice": "^5.1.0",
     "koa": "^2.7.0",
     "koa-bodyparser": "^4.2.1",
